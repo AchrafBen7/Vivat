@@ -41,6 +41,7 @@ services:
     image: mysql:8.0
     container_name: vivat-mysql
     restart: unless-stopped
+    command: ["--log_bin_trust_function_creators=1"]
     environment:
       MYSQL_DATABASE: vivat
       MYSQL_USER: vivat
