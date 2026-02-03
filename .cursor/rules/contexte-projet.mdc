@@ -1,0 +1,28 @@
+---
+description: Contexte et spécifications du projet Vivat — source de vérité
+alwaysApply: true
+---
+
+# Contexte du projet Vivat
+
+## 1. Fichiers de contexte obligatoires
+
+Avant de proposer une solution ou du code, **avoir lu et pris en compte** les **5 fichiers de référence** suivants :
+
+1. **`CONTEXTE_PROJET.md`** (racine) — Vision, fonctionnalités du site, stack, architecture, pipeline.
+2. **`docs/EXEMPLES_CODE_REFERENCE.md`** — Exemples de code : Jobs (FetchRss, EnrichContent), Services (RssParser, ContentExtractor, ArticleGenerator), Horizon, Controller/Request/Policy, rate limiting.
+3. **`docs/MIGRATIONS_REFERENCE.md`** — Les 12 migrations du pipeline (sources, categories, rss_feeds, rss_items, enriched_items, clusters, cluster_items, articles, article_sources, category_templates, pipeline_jobs, triggers).
+4. **`docs/MODELS_REFERENCE.md`** — Les 11 models Eloquent du pipeline (HasUuids, relations, scopes, helpers).
+5. **`docs/SCHEMA_AUTRES_FONCTIONNALITES.md`** — Schéma des autres fonctionnalités (users, contribution, paiement, personnalisation) — peut encore changer.
+
+Toute décision technique ou fonctionnelle doit être **alignée** avec ces documents. Si une section est vide ou imprécise, le signaler et proposer des clarifications plutôt que d’inventer des choix.
+
+## 2. Laravel Boost
+
+- **Laravel Boost** est installé (`composer require laravel/boost --dev` + `php artisan boost:install`).
+- **À utiliser** : s’appuyer sur les guidelines et skills Laravel Boost générés pour le projet (bonnes pratiques Laravel, API doc Laravel via MCP) pour écrire du code conforme et à jour.
+- Lors de l’ajout de fonctionnalités ou de refactoring, consulter les guidelines Boost et la doc Laravel (via MCP si disponible) pour rester cohérent avec l’écosystème Laravel.
+
+---
+
+Ces 5 fichiers + Laravel Boost sont la **référence unique** pour ne rien oublier sur le projet Vivat.
