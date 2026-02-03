@@ -48,12 +48,25 @@ Ce fichier sert de **résumé étape par étape** de ce qui a été fait sur le 
 
 ---
 
+## Étape 4 — Docker (environnement local)
+
+- **Résumé** : Mise en place de l’environnement Docker pour le dev local : PHP 8.3, MySQL 8, Redis. L’app Laravel tourne dans un container avec le code monté ; MySQL et Redis ont des volumes persistants.
+- **Fichiers créés** :
+  - `Dockerfile` — Image PHP 8.3 Alpine, extensions (pdo_mysql, redis, gd, zip, bcmath, intl, etc.), Composer, entrypoint pour `composer install` si besoin.
+  - `docker-compose.yml` — Services `app` (port 8000), `mysql` (8.0, port 3306, user/password vivat), `redis` (7-alpine, port 6379) ; healthcheck MySQL ; volumes pour données et code.
+  - `docker/entrypoint.sh` — Script d’entrée : `composer install` si `vendor` absent, permissions storage/bootstrap/cache.
+  - `.dockerignore` — Réduction du contexte de build (git, vendor, .env, logs, etc.).
+  - `docs/DOCKER.md` — Instructions : démarrage, premier lancement (key:generate, migrate), commandes utiles, variables d’environnement.
+- **Utilisation** : `docker compose up -d --build` puis `docker compose exec app php artisan migrate`.
+
+---
+
 ## Prochaines étapes (à remplir au fur et à mesure)
 
 - [ ] Ajouter les 12 migrations du pipeline (depuis `docs/MIGRATIONS_REFERENCE.md`) et lancer `php artisan migrate`.
 - [ ] Créer les 11 models du pipeline (depuis `docs/MODELS_REFERENCE.md`).
-- [ ] (Optionnel) Services, Jobs, Horizon, etc. selon `docs/EXEMPLES_CODE_REFERENCE.md`.
+- [ ] (Optionnel) Services Horizon + Scheduler dans Docker ; Services, Jobs, etc. selon `docs/EXEMPLES_CODE_REFERENCE.md`.
 
 ---
 
-*Dernière mise à jour : journal créé — étapes 1 à 3 remplies.*
+*Dernière mise à jour : étape 4 (Docker) ajoutée.*
