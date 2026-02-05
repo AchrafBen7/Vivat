@@ -70,6 +70,22 @@ services:
     networks:
       - vivat
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: vivat-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - vivat
+
 volumes:
   vivat_mysql_data:
   vivat_redis_data:
