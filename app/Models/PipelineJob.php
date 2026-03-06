@@ -28,6 +28,7 @@ class PipelineJob extends Model
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'retry_count' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     public function scopeRunning($query)

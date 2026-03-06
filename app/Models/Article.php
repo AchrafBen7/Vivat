@@ -20,9 +20,13 @@ class Article extends Model
         'meta_description',
         'keywords',
         'category_id',
+        'sub_category_id',
         'cluster_id',
         'reading_time',
         'status',
+        'article_type',
+        'cover_image_url',
+        'cover_video_url',
         'quality_score',
         'published_at',
     ];
@@ -37,6 +41,11 @@ class Article extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 
     public function cluster(): BelongsTo

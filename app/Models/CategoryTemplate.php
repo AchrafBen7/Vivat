@@ -27,6 +27,7 @@ class CategoryTemplate extends Model
     protected $casts = [
         'min_word_count' => 'integer',
         'max_word_count' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     public function category(): BelongsTo

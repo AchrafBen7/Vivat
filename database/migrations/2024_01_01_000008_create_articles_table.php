@@ -29,8 +29,12 @@ return new class extends Migration
             $table->index('quality_score');
             $table->index(['status', 'published_at'], 'idx_articles_published');
             $table->index(['category_id', 'status'], 'idx_articles_category_status');
-            $table->fullText(['title', 'excerpt'], 'ft_articles_search');
         });
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            Schema::table('articles', function (Blueprint $table) {
+                $table->fullText(['title', 'excerpt'], 'ft_articles_search');
+            });
+        }
     }
 
     public function down(): void

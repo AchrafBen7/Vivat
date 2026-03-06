@@ -34,6 +34,6 @@ class ArticlePolicy
 
     public function publish(?User $user, Article $article): bool
     {
-        return $article->isPublishable();
+        return true; // La vérification isPublishable() est dans le controller
     }
 }

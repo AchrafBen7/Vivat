@@ -24,11 +24,11 @@ class FetchRssFeedJob implements ShouldQueue
 
     public int $timeout = 60;
 
-    public string $queue = 'rss';
-
     public function __construct(
         public RssFeed $feed
-    ) {}
+    ) {
+        $this->onQueue('rss');
+    }
 
     public function handle(RssParserService $parser): void
     {
@@ -65,7 +65,10 @@ class FetchRssFeedJob implements ShouldQueue
                 'description' => mb_substr($item['description'] ?? '', 0, 1000),
                 'guid' => $item['guid'] ?? null,
                 'dedup_hash' => $hash,
-                'published_at' => isset($item['pubDate']) && $item['pubDate'] ? now()->parse($item['pubDate']) : null,
+                'published_at' => isset($item['pubDate']) && $item['pubDate']
+                    ? \Illuminate\Support\Carbon::parse($item['pubDate'])
+                    : null,
+                'fetched_at' => now(),
                 'status' => 'new',
             ]);
             $newCount++;

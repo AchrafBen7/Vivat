@@ -17,7 +17,11 @@ class CategoryResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'color' => $this->color,
+            'home_order' => $this->home_order,
+            'image_url' => $this->image_url,
+            'video_url' => $this->video_url,
+            'published_articles_count' => $this->when(isset($this->published_articles_count), $this->published_articles_count),
+            'sub_categories' => $this->whenLoaded('subCategories', fn () => SubCategoryResource::collection($this->subCategories)),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

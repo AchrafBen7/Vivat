@@ -15,11 +15,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Roles & Permissions must be seeded FIRST
+        $this->call(RolesAndPermissionsSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Pipeline data (categories, sources, feeds, templates)
+        $this->call(PipelineSeeder::class);
+
+        // Admin user
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@vivat.be'],
+            [
+                'name'     => 'Admin Vivat',
+                'password' => bcrypt('password'),
+                'language' => 'fr',
+            ]
+        );
+        $admin->assignRole('admin');
+
+        // Contributor user (for testing)
+        $contributor = User::firstOrCreate(
+            ['email' => 'contributeur@vivat.be'],
+            [
+                'name'     => 'Contributeur Test',
+                'password' => bcrypt('password'),
+                'language' => 'fr',
+            ]
+        );
+        $contributor->assignRole('contributor');
     }
 }

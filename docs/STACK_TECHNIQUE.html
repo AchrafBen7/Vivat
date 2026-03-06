@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivat — Stack Technique Backend</title>
+<style>
+  @page {
+    size: A4;
+    margin: 25mm 20mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a2e;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 30px 40px;
+    background: #fff;
+  }
+  h1 {
+    font-size: 24pt;
+    color: #16213e;
+    border-bottom: 3px solid #0f3460;
+    padding-bottom: 10px;
+    margin-top: 0;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 16pt;
+    color: #0f3460;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-top: 35px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 13pt;
+    color: #1a365d;
+    margin-top: 25px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #2d3748;
+    margin-top: 20px;
+    page-break-after: avoid;
+  }
+  blockquote {
+    border-left: 4px solid #0f3460;
+    margin: 15px 0;
+    padding: 10px 20px;
+    background: #f0f4ff;
+    border-radius: 0 6px 6px 0;
+    font-size: 10pt;
+    color: #4a5568;
+  }
+  blockquote p { margin: 4px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #0f3460;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+  }
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background: #f7fafc; }
+  tr:hover { background: #edf2f7; }
+  code {
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+    font-size: 9.5pt;
+    color: #c53030;
+  }
+  pre {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.5;
+    page-break-inside: avoid;
+    margin: 15px 0;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 30px 0;
+  }
+  strong { color: #1a202c; }
+  a { color: #2b6cb0; text-decoration: none; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  p { margin: 8px 0; }
+
+  /* Print-specific */
+  @media print {
+    body { padding: 0; max-width: none; }
+    h1, h2, h3, h4 { page-break-after: avoid; }
+    table, pre, blockquote { page-break-inside: avoid; }
+    a { color: #2b6cb0; }
+    a::after { content: none; }
+  }
+
+  /* Table of contents links */
+  a[href^="#"] { color: #0f3460; font-weight: 500; }
+
+  /* Cover-like header */
+  h1:first-of-type {
+    text-align: center;
+    font-size: 28pt;
+    margin-bottom: 5px;
+  }
+  body > blockquote:first-of-type {
+    text-align: center;
+    border-left: none;
+    background: none;
+    padding: 0;
+    margin-bottom: 30px;
+  }
+</style>
+</head>
+<body>
+<h1>Vivat — Stack Technique Backend</h1>
+<blockquote>
+<p><strong>Version</strong> : Fevrier 2026
+<strong>Auteur</strong> : Equipe Backend
+<strong>Statut</strong> : En developpement actif</p>
+</blockquote>
+<hr>
+<h2>Table des matieres</h2>
+<ol>
+<li><a href="#1-vue-densemble">Vue d&#39;ensemble</a></li>
+<li><a href="#2-architecture-logicielle">Architecture logicielle</a></li>
+<li><a href="#3-fonctionnalite-1--content-acquisition-engine">Fonctionnalite 1 — Content Acquisition Engine (detail)</a></li>
+<li><a href="#4-fonctionnalites-2-11--site-public-et-contributeurs">Fonctionnalites 2-11 — Site public et contributeurs</a></li>
+<li><a href="#5-base-de-donnees">Base de donnees</a></li>
+<li><a href="#6-authentification-et-securite">Authentification et securite</a></li>
+<li><a href="#7-intelligence-artificielle">Intelligence artificielle</a></li>
+<li><a href="#8-cache-et-performance">Cache et performance</a></li>
+<li><a href="#9-paiement">Paiement</a></li>
+<li><a href="#10-infrastructure-et-deploiement">Infrastructure et deploiement</a></li>
+<li><a href="#11-packages-et-dependances">Packages et dependances</a></li>
+<li><a href="#12-inventaire-du-code">Inventaire du code</a></li>
+</ol>
+<hr>
+<h2>1. Vue d&#39;ensemble</h2>
+<p>Vivat est une plateforme media automatisee qui <strong>ingere des flux RSS</strong>, <strong>enrichit le contenu par IA</strong>, et <strong>genere des articles SEO originaux</strong> a partir de multiples sources. Le backend expose une API REST complète pour le site public, l&#39;espace contributeur et le dashboard admin.</p>
+<h3>Stack en un coup d&#39;oeil</h3>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Technologie</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Framework</strong></td>
+<td>Laravel</td>
+<td>12</td>
+</tr>
+<tr>
+<td><strong>Langage</strong></td>
+<td>PHP</td>
+<td>8.3+</td>
+</tr>
+<tr>
+<td><strong>Base de donnees</strong></td>
+<td>MySQL</td>
+<td>8.0</td>
+</tr>
+<tr>
+<td><strong>Cache / Queues / Sessions</strong></td>
+<td>Redis</td>
+<td>7</td>
+</tr>
+<tr>
+<td><strong>IA</strong></td>
+<td>OpenAI GPT-4o</td>
+<td>API</td>
+</tr>
+<tr>
+<td><strong>Paiement</strong></td>
+<td>Stripe</td>
+<td>Payment Intents</td>
+</tr>
+<tr>
+<td><strong>Auth API</strong></td>
+<td>Laravel Sanctum</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td><strong>Roles &amp; Permissions</strong></td>
+<td>spatie/laravel-permission</td>
+<td>6.24</td>
+</tr>
+<tr>
+<td><strong>Conteneurisation</strong></td>
+<td>Docker Compose</td>
+<td>PHP + MySQL + Redis</td>
+</tr>
+<tr>
+<td><strong>Queue monitoring</strong></td>
+<td>Laravel Horizon</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. Architecture logicielle</h2>
+<h3>Principes d&#39;architecture</h3>
+<p>Le backend suit une <strong>architecture MVC enrichie</strong> avec une separation stricte des responsabilites :</p>
+<pre><code>Requete HTTP
+    |
+    v
+[Middleware] ---- Auth (Sanctum) + Rate Limiting + CORS + Role Check
+    |
+    v
+[Controller] ---- Fin et leger : validation + delegation
+    |
+    v
+[Form Request] -- Validation des donnees entrantes (regles declaratives)
+    |
+    v
+[Service] ------- Logique metier pure (testable, reutilisable)
+    |
+    v
+[Job / Queue] --- Taches lourdes asynchrones (IA, scraping, emails)
+    |
+    v
+[Model] --------- Acces aux donnees (Eloquent, relations, scopes)
+    |
+    v
+[Policy] -------- Autorisation (qui peut faire quoi sur quel objet)
+    |
+    v
+[Resource] ------ Transformation JSON de la reponse API
+</code></pre>
+<h3>Pourquoi cette architecture ?</h3>
+<table>
+<thead>
+<tr>
+<th>Principe</th>
+<th>Implementation</th>
+<th>Avantage</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Controllers fins</strong></td>
+<td>Le controller ne contient que la validation et la delegation au service</td>
+<td>Lisibilite, testabilite</td>
+</tr>
+<tr>
+<td><strong>Services pour la logique metier</strong></td>
+<td><code>ArticleGeneratorService</code>, <code>ArticleSelectionService</code>, <code>ContentExtractorService</code>, <code>RssParserService</code>, <code>RecommendationService</code></td>
+<td>Reutilisables en CLI, Jobs, API</td>
+</tr>
+<tr>
+<td><strong>Jobs pour les taches lourdes</strong></td>
+<td><code>FetchRssFeedJob</code>, <code>EnrichContentJob</code>, <code>GenerateArticleJob</code></td>
+<td>Non-bloquant, retry automatique, monitoring Horizon</td>
+</tr>
+<tr>
+<td><strong>Form Requests</strong></td>
+<td><code>StoreSourceRequest</code>, <code>GenerateArticleRequest</code>, etc.</td>
+<td>Validation centralisee, messages d&#39;erreur coherents</td>
+</tr>
+<tr>
+<td><strong>Policies</strong></td>
+<td><code>ArticlePolicy</code>, <code>SourcePolicy</code>, <code>RssFeedPolicy</code></td>
+<td>Autorisation declarative, couplage faible</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td><code>ArticleResource</code>, <code>CategoryResource</code>, <code>SubmissionResource</code>, etc.</td>
+<td>Format JSON maitrise, pas de fuite de donnees</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Fonctionnalite 1 — Content Acquisition Engine</h2>
+<p>C&#39;est la fonctionnalite principale du backend. Un <strong>pipeline automatise en 5 etapes</strong> qui va de la decouverte d&#39;une information dans un flux RSS a la publication d&#39;un article original genere par IA.</p>
+<h3>Schema du pipeline</h3>
+<pre><code>Sources (medias)
+    |
+    v
+[Etape 1] INGESTION RSS
+    |   FetchRssFeedJob (queue: rss)
+    |   RssParserService (parse RSS 2.0 / Atom)
+    |   Deduplication SHA-256 (url + title)
+    |   -&gt; rss_items (status: new)
+    |
+    v
+[Etape 2] ENRICHISSEMENT IA
+    |   EnrichContentJob (queue: enrichment)
+    |   ContentExtractorService (scraping HTML)
+    |   OpenAI GPT-4o (analyse structuree)
+    |   -&gt; enriched_items (lead, headings, key_points,
+    |      seo_keywords, primary_topic, quality_score, seo_score)
+    |   -&gt; rss_items (status: enriched)
+    |
+    v
+[Etape 3] SELECTION INTELLIGENTE
+    |   ArticleSelectionService
+    |   Score multi-criteres :
+    |     - Fraicheur         25%
+    |     - Qualite contenu   25%
+    |     - Potentiel SEO     30%
+    |     - Diversite sources 20%
+    |   Regroupement par sujet (Jaccard &gt;= 20%)
+    |   Reasoning : &quot;pourquoi CET article ?&quot;
+    |
+    v
+[Etape 4] GENERATION IA
+    |   ArticleGeneratorService / GenerateArticleJob (queue: generation)
+    |   Prompt = CategoryTemplate (ton, structure, SEO) + sources enrichies
+    |   OpenAI GPT-4o (JSON mode)
+    |   -&gt; articles (status: draft, title, content HTML, meta SEO, keywords)
+    |   -&gt; article_sources (tracabilite)
+    |
+    v
+[Etape 5] PUBLICATION
+        Cycle : draft -&gt; review -&gt; published / rejected / archived
+        Condition : quality_score &gt;= 60
+        published_at defini automatiquement
+</code></pre>
+<h3>Detail de chaque etape</h3>
+<h4>Etape 1 — Ingestion RSS</h4>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Fichier</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Model Source</strong></td>
+<td><code>app/Models/Source.php</code></td>
+<td>Media (nom, URL, langue, actif)</td>
+</tr>
+<tr>
+<td><strong>Model RssFeed</strong></td>
+<td><code>app/Models/RssFeed.php</code></td>
+<td>Flux RSS lie a une source + categorie</td>
+</tr>
+<tr>
+<td><strong>Model RssItem</strong></td>
+<td><code>app/Models/RssItem.php</code></td>
+<td>Article brut decouvert (titre, URL, hash dedup)</td>
+</tr>
+<tr>
+<td><strong>Service</strong></td>
+<td><code>app/Services/RssParserService.php</code></td>
+<td>Parse RSS 2.0 et Atom, normalise, genere le hash SHA-256 de deduplication</td>
+</tr>
+<tr>
+<td><strong>Job</strong></td>
+<td><code>app/Jobs/FetchRssFeedJob.php</code></td>
+<td>Queue <code>rss</code> : HTTP GET du XML, parse, cree les RssItem avec deduplication</td>
+</tr>
+<tr>
+<td><strong>Scheduler</strong></td>
+<td><code>bootstrap/app.php</code></td>
+<td><code>RssFeed::dueForFetch()</code> toutes les 30 min</td>
+</tr>
+</tbody></table>
+<p><strong>Mecanismes cles :</strong></p>
+<ul>
+<li><strong>Deduplication</strong> : hash SHA-256 sur <code>url + title</code> → colonne <code>dedup_hash</code> (unique). Aucun doublon possible.</li>
+<li><strong>Statuts</strong> : chaque item commence a <code>new</code>, passe a <code>enriching</code>, puis <code>enriched</code> ou <code>failed</code>.</li>
+<li><strong>Intervalles</strong> : chaque flux a son propre <code>fetch_interval_minutes</code> (configurable par source).</li>
+</ul>
+<h4>Etape 2 — Enrichissement IA</h4>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Fichier</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Service</strong></td>
+<td><code>app/Services/ContentExtractorService.php</code></td>
+<td>Scrape l&#39;URL, extrait le contenu via <code>&lt;article&gt;</code>/<code>&lt;main&gt;</code>, supprime script/nav/footer</td>
+</tr>
+<tr>
+<td><strong>Job</strong></td>
+<td><code>app/Jobs/EnrichContentJob.php</code></td>
+<td>Queue <code>enrichment</code> : extraction + appel OpenAI pour structurer</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td><code>app/Models/EnrichedItem.php</code></td>
+<td>Contenu structure (1:1 avec RssItem)</td>
+</tr>
+</tbody></table>
+<p><strong>Ce que l&#39;IA produit pour chaque item :</strong></p>
+<ul>
+<li><code>lead</code> : resume 1-2 phrases</li>
+<li><code>headings[]</code> : titres H2/H3</li>
+<li><code>key_points[]</code> : 3-7 points cles</li>
+<li><code>seo_keywords[]</code> : 5-10 mots-cles longue traine</li>
+<li><code>primary_topic</code> : sujet principal en 2-4 mots</li>
+<li><code>quality_score</code> : 0-100 (qualite redactionnelle)</li>
+<li><code>seo_score</code> : 0-100 (potentiel SEO)</li>
+</ul>
+<p><strong>Protection :</strong> Rate limiter OpenAI a 50 requetes/min (<code>AppServiceProvider</code>).</p>
+<h4>Etape 3 — Selection intelligente</h4>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Fichier</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Service</strong></td>
+<td><code>app/Services/ArticleSelectionService.php</code></td>
+<td>Score, regroupe par sujet, selectionne les N meilleurs</td>
+</tr>
+</tbody></table>
+<p><strong>Algorithme de scoring (exemple avec 15 items disponibles pour 1 article/jour) :</strong></p>
+<pre><code>Score total = Fraicheur (25%) + Qualite (25%) + SEO (30%) + Diversite (20%)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Critere</th>
+<th>Poids</th>
+<th>Logique</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Fraicheur</strong></td>
+<td>25%</td>
+<td>&lt; 48h = max, decroit lineairement sur 7 jours</td>
+</tr>
+<tr>
+<td><strong>Qualite contenu</strong></td>
+<td>25%</td>
+<td>quality_score de l&#39;enrichissement + bonus contenu long</td>
+</tr>
+<tr>
+<td><strong>Potentiel SEO</strong></td>
+<td>30%</td>
+<td>Mots-cles longue traine, faible concurrence, termes specifiques</td>
+</tr>
+<tr>
+<td><strong>Diversite sources</strong></td>
+<td>20%</td>
+<td>Multi-sources = +10/source supplementaire (synthese a haute valeur)</td>
+</tr>
+</tbody></table>
+<p><strong>Regroupement par sujet :</strong> Similarite de Jaccard sur les mots-cles (&gt;= 20% d&#39;intersection = meme sujet). Un article genere a partir de 3 sources sur le meme sujet est plus riche qu&#39;un article mono-source.</p>
+<p><strong>Reasoning :</strong> Chaque proposition retournee par l&#39;API inclut un texte explicatif : <em>&quot;Pourquoi generer CET article ?&quot;</em> — justifie par les scores, les sources, et le potentiel SEO.</p>
+<h4>Etape 4 — Generation IA</h4>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Fichier</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Service</strong></td>
+<td><code>app/Services/ArticleGeneratorService.php</code></td>
+<td>Construction du prompt, appel OpenAI, parse, create Article</td>
+</tr>
+<tr>
+<td><strong>Job</strong></td>
+<td><code>app/Jobs/GenerateArticleJob.php</code></td>
+<td>Version async du service (queue <code>generation</code>)</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td><code>app/Models/CategoryTemplate.php</code></td>
+<td>Ton, structure, min/max mots, regles SEO par categorie</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td><code>app/Models/Article.php</code></td>
+<td>Article genere (title, slug, content HTML, meta SEO, keywords)</td>
+</tr>
+</tbody></table>
+<p><strong>Comment le prompt est construit :</strong></p>
+<ol>
+<li><strong>System prompt</strong> = instructions generales + <code>CategoryTemplate</code> (ton professionnel, 800-1500 mots, HTML structure H2/H3, style magazine, regles SEO)</li>
+<li><strong>User prompt</strong> = pour chaque source enrichie : titre + lead + key_points + texte extrait + mots-cles SEO consolides</li>
+<li><strong>Consignes SEO</strong> : densite mots-cles 1-2%, mot-cle principal dans titre + H1 + premier paragraphe + au moins 2 H2</li>
+</ol>
+<p><strong>Tracabilite complete :</strong> La table <code>article_sources</code> lie chaque article genere a ses items RSS d&#39;origine. On peut toujours remonter de l&#39;article publie jusqu&#39;a la source media.</p>
+<h4>Etape 5 — Publication</h4>
+<ul>
+<li><strong>Cycle de vie</strong> : <code>draft</code> → <code>review</code> → <code>published</code> / <code>rejected</code> / <code>archived</code></li>
+<li><strong>Condition</strong> : <code>quality_score &gt;= 60</code> et status <code>draft</code> ou <code>review</code></li>
+<li><strong>SEO</strong> : <code>meta_title</code>, <code>meta_description</code>, <code>keywords[]</code>, <code>slug</code>, <code>reading_time</code></li>
+</ul>
+<h3>Automatisation</h3>
+<table>
+<thead>
+<tr>
+<th>Tache</th>
+<th>Frequence</th>
+<th>Mecanisme</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fetch des flux RSS</td>
+<td>Toutes les 30 min</td>
+<td>Laravel Scheduler → <code>FetchRssFeedJob</code></td>
+</tr>
+<tr>
+<td>Enrichissement IA</td>
+<td>Toutes les heures (50 items max)</td>
+<td>Laravel Scheduler → <code>EnrichContentJob</code></td>
+</tr>
+<tr>
+<td>Snapshot Horizon</td>
+<td>Toutes les 5 min</td>
+<td><code>horizon:snapshot</code></td>
+</tr>
+<tr>
+<td>Nettoyage jobs echoues</td>
+<td>Quotidien</td>
+<td><code>queue:prune-failed --hours=168</code></td>
+</tr>
+</tbody></table>
+<h3>Monitoring</h3>
+<ul>
+<li><strong>Laravel Horizon</strong> : dashboard temps reel des queues (<code>rss</code>, <code>enrichment</code>, <code>generation</code>, <code>default</code>)</li>
+<li><strong>Pipeline status</strong> : endpoint <code>GET /api/pipeline/status</code> (nombre d&#39;items par statut, feeds actifs, derniers jobs)</li>
+<li><strong>4 superviseurs Horizon</strong> : un par type de queue avec scaling different</li>
+</ul>
+<hr>
+<h2>4. Fonctionnalites 2-11 — Site public et contributeurs</h2>
+<h3>Organisation des routes API</h3>
+<p>L&#39;API est organisee en <strong>4 niveaux d&#39;acces</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Prefixe</th>
+<th>Auth requise</th>
+<th>Role</th>
+<th>Fonctionnalites</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/api/public/*</code></td>
+<td>Aucune</td>
+<td>Visiteur</td>
+<td>Articles publies, categories, hub pages, recherche, preferences, recommandations, progression lecture</td>
+</tr>
+<tr>
+<td><code>/api/auth/*</code></td>
+<td>Aucune (register/login) / Sanctum</td>
+<td>Tous</td>
+<td>Inscription, connexion, profil</td>
+</tr>
+<tr>
+<td><code>/api/contributor/*</code></td>
+<td>Sanctum</td>
+<td>Contributeur ou Admin</td>
+<td>Soumission d&#39;articles, historique, paiements</td>
+</tr>
+<tr>
+<td><code>/api/*</code> (admin)</td>
+<td>Sanctum + role admin</td>
+<td>Admin</td>
+<td>Pipeline, CRUD sources/feeds/articles, moderation, stats, newsletter</td>
+</tr>
+<tr>
+<td><code>/api/newsletter/*</code></td>
+<td>Aucune</td>
+<td>Visiteur</td>
+<td>Inscription/desinscription newsletter</td>
+</tr>
+</tbody></table>
+<h3>Fonctionnalites implementees</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Fonctionnalite</th>
+<th>Endpoints cles</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Content Acquisition Engine</strong></td>
+<td><code>pipeline/*</code>, <code>articles/generate</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Auth + Roles</strong></td>
+<td><code>auth/register</code>, <code>auth/login</code>, <code>auth/me</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>API publique articles</strong></td>
+<td><code>public/articles</code>, <code>public/articles/{slug}</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Pages Hub categories</strong></td>
+<td><code>public/categories/{slug}/hub</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Recherche et filtrage</strong></td>
+<td><code>public/search?q=...&amp;category=...&amp;date_from=...&amp;reading_time_max=...</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Personnalisation / Preferences</strong></td>
+<td><code>public/preferences</code> (GET/POST, cookie ou auth)</td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Recommandations</strong></td>
+<td><code>public/recommendations?interests=...&amp;session_id=...</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Progression de lecture</strong></td>
+<td><code>public/reading-progress</code> (GET/POST)</td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Soumission articles (contributeur)</strong></td>
+<td><code>contributor/submissions</code> (CRUD)</td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Moderation (admin)</strong></td>
+<td><code>submissions/{id}/approve</code>, <code>submissions/{id}/reject</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Newsletter</strong></td>
+<td><code>newsletter/subscribe</code>, <code>newsletter/unsubscribe</code>, <code>newsletter/confirm</code></td>
+<td>Complet</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>Paiement Stripe</strong></td>
+<td><code>contributor/payments/create-intent</code>, <code>payments/{id}/refund</code></td>
+<td>Complet</td>
+</tr>
+</tbody></table>
+<h3>Detail des APIs publiques</h3>
+<p><strong>Recherche</strong> (<code>GET /api/public/search</code>) :</p>
+<ul>
+<li>Recherche par mot-cle dans titre, excerpt, meta_description</li>
+<li>Filtres : categorie (slug), date_from/date_to, reading_time_max</li>
+<li>Pagination, tri par date de publication</li>
+</ul>
+<p><strong>Recommandations</strong> (<code>GET /api/public/recommendations</code>) :</p>
+<ul>
+<li>Algorithme de scoring : interets utilisateur (40%) + qualite article (25%) + fraicheur (20%) + popularite (15%)</li>
+<li>Exclusion des articles deja lus (&gt; 50% de progression)</li>
+<li>Fonctionne avec ou sans compte (session_id cookie)</li>
+</ul>
+<p><strong>Page Hub</strong> (<code>GET /api/public/categories/{slug}/hub</code>) :</p>
+<ul>
+<li>Description de la categorie</li>
+<li>3 articles &quot;a la une&quot; (meilleur quality_score)</li>
+<li>10 articles les plus recents</li>
+<li>Comptage total d&#39;articles publies</li>
+</ul>
+<hr>
+<h2>5. Base de donnees</h2>
+<h3>MySQL 8.0</h3>
+<p><strong>36 tables</strong> organisees en 5 groupes :</p>
+<h4>Pipeline (11 tables)</h4>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Role</th>
+<th>PK</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sources</code></td>
+<td>Medias (nom, URL, langue, actif)</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>categories</code></td>
+<td>14 categories thematiques</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>rss_feeds</code></td>
+<td>Flux RSS lies a une source + categorie</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>rss_items</code></td>
+<td>Articles bruts decouverts (titre, URL, hash dedup)</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>enriched_items</code></td>
+<td>Contenu structure par l&#39;IA (1:1 avec rss_item)</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>clusters</code></td>
+<td>Groupes thematiques d&#39;items</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>cluster_items</code></td>
+<td>Pivot cluster ←→ rss_item</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>articles</code></td>
+<td>Articles generes (content HTML, SEO, quality_score)</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>article_sources</code></td>
+<td>Tracabilite article ←→ sources originales</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>category_templates</code></td>
+<td>Config de generation par categorie (ton, mots, SEO)</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td><code>pipeline_jobs</code></td>
+<td>Monitoring des jobs (type, statut, erreurs, retries)</td>
+<td>UUID</td>
+</tr>
+</tbody></table>
+<h4>Utilisateurs et auth (6 tables)</h4>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>users</code></td>
+<td>Utilisateurs (UUID, name, email, language, interests, avatar, bio)</td>
+</tr>
+<tr>
+<td><code>personal_access_tokens</code></td>
+<td>Tokens Sanctum (API auth)</td>
+</tr>
+<tr>
+<td><code>roles</code> / <code>permissions</code> / <code>model_has_roles</code> / <code>model_has_permissions</code> / <code>role_has_permissions</code></td>
+<td>Roles et permissions (spatie)</td>
+</tr>
+<tr>
+<td><code>password_reset_tokens</code></td>
+<td>Reset mot de passe</td>
+</tr>
+<tr>
+<td><code>sessions</code></td>
+<td>Sessions Laravel</td>
+</tr>
+</tbody></table>
+<h4>Fonctionnalites site (5 tables)</h4>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>submissions</code></td>
+<td>Articles soumis par les contributeurs (draft → pending → approved/rejected)</td>
+</tr>
+<tr>
+<td><code>payments</code></td>
+<td>Paiements Stripe (payment_intent, amount, status, refund)</td>
+</tr>
+<tr>
+<td><code>newsletter_subscribers</code></td>
+<td>Abonnes newsletter (email, interests min 3, confirm/unsubscribe tokens)</td>
+</tr>
+<tr>
+<td><code>reading_histories</code></td>
+<td>Progression de lecture (user_id ou session_id, article_id, progress 0-100)</td>
+</tr>
+<tr>
+<td><code>user_preferences</code></td>
+<td>Preferences visiteurs non connectes (session_id, interests, language)</td>
+</tr>
+</tbody></table>
+<h4>Legacy (5 tables — donnees importees du site existant)</h4>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Rows importees</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tbl_cont_pg</code></td>
+<td>3 756 articles</td>
+</tr>
+<tr>
+<td><code>tbl_ref</code></td>
+<td>71 categories/references</td>
+</tr>
+<tr>
+<td><code>tbl_usr</code></td>
+<td>3 utilisateurs</td>
+</tr>
+<tr>
+<td><code>logs</code></td>
+<td>0 (conserve pour compatibilite)</td>
+</tr>
+<tr>
+<td><code>cloaked_ip</code></td>
+<td>0 (conserve pour compatibilite)</td>
+</tr>
+</tbody></table>
+<h4>Framework Laravel (5 tables)</h4>
+<p><code>cache</code>, <code>cache_locks</code>, <code>jobs</code>, <code>job_batches</code>, <code>failed_jobs</code>, <code>migrations</code></p>
+<h3>Indexation</h3>
+<p>Les index sont optimises pour les requetes frequentes :</p>
+<ul>
+<li><code>articles</code> : index sur <code>status</code>, <code>published_at</code>, <code>quality_score</code>, composites <code>(status, published_at)</code> et <code>(category_id, status)</code>, <strong>full-text</strong> sur <code>(title, excerpt)</code></li>
+<li><code>rss_items</code> : index sur <code>status</code>, <code>dedup_hash</code> (unique), <code>feed_id</code>, <code>category_id</code></li>
+<li><code>submissions</code> : index sur <code>status</code>, composite <code>(user_id, status)</code></li>
+<li><code>reading_histories</code> : index sur <code>(user_id, article_id)</code>, <code>(session_id, article_id)</code></li>
+</ul>
+<h3>Coherence des cles primaires</h3>
+<p><strong>Toutes les tables metier utilisent des UUID</strong> (via le trait <code>HasUuids</code> d&#39;Eloquent). Cela garantit :</p>
+<ul>
+<li>Pas de collision lors de la fusion de bases</li>
+<li>IDs non predictibles (securite API)</li>
+<li>Compatibilite avec une architecture distribuee future</li>
+</ul>
+<hr>
+<h2>6. Authentification et securite</h2>
+<h3>Authentification API — Laravel Sanctum</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Role</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /api/auth/register</code></td>
+<td>Public</td>
+<td>Inscription (cree un compte <code>contributor</code>)</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/login</code></td>
+<td>Public</td>
+<td>Connexion (retourne un Bearer token)</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/logout</code></td>
+<td>Auth</td>
+<td>Revoque le token courant</td>
+</tr>
+<tr>
+<td><code>GET /api/auth/me</code></td>
+<td>Auth</td>
+<td>Profil utilisateur + roles</td>
+</tr>
+<tr>
+<td><code>PUT /api/auth/profile</code></td>
+<td>Auth</td>
+<td>Modifier nom, langue, interets, bio</td>
+</tr>
+</tbody></table>
+<p><strong>Strategie single-device</strong> : a chaque login, les tokens precedents sont revoques.</p>
+<h3>Roles et permissions — spatie/laravel-permission</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Permissions</th>
+<th>Cible</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>admin</strong></td>
+<td>Toutes (21 permissions)</td>
+<td>Pipeline, CRUD, moderation, stats, newsletter, paiements</td>
+</tr>
+<tr>
+<td><strong>contributor</strong></td>
+<td><code>articles.view</code>, <code>submissions.create</code>, <code>submissions.view-own</code></td>
+<td>Soumission d&#39;articles, consultation</td>
+</tr>
+<tr>
+<td><strong>Visiteur</strong> (non connecte)</td>
+<td>—</td>
+<td>Lecture articles, recherche, preferences (cookie), newsletter</td>
+</tr>
+</tbody></table>
+<h3>Protection des routes</h3>
+<pre><code>/api/public/*           → Aucun middleware (acces libre)
+/api/auth/register|login → Aucun middleware
+/api/auth/logout|me|...  → auth:sanctum
+/api/newsletter/*        → Aucun middleware
+/api/contributor/*       → auth:sanctum + role:contributor|admin
+/api/* (admin)           → auth:sanctum + role:admin
+</code></pre>
+<h3>Rate limiting</h3>
+<ul>
+<li><strong>API publique</strong> : 60 requetes/minute par IP (ou par user_id si connecte)</li>
+<li><strong>OpenAI</strong> : 50 requetes/minute (par item, via le RateLimiter Laravel)</li>
+</ul>
+<h3>Securite supplementaire</h3>
+<ul>
+<li><strong>HTTPS</strong> obligatoire en production</li>
+<li><strong>Validation serveur</strong> : toutes les donnees entrantes sont validees via Form Requests</li>
+<li><strong>Policies</strong> : autorisation objet par objet (qui peut publier, modifier, supprimer)</li>
+<li><code>.env</code> dans <code>.gitignore</code> (jamais commite)</li>
+</ul>
+<hr>
+<h2>7. Intelligence artificielle</h2>
+<h3>Modele : OpenAI GPT-4o</h3>
+<table>
+<thead>
+<tr>
+<th>Usage</th>
+<th>Etape</th>
+<th>Entree</th>
+<th>Sortie</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Enrichissement</strong></td>
+<td>Etape 2</td>
+<td>Texte brut de l&#39;article source</td>
+<td>lead, headings, key_points, seo_keywords, primary_topic, quality_score, seo_score</td>
+</tr>
+<tr>
+<td><strong>Generation</strong></td>
+<td>Etape 4</td>
+<td>N sources enrichies + CategoryTemplate</td>
+<td>Article original HTML (800-1500 mots), meta SEO, keywords</td>
+</tr>
+<tr>
+<td><strong>Selection</strong></td>
+<td>Etape 3</td>
+<td>Scores des items enrichis</td>
+<td>Classement + reasoning</td>
+</tr>
+</tbody></table>
+<h3>Integration technique</h3>
+<ul>
+<li><strong>Appels via Jobs asynchrones</strong> : jamais d&#39;appel OpenAI dans une requete HTTP synchrone (sauf generation explicite via admin)</li>
+<li><strong>JSON mode</strong> : les reponses sont structurees en JSON pour un parsing fiable</li>
+<li><strong>Rate limiter</strong> : 50 req/min pour eviter les erreurs 429</li>
+<li><strong>Retry</strong> : les jobs echoues sont automatiquement rejoues (3 tentatives par defaut)</li>
+<li><strong>Prompts SEO</strong> : densite de mots-cles 1-2%, placement dans titre + H1 + premier paragraphe + H2</li>
+<li><strong>CategoryTemplate</strong> : chaque categorie a ses propres instructions (ton, longueur, regles SEO)</li>
+</ul>
+<h3>Cout et optimisation</h3>
+<ul>
+<li>Seuls les items au statut <code>new</code> sont enrichis (pas de retraitement)</li>
+<li>L&#39;enrichissement est limite a 50 items/heure</li>
+<li>Le delai entre les appels est de 3 secondes (evite les pics)</li>
+</ul>
+<hr>
+<h2>8. Cache et performance</h2>
+<h3>Redis</h3>
+<p>Redis est utilise pour <strong>3 roles</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Config</th>
+<th>Avantage</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Cache applicatif</strong></td>
+<td><code>CACHE_STORE=redis</code></td>
+<td>Articles, pages hub, resultats de recherche</td>
+</tr>
+<tr>
+<td><strong>Files d&#39;attente</strong></td>
+<td><code>QUEUE_CONNECTION=redis</code></td>
+<td>Jobs asynchrones (scraping, IA, emails)</td>
+</tr>
+<tr>
+<td><strong>Sessions</strong></td>
+<td><code>SESSION_DRIVER=redis</code></td>
+<td>Sessions utilisateur rapides</td>
+</tr>
+</tbody></table>
+<h3>Laravel Horizon</h3>
+<p>Horizon fournit un <strong>dashboard temps reel</strong> pour monitorer les queues :</p>
+<table>
+<thead>
+<tr>
+<th>Superviseur</th>
+<th>Queue</th>
+<th>Workers</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>rss</code></td>
+<td>rss</td>
+<td>2</td>
+<td>Fetch des flux RSS</td>
+</tr>
+<tr>
+<td><code>enrichment</code></td>
+<td>enrichment</td>
+<td>3</td>
+<td>Enrichissement IA</td>
+</tr>
+<tr>
+<td><code>generation</code></td>
+<td>generation</td>
+<td>2</td>
+<td>Generation d&#39;articles</td>
+</tr>
+<tr>
+<td><code>default</code></td>
+<td>default</td>
+<td>2</td>
+<td>Taches generales</td>
+</tr>
+</tbody></table>
+<p><strong>Acces</strong> : <code>http://localhost:8000/horizon</code></p>
+<hr>
+<h2>9. Paiement</h2>
+<h3>Stripe — Publication ponctuelle (one-time)</h3>
+<p><strong>Flux de paiement :</strong></p>
+<pre><code>1. Contributeur soumet un article
+2. POST /api/contributor/payments/create-intent
+   → Cree un PaymentIntent Stripe (15 EUR par defaut)
+   → Retourne client_secret au frontend
+3. Frontend confirme le paiement (Stripe.js)
+4. POST /api/contributor/payments/confirm
+   → Verifie le statut aupres de Stripe
+   → Si succeeded : marque le paiement comme &quot;paid&quot;
+   → Soumet automatiquement l&#39;article pour validation
+5. Admin approuve ou rejette
+6. Si rejete : POST /api/payments/{id}/refund
+   → Cree un Refund Stripe
+   → Marque le paiement comme &quot;refunded&quot;
+</code></pre>
+<p><strong>Statuts</strong> : <code>pending</code> → <code>paid</code> → <code>refunded</code> (si rejete) / <code>failed</code></p>
+<p><strong>Dashboard contributeur</strong> : <code>GET /api/contributor/payments</code> — historique complet (montant, statut, article associe)</p>
+<hr>
+<h2>10. Infrastructure et deploiement</h2>
+<h3>Docker Compose (developpement)</h3>
+<pre><code class="language-yaml">Services :
+  app    : PHP 8.3 Alpine + extensions (pdo_mysql, redis, gd, zip, bcmath, intl)
+  mysql  : MySQL 8.0 (healthcheck, volumes persistants)
+  redis  : Redis 7 Alpine
+  phpmyadmin : phpMyAdmin (port 8080)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Service</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>http://localhost:8000</code></td>
+<td>Application Laravel</td>
+</tr>
+<tr>
+<td><code>http://localhost:8000/horizon</code></td>
+<td>Dashboard Horizon</td>
+</tr>
+<tr>
+<td><code>http://localhost:8080</code></td>
+<td>phpMyAdmin</td>
+</tr>
+</tbody></table>
+<h3>Environnement identique local / staging / prod</h3>
+<ul>
+<li><strong>Docker</strong> garantit que l&#39;environnement est reproductible</li>
+<li>Les variables d&#39;environnement (<code>.env</code>) sont les seules differences entre local et prod</li>
+<li>Les migrations et seeders assurent un schema identique partout</li>
+</ul>
+<h3>Cible production</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Choix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Serveur</strong></td>
+<td>VPS (DigitalOcean / Hetzner)</td>
+</tr>
+<tr>
+<td><strong>Reverse proxy</strong></td>
+<td>Nginx + SSL (Let&#39;s Encrypt)</td>
+</tr>
+<tr>
+<td><strong>Process manager</strong></td>
+<td>Supervisor (pour Horizon + Scheduler)</td>
+</tr>
+<tr>
+<td><strong>Monitoring</strong></td>
+<td>Sentry ou Bugsnag (a installer)</td>
+</tr>
+<tr>
+<td><strong>Debug dev</strong></td>
+<td>Laravel Telescope (a installer)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>11. Packages et dependances</h2>
+<h3>Packages installes et utilises</h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Role</th>
+<th>Statut</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>laravel/sanctum</code></td>
+<td>4.3</td>
+<td>Auth API par tokens Bearer</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td><code>laravel/horizon</code></td>
+<td>—</td>
+<td>Monitoring et gestion des queues Redis</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td><code>spatie/laravel-permission</code></td>
+<td>6.24</td>
+<td>Roles (admin, contributor) et 21 permissions</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td><code>spatie/laravel-sluggable</code></td>
+<td>3.7</td>
+<td>Slugs SEO automatiques (Submissions)</td>
+<td>Installe et utilise</td>
+</tr>
+<tr>
+<td><code>stripe/stripe-php</code></td>
+<td>19.3</td>
+<td>API Stripe (PaymentIntent, Refund)</td>
+<td>Installe et utilise</td>
+</tr>
+</tbody></table>
+<h3>Packages prevus (a installer selon besoin)</h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Role</th>
+<th>Priorite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>spatie/laravel-sitemap</code></td>
+<td>Sitemap XML dynamique pour SEO</td>
+<td>Moyenne</td>
+</tr>
+<tr>
+<td><code>laravel/telescope</code></td>
+<td>Debug en developpement</td>
+<td>Basse</td>
+</tr>
+<tr>
+<td><code>sentry/sentry-laravel</code></td>
+<td>Monitoring erreurs en production</td>
+<td>Haute (avant prod)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>12. Inventaire du code</h2>
+<h3>Chiffres cles</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Nombre</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Routes API</strong></td>
+<td>94</td>
+</tr>
+<tr>
+<td><strong>Tables en base</strong></td>
+<td>36</td>
+</tr>
+<tr>
+<td><strong>Models Eloquent</strong></td>
+<td>17</td>
+</tr>
+<tr>
+<td><strong>Controllers API</strong></td>
+<td>16</td>
+</tr>
+<tr>
+<td><strong>Services</strong></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Jobs asynchrones</strong></td>
+<td>3</td>
+</tr>
+<tr>
+<td><strong>Migrations</strong></td>
+<td>24</td>
+</tr>
+<tr>
+<td><strong>Roles</strong></td>
+<td>2 (admin, contributor)</td>
+</tr>
+<tr>
+<td><strong>Permissions</strong></td>
+<td>21</td>
+</tr>
+</tbody></table>
+<h3>Liste des Models</h3>
+<p><code>Article</code>, <code>ArticleSource</code>, <code>Category</code>, <code>CategoryTemplate</code>, <code>Cluster</code>, <code>ClusterItem</code>, <code>EnrichedItem</code>, <code>NewsletterSubscriber</code>, <code>Payment</code>, <code>PipelineJob</code>, <code>ReadingHistory</code>, <code>RssFeed</code>, <code>RssItem</code>, <code>Source</code>, <code>Submission</code>, <code>User</code>, <code>UserPreference</code></p>
+<h3>Liste des Controllers</h3>
+<p><code>AdminSubmissionController</code>, <code>ArticleController</code>, <code>AuthController</code>, <code>CategoryController</code>, <code>CategoryTemplateController</code>, <code>ClusterController</code>, <code>ContributorSubmissionController</code>, <code>NewsletterController</code>, <code>PaymentController</code>, <code>PipelineController</code>, <code>PreferenceController</code>, <code>ReadingHistoryController</code>, <code>RssFeedController</code>, <code>RssItemController</code>, <code>SourceController</code>, <code>StatsController</code></p>
+<h3>Liste des Services</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Responsabilite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RssParserService</code></td>
+<td>Parse RSS 2.0 / Atom, deduplication</td>
+</tr>
+<tr>
+<td><code>ContentExtractorService</code></td>
+<td>Scraping HTML, extraction contenu</td>
+</tr>
+<tr>
+<td><code>ArticleSelectionService</code></td>
+<td>Selection intelligente multi-criteres</td>
+</tr>
+<tr>
+<td><code>ArticleGeneratorService</code></td>
+<td>Generation article IA (prompt, parse, create)</td>
+</tr>
+<tr>
+<td><code>RecommendationService</code></td>
+<td>Recommandations personnalisees</td>
+</tr>
+</tbody></table>
+<h3>Liste des Jobs</h3>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Queue</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FetchRssFeedJob</code></td>
+<td><code>rss</code></td>
+<td>Recupere et parse un flux RSS</td>
+</tr>
+<tr>
+<td><code>EnrichContentJob</code></td>
+<td><code>enrichment</code></td>
+<td>Extrait le contenu + enrichit via IA</td>
+</tr>
+<tr>
+<td><code>GenerateArticleJob</code></td>
+<td><code>generation</code></td>
+<td>Genere un article via IA (async)</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>Document genere le 9 fevrier 2026. Mis a jour a chaque evolution de la stack.</em></p>
+
+</body>
+</html>

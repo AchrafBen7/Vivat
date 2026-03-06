@@ -125,9 +125,55 @@ Ce fichier sert de **résumé étape par étape** de ce qui a été fait sur le 
 - [x] Créer les 11 models du pipeline.
 - [x] Services, Jobs, Horizon, rate limiter, Scheduler.
 - [x] Contrôleurs API, Resources, routes API (testables dans Postman).
-- [x] Form Requests dédiés (Store/Update Source, RssFeed, Article ; GenerateArticle), Policies (Source, RssFeed, Article).
+- [x] Form Requests dédiés, Policies (Source, RssFeed, Article).
 - [x] Commandes Artisan (rss:fetch, content:enrich, cleanup:old, articles:generate).
-- [ ] (Optionnel) Auth Sanctum, Filament admin, Events/Listeners, tests.
+- [x] Tests Unit/Feature, compatibilité SQLite.
+- [ ] **Pour que tout marche** : Seeders (données de démarrage), vérif .env + Horizon + scheduler (voir ci‑dessous).
+- [ ] (Optionnel) Auth Sanctum, Filament admin, Events/Listeners.
+
+---
+
+## Prochaines étapes pour que tout fonctionne
+
+Ce qui reste à faire pour que le **pipeline et l’API** tournent de bout en bout et que tout ce qui est prévu soit en place.
+
+### 1. Données de démarrage (obligatoire pour tester le pipeline)
+
+Sans au moins **1 catégorie, 1 source et 1 flux RSS**, `rss:fetch` n’a rien à traiter.
+
+- [ ] **Seeders** : créer `CategorySeeder`, `SourceSeeder`, `RssFeedSeeder` (ex. 1 catégorie « Actualités », 1 source, 1 flux RSS réel), les appeler depuis `DatabaseSeeder`, puis `php artisan db:seed`.
+- **Alternative** : créer les enregistrements à la main via l’API (POST /api/sources, POST /api/categories si endpoint, POST /api/rss-feeds) ou phpMyAdmin.
+
+### 2. Environnement opérationnel
+
+- [ ] **.env** (ou variables Docker) : `QUEUE_CONNECTION=redis`, `REDIS_HOST=redis` (en Docker), `OPENAI_API_KEY` renseignée pour l’enrichissement et la génération d’articles.
+- [ ] **Horizon** : lancer `php artisan horizon` (ou service Docker dédié) pour que les jobs (rss, enrichment, generation) soient exécutés.
+- [ ] **Scheduler** : en local `php artisan schedule:work`, ou en prod une entrée cron `* * * * * php artisan schedule:run` pour le fetch toutes les 30 min et l’enrichissement toutes les heures.
+
+### 3. Vérification de bout en bout
+
+- [ ] Lancer `php artisan rss:fetch --all` → des `rss_items` en statut `new` apparaissent (vérifier en BDD ou GET /api/rss-items?status=new).
+- [ ] Lancer `php artisan content:enrich` (avec Horizon qui tourne) → des items passent en `enriched` (et des `enriched_items` sont créés).
+- [ ] Appeler POST /api/articles/generate avec des `item_ids` enrichis → un article est créé (ou POST /api/articles/generate-async puis vérifier en BDD / Horizon).
+
+### 4. Compléments utiles (prévus dans le contexte projet)
+
+| Élément | Statut | Priorité |
+|--------|--------|----------|
+| **Seeders** (catégories, sources, flux) | À faire | Haute (pour démo / tests) |
+| **Filament** (admin : sources, flux, articles, jobs) | Non fait | Moyenne |
+| **Auth Sanctum** (protéger l’API / admin) | Non fait | Selon besoin |
+| **Clustering** (ClusteringService, ClusterItemsJob) | Non fait | Optionnel (génération possible sans) |
+| **PipelineController** (état des jobs pipeline) | Non fait | Optionnel (Stats suffit pour l’instant) |
+| **RssItemPolicy / PipelineJobPolicy** | Non fait | Optionnel |
+| **Factories** (pour tests / seed) | Non fait | Utile avec seeders |
+
+### 5. Ordre recommandé
+
+1. **Seeders** (catégories + sources + 1–2 flux RSS) → `db:seed`.
+2. Vérifier **.env** (redis, OpenAI), lancer **Horizon** et **schedule:work** (ou cron).
+3. Tester la chaîne : **rss:fetch** → **content:enrich** (attendre les jobs) → **POST /api/articles/generate**.
+4. Ensuite, selon besoin : **Filament** (admin), **Sanctum** (auth), puis reste (clustering, policies, etc.).
 
 ---
 
@@ -152,4 +198,142 @@ Ce fichier sert de **résumé étape par étape** de ce qui a été fait sur le 
 
 ---
 
-*Dernière mise à jour : étape 11 (commandes Artisan pipeline) ajoutée.*
+## Étape 12 — Tests et compatibilité SQLite
+
+- **Résumé** : Ajout de tests Unit et Feature pour le pipeline et l’API ; migrations rendues compatibles SQLite (tests en mémoire) ; correction du Controller de base pour l’autorisation.
+- **Tests créés** :
+  - **Unit** : `tests/Unit/RssParserServiceTest.php` (parse RSS vide, RSS 2.0, generateDedupHash) ; `tests/Unit/ArticleTest.php` (isPublishable selon quality_score et status).
+  - **Feature API** : `tests/Feature/Api/SourceApiTest.php` (index 200, store 201 + validation, show 200) ; `tests/Feature/Api/StatsApiTest.php` (GET /api/stats structure).
+- **Correctifs** :
+  - `app/Http/Controllers/Controller.php` — ajout du trait `AuthorizesRequests` pour que `$this->authorize()` fonctionne dans les contrôleurs API.
+  - `database/migrations/2024_01_01_000012_create_updated_at_triggers.php` — exécution des triggers uniquement si `DB::getDriverName() === 'mysql'` (évite l’erreur en SQLite).
+  - `database/migrations/2024_01_01_000004_create_rss_items_table.php` et `2024_01_01_000008_create_articles_table.php` — index fullText créés uniquement pour MySQL (SQLite non supporté par le schema builder).
+- **Lancement** : `vendor/bin/phpunit` ou `php artisan test` (12 tests, 39 assertions).
+
+---
+
+## Étape 13 — Alignement avec la base existante (ID93677_vivat)
+
+- **Résumé** : Alignement du schéma Laravel avec la base fournie par le chef de projet : création des tables legacy (site) pour pouvoir importer les articles et données existantes, sans toucher au pipeline (scraping + génération d’articles IA).
+- **Fichiers créés** :
+  - `database/migrations/2024_01_01_000000_create_legacy_site_tables.php` — Création des tables `cloaked_ip`, `logs`, `tbl_ref`, `tbl_usr`, `tbl_cont_pg` avec la même structure que le dump `ID93677_vivat.sql` (contID, contTitle, contDesc, contContent, contRef1/2/3, tbl_ref hiérarchique, tbl_usr, etc.).
+  - `docs/SCHEMA_BASE_EXISTANTE.md` — Documentation du schéma de la base existante (colonnes, rôles) et du mapping pipeline vs site (articles → tbl_cont_pg, catégories → tbl_ref, users → tbl_usr).
+- **Stratégie** :
+  - **Pipeline inchangé** : sources, rss_feeds, rss_items, enriched_items, clusters, cluster_items, **articles** (UUID), article_sources, category_templates, pipeline_jobs, triggers.
+  - **Site / legacy** : tables `tbl_cont_pg` (articles préexistants), `tbl_ref` (catégories/références), `tbl_usr` (utilisateurs), plus `logs` et `cloaked_ip` pour alignement complet avec le dump.
+- **Import des données** : Après `php artisan migrate`, importer les INSERT du fichier SQL fourni vers ces tables (voir `docs/SCHEMA_BASE_EXISTANTE.md`).
+
+---
+
+## Étape 14 — Import données legacy + Audit complet backend pipeline
+
+- **Import vivat_old → vivat** :
+  - Base `vivat_old` créée dans Docker avec le dump `ID93677_vivat.sql`.
+  - Données copiées : **3756** articles (`tbl_cont_pg`), **71** refs (`tbl_ref`), **3** users (`tbl_usr`).
+  - Correction migration legacy : index `TBL_CONT_PG_IDX_PG_CONTENT` avec préfixes pour rester sous la limite MySQL 3072 bytes (utf8mb4).
+
+- **Bugs corrigés** :
+  - `FetchRssFeedJob` : ajout `fetched_at => now()` (manquait).
+  - `EnrichContentJob` : ajout `enriched_at => now()` (manquait).
+  - `ArticleResource` : `content` retourné sur `articles.show`, `generate`, `generate-async`, `publish` (pas seulement show).
+  - `ArticleGeneratorService::sanitizeContent()` : correction ParseError sur les guillemets typographiques (regex Unicode).
+  - `ContentExtractorService::loadHtml()` : correction `mb_convert_encoding()` deprecated → XML encoding pragma.
+  - Tous les Jobs (`FetchRssFeedJob`, `EnrichContentJob`, `GenerateArticleJob`) : suppression de la propriété `$queue` (conflit avec trait `Queueable`), usage de `$this->onQueue()` dans le constructeur.
+  - Models avec `$timestamps = false` (`Category`, `CategoryTemplate`, `Cluster`, `RssFeed`, `RssItem`, `PipelineJob`) : ajout cast `'created_at' => 'datetime'` pour éviter les erreurs `toIso8601String()` sur string.
+  - `ArticlePolicy::publish()` : retourne toujours `true`, la vérification business `isPublishable()` est dans le controller (message 422 clair).
+  - `ArticleController::generate()` : try/catch avec erreur 502 descriptive au lieu d'un stack trace brut.
+
+- **Endpoints ajoutés** :
+  - `POST /api/pipeline/fetch-rss` — Déclenche le fetch des flux RSS (tous actifs ou un seul).
+  - `POST /api/pipeline/enrich` — Déclenche l'enrichissement des items "new".
+  - `GET /api/pipeline/status` — Statut global du pipeline (feeds, items par statut).
+  - `CRUD /api/clusters` — Gestion des clusters (create, read, update, delete avec items).
+  - `CRUD /api/category-templates` — Gestion des templates de génération par catégorie.
+
+- **Seeder** :
+  - `database/seeders/PipelineSeeder.php` : 14 catégories, 6 sources (Reporterre, Futura Sciences, Novethic, Natura Sciences, etc.), 5 flux RSS, 14 category templates.
+
+- **Tests Postman (tous OK)** :
+  | Endpoint | Méthode | Résultat |
+  |---|---|---|
+  | `/api/sources` | GET/POST/PUT/DELETE | OK (CRUD complet) |
+  | `/api/categories` | GET (index/show) | OK |
+  | `/api/category-templates` | GET/POST/PUT/DELETE | OK |
+  | `/api/rss-feeds` | GET/POST/PUT/DELETE | OK |
+  | `/api/pipeline/fetch-rss` | POST | OK (120 items récupérés de 5 flux) |
+  | `/api/rss-items` | GET (index/show, filtres status/category/feed) | OK |
+  | `/api/pipeline/enrich` | POST | OK (extraction OK, OpenAI = quota dépassé) |
+  | `/api/pipeline/status` | GET | OK |
+  | `/api/clusters` | GET/POST/PUT/DELETE | OK |
+  | `/api/articles` | GET/POST/PUT/DELETE | OK |
+  | `/api/articles/generate` | POST | OK (validation + OpenAI call, erreur quota 502) |
+  | `/api/articles/{id}/publish` | POST | OK (vérification quality_score >= 60) |
+  | `/api/stats` | GET | OK |
+
+- **Blocage actuel** : La clé OpenAI (`OPENAI_API_KEY`) a dépassé son quota → les appels enrichissement IA et génération d'articles retournent une erreur 429/502. **Il faut ajouter des crédits** sur https://platform.openai.com/settings/organization/billing.
+
+- **Audit base de données vivat** :
+  | Table | Rôle | Rows | Utile ? |
+  |---|---|---|---|
+  | `sources` | Médias configurés | 6 | Oui (pipeline) |
+  | `categories` | 14 catégories thématiques | 14 | Oui (pipeline + site) |
+  | `rss_feeds` | Flux RSS liés sources/catégories | 5 | Oui (pipeline) |
+  | `rss_items` | Articles bruts découverts | 120 | Oui (pipeline) |
+  | `enriched_items` | Contenu extrait et structuré IA | 3 | Oui (pipeline) |
+  | `clusters` | Groupes thématiques d'items | 1 | Oui (pipeline) |
+  | `cluster_items` | Pivot cluster ↔ rss_item | 2 | Oui (pipeline) |
+  | `articles` | Articles générés | 1 | Oui (pipeline) |
+  | `article_sources` | Traçabilité article → sources | 0 | Oui (pipeline) |
+  | `category_templates` | Config génération par catégorie | 14 | Oui (pipeline) |
+  | `pipeline_jobs` | Monitoring des jobs | 0 | Oui (monitoring) |
+  | `tbl_cont_pg` | Articles legacy (site existant) | 3756 | Oui (données importées) |
+  | `tbl_ref` | Catégories legacy | 71 | Oui (données importées) |
+  | `tbl_usr` | Utilisateurs legacy | 3 | Oui (données importées) |
+  | `users` | Users Laravel (auth) | 0 | Oui (auth future) |
+  | `sessions` | Sessions Laravel | 0 | Oui (auth) |
+  | `cache` / `cache_locks` | Cache Laravel | 0 | Oui (framework) |
+  | `jobs` / `job_batches` / `failed_jobs` | Queue Laravel | 0 | Oui (queue) |
+  | `migrations` | Migration tracking | 15 | Oui (framework) |
+  | `password_reset_tokens` | Reset password | 0 | Oui (auth) |
+  | `cloaked_ip` | IPs cloakées (legacy) | 0 | Non essentiel (legacy vide) |
+  | `logs` | Logs legacy (MyISAM) | 0 | Non essentiel (legacy vide) |
+
+  **Conclusion** : Toutes les tables servent. Les 2 tables legacy vides (`cloaked_ip`, `logs`) sont non essentielles mais ne gênent pas.
+
+---
+
+## Étape 15 — Sélection intelligente des articles + SEO + Guide de tests
+
+- **Problématique** : Avec 120+ items RSS récupérés et ~15 infos par jour, comment décider QUEL article générer ? Pourquoi celui-ci et pas un autre ?
+
+- **ArticleSelectionService** (`app/Services/ArticleSelectionService.php`) :
+  - **Scoring multi-critères** (0-100) :
+    - Fraîcheur (25%) : articles < 48h = score max, décroît sur 7 jours
+    - Qualité contenu (25%) : quality_score de l'enrichissement + bonus contenu long
+    - Potentiel SEO (30%) : mots-clés longue traîne, spécifiques, faible concurrence
+    - Diversité sources (20%) : multi-sources = synthèse à haute valeur (+10/source)
+  - **Regroupement par sujet** : similarité de Jaccard sur les mots-clés (>= 20% = même sujet)
+  - **Sélection** : prend les N meilleurs groupes et explique POURQUOI
+  - **Mots-clés SEO heuristiques** : termes de 6-12 chars, détection termes haute valeur (environnement), pénalisation termes génériques
+  - **Reasoning** : chaque proposition a un texte explicatif complet (sources, qualité, SEO, fraîcheur)
+
+- **Enrichissement SEO amélioré** :
+  - Nouveau prompt OpenAI qui demande : `seo_keywords` (5-10 mots longue traîne), `primary_topic`, `seo_score` (0-100)
+  - Migration `2024_01_01_000013_add_seo_keywords_to_enriched_items.php` : colonnes `seo_keywords` (JSON), `seo_score` (tinyint), `primary_topic` (varchar)
+  - Model `EnrichedItem` mis à jour avec les nouveaux champs
+
+- **Prompt de génération amélioré** :
+  - Inclusion des mots-clés SEO consolidés dans le user prompt
+  - Consignes SEO dans le system prompt (densité 1-2%, mot-clé dans titre + H1 + premier paragraphe)
+  - meta_title 50-60 chars, meta_description 150-160 chars
+  - Sources nommées dans le prompt pour meilleure synthèse
+
+- **Nouvel endpoint** :
+  - `GET /api/pipeline/select-items?count=3&category_id=` — Propositions d'articles classées par pertinence avec reasoning
+
+- **Documentation complète** :
+  - `docs/TESTING_POSTMAN.md` : 37 endpoints documentés, 17 scénarios de test, workflow complet du RSS à l'article publié, scénarios d'erreur, commandes Artisan
+
+---
+
+*Dernière mise à jour : étape 15 (sélection intelligente, SEO, guide de tests Postman complet).*

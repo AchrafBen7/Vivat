@@ -73,7 +73,7 @@ class ContentExtractorService
     {
         libxml_use_internal_errors(true);
         $dom = new DOMDocument;
-        $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
+        $html = '<?xml encoding="UTF-8">' . $html;
         if (! @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
             libxml_clear_errors();
             return null;

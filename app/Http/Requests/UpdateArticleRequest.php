@@ -22,7 +22,13 @@ class UpdateArticleRequest extends FormRequest
             'content' => 'sometimes|string',
             'meta_title' => 'nullable|string|max:70',
             'meta_description' => 'nullable|string|max:160',
+            'category_id' => 'nullable|uuid|exists:categories,id',
+            'sub_category_id' => 'nullable|uuid|exists:sub_categories,id',
             'status' => 'nullable|in:draft,review,published,archived,rejected',
+            'article_type' => 'nullable|string|in:hot_news,long_form,standard',
+            'cover_image_url' => 'nullable|string|max:500',
+            'cover_video_url' => 'nullable|string|max:500',
+            'published_at' => 'nullable|date',
         ];
     }
 }

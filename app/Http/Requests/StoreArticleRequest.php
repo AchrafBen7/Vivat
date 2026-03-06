@@ -24,8 +24,15 @@ class StoreArticleRequest extends FormRequest
             'meta_title' => 'nullable|string|max:70',
             'meta_description' => 'nullable|string|max:160',
             'category_id' => 'nullable|uuid|exists:categories,id',
+            'sub_category_id' => 'nullable|uuid|exists:sub_categories,id',
             'reading_time' => 'nullable|integer|min:1|max:60',
             'status' => 'nullable|in:draft,review,published,archived,rejected',
+            'article_type' => 'nullable|string|in:hot_news,long_form,standard',
+            'cover_image_url' => 'nullable|string|max:500',
+            'cover_video_url' => 'nullable|string|max:500',
+            'quality_score' => 'nullable|integer|min:0|max:100',
+            'keywords' => 'nullable|array',
+            'keywords.*' => 'string|max:100',
         ];
     }
 

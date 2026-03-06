@@ -41,4 +41,11 @@ return [
         'max_tokens' => (int) env('OPENAI_MAX_TOKENS', 4000),
     ],
 
+    'stripe' => [
+        'key'               => env('STRIPE_KEY'),
+        'secret'            => env('STRIPE_SECRET'),
+        'webhook_secret'    => env('STRIPE_WEBHOOK_SECRET'),
+        'publication_price' => (int) env('STRIPE_PUBLICATION_PRICE', 1500), // 15.00 EUR in cents
+    ],
+
 ];

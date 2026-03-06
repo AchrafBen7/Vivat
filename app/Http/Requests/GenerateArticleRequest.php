@@ -21,6 +21,10 @@ class GenerateArticleRequest extends FormRequest
             'item_ids.*' => 'uuid|exists:rss_items,id',
             'category_id' => 'nullable|uuid|exists:categories,id',
             'custom_prompt' => 'nullable|string|max:1000',
+            'article_type' => 'nullable|string|in:hot_news,long_form,standard',
+            'suggested_min_words' => 'nullable|integer|min:300|max:3000',
+            'suggested_max_words' => 'nullable|integer|min:300|max:3000',
+            'context_priority' => 'nullable|string|max:500',
         ];
     }
 

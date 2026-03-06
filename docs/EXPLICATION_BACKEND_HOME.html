@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivat — Stack Technique Backend</title>
+<style>
+  @page {
+    size: A4;
+    margin: 25mm 20mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a2e;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 30px 40px;
+    background: #fff;
+  }
+  h1 {
+    font-size: 24pt;
+    color: #16213e;
+    border-bottom: 3px solid #0f3460;
+    padding-bottom: 10px;
+    margin-top: 0;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 16pt;
+    color: #0f3460;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-top: 35px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 13pt;
+    color: #1a365d;
+    margin-top: 25px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #2d3748;
+    margin-top: 20px;
+    page-break-after: avoid;
+  }
+  blockquote {
+    border-left: 4px solid #0f3460;
+    margin: 15px 0;
+    padding: 10px 20px;
+    background: #f0f4ff;
+    border-radius: 0 6px 6px 0;
+    font-size: 10pt;
+    color: #4a5568;
+  }
+  blockquote p { margin: 4px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #0f3460;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+  }
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background: #f7fafc; }
+  tr:hover { background: #edf2f7; }
+  code {
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+    font-size: 9.5pt;
+    color: #c53030;
+  }
+  pre {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.5;
+    page-break-inside: avoid;
+    margin: 15px 0;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 30px 0;
+  }
+  strong { color: #1a202c; }
+  a { color: #2b6cb0; text-decoration: none; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  p { margin: 8px 0; }
+
+  /* Print-specific */
+  @media print {
+    body { padding: 0; max-width: none; }
+    h1, h2, h3, h4 { page-break-after: avoid; }
+    table, pre, blockquote { page-break-inside: avoid; }
+    a { color: #2b6cb0; }
+    a::after { content: none; }
+  }
+
+  /* Table of contents links */
+  a[href^="#"] { color: #0f3460; font-weight: 500; }
+
+  /* Cover-like header */
+  h1:first-of-type {
+    text-align: center;
+    font-size: 28pt;
+    margin-bottom: 5px;
+  }
+  body > blockquote:first-of-type {
+    text-align: center;
+    border-left: none;
+    background: none;
+    padding: 0;
+    margin-bottom: 30px;
+  }
+</style>
+</head>
+<body>
+<h2>Contexte général</h2>
+<p>Ce document résume, de façon <strong>chronologique</strong> et <strong>motivée</strong>, ce qui a été mis en place sur l’API Vivat pour :</p>
+<ul>
+<li>la <strong>gestion des catégories et des articles</strong> côté admin,</li>
+<li>la <strong>différence de rôle</strong> entre un admin et un utilisateur public,</li>
+<li>les <strong>endpoints publics</strong> qui alimentent la home et les pages hub (rubriques).</li>
+</ul>
+<p>L’objectif est que le PM (développeur) comprenne :</p>
+<ul>
+<li><strong>ce que j’ai fait</strong> (endpoints, modèles, schéma),</li>
+<li><strong>dans quel ordre</strong>,</li>
+<li>et <strong>pourquoi</strong> ces choix ont été faits du point de vue produit / front.</li>
+</ul>
+<h3>Vue d’ensemble des étapes</h3>
+<ol>
+<li><p><strong>Étape 1 — Structurer les rubriques</strong><br>J’ai d’abord stabilisé le modèle <code>Category</code> et les endpoints <code>/api/categories</code> pour que l’admin puisse définir les 9 rubriques principales (nom, slug, description, ordre d’affichage sur la home, image/vidéo de carte).</p>
+</li>
+<li><p><strong>Étape 2 — Structurer les articles</strong><br>Ensuite j’ai posé le modèle <code>Article</code> et <code>POST /api/articles</code> pour créer des articles complets (texte, SEO, type éditorial, visuel, rattachement à une catégorie/sous-catégorie).</p>
+</li>
+<li><p><strong>Étape 3 — Séparer les rôles</strong><br>Puis j’ai bien séparé les routes <strong>admin</strong> (<code>/api/...</code>) des routes <strong>publiques</strong> (<code>/api/public/...</code>) pour que le front ne voie que ce qui est publiable et stable.</p>
+</li>
+<li><p><strong>Étape 4 — Construire la home</strong><br>À partir de là, j’ai conçu <code>GET /api/public/home</code> pour renvoyer, en un seul payload, tout ce dont le front a besoin pour la home : top_news, featured, latest, rubriques et CTA « Rédiger ».</p>
+</li>
+<li><p><strong>Étape 5 — Ajouter la liste complète et les hubs</strong><br>Enfin, j’ai ajouté :</p>
+<ul>
+<li><code>GET /api/public/articles</code> pour la pagination / « Show all »,</li>
+<li><code>GET /api/public/articles/{slug}</code> pour le détail,</li>
+<li><code>GET /api/public/categories/{slug}/hub</code> pour les pages hub par rubrique, avec filtre optionnel par sous-catégorie.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>1. Gestion des catégories (admin) — <code>/api/categories</code></h2>
+<h3>1.1. Modèle et schéma</h3>
+<p>Table <code>categories</code> :</p>
+<ul>
+<li><code>id</code> (UUID, PK)</li>
+<li><code>name</code>, <code>slug</code> (unique), <code>description</code></li>
+<li><code>home_order</code> : entier optionnel pour l’ordre d’affichage des <strong>rubriques</strong> sur la home (1–9).  <blockquote>
+<p><strong>Important</strong> : <code>home_order</code> ne fige <strong>pas</strong> les articles affichés, uniquement l’ordre des cartes rubriques (Au quotidien, Énergie, Finance…). Les articles restent sélectionnés dynamiquement (voir section home).</p>
+</blockquote>
+</li>
+<li><code>image_url</code> : visuel de la carte rubrique</li>
+<li><code>video_url</code> : URL vidéo optionnelle pour la carte</li>
+<li><code>created_at</code></li>
+</ul>
+<p>Modèle <code>Category</code> :</p>
+<ul>
+<li><code>fillable</code> : <code>name</code>, <code>slug</code>, <code>description</code>, <code>home_order</code>, <code>image_url</code>, <code>video_url</code></li>
+<li>relations :<ul>
+<li><code>articles()</code> → articles de la rubrique</li>
+<li><code>subCategories()</code> → sous-catégories (max 5 par catégorie), ordonnées par <code>order</code></li>
+</ul>
+</li>
+</ul>
+<h3>1.2. Endpoints admin</h3>
+<p>Les routes admin sont protégées par <code>auth:sanctum</code> + <code>role:admin</code>.<br>Pour les catégories :</p>
+<ul>
+<li><p><strong>GET</strong> <code>/api/categories</code><br>Retourne la liste complète des catégories avec <code>published_articles_count</code> (nombre d’articles publiés dans la catégorie).</p>
+</li>
+<li><p><strong>POST</strong> <code>/api/categories</code><br>Crée une nouvelle catégorie avec validation :</p>
+<ul>
+<li><code>name</code> requis,</li>
+<li><code>slug</code> requis + unique,</li>
+<li><code>home_order</code>, <code>image_url</code>, <code>video_url</code> optionnels.
+Après création on fait un <code>refresh()</code> pour récupérer <code>created_at</code> et on invalide les caches home / catégories.</li>
+</ul>
+</li>
+<li><p><strong>GET</strong> <code>/api/categories/{id}</code><br>Détail d’une catégorie pour l’admin (avec <code>published_articles_count</code>).</p>
+</li>
+<li><p><strong>PUT</strong> <code>/api/categories/{id}</code><br>Mise à jour partielle (<code>sometimes</code>) avec validation, puis invalidation des caches :</p>
+<ul>
+<li><code>vivat.categories.index</code></li>
+<li><code>vivat.hub.{slug}</code></li>
+<li><code>vivat.home</code></li>
+</ul>
+</li>
+<li><p><strong>DELETE</strong> <code>/api/categories/{id}</code><br>Supprime la catégorie et invalide les mêmes caches.<br>Les articles liés basculent sur <code>category_id = null</code> grâce à <code>nullOnDelete</code>.</p>
+</li>
+</ul>
+<hr>
+<h2>2. Gestion des articles (admin) — <code>POST /api/articles</code></h2>
+<h3>2.1. Modèle et schéma</h3>
+<p>Table <code>articles</code> :</p>
+<ul>
+<li>Contenu : <code>title</code>, <code>slug</code> (unique), <code>excerpt</code>, <code>content</code></li>
+<li>SEO : <code>meta_title</code>, <code>meta_description</code>, <code>keywords</code> (JSON)</li>
+<li>Classification :<ul>
+<li><code>category_id</code> → catégorie principale</li>
+<li><code>sub_category_id</code> → sous-catégorie facultative (pour le hub)</li>
+<li><code>cluster_id</code></li>
+</ul>
+</li>
+<li>Affichage home / hub :<ul>
+<li><code>article_type</code> (<code>hot_news</code>, <code>long_form</code>, <code>standard</code>)</li>
+<li><code>cover_image_url</code></li>
+<li><code>cover_video_url</code></li>
+</ul>
+</li>
+<li>Métadonnées :<ul>
+<li><code>reading_time</code></li>
+<li><code>status</code> (<code>draft</code>, <code>review</code>, <code>published</code>, <code>archived</code>, <code>rejected</code>)</li>
+<li><code>quality_score</code></li>
+<li><code>published_at</code></li>
+<li><code>created_at</code> / <code>updated_at</code></li>
+</ul>
+</li>
+</ul>
+<p>Modèle <code>Article</code> :</p>
+<ul>
+<li><code>fillable</code> inclut : <code>category_id</code>, <code>sub_category_id</code>, <code>article_type</code>, <code>cover_image_url</code>, <code>cover_video_url</code>, etc.</li>
+<li>relations :<ul>
+<li><code>category()</code></li>
+<li><code>subCategory()</code></li>
+<li><code>cluster()</code></li>
+<li><code>articleSources()</code></li>
+</ul>
+</li>
+<li>méthodes :<ul>
+<li><code>scopePublished()</code> pour filtrer les articles publiés,</li>
+<li><code>isPublishable()</code> + <code>publish()</code> pour contrôler la mise en ligne (ex. <code>quality_score &gt;= 60</code>).</li>
+</ul>
+</li>
+</ul>
+<h3>2.2. Création et mise à jour</h3>
+<p><code>StoreArticleRequest</code> (POST <code>/api/articles</code>) :</p>
+<ul>
+<li>Valide :<ul>
+<li><code>title</code>, <code>slug</code>, <code>content</code> (obligatoires),</li>
+<li><code>category_id</code>, <code>sub_category_id</code>, <code>article_type</code>, <code>cover_image_url</code>, <code>cover_video_url</code>, etc.</li>
+</ul>
+</li>
+<li>Fixe des valeurs par défaut via <code>prepareForValidation()</code> :<ul>
+<li><code>status = draft</code> si absent,</li>
+<li><code>reading_time = 5</code> si absent.</li>
+</ul>
+</li>
+</ul>
+<p><code>UpdateArticleRequest</code> (PUT <code>/api/articles/{id}</code>) :</p>
+<ul>
+<li>Gère les mises à jour partielles (<code>sometimes</code>) :<ul>
+<li>contenu, SEO, classification (<code>category_id</code>, <code>sub_category_id</code>),</li>
+<li>affichage (<code>cover_image_url</code>, <code>cover_video_url</code>, <code>article_type</code>),</li>
+<li><code>status</code>, <code>published_at</code>.</li>
+</ul>
+</li>
+</ul>
+<p><code>ArticleController@store</code> :</p>
+<ul>
+<li>Vérifie les autorisations (<code>Policy</code> sur <code>Article</code>).</li>
+<li>Crée l’article avec les données validées et un <code>quality_score</code> par défaut si non fourni.</li>
+</ul>
+<hr>
+<h2>3. Rôles : admin vs utilisateur public</h2>
+<p>La différence de rôle est nette :</p>
+<ul>
+<li><p><strong>Admin</strong> :</p>
+<ul>
+<li>Accès aux routes protégées <code>auth:sanctum</code> + <code>role:admin</code> :<ul>
+<li>CRUD catégories <code>/api/categories</code></li>
+<li>CRUD articles <code>/api/articles</code></li>
+<li>Gestion des sous-catégories <code>/api/categories/{category}/sub-categories</code>, <code>/api/sub-categories/{id}</code></li>
+<li>Pipeline, stats, etc.</li>
+</ul>
+</li>
+<li>Peut structurer l’arborescence éditoriale (rubriques, sous-rubriques) et publier / dépublier des contenus.</li>
+</ul>
+</li>
+<li><p><strong>Utilisateur public</strong> (non authentifié) :</p>
+<ul>
+<li>Accès <strong>lecture seule</strong> aux routes <code>prefix(&#39;public&#39;)</code> :<ul>
+<li><code>/api/public/home</code> (home complète),</li>
+<li><code>/api/public/articles</code> (liste paginée d’articles publiés),</li>
+<li><code>/api/public/articles/{slug}</code> (détail d’un article),</li>
+<li><code>/api/public/categories</code> (liste des rubriques),</li>
+<li><code>/api/public/categories/{slug}/hub</code> (page hub d’une rubrique),</li>
+<li><code>/api/public/search</code>, <code>/api/public/recommendations</code>, etc.</li>
+</ul>
+</li>
+<li>Ne peut ni créer ni modifier les ressources.</li>
+</ul>
+</li>
+</ul>
+<p>Cette séparation garantit :</p>
+<ul>
+<li>que la <strong>structure éditoriale</strong> reste pilotée par l’admin,</li>
+<li>que le <strong>lecteur public</strong> ne voit que les contenus publiés via les endpoints <code>public.*</code>.</li>
+</ul>
+<hr>
+<h2>4. Fonctionnalités Home — <code>/api/public/home</code></h2>
+<p>L’endpoint <code>GET /api/public/home</code> fournit en un seul appel toutes les données nécessaires à la page d’accueil.</p>
+<h3>4.1. top_news</h3>
+<ul>
+<li>Sélectionne l’article le plus récent avec <code>article_type = hot_news</code> et <code>status = published</code>.</li>
+<li>Charge la catégorie associée.</li>
+<li>Retourne un objet article enrichi avec :<ul>
+<li><code>display_type = &quot;top_news&quot;</code>,</li>
+<li>toutes les métadonnées utiles (titre, excerpt, catégorie, temps de lecture, cover_image_url / cover_video_url, dates…).</li>
+</ul>
+</li>
+</ul>
+<h3>4.2. featured</h3>
+<ul>
+<li>À partir de la liste des articles publiés (hors <code>top_news</code>), on sélectionne les <strong>articles importants</strong> :<ul>
+<li>soit <code>article_type = hot_news</code>,</li>
+<li>soit présence d’un média (<code>cover_image_url</code> ou <code>cover_video_url</code> non null).</li>
+</ul>
+</li>
+<li>Limite configurable via <code>config(&#39;vivat.home_featured_count&#39;)</code> (par défaut 4).</li>
+<li>Chaque article est renvoyé avec <code>display_type = &quot;featured&quot;</code> pour que le front choisisse le gabarit visuel adapté (cartes mises en avant).</li>
+</ul>
+<h3>4.3. latest (Dernières actualités)</h3>
+<ul>
+<li>On repart de la liste des articles publiés <strong>en excluant</strong> tous ceux déjà utilisés dans <code>top_news</code> et <code>featured</code>.</li>
+<li>On prend les plus récents (<code>published_at</code> desc), quantité configurable (<code>home_latest_count</code>).</li>
+<li>Chaque article reçoit un <code>display_type</code> calculé :<ul>
+<li><code>standard</code> si un média est présent (<code>cover_image_url</code> ou <code>cover_video_url</code>),</li>
+<li><code>secondary</code> sinon (article sans visuel).</li>
+</ul>
+</li>
+<li>Le bloc est structuré comme :<pre><code class="language-json">{
+  \&quot;label\&quot;: \&quot;Dernières actualités\&quot;,
+  \&quot;articles\&quot;: [ ... ]
+}
+</code></pre>
+</li>
+</ul>
+<h3>4.4. categories (Rubriques)</h3>
+<ul>
+<li>L’API retourne au maximum <code>home_categories_count</code> catégories (par défaut 9) :<ul>
+<li>si des <code>home_order</code> existent → tri par <code>home_order</code>,</li>
+<li>sinon tri alphabétique sur <code>name</code>.</li>
+</ul>
+</li>
+<li>Chaque catégorie inclut :<ul>
+<li><code>id</code>, <code>name</code>, <code>slug</code>, <code>description</code>, <code>color</code>,</li>
+<li><code>home_order</code>,</li>
+<li><code>image_url</code>, <code>video_url</code>,</li>
+<li><code>published_articles_count</code> (nombre d’articles publiés dans la rubrique).</li>
+</ul>
+</li>
+</ul>
+<h3>4.5. writer_cta (bouton « Rédiger un article »)</h3>
+<ul>
+<li>Objet <code>writer_cta</code> dans la réponse :<ul>
+<li><code>signup_url</code> : URL pour s’inscrire comme rédacteur (ex. <code>/register</code>),</li>
+<li><code>dashboard_url</code> : URL du dashboard rédacteur (ex. <code>/contributor/submissions</code>),</li>
+<li><code>is_authenticated_as_contributor</code> : booléen qui dit si l’utilisateur courant a un rôle <code>contributor</code> ou <code>admin</code>.</li>
+</ul>
+</li>
+</ul>
+<p>En pratique :</p>
+<ul>
+<li>visiteur non connecté → le front affiche un CTA vers <code>signup_url</code>,</li>
+<li>contributeur/admin connecté → le front affiche un CTA vers <code>dashboard_url</code>.</li>
+</ul>
+<p>L’ensemble de la réponse <code>/api/public/home</code> est mis en cache (<code>vivat.home</code>) avec un TTL configurable (5 minutes par défaut). Le cache est invalidé dès qu’un article publié ou une catégorie change.</p>
+<hr>
+<h2>5. Liste paginée d’articles — <code>/api/public/articles</code></h2>
+<p>L’endpoint <code>GET /api/public/articles</code> sert de base à :</p>
+<ul>
+<li>la fonctionnalité <strong>« Show all »</strong> depuis la home,</li>
+<li>une éventuelle page « Tous les articles ».</li>
+</ul>
+<h3>5.1. Paramètres</h3>
+<ul>
+<li><code>page</code> : numéro de page (1, 2, 3…)</li>
+<li><code>per_page</code> : nombre d’articles par page (défaut 12, max 50)</li>
+<li><code>category</code> : slug de catégorie (<code>?category=finance</code>)</li>
+<li><code>reading_time_max</code> : filtre par temps de lecture maximum</li>
+<li><code>sort</code> : champ de tri (<code>published_at</code>, <code>reading_time</code>, <code>quality_score</code>, <code>title</code>)</li>
+<li><code>dir</code> : sens (<code>asc</code> ou <code>desc</code>)</li>
+</ul>
+<h3>5.2. Réponse</h3>
+<ul>
+<li><code>data</code> : tableau d’articles (sans <code>content</code>, optimisé pour la liste)</li>
+<li><code>meta</code> : <code>current_page</code>, <code>last_page</code>, <code>per_page</code>, <code>total</code>, etc.</li>
+<li><code>links</code> : <code>first</code>, <code>last</code>, <code>prev</code>, <code>next</code></li>
+</ul>
+<p>Chaque article inclut les champs nécessaires pour être affiché dans une liste (titre, slug, excerpt, catégorie, temps de lecture, média, dates…).</p>
+<hr>
+<h2>6. Détail d’un article — <code>/api/public/articles/{slug}</code></h2>
+<ul>
+<li>Route : <code>GET /api/public/articles/{article:slug}</code>.</li>
+<li><code>ArticleController@showBySlug</code> :<ul>
+<li>utilise le binding Laravel sur le slug,</li>
+<li>charge les relations nécessaires (<code>category</code>, <code>articleSources</code>, <code>subCategory</code>).</li>
+</ul>
+</li>
+<li>Dans <code>ArticleResource</code>, la route de détail (nommée <code>public.articles.show</code>) active le retour du :<ul>
+<li><code>content</code> complet (HTML),</li>
+<li><code>article_sources</code>,</li>
+<li>relations de contexte (catégorie, sous-catégorie).</li>
+</ul>
+</li>
+</ul>
+<p>Le front peut ainsi construire la page article à partir de l’URL de type <code>/articles/ia-revolution-medicale-sans-garde-fou</code> (slug friendly et SEO-friendly).</p>
+<hr>
+<h2>7. Page Hub de rubrique — <code>/api/public/categories/{slug}/hub</code></h2>
+<p>La page hub reprend la logique de la home mais filtrée par <strong>rubrique</strong>, et éventuellement par <strong>sous-catégorie</strong>.</p>
+<h3>7.1. Sans filtre (par catégorie)</h3>
+<p><code>GET /api/public/categories/finance/hub</code> renvoie :</p>
+<ul>
+<li><code>category</code> : <code>CategoryResource</code> avec <code>image_url</code>, <code>video_url</code>, <code>sub_categories</code> (max 5).</li>
+<li><code>description</code> : description éditoriale de la rubrique.</li>
+<li><code>total_published</code> : nombre d’articles publiés dans la rubrique (tous confondus).</li>
+<li><code>sub_categories</code> : liste des sous-catégories (nom, slug, ordre, images/vidéos) pour alimenter un filtre UI.</li>
+<li><code>featured</code> :<ul>
+<li>articles publiés de la catégorie avec au moins un média (<code>cover_image_url</code> ou <code>cover_video_url</code>),</li>
+<li>triés par <code>quality_score</code>,</li>
+<li>limités à 3,</li>
+<li>chaque article enrichi avec <code>display_type = &quot;featured&quot;</code>.</li>
+</ul>
+</li>
+<li><code>latest</code> :<ul>
+<li>les autres articles (hors <code>featured</code>),</li>
+<li>triés par <code>published_at</code> desc, limite 12,</li>
+<li><code>display_type = &quot;standard&quot;</code> si média, <code>secondary</code> sinon.</li>
+</ul>
+</li>
+</ul>
+<p>Le tout est mis en cache sous des clés de type <code>vivat.hub.{slug}</code>.</p>
+<h3>7.2. Avec filtre par sous-catégorie</h3>
+<ul>
+<li>Query param : <code>?sub_category={slug}</code>.</li>
+<li>Ex. : <code>GET /api/public/categories/finance/hub?sub_category=epargne</code>.</li>
+<li>Le contrôleur :<ul>
+<li>résout d’abord la <code>SubCategory</code> correspondant au slug dans cette catégorie,</li>
+<li>si trouvée, filtre les articles sur <code>sub_category_id</code>,</li>
+<li>recalcule <code>total_published</code>, <code>featured</code> et <code>latest</code> sur ce sous-ensemble.</li>
+</ul>
+</li>
+<li>Le cache est segmenté par sous-catégorie : <code>vivat.hub.finance.epargne</code>, etc.</li>
+</ul>
+<p>Visuellement, ça permet :</p>
+<ul>
+<li>d’avoir une <strong>page hub riche</strong> par rubrique (même pattern que la home),</li>
+<li>d’ajouter un <strong>filtre par sous-catégorie</strong> qui recompose les blocs featured/standard/secondary sans changer de page.</li>
+</ul>
+<hr>
+<h2>Conclusion</h2>
+<p>En résumé :</p>
+<ul>
+<li>Tu as mis en place un <strong>back-office propre</strong> (catégories, sous-catégories, articles) avec une séparation claire des rôles :<br><strong>admin</strong> pour la gestion éditoriale, <strong>public</strong> pour la lecture via <code>/api/public/...</code>.</li>
+<li>Tu as conçu des endpoints <strong>pensés pour le front</strong> :<ul>
+<li><code>/api/public/home</code> pour toute la home (top_news, featured, latest, catégories, CTA),</li>
+<li><code>/api/public/articles</code> pour la pagination / « Show all »,</li>
+<li><code>/api/public/articles/{slug}</code> pour le détail d’article SEO-friendly,</li>
+<li><code>/api/public/categories/{slug}/hub</code> pour les hubs de rubrique, avec filtre par sous-catégorie et la même logique de <code>display_type</code> que sur la home.</li>
+</ul>
+</li>
+</ul>
+<p>Ce socle rend la page d’accueil et les hubs <strong>faciles à implémenter côté front</strong> (iOS, web ou autre), tout en restant <strong>extensible</strong> (vidéos, nouvelles sections, rôles supplémentaires).</p>
+
+</body>
+</html>

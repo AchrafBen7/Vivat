@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivat — Stack Technique Backend</title>
+<style>
+  @page {
+    size: A4;
+    margin: 25mm 20mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a2e;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 30px 40px;
+    background: #fff;
+  }
+  h1 {
+    font-size: 24pt;
+    color: #16213e;
+    border-bottom: 3px solid #0f3460;
+    padding-bottom: 10px;
+    margin-top: 0;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 16pt;
+    color: #0f3460;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-top: 35px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 13pt;
+    color: #1a365d;
+    margin-top: 25px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #2d3748;
+    margin-top: 20px;
+    page-break-after: avoid;
+  }
+  blockquote {
+    border-left: 4px solid #0f3460;
+    margin: 15px 0;
+    padding: 10px 20px;
+    background: #f0f4ff;
+    border-radius: 0 6px 6px 0;
+    font-size: 10pt;
+    color: #4a5568;
+  }
+  blockquote p { margin: 4px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #0f3460;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+  }
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background: #f7fafc; }
+  tr:hover { background: #edf2f7; }
+  code {
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+    font-size: 9.5pt;
+    color: #c53030;
+  }
+  pre {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.5;
+    page-break-inside: avoid;
+    margin: 15px 0;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 30px 0;
+  }
+  strong { color: #1a202c; }
+  a { color: #2b6cb0; text-decoration: none; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  p { margin: 8px 0; }
+
+  /* Print-specific */
+  @media print {
+    body { padding: 0; max-width: none; }
+    h1, h2, h3, h4 { page-break-after: avoid; }
+    table, pre, blockquote { page-break-inside: avoid; }
+    a { color: #2b6cb0; }
+    a::after { content: none; }
+  }
+
+  /* Table of contents links */
+  a[href^="#"] { color: #0f3460; font-weight: 500; }
+
+  /* Cover-like header */
+  h1:first-of-type {
+    text-align: center;
+    font-size: 28pt;
+    margin-bottom: 5px;
+  }
+  body > blockquote:first-of-type {
+    text-align: center;
+    border-left: none;
+    background: none;
+    padding: 0;
+    margin-bottom: 30px;
+  }
+</style>
+</head>
+<body>
+<h1>Vivat — Rapport complet du travail realise</h1>
+<blockquote>
+<p><strong>Projet</strong> : Vivat — Plateforme media automatisee
+<strong>Developpeur Backend</strong> : Achraf Ben Ali
+<strong>Periode</strong> : Janvier — Fevrier 2026
+<strong>Technologie</strong> : Laravel 12, PHP 8.3, MySQL 8, Redis, Docker, OpenAI GPT-4o, Stripe</p>
+</blockquote>
+<hr>
+<h2>Introduction</h2>
+<p>Ce document presente de maniere detaillee tout le travail effectue sur le backend du projet Vivat, de la premiere ligne de documentation jusqu&#39;a l&#39;API complete avec 94 endpoints. Il est destine au chef de projet pour avoir une vue claire de l&#39;avancement, des choix techniques et de ce qui reste a faire.</p>
+<p>Le projet Vivat est une plateforme media qui repose sur un moteur d&#39;acquisition de contenu automatise : le systeme recupere automatiquement des articles depuis des flux RSS de medias francophones, les analyse par intelligence artificielle, puis genere des articles originaux optimises pour le referencement (SEO).</p>
+<hr>
+<h2>PHASE 1 — Fondations du projet</h2>
+<h3>Etape 1 — Documentation technique prealable</h3>
+<p><strong>Objectif</strong> : Ne pas coder a l&#39;aveugle. Poser les bases avant de commencer.</p>
+<p>Avant d&#39;ecrire la moindre ligne de code, j&#39;ai redige 5 documents de reference :</p>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CONTEXTE_PROJET.md</code></td>
+<td>La vision du produit, les 12 fonctionnalites prevues, la stack technique choisie (Laravel 12, MySQL, Redis, OpenAI, Stripe), et la liste de tous les fichiers a creer</td>
+</tr>
+<tr>
+<td><code>EXEMPLES_CODE_REFERENCE.md</code></td>
+<td>Des exemples concrets de code pour chaque composant : comment fetcher un flux RSS, comment extraire du contenu HTML, comment appeler OpenAI, comment gerer les queues</td>
+</tr>
+<tr>
+<td><code>MIGRATIONS_REFERENCE.md</code></td>
+<td>Le schema de toutes les tables a creer pour le pipeline, avec les types de colonnes, les relations et les index</td>
+</tr>
+<tr>
+<td><code>MODELS_REFERENCE.md</code></td>
+<td>La structure de chaque model (objet PHP qui represente une table), avec les relations entre eux</td>
+</tr>
+<tr>
+<td><code>SCHEMA_AUTRES_FONCTIONNALITES.md</code></td>
+<td>Le schema prevu pour les fonctionnalites cote site (utilisateurs, paiements, contributions, etc.)</td>
+</tr>
+</tbody></table>
+<p><strong>Pourquoi c&#39;est important</strong> : Ces documents servent de feuille de route. Chaque decision est documentee avant l&#39;implementation. Un nouveau developpeur peut lire ces fichiers et comprendre le projet en 30 minutes.</p>
+<hr>
+<h3>Etape 2 — Creation du projet Laravel 12</h3>
+<p><strong>Objectif</strong> : Initialiser le projet avec le framework.</p>
+<ul>
+<li>Installation de Laravel 12, la derniere version du framework PHP le plus utilise au monde</li>
+<li>Installation de Laravel Boost (outils de developpement pour l&#39;IDE Cursor)</li>
+<li>Mise en place des conventions de code et des regles de developpement</li>
+</ul>
+<p><strong>Resultat</strong> : Un projet Laravel vierge mais structure, pret a recevoir du code.</p>
+<hr>
+<h3>Etape 3 — Configuration de la base de donnees</h3>
+<p><strong>Objectif</strong> : Utiliser MySQL au lieu de SQLite (la base par defaut de Laravel).</p>
+<ul>
+<li>Configuration de MySQL 8 comme base de donnees principale</li>
+<li>Encodage <code>utf8mb4</code> pour supporter les caracteres speciaux (accents, emojis)</li>
+<li>Parametrage des variables d&#39;environnement (identifiants, ports)</li>
+</ul>
+<p><strong>Pourquoi MySQL et pas SQLite</strong> : MySQL est une base de donnees production-ready, plus performante, avec support du full-text search (recherche par mots-cles dans les articles) et des triggers (mises a jour automatiques).</p>
+<hr>
+<h3>Etape 4 — Dockerisation complete de l&#39;environnement</h3>
+<p><strong>Objectif</strong> : Que n&#39;importe quel developpeur puisse lancer le projet en une seule commande.</p>
+<p>J&#39;ai cree un environnement Docker complet avec 4 services :</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Technologie</th>
+<th>Port</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>app</strong></td>
+<td>PHP 8.3 (Alpine Linux)</td>
+<td>8000</td>
+<td>L&#39;application Laravel elle-meme</td>
+</tr>
+<tr>
+<td><strong>mysql</strong></td>
+<td>MySQL 8.0</td>
+<td>3306</td>
+<td>La base de donnees</td>
+</tr>
+<tr>
+<td><strong>redis</strong></td>
+<td>Redis 7</td>
+<td>6379</td>
+<td>Cache, files d&#39;attente, sessions</td>
+</tr>
+<tr>
+<td><strong>phpmyadmin</strong></td>
+<td>phpMyAdmin</td>
+<td>8080</td>
+<td>Interface web pour visualiser la base</td>
+</tr>
+</tbody></table>
+<p><strong>Fichiers crees</strong> :</p>
+<ul>
+<li><code>Dockerfile</code> : l&#39;image PHP avec toutes les extensions necessaires (pdo_mysql, redis, gd pour les images, zip, bcmath, intl pour les langues)</li>
+<li><code>docker-compose.yml</code> : l&#39;orchestration des 4 services avec healthcheck sur MySQL et volumes persistants (les donnees survivent au redemarrage)</li>
+<li><code>docker/entrypoint.sh</code> : script qui installe automatiquement les dependances au premier lancement</li>
+<li><code>.dockerignore</code> : liste des fichiers a ne pas inclure dans l&#39;image Docker</li>
+</ul>
+<p><strong>Utilisation</strong> :</p>
+<pre><code>docker compose up -d          ← lance tout
+docker compose exec app bash  ← entre dans le container
+</code></pre>
+<p><strong>Pourquoi Docker</strong> : L&#39;environnement est identique en local, en staging et en production. Plus de &quot;ca marche chez moi mais pas chez toi&quot;. Un seul <code>docker compose up -d</code> et tout est pret.</p>
+<hr>
+<h2>PHASE 2 — Le moteur d&#39;acquisition de contenu (fonctionnalite principale)</h2>
+<p>C&#39;est le coeur du projet. Un pipeline automatise en 5 etapes qui transforme des flux RSS en articles originaux.</p>
+<h3>Comment ca marche (vue simplifiee)</h3>
+<pre><code>Medias (Reporterre, Futura Sciences, Novethic...)
+        |
+        v
+  [1] RECUPERATION des flux RSS (automatique, 1 fois par jour)
+        |
+        v
+  [2] ANALYSE par IA : l&#39;article est scrape, structure, note
+        |
+        v
+  [3] SELECTION : l&#39;algorithme choisit les meilleurs sujets
+        |
+        v
+  [4] GENERATION : l&#39;IA ecrit un article original a partir de plusieurs sources
+        |
+        v
+  [5] PUBLICATION : l&#39;article passe en review puis est publie
+</code></pre>
+<hr>
+<h3>Etape 5 — Schema de base de donnees (12 migrations, 11 tables)</h3>
+<p><strong>Objectif</strong> : Creer toutes les tables necessaires au fonctionnement du pipeline.</p>
+<p>J&#39;ai ecrit <strong>12 fichiers de migration</strong> (des scripts PHP qui creent les tables automatiquement). Chaque migration est numerotee pour s&#39;executer dans le bon ordre, car certaines tables dependent d&#39;autres (un flux RSS est lie a une source, donc la table <code>sources</code> doit exister avant <code>rss_feeds</code>).</p>
+<p><strong>Choix technique important</strong> : Toutes les tables utilisent des <strong>UUID</strong> comme identifiant (ex: <code>019c413d-f29d-71b9-b289-0ff1bd1ac7ad</code>) au lieu de nombres (1, 2, 3...). Avantages : impossible de deviner un ID dans l&#39;URL, pas de collision si on fusionne des bases, compatible avec une architecture distribuee.</p>
+<p>Voici le detail de chaque table creee, avec ses colonnes et son role :</p>
+<hr>
+<h4>Table 1 — <code>sources</code> (les medias surveilles)</h4>
+<p>Chaque source represente un media qu&#39;on surveille (Reporterre, Futura Sciences, Novethic...).</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Nom du media (&quot;Reporterre&quot;)</td>
+</tr>
+<tr>
+<td><code>base_url</code></td>
+<td>string</td>
+<td>URL du site (&quot;<a href="https://reporterre.net">https://reporterre.net</a>&quot;)</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>string(10), defaut: &#39;fr&#39;</td>
+<td>Langue du media</td>
+</tr>
+<tr>
+<td><code>is_active</code></td>
+<td>boolean, defaut: true</td>
+<td>Est-ce qu&#39;on surveille ce media ?</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Date de derniere modification (mise a jour automatique via un trigger MySQL)</td>
+</tr>
+</tbody></table>
+<p><strong>Index</strong> : sur <code>is_active</code> et <code>language</code> pour filtrer rapidement les sources actives.</p>
+<hr>
+<h4>Table 2 — <code>categories</code> (les 14 categories thematiques)</h4>
+<p>Les categories editoriales du site (Environnement, Sante, Energie, Alimentation...).</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Nom de la categorie (&quot;Environnement&quot;)</td>
+</tr>
+<tr>
+<td><code>slug</code></td>
+<td>string, unique</td>
+<td>Version URL-friendly (&quot;environnement&quot;) — utilisee dans les URLs</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text, optionnel</td>
+<td>Description de la categorie</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string(7), defaut: &#39;#3B82F6&#39;</td>
+<td>Couleur d&#39;affichage (code hexadecimal)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Index unique</strong> sur <code>slug</code> : deux categories ne peuvent pas avoir le meme slug.</p>
+<hr>
+<h4>Table 3 — <code>rss_feeds</code> (les flux RSS a recuperer)</h4>
+<p>Chaque flux RSS est lie a une source et a une categorie. Le systeme sait quand il doit les recuperer.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>UUID (cle etrangere → <code>sources</code>)</td>
+<td>A quel media appartient ce flux</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (cle etrangere → <code>categories</code>)</td>
+<td>Dans quelle categorie classer les items</td>
+</tr>
+<tr>
+<td><code>feed_url</code></td>
+<td>text</td>
+<td>L&#39;URL du flux RSS a recuperer</td>
+</tr>
+<tr>
+<td><code>is_active</code></td>
+<td>boolean, defaut: true</td>
+<td>Est-ce qu&#39;on recupere ce flux ?</td>
+</tr>
+<tr>
+<td><code>last_fetched_at</code></td>
+<td>timestamp, optionnel</td>
+<td>Derniere fois qu&#39;on l&#39;a recupere</td>
+</tr>
+<tr>
+<td><code>fetch_interval_minutes</code></td>
+<td>entier, defaut: 30</td>
+<td>Toutes les combien de minutes on recupere</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Index composite</strong> <code>idx_feeds_due_fetch</code> sur (<code>is_active</code>, <code>last_fetched_at</code>) : permet de trouver instantanement les flux qui doivent etre recuperes.</p>
+<p><strong>Cles etrangeres</strong> : si on supprime une source, le <code>source_id</code> passe a NULL (l&#39;article n&#39;est pas supprime).</p>
+<hr>
+<h4>Table 4 — <code>rss_items</code> (les articles bruts decouverts)</h4>
+<p>Chaque item est un article decouvert dans un flux RSS. C&#39;est la matiere premiere du pipeline.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>rss_feed_id</code></td>
+<td>UUID (cle etrangere → <code>rss_feeds</code>)</td>
+<td>De quel flux vient cet item</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (cle etrangere → <code>categories</code>)</td>
+<td>Categorie assignee</td>
+</tr>
+<tr>
+<td><code>guid</code></td>
+<td>string, optionnel</td>
+<td>Identifiant unique donne par le flux RSS</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Titre de l&#39;article</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text, optionnel</td>
+<td>Resume fourni par le flux RSS</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>text</td>
+<td>URL de l&#39;article original</td>
+</tr>
+<tr>
+<td><code>published_at</code></td>
+<td>timestamp, optionnel</td>
+<td>Date de publication originale</td>
+</tr>
+<tr>
+<td><code>fetched_at</code></td>
+<td>timestamp</td>
+<td>Quand on l&#39;a recupere</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td><code>new</code> → <code>enriching</code> → <code>enriched</code> → <code>used</code> (ou <code>failed</code>/<code>ignored</code>)</td>
+</tr>
+<tr>
+<td><code>dedup_hash</code></td>
+<td>string(64), unique</td>
+<td>Hash SHA-256 de l&#39;URL+titre — empeche les doublons</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Statuts possibles</strong> et leur signification :</p>
+<ul>
+<li><code>new</code> : vient d&#39;etre decouvert, pas encore analyse</li>
+<li><code>enriching</code> : en cours d&#39;analyse par l&#39;IA</li>
+<li><code>enriched</code> : analyse terminee, pret pour la selection</li>
+<li><code>used</code> : a ete utilise pour generer un article</li>
+<li><code>failed</code> : l&#39;enrichissement a echoue</li>
+<li><code>ignored</code> : ignore (contenu non pertinent)</li>
+</ul>
+<p><strong>Index full-text</strong> sur (<code>title</code>, <code>description</code>) : permet la recherche par mots-cles dans les items.</p>
+<p><strong>Deduplication</strong> : le hash <code>dedup_hash</code> empeche d&#39;inserer deux fois le meme article, meme s&#39;il apparait dans plusieurs flux RSS.</p>
+<hr>
+<h4>Table 5 — <code>enriched_items</code> (l&#39;analyse IA de chaque article)</h4>
+<p>Chaque item enrichi est le resultat de l&#39;analyse IA d&#39;un article brut. Relation 1:1 avec <code>rss_items</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>rss_item_id</code></td>
+<td>UUID (cle etrangere → <code>rss_items</code>), unique</td>
+<td>L&#39;item source</td>
+</tr>
+<tr>
+<td><code>lead</code></td>
+<td>text, optionnel</td>
+<td>Le chapeau / introduction de l&#39;article</td>
+</tr>
+<tr>
+<td><code>headings</code></td>
+<td>JSON, optionnel</td>
+<td>Les titres de sections extraits (H2, H3...)</td>
+</tr>
+<tr>
+<td><code>key_points</code></td>
+<td>JSON, optionnel</td>
+<td>Les points cles identifies par l&#39;IA</td>
+</tr>
+<tr>
+<td><code>seo_keywords</code></td>
+<td>JSON, optionnel</td>
+<td>Mots-cles SEO longue traine extraits par l&#39;IA</td>
+</tr>
+<tr>
+<td><code>primary_topic</code></td>
+<td>string, optionnel</td>
+<td>Le sujet principal identifie</td>
+</tr>
+<tr>
+<td><code>extracted_text</code></td>
+<td>longText, optionnel</td>
+<td>Le texte complet scrape et nettoye</td>
+</tr>
+<tr>
+<td><code>extraction_method</code></td>
+<td>string(50), defaut: &#39;readability&#39;</td>
+<td>Methode utilisee pour le scraping</td>
+</tr>
+<tr>
+<td><code>quality_score</code></td>
+<td>entier (0-255), defaut: 0</td>
+<td>Score de qualite donne par l&#39;IA (0-100)</td>
+</tr>
+<tr>
+<td><code>seo_score</code></td>
+<td>entier (0-255), defaut: 0</td>
+<td>Score de potentiel SEO (0-100)</td>
+</tr>
+<tr>
+<td><code>enriched_at</code></td>
+<td>timestamp</td>
+<td>Quand l&#39;enrichissement a ete fait</td>
+</tr>
+</tbody></table>
+<p><strong>Contrainte unique</strong> sur <code>rss_item_id</code> : un item RSS n&#39;a qu&#39;un seul enrichissement.</p>
+<p><strong>Les champs JSON</strong> (<code>headings</code>, <code>key_points</code>, <code>seo_keywords</code>) sont stockes au format JSON natif MySQL — ca permet de stocker des listes sans creer de tables supplementaires.</p>
+<hr>
+<h4>Table 6 — <code>clusters</code> (groupes d&#39;articles par sujet)</h4>
+<p>Les clusters regroupent des items RSS qui parlent du meme sujet (ex: 3 articles de 3 medias sur &quot;la transition energetique&quot; forment 1 cluster).</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (cle etrangere → <code>categories</code>)</td>
+<td>Categorie du cluster</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td>Nom du sujet (&quot;Transition energetique en Europe&quot;)</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>JSON, optionnel</td>
+<td>Mots-cles partages par les items du cluster</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td><code>pending</code> → <code>processing</code> → <code>generated</code> (ou <code>failed</code>)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<hr>
+<h4>Table 7 — <code>cluster_items</code> (table pivot cluster ↔ item RSS)</h4>
+<p>Table de liaison qui dit &quot;cet item RSS fait partie de ce cluster&quot;. Relation N:N.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>cluster_id</code></td>
+<td>UUID (cle etrangere → <code>clusters</code>)</td>
+<td>Le cluster</td>
+</tr>
+<tr>
+<td><code>rss_item_id</code></td>
+<td>UUID (cle etrangere → <code>rss_items</code>)</td>
+<td>L&#39;item RSS</td>
+</tr>
+</tbody></table>
+<p><strong>Contrainte unique</strong> sur (<code>cluster_id</code>, <code>rss_item_id</code>) : un item ne peut etre qu&#39;une fois dans un cluster.</p>
+<p><strong>Suppression en cascade</strong> : si on supprime un cluster, toutes ses liaisons sont supprimees automatiquement.</p>
+<hr>
+<h4>Table 8 — <code>articles</code> (les articles generes par l&#39;IA)</h4>
+<p>C&#39;est la table la plus importante : les articles finaux publies sur le site.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Titre de l&#39;article</td>
+</tr>
+<tr>
+<td><code>slug</code></td>
+<td>string, unique</td>
+<td>URL-friendly du titre (&quot;transition-energetique-europe-2026&quot;)</td>
+</tr>
+<tr>
+<td><code>excerpt</code></td>
+<td>text, optionnel</td>
+<td>Resume court (affiche dans les listes)</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>longText</td>
+<td>Le contenu HTML complet de l&#39;article</td>
+</tr>
+<tr>
+<td><code>meta_title</code></td>
+<td>string, optionnel</td>
+<td>Titre pour le SEO (balise <code>&lt;title&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>meta_description</code></td>
+<td>string, optionnel</td>
+<td>Description pour le SEO (balise <code>&lt;meta&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>JSON, optionnel</td>
+<td>Mots-cles de l&#39;article</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (cle etrangere → <code>categories</code>)</td>
+<td>Categorie de l&#39;article</td>
+</tr>
+<tr>
+<td><code>cluster_id</code></td>
+<td>UUID (cle etrangere → <code>clusters</code>)</td>
+<td>Cluster source (optionnel)</td>
+</tr>
+<tr>
+<td><code>reading_time</code></td>
+<td>entier, defaut: 5</td>
+<td>Temps de lecture estime (en minutes)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td><code>draft</code> → <code>review</code> → <code>published</code> (ou <code>archived</code>/<code>rejected</code>)</td>
+</tr>
+<tr>
+<td><code>quality_score</code></td>
+<td>entier (0-255), defaut: 0</td>
+<td>Score de qualite IA (doit etre &gt;= 60 pour etre publiable)</td>
+</tr>
+<tr>
+<td><code>published_at</code></td>
+<td>timestamp, optionnel</td>
+<td>Date de publication (rempli quand status = published)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Derniere modification (trigger MySQL automatique)</td>
+</tr>
+</tbody></table>
+<p><strong>Statuts possibles</strong> :</p>
+<ul>
+<li><code>draft</code> : brouillon, vient d&#39;etre genere par l&#39;IA</li>
+<li><code>review</code> : en cours de relecture par l&#39;equipe editoriale</li>
+<li><code>published</code> : publie et visible sur le site</li>
+<li><code>archived</code> : retire du site mais conserve en base</li>
+<li><code>rejected</code> : refuse (qualite insuffisante)</li>
+</ul>
+<p><strong>Index full-text</strong> sur (<code>title</code>, <code>excerpt</code>) : permet la recherche par mots-cles sur le site.</p>
+<p><strong>Index composite</strong> <code>idx_articles_published</code> sur (<code>status</code>, <code>published_at</code>) : optimise la requete &quot;afficher les articles publies tries par date&quot;, la plus frequente sur le site.</p>
+<hr>
+<h4>Table 9 — <code>article_sources</code> (tracabilite : d&#39;ou vient chaque article)</h4>
+<p>Permet de savoir exactement quels articles RSS ont ete utilises pour generer un article. C&#39;est l&#39;audit trail.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>article_id</code></td>
+<td>UUID (cle etrangere → <code>articles</code>)</td>
+<td>L&#39;article genere</td>
+</tr>
+<tr>
+<td><code>rss_item_id</code></td>
+<td>UUID (cle etrangere → <code>rss_items</code>)</td>
+<td>L&#39;item RSS source</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>UUID (cle etrangere → <code>sources</code>)</td>
+<td>Le media d&#39;origine</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>text</td>
+<td>L&#39;URL de l&#39;article original</td>
+</tr>
+<tr>
+<td><code>used_at</code></td>
+<td>timestamp</td>
+<td>Quand cette source a ete utilisee</td>
+</tr>
+</tbody></table>
+<p><strong>Utilite</strong> : un article genere peut dire &quot;Base sur 3 sources : Reporterre (url1), Futura Sciences (url2), Novethic (url3)&quot;. C&#39;est essentiel pour la transparence et le respect des sources.</p>
+<hr>
+<h4>Table 10 — <code>category_templates</code> (regles de generation par categorie)</h4>
+<p>Chaque categorie a un template qui dicte a l&#39;IA comment ecrire. Le ton, la longueur et les regles SEO changent selon la categorie.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (cle etrangere → <code>categories</code>), unique</td>
+<td>La categorie concernee</td>
+</tr>
+<tr>
+<td><code>tone</code></td>
+<td>string(50), defaut: &#39;professional&#39;</td>
+<td>Le ton de l&#39;article (professionnel, pedagogique, engage...)</td>
+</tr>
+<tr>
+<td><code>structure</code></td>
+<td>string(50), defaut: &#39;standard&#39;</td>
+<td>Structure de l&#39;article (standard, analyse, liste, interview...)</td>
+</tr>
+<tr>
+<td><code>min_word_count</code></td>
+<td>entier, defaut: 900</td>
+<td>Nombre minimum de mots</td>
+</tr>
+<tr>
+<td><code>max_word_count</code></td>
+<td>entier, defaut: 2000</td>
+<td>Nombre maximum de mots</td>
+</tr>
+<tr>
+<td><code>style_notes</code></td>
+<td>text, optionnel</td>
+<td>Notes additionnelles sur le style</td>
+</tr>
+<tr>
+<td><code>seo_rules</code></td>
+<td>text, optionnel</td>
+<td>Regles SEO specifiques a la categorie</td>
+</tr>
+</tbody></table>
+<p><strong>Exemple concret</strong> : pour la categorie &quot;Environnement&quot;, le template dit : ton = pedagogique, 1000-1800 mots, &quot;Utiliser des donnees chiffrees et des sources scientifiques, inclure des pistes d&#39;action concretes&quot;.</p>
+<hr>
+<h4>Table 11 — <code>pipeline_jobs</code> (suivi de chaque tache)</h4>
+<p>Enregistre chaque execution du pipeline pour le monitoring et le debug.</p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (cle primaire)</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>job_type</code></td>
+<td>enum</td>
+<td><code>fetch_rss</code>, <code>enrich</code>, <code>cluster</code>, <code>generate</code>, <code>publish</code>, <code>cleanup</code></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td><code>pending</code> → <code>running</code> → <code>completed</code> (ou <code>failed</code>)</td>
+</tr>
+<tr>
+<td><code>started_at</code></td>
+<td>timestamp, optionnel</td>
+<td>Debut de l&#39;execution</td>
+</tr>
+<tr>
+<td><code>completed_at</code></td>
+<td>timestamp, optionnel</td>
+<td>Fin de l&#39;execution</td>
+</tr>
+<tr>
+<td><code>error_message</code></td>
+<td>text, optionnel</td>
+<td>Message d&#39;erreur (si echec)</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>JSON, optionnel</td>
+<td>Donnees supplementaires (nombre d&#39;items traites, duree...)</td>
+</tr>
+<tr>
+<td><code>retry_count</code></td>
+<td>entier, defaut: 0</td>
+<td>Nombre de tentatives en cas d&#39;echec</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Index composite</strong> <code>idx_jobs_pending</code> sur (<code>status</code>, <code>created_at</code>) : permet de retrouver instantanement les jobs en attente.</p>
+<hr>
+<h4>Migration 12 — Triggers de mise a jour automatique</h4>
+<p><strong>Contexte</strong> : En Laravel, quand un model a <code>$timestamps = true</code> (valeur par defaut), le framework met a jour automatiquement les colonnes <code>created_at</code> et <code>updated_at</code> a chaque sauvegarde. Pour les tables <code>sources</code> et <code>articles</code>, on utilise bien les timestamps, mais pour eviter tout oubli (par exemple si on modifie une ligne en SQL brut ou via un autre outil), j&#39;ai ajoute une <strong>securite au niveau de la base de donnees</strong> : un <strong>trigger MySQL</strong>.</p>
+<p><strong>Qu&#39;est-ce qu&#39;un trigger ?</strong><br>Un trigger est une regle stockee dans MySQL qui s&#39;execute automatiquement avant ou apres une action (INSERT, UPDATE, DELETE). Ici, on utilise un trigger <strong>BEFORE UPDATE</strong> : juste avant que MySQL n&#39;ecrive la ligne modifiee, il execute notre regle et met a jour la colonne <code>updated_at</code>.</p>
+<p><strong>Comment c&#39;est fait en code</strong> :<br>Fichier : <code>database/migrations/2024_01_01_000012_create_updated_at_triggers.php</code>.</p>
+<ol>
+<li><p><strong>Verification du moteur</strong> : le code verifie qu&#39;on est bien sur MySQL (<code>DB::getDriverName() === &#39;mysql&#39;</code>). Si on utilise SQLite (par exemple pour les tests), les triggers ne sont pas crees, car la syntaxe des triggers est differente selon les moteurs.</p>
+</li>
+<li><p><strong>Creation des triggers</strong> : on execute du SQL &quot;brut&quot; via <code>DB::unprepared()</code> car Laravel ne fournit pas de methode dediee pour les triggers. Pour chaque table (<code>sources</code> et <code>articles</code>), on cree un trigger avec le meme principe :</p>
+<pre><code class="language-sql">CREATE TRIGGER sources_updated_at_trigger
+BEFORE UPDATE ON sources
+FOR EACH ROW
+SET NEW.updated_at = NOW()
+</code></pre>
+<ul>
+<li><strong>BEFORE UPDATE</strong> : le trigger s&#39;execute avant que la ligne soit ecrite.</li>
+<li><strong>ON sources</strong> (puis <strong>ON articles</strong>) : uniquement quand on fait un <code>UPDATE</code> sur cette table.</li>
+<li><strong>FOR EACH ROW</strong> : pour chaque ligne modifiee par la requete.</li>
+<li><strong>SET NEW.updated_at = NOW()</strong> : on force la valeur qui sera ecrite : la date/heure courante. <code>NEW</code> designe la nouvelle version de la ligne en cours d&#39;update.</li>
+</ul>
+</li>
+<li><p><strong>Rollback (methode <code>down()</code>)</strong> : si on annule la migration, on supprime les triggers avec <code>DROP TRIGGER IF EXISTS ...</code> pour ne rien laisser en base.</p>
+</li>
+</ol>
+<p><strong>En resume</strong> : a chaque fois qu&#39;une ligne de <code>sources</code> ou d&#39;<code>articles</code> est modifiee (que ce soit depuis Laravel, phpMyAdmin ou une requete SQL directe), MySQL met automatiquement <code>updated_at</code> a la date du jour. C&#39;est fait une seule fois, dans une migration, et c&#39;est la base de donnees qui garantit la coherence.</p>
+<hr>
+<h4>Resume des tables du pipeline</h4>
+<pre><code>sources ──→ rss_feeds ──→ rss_items ──→ enriched_items
+   |             |             |                |
+   |             |             ↓                |
+   |             |        cluster_items ←── clusters
+   |             |             |
+   |             ↓             ↓
+   └──→ article_sources ←── articles ←── category_templates
+                                |
+                          pipeline_jobs (monitoring)
+</code></pre>
+<p><strong>En chiffres</strong> : 12 fichiers de migration, 11 tables, 4 cles etrangeres avec cascade, 2 index full-text (recherche), 8 index composites (performance), 2 triggers (automatisation), et chaque colonne est typee avec precision.</p>
+<hr>
+<h3>Etape 6 — phpMyAdmin</h3>
+<p><strong>Objectif</strong> : Avoir une interface graphique pour visualiser la base de donnees.</p>
+<p>J&#39;ai ajoute phpMyAdmin dans le <code>docker-compose.yml</code> :</p>
+<ul>
+<li>Accessible sur <code>http://localhost:8080</code></li>
+<li>Connexion automatique au serveur MySQL</li>
+<li>Permet de voir les tables, les donnees, executer des requetes SQL, exporter des dumps</li>
+</ul>
+<p>C&#39;est un outil de developpement — il ne sera pas present en production. Il est utile pour :</p>
+<ul>
+<li>Verifier que les migrations ont bien cree les tables</li>
+<li>Inspecter les donnees inserees par le pipeline</li>
+<li>Debugger les problemes de donnees</li>
+<li>Montrer la structure de la base au chef de projet</li>
+</ul>
+<hr>
+<h3>Etape 7 — Models Eloquent (11 models)</h3>
+<p><strong>Objectif</strong> : Creer la couche PHP qui represente chaque table et definit les regles metier.</p>
+<p>En Laravel, chaque table a un <strong>Model</strong> : un fichier PHP qui definit comment lire, ecrire, relier et manipuler les donnees de cette table. C&#39;est le coeur de l&#39;application.</p>
+<p>J&#39;ai cree <strong>11 models</strong> dans <code>/app/Models/</code>. Voici ce que contient chaque model :</p>
+<hr>
+<h4>Model <code>Source</code> (fichier <code>app/Models/Source.php</code>)</h4>
+<p>Represente un media surveille.</p>
+<p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
+<ul>
+<li><code>Source::active()-&gt;get()</code> → recuperer toutes les sources actives</li>
+<li><code>$source-&gt;rssFeeds</code> → acceder a tous les flux RSS de cette source</li>
+<li><code>$source-&gt;articleSources</code> → voir dans quels articles cette source a ete citee</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>rssFeeds()</code> : a plusieurs flux RSS / <code>articleSources()</code> : citee dans plusieurs articles</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>active()</code> : filtre les sources ou <code>is_active = true</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h4>Model <code>Category</code> (fichier <code>app/Models/Category.php</code>)</h4>
+<p>Represente une categorie thematique.</p>
+<p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
+<ul>
+<li><code>$category-&gt;articles</code> → tous les articles de cette categorie</li>
+<li><code>$category-&gt;template</code> → les regles de generation pour cette categorie</li>
+<li><code>$category-&gt;rssFeeds</code> → les flux RSS associes a cette categorie</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>rssFeeds()</code>, <code>rssItems()</code>, <code>clusters()</code>, <code>articles()</code> : a plusieurs de chaque / <code>template()</code> : a un seul template de generation</td>
+</tr>
+</tbody></table>
+<hr>
+<h4>Model <code>RssFeed</code> (fichier <code>app/Models/RssFeed.php</code>)</h4>
+<p>Represente un flux RSS a surveiller.</p>
+<p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
+<ul>
+<li><code>RssFeed::active()-&gt;get()</code> → les flux actifs</li>
+<li><code>RssFeed::dueForFetch()-&gt;get()</code> → les flux qu&#39;il faut recuperer maintenant (la derniere recuperation + l&#39;intervalle est depasse)</li>
+<li><code>$feed-&gt;source</code> → le media auquel appartient ce flux</li>
+<li><code>$feed-&gt;items</code> → tous les items decouverts dans ce flux</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>source()</code> : appartient a une source / <code>category()</code> : appartient a une categorie / <code>items()</code> : a plusieurs items RSS</td>
+</tr>
+<tr>
+<td>Scopes</td>
+<td><code>active()</code> : flux actifs / <code>dueForFetch()</code> : flux qui doivent etre recuperes (calcul automatique basé sur <code>last_fetched_at</code> et <code>fetch_interval_minutes</code>)</td>
+</tr>
+</tbody></table>
+<p>Le scope <code>dueForFetch()</code> est important : c&#39;est lui qui determine automatiquement quels flux doivent etre recuperes en comparant <code>last_fetched_at + fetch_interval_minutes</code> avec l&#39;heure actuelle.</p>
+<hr>
+<h4>Model <code>RssItem</code> (fichier <code>app/Models/RssItem.php</code>)</h4>
+<p>Represente un article brut decouvert dans un flux RSS.</p>
+<p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
+<ul>
+<li><code>RssItem::new()-&gt;get()</code> → les items pas encore analyses</li>
+<li><code>RssItem::enriched()-&gt;get()</code> → les items analyses et prets pour la selection</li>
+<li><code>$item-&gt;enrichedItem</code> → l&#39;analyse IA de cet item</li>
+<li><code>$item-&gt;clusters</code> → les clusters dont fait partie cet item</li>
+<li><code>$item-&gt;isEnriched()</code> → verifie que l&#39;item a bien ete enrichi</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>rssFeed()</code> : vient de quel flux / <code>category()</code> : categorie / <code>enrichedItem()</code> : son analyse IA (1:1) / <code>clusters()</code> : ses groupes thematiques (N:N via <code>cluster_items</code>) / <code>articleSources()</code> : dans quels articles finaux il a ete utilise</td>
+</tr>
+<tr>
+<td>Scopes</td>
+<td><code>status($status)</code> : filtre par statut / <code>new()</code> : statut &quot;new&quot; / <code>enriched()</code> : statut &quot;enriched&quot;</td>
+</tr>
+<tr>
+<td>Methode metier</td>
+<td><code>isEnriched()</code> : retourne <code>true</code> si le statut est &quot;enriched&quot; ET que l&#39;enrichissement existe en base</td>
+</tr>
+</tbody></table>
+<hr>
+<h4>Model <code>EnrichedItem</code> (fichier <code>app/Models/EnrichedItem.php</code>)</h4>
+<p>Represente l&#39;analyse IA d&#39;un article. Lie 1:1 a un <code>RssItem</code>.</p>
+<p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
+<ul>
+<li><code>$enriched-&gt;rssItem</code> → l&#39;item RSS original</li>
+<li><code>$enriched-&gt;getWordCount()</code> → compter les mots du texte extrait</li>
+<li><code>$enriched-&gt;isHighQuality()</code> → savoir si le score qualite est &gt;= 70</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>rssItem()</code> : l&#39;item RSS source</td>
+</tr>
+<tr>
+<td>Methodes metier</td>
+<td><code>getWordCount()</code> : retourne le nombre de mots du <code>extracted_text</code> / <code>isHighQuality()</code> : retourne <code>true</code> si <code>quality_score &gt;= 70</code></td>
+</tr>
+</tbody></table>
+<p>Les champs JSON (<code>headings</code>, <code>key_points</code>, <code>seo_keywords</code>) sont automatiquement convertis en tableaux PHP grace au cast <code>array</code>. On peut ecrire <code>$enriched-&gt;seo_keywords</code> et recevoir directement <code>[&#39;recyclage&#39;, &#39;textile&#39;, &#39;economie circulaire&#39;]</code>.</p>
+<hr>
+<h4>Model <code>Cluster</code> (fichier <code>app/Models/Cluster.php</code>)</h4>
+<p>Represente un groupe d&#39;articles sur le meme sujet.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>category()</code> : categorie / <code>rssItems()</code> : les items du cluster (N:N via <code>cluster_items</code>) / <code>article()</code> : l&#39;article genere a partir de ce cluster (1:1)</td>
+</tr>
+<tr>
+<td>Scopes</td>
+<td><code>pending()</code> : clusters en attente / <code>generated()</code> : clusters deja utilises pour generer un article</td>
+</tr>
+</tbody></table>
+<hr>
+<h4>Model <code>ClusterItem</code> (fichier <code>app/Models/ClusterItem.php</code>)</h4>
+<p>Table pivot entre <code>Cluster</code> et <code>RssItem</code>. Pas de logique metier, juste les liaisons.</p>
+<hr>
+<h4>Model <code>Article</code> (fichier <code>app/Models/Article.php</code>)</h4>
+<p><strong>Le model le plus important</strong> — represente un article genere par l&#39;IA et publie sur le site.</p>
+<p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
+<ul>
+<li><code>Article::published()-&gt;get()</code> → tous les articles publies</li>
+<li><code>Article::draft()-&gt;get()</code> → les brouillons</li>
+<li><code>$article-&gt;isPublishable()</code> → est-ce que cet article peut etre publie ?</li>
+<li><code>$article-&gt;publish()</code> → publier l&#39;article (change le statut et rempli <code>published_at</code>)</li>
+<li><code>$article-&gt;category</code> → sa categorie</li>
+<li><code>$article-&gt;sources</code> → les medias originaux qui ont servi a le generer</li>
+<li><code>$article-&gt;articleSources</code> → le detail de chaque source avec l&#39;URL</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>category()</code> : appartient a une categorie / <code>cluster()</code> : genere a partir d&#39;un cluster / <code>articleSources()</code> : liens vers les items RSS sources / <code>sources()</code> : les medias sources (N:N via <code>article_sources</code>, avec les champs pivot <code>rss_item_id</code>, <code>url</code>, <code>used_at</code>)</td>
+</tr>
+<tr>
+<td>Scopes</td>
+<td><code>status($status)</code> : filtre par statut / <code>published()</code> : articles publies avec <code>published_at</code> non null / <code>draft()</code> : brouillons</td>
+</tr>
+<tr>
+<td>Methode <code>isPublishable()</code></td>
+<td>Retourne <code>true</code> si <strong>quality_score &gt;= 60</strong> ET statut est <code>draft</code> ou <code>review</code>. Un article avec un score de 45 ne peut PAS etre publie — c&#39;est une regle metier qui garantit la qualite minimale.</td>
+</tr>
+<tr>
+<td>Methode <code>publish()</code></td>
+<td>Change le statut en <code>published</code>, rempli <code>published_at</code> avec la date actuelle, et sauvegarde. Refuse de publier si <code>isPublishable()</code> est false.</td>
+</tr>
+</tbody></table>
+<p><strong>Pourquoi le seuil de 60 ?</strong> C&#39;est un compromis : assez haut pour filtrer les articles de mauvaise qualite, assez bas pour ne pas bloquer des articles corrects. Ce seuil est modifiable.</p>
+<hr>
+<h4>Model <code>ArticleSource</code> (fichier <code>app/Models/ArticleSource.php</code>)</h4>
+<p>La tracabilite : pour chaque article genere, on sait exactement quelles sources ont ete utilisees.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>article()</code> : l&#39;article genere / <code>rssItem()</code> : l&#39;item RSS source / <code>source()</code> : le media d&#39;origine</td>
+</tr>
+</tbody></table>
+<hr>
+<h4>Model <code>CategoryTemplate</code> (fichier <code>app/Models/CategoryTemplate.php</code>)</h4>
+<p>Les regles de generation pour chaque categorie.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Relations</td>
+<td><code>category()</code> : la categorie concernee</td>
+</tr>
+</tbody></table>
+<p>Quand l&#39;IA genere un article pour la categorie &quot;Environnement&quot;, elle regarde le template : ton pedagogique, 1000-1800 mots, regles SEO specifiques. Pour la categorie &quot;Technologie&quot;, le ton sera plus analytique et la structure plus technique.</p>
+<hr>
+<h4>Model <code>PipelineJob</code> (fichier <code>app/Models/PipelineJob.php</code>)</h4>
+<p>Le monitoring de chaque tache du pipeline.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scopes</td>
+<td><code>running()</code> : jobs en cours / <code>failed()</code> : jobs echoues / <code>ofType($type)</code> : jobs d&#39;un type precis (ex: <code>fetch_rss</code>)</td>
+</tr>
+<tr>
+<td>Methode <code>start()</code></td>
+<td>Passe le statut a <code>running</code> et enregistre l&#39;heure de debut</td>
+</tr>
+<tr>
+<td>Methode <code>complete()</code></td>
+<td>Passe le statut a <code>completed</code> et enregistre l&#39;heure de fin</td>
+</tr>
+<tr>
+<td>Methode <code>fail($message)</code></td>
+<td>Passe le statut a <code>failed</code>, enregistre le message d&#39;erreur, et incremente le compteur de tentatives</td>
+</tr>
+</tbody></table>
+<p><strong>Exemple d&#39;utilisation dans le code</strong> :</p>
+<pre><code class="language-php">$job = PipelineJob::create([&#39;job_type&#39; =&gt; &#39;fetch_rss&#39;]);
+$job-&gt;start();                    // statut → &quot;running&quot;
+// ... execution du fetch ...
+$job-&gt;complete();                 // statut → &quot;completed&quot;
+// OU en cas d&#39;erreur :
+$job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, retry_count +1
+</code></pre>
+<hr>
+<h4>Resume des models : la chaine de relations</h4>
+<pre><code>Source (1) ──→ (N) RssFeed (1) ──→ (N) RssItem (1) ──→ (1) EnrichedItem
+                                          |
+                                          ↕ (N:N)
+                                       Cluster (1) ──→ (1) Article
+                                                              |
+                                                         ArticleSource
+                                                         (tracabilite)
+</code></pre>
+<p><strong>En chiffres</strong> : 11 models, 23 relations definies, 8 scopes reutilisables, 7 methodes metier, tous avec UUIDs, et chaque champ JSON est automatiquement converti en tableau PHP.</p>
+<hr>
+<h3>Etape 8 — Services, Jobs, Horizon et Scheduler</h3>
+<p><strong>Objectif</strong> : Implementer toute la logique du pipeline.</p>
+<p>C&#39;est l&#39;etape la plus complexe. J&#39;ai separe le code en 3 couches :</p>
+<p><strong>Les Services</strong> (la logique metier pure) :</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RssParserService</code></td>
+<td>Prend un fichier XML (RSS ou Atom) et en extrait les articles avec titre, URL, date. Genere un hash unique pour eviter les doublons.</td>
+</tr>
+<tr>
+<td><code>ContentExtractorService</code></td>
+<td>Va sur le site original, scrape la page HTML, extrait uniquement le contenu de l&#39;article (retire les menus, pubs, footers). Si le contenu est trop court, explore les liens internes.</td>
+</tr>
+<tr>
+<td><code>ArticleGeneratorService</code></td>
+<td>Construit un prompt pour OpenAI a partir de plusieurs sources enrichies, appelle l&#39;API, parse la reponse JSON, cree l&#39;article en base avec le score qualite et les metadonnees SEO.</td>
+</tr>
+</tbody></table>
+<p><strong>Les Jobs</strong> (taches asynchrones — ne bloquent pas le serveur) :</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Queue</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FetchRssFeedJob</code></td>
+<td><code>rss</code></td>
+<td>Recupere un flux RSS et cree les items en base</td>
+</tr>
+<tr>
+<td><code>EnrichContentJob</code></td>
+<td><code>enrichment</code></td>
+<td>Scrape une page + appelle OpenAI pour l&#39;analyse</td>
+</tr>
+<tr>
+<td><code>GenerateArticleJob</code></td>
+<td><code>generation</code></td>
+<td>Genere un article complet via OpenAI</td>
+</tr>
+</tbody></table>
+<p><strong>Laravel Horizon</strong> : un dashboard temps reel (accessible sur <code>http://localhost:8000/horizon</code>) qui montre l&#39;etat de toutes les queues, les jobs en cours, les echecs, les temps de traitement.</p>
+<p><strong>Le Scheduler</strong> (taches automatiques) :</p>
+<table>
+<thead>
+<tr>
+<th>Tache</th>
+<th>Frequence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Recuperer les flux RSS</td>
+<td>1 fois par jour</td>
+</tr>
+<tr>
+<td>Enrichir les nouveaux items par IA</td>
+<td>Toutes les heures (50 items max)</td>
+</tr>
+<tr>
+<td>Snapshot des stats Horizon</td>
+<td>Toutes les 5 minutes</td>
+</tr>
+<tr>
+<td>Nettoyage des jobs echoues</td>
+<td>Tous les jours</td>
+</tr>
+</tbody></table>
+<p><strong>Tout est automatise</strong> : une fois le serveur lance, le pipeline tourne tout seul sans intervention humaine.</p>
+<hr>
+<h3>Etape 9 — API REST complete</h3>
+<p><strong>Objectif</strong> : Permettre a n&#39;importe quel client (frontend, mobile, Postman) de communiquer avec le backend.</p>
+<p>J&#39;ai cree une API REST avec :</p>
+<ul>
+<li><strong>6 controllers</strong> : un par ressource (Sources, Categories, RSS Feeds, RSS Items, Articles, Stats)</li>
+<li><strong>7 resources JSON</strong> : chaque reponse est formatee proprement (pas de donnees sensibles exposees)</li>
+<li><strong>Pagination</strong> : les listes sont paginees (12 articles/page par defaut, max 50)</li>
+<li><strong>Filtres</strong> : par statut, par categorie, par date, par duree de lecture</li>
+</ul>
+<p>Tous les endpoints sont documentees et testables dans Postman.</p>
+<hr>
+<h3>Etape 10 — Validation et autorisations</h3>
+<p><strong>Objectif</strong> : S&#39;assurer que les donnees envoyees sont valides et que les actions sont autorisees.</p>
+<ul>
+<li><strong>7 Form Requests</strong> : chaque requete est validee avant d&#39;atteindre le code metier (ex: on verifie que l&#39;URL d&#39;un flux RSS est bien une URL valide)</li>
+<li><strong>3 Policies</strong> : des regles d&#39;autorisation par ressource (qui peut creer une source ? Qui peut publier un article ?)</li>
+</ul>
+<hr>
+<h3>Etape 11 — Commandes Artisan (CLI)</h3>
+<p><strong>Objectif</strong> : Pouvoir declencher le pipeline manuellement en ligne de commande.</p>
+<p>4 commandes creees :</p>
+<ul>
+<li><code>php artisan rss:fetch --all</code> → recupere tous les flux RSS maintenant</li>
+<li><code>php artisan content:enrich --limit=50</code> → enrichit les 50 prochains items</li>
+<li><code>php artisan cleanup:old --days=90</code> → supprime les vieilles donnees</li>
+<li><code>php artisan articles:generate</code> → lance la generation d&#39;articles</li>
+</ul>
+<p>Utile pour le developpement et les tests sans attendre le scheduler.</p>
+<hr>
+<h3>Etape 12 — Tests automatises</h3>
+<p><strong>Objectif</strong> : S&#39;assurer que le code fonctionne correctement.</p>
+<ul>
+<li><strong>12 tests</strong> avec <strong>39 assertions</strong> (PHPUnit)</li>
+<li>Tests unitaires : le parsing RSS fonctionne, la logique de publication est correcte</li>
+<li>Tests d&#39;integration : les endpoints API retournent les bonnes reponses</li>
+<li>Compatibilite SQLite pour que les tests tournent en memoire (plus rapide)</li>
+</ul>
+<hr>
+<h2>PHASE 3 — Analyse et integration de l&#39;ancienne base de donnees</h2>
+<h3>Etape 13 — Analyse de la base existante</h3>
+<p><strong>Objectif</strong> : Comprendre la base de donnees du site existant et decider quoi reutiliser.</p>
+<p>Le chef de projet m&#39;a fourni un dump SQL de l&#39;ancienne base (<code>ID93677_vivat.sql</code>). J&#39;ai analyse chaque table en detail :</p>
+<table>
+<thead>
+<tr>
+<th>Table ancienne</th>
+<th>Contenu</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tbl_cont_pg</code></td>
+<td><strong>3 756 articles</strong> existants (titre, contenu HTML, meta SEO, date, langue)</td>
+<td><strong>A conserver</strong> — c&#39;est le contenu du site actuel</td>
+</tr>
+<tr>
+<td><code>tbl_ref</code></td>
+<td><strong>71 categories/references</strong> hierarchiques (categories parentes et enfants)</td>
+<td><strong>A conserver</strong> — structure editoriale du site</td>
+</tr>
+<tr>
+<td><code>tbl_usr</code></td>
+<td><strong>3 utilisateurs</strong> (admin, editeurs)</td>
+<td><strong>A conserver</strong> — utilisateurs existants</td>
+</tr>
+<tr>
+<td><code>logs</code></td>
+<td>Logs d&#39;activite</td>
+<td>Conserve pour compatibilite (vide)</td>
+</tr>
+<tr>
+<td><code>cloaked_ip</code></td>
+<td>IPs de bots</td>
+<td>Conserve pour compatibilite (vide)</td>
+</tr>
+</tbody></table>
+<p>J&#39;ai redige un document complet (<code>SCHEMA_BASE_EXISTANTE.md</code>) qui explique :</p>
+<ul>
+<li>Chaque colonne de chaque table</li>
+<li>Le mapping entre l&#39;ancien et le nouveau schema</li>
+<li>Comment les anciennes categories correspondent aux nouvelles</li>
+</ul>
+<hr>
+<h3>Etape 14 — Import des donnees et audit complet du pipeline</h3>
+<p><strong>Objectif</strong> : Copier les donnees utiles et verifier que tout fonctionne de bout en bout.</p>
+<p><strong>Import des donnees</strong> :</p>
+<ul>
+<li>Chargement du dump dans une base temporaire <code>vivat_old</code> dans Docker</li>
+<li>Copie selective : 3 756 articles, 71 references, 3 utilisateurs vers la base <code>vivat</code></li>
+<li>Correction des incompatibilites (index trop longs pour utf8mb4, dates au format <code>0000-00-00</code>, doublons)</li>
+</ul>
+<p><strong>Audit et correction de bugs</strong> :
+En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 9 bugs :</p>
+<table>
+<thead>
+<tr>
+<th>Bug</th>
+<th>Correction</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Timestamps manquants sur les items RSS et enrichis</td>
+<td>Ajout de <code>fetched_at</code> et <code>enriched_at</code></td>
+</tr>
+<tr>
+<td>Conflit entre les Jobs et le trait Laravel pour les queues</td>
+<td>Remplacement de la propriete par <code>$this-&gt;onQueue()</code></td>
+</tr>
+<tr>
+<td>Encodage HTML incorrect lors du scraping</td>
+<td>Ajout d&#39;un pragma XML pour l&#39;encodage UTF-8</td>
+</tr>
+<tr>
+<td>Erreur de regex sur les guillemets typographiques francais</td>
+<td>Correction des patterns Unicode</td>
+</tr>
+<tr>
+<td>Erreur 403 lors de la publication (au lieu d&#39;un message clair)</td>
+<td>Refonte de la Policy pour deleguer au controller</td>
+</tr>
+<tr>
+<td>Erreur 500 si OpenAI echoue (stack trace brut)</td>
+<td>Try/catch avec message d&#39;erreur 502 descriptif</td>
+</tr>
+<tr>
+<td>Dates mal castees dans les Resources JSON</td>
+<td>Ajout du cast <code>datetime</code> sur les models</td>
+</tr>
+<tr>
+<td>Contenu manquant dans la reponse de generation</td>
+<td>Ajout de la route dans la condition de l&#39;ArticleResource</td>
+</tr>
+<tr>
+<td>Index MySQL trop long pour utf8mb4</td>
+<td>Utilisation de prefixes dans l&#39;index</td>
+</tr>
+</tbody></table>
+<p><strong>Test complet Postman</strong> : tous les endpoints testes et fonctionnels.</p>
+<p><strong>Nouveaux endpoints ajoutes</strong> :</p>
+<ul>
+<li><code>POST /api/pipeline/fetch-rss</code> — declencher le fetch RSS</li>
+<li><code>POST /api/pipeline/enrich</code> — declencher l&#39;enrichissement</li>
+<li><code>GET /api/pipeline/select-items</code> — voir les propositions d&#39;articles</li>
+<li><code>GET /api/pipeline/status</code> — etat global du pipeline</li>
+<li>CRUD complet pour les <code>clusters</code> et <code>category-templates</code></li>
+</ul>
+<p><strong>Donnees de depart (seeder)</strong> : j&#39;ai cree un seeder automatique qui insere 14 categories, 6 sources medias, 5 flux RSS et 14 templates de generation.</p>
+<hr>
+<h3>Etape 15 — Selection intelligente des articles et strategie SEO</h3>
+<p><strong>Objectif</strong> : Repondre a la question &quot;Pourquoi generer CET article et pas un autre ?&quot;</p>
+<p>Quand le pipeline recupere 120 articles depuis 15 sources, il faut choisir lesquels meritent d&#39;etre generes. J&#39;ai cree un algorithme de selection intelligent :</p>
+<p><strong>Le scoring</strong> (chaque article recoit un score sur 100) :</p>
+<table>
+<thead>
+<tr>
+<th>Critere</th>
+<th>Poids</th>
+<th>Logique</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Potentiel SEO</strong></td>
+<td>30%</td>
+<td>Les mots-cles longue traine (specifiques) valent plus que les mots generiques. &quot;Recyclage textile France 2026&quot; &gt; &quot;ecologie&quot;</td>
+</tr>
+<tr>
+<td><strong>Fraicheur</strong></td>
+<td>25%</td>
+<td>Un article de moins de 48h a le score max. Apres 7 jours → score nul</td>
+</tr>
+<tr>
+<td><strong>Qualite du contenu</strong></td>
+<td>25%</td>
+<td>Le score donne par l&#39;IA lors de l&#39;enrichissement + bonus si le contenu est long et riche</td>
+</tr>
+<tr>
+<td><strong>Diversite des sources</strong></td>
+<td>20%</td>
+<td>Un sujet couvert par 3 medias differents vaut plus qu&#39;un sujet d&#39;une seule source (synthese multi-sources = plus de valeur)</td>
+</tr>
+</tbody></table>
+<p><strong>Le regroupement par sujet</strong> : les articles qui partagent plus de 20% de mots-cles sont regroupes. On genere UN article de synthese a partir de 3-4 sources plutot que de copier un seul article.</p>
+<p><strong>L&#39;explication</strong> : chaque proposition d&#39;article inclut un texte &quot;reasoning&quot; qui dit : &quot;Cet article est propose parce que 3 sources couvrent le sujet, le potentiel SEO est eleve (score 78), et le sujet est frais (publie il y a 6h).&quot;</p>
+<p><strong>Amelioration SEO</strong> : j&#39;ai enrichi le prompt d&#39;OpenAI pour qu&#39;il extraie des mots-cles longue traine, un sujet principal, et un score SEO (0-100). Ces donnees sont stockees dans <code>enriched_items</code> et reutilisees lors de la generation.</p>
+<p><strong>Documentation</strong> : j&#39;ai ecrit un guide complet de tests Postman (<code>TESTING_POSTMAN.md</code>) avec 37 endpoints documentes et 17 scenarios de test.</p>
+<hr>
+<h2>PHASE 4 — Fonctionnalites du site (11 features)</h2>
+<h3>Etape 16 — Audit et correction de la stack technique</h3>
+<p><strong>Objectif</strong> : Verifier que tout ce qu&#39;on annonce dans la stack est bien installe et configure.</p>
+<p>J&#39;ai compare la stack annoncee avec ce qui existait reellement dans le code :</p>
+<table>
+<thead>
+<tr>
+<th>Annonce</th>
+<th>Realite avant correction</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Laravel Sanctum pour l&#39;auth</td>
+<td>Pas installe</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td>spatie/laravel-permission pour les roles</td>
+<td>Pas installe</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td>spatie/laravel-sluggable pour les slugs SEO</td>
+<td>Pas installe</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td>Stripe pour le paiement</td>
+<td>Pas installe</td>
+<td>Installe et configure</td>
+</tr>
+<tr>
+<td>GPT-4.5 dans la doc</td>
+<td>N&#39;existe pas (c&#39;est GPT-4o)</td>
+<td>Corrige dans la doc</td>
+</tr>
+<tr>
+<td>APP_NAME=Laravel</td>
+<td>Mauvais nom</td>
+<td>Corrige → APP_NAME=Vivat</td>
+</tr>
+<tr>
+<td>APP_LOCALE=en</td>
+<td>Mauvaise langue</td>
+<td>Corrige → APP_LOCALE=fr</td>
+</tr>
+<tr>
+<td>Table users avec ID numerique</td>
+<td>Incoherent (tout le reste est UUID)</td>
+<td>Migre vers UUID</td>
+</tr>
+</tbody></table>
+<p><strong>Resultat</strong> : la stack annoncee correspond maintenant a 100% au code reel.</p>
+<hr>
+<h3>Etape 17 — Authentification, roles, API publique et personnalisation</h3>
+<p><strong>Objectif</strong> : Implementer les fonctionnalites visibles cote site.</p>
+<p><strong>Authentification (Sanctum)</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /api/auth/register</code></td>
+<td>Creer un compte (attribue automatiquement le role &quot;contributor&quot;)</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/login</code></td>
+<td>Se connecter (retourne un token Bearer a envoyer dans chaque requete)</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/logout</code></td>
+<td>Se deconnecter (revoque le token)</td>
+</tr>
+<tr>
+<td><code>GET /api/auth/me</code></td>
+<td>Voir son profil + ses roles</td>
+</tr>
+<tr>
+<td><code>PUT /api/auth/profile</code></td>
+<td>Modifier son nom, langue, centres d&#39;interet, bio</td>
+</tr>
+</tbody></table>
+<p><strong>Roles et permissions</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Ce qu&#39;il peut faire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Admin</strong></td>
+<td>Tout : pipeline, generation, moderation, stats, newsletter, paiements (21 permissions)</td>
+</tr>
+<tr>
+<td><strong>Contributeur</strong></td>
+<td>Voir les articles, soumettre des articles, voir ses soumissions (3 permissions)</td>
+</tr>
+<tr>
+<td><strong>Visiteur</strong> (non connecte)</td>
+<td>Lire les articles, chercher, voir les categories, s&#39;abonner a la newsletter</td>
+</tr>
+</tbody></table>
+<p><strong>Protection des routes</strong> : chaque route est protegee par le bon niveau d&#39;acces. Un contributeur ne peut pas declencher le pipeline. Un visiteur ne peut pas moderer les soumissions.</p>
+<p><strong>API publique</strong> (accessible sans compte) :</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /api/public/articles</code></td>
+<td>Liste des articles publies (pagination, tri, filtres)</td>
+</tr>
+<tr>
+<td><code>GET /api/public/articles/{slug}</code></td>
+<td>Un article par son slug (URL SEO)</td>
+</tr>
+<tr>
+<td><code>GET /api/public/categories</code></td>
+<td>Liste des categories avec le nombre d&#39;articles</td>
+</tr>
+<tr>
+<td><code>GET /api/public/categories/{slug}/hub</code></td>
+<td>Page hub d&#39;une categorie (a la une + recents)</td>
+</tr>
+<tr>
+<td><code>GET /api/public/search?q=climat</code></td>
+<td>Recherche par mot-cle, filtres categorie/date/duree</td>
+</tr>
+<tr>
+<td><code>GET /api/public/recommendations</code></td>
+<td>Articles recommandes selon les interets du visiteur</td>
+</tr>
+<tr>
+<td><code>POST /api/public/preferences</code></td>
+<td>Sauvegarder ses centres d&#39;interet (cookie, sans compte)</td>
+</tr>
+<tr>
+<td><code>GET /api/public/preferences</code></td>
+<td>Recuperer ses preferences</td>
+</tr>
+<tr>
+<td><code>POST /api/public/reading-progress</code></td>
+<td>Sauvegarder sa progression de lecture</td>
+</tr>
+<tr>
+<td><code>GET /api/public/reading-progress</code></td>
+<td>Reprendre la ou on s&#39;etait arrete</td>
+</tr>
+</tbody></table>
+<p><strong>Logique d&#39;affichage des articles</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Ou ?</th>
+<th>Critere</th>
+<th>Comment ca marche</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Homepage</strong></td>
+<td>Les plus recents</td>
+<td>Tries par <code>published_at</code> (date de publication) descendant</td>
+</tr>
+<tr>
+<td><strong>A la une</strong> (page hub)</td>
+<td>Les meilleurs</td>
+<td>Les 3 articles avec le <strong>quality_score</strong> le plus eleve dans la categorie</td>
+</tr>
+<tr>
+<td><strong>Recommandations</strong></td>
+<td>Personnalise</td>
+<td>Algorithme : interets (40%) + qualite (25%) + fraicheur (20%) + popularite (15%), en excluant les articles deja lus</td>
+</tr>
+<tr>
+<td><strong>Recherche</strong></td>
+<td>Par mots-cles</td>
+<td>Recherche dans le titre, le resume et la description SEO</td>
+</tr>
+</tbody></table>
+<p><strong>Systeme de recommandation</strong> : fonctionne meme sans compte. Le visiteur envoie un identifiant de session (cookie) et ses centres d&#39;interet. Le systeme calcule un score pour chaque article et retourne les plus pertinents.</p>
+<p><strong>Progression de lecture</strong> : quand un visiteur lit un article, le frontend peut envoyer le pourcentage lu (ex: 65%). La prochaine fois, il peut reprendre la ou il s&#39;etait arrete. Fonctionne avec un cookie (sans compte) ou avec un compte utilisateur.</p>
+<hr>
+<h3>Etape 18 — Espace contributeur, newsletter et paiement Stripe</h3>
+<p><strong>Espace contributeur</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /api/contributor/submissions</code></td>
+<td>Soumettre un article (brouillon ou directement en validation)</td>
+</tr>
+<tr>
+<td><code>GET /api/contributor/submissions</code></td>
+<td>Voir l&#39;historique de ses soumissions</td>
+</tr>
+<tr>
+<td><code>PUT /api/contributor/submissions/{id}</code></td>
+<td>Modifier un brouillon ou un article rejete</td>
+</tr>
+<tr>
+<td><code>DELETE /api/contributor/submissions/{id}</code></td>
+<td>Supprimer un brouillon</td>
+</tr>
+</tbody></table>
+<p>Le contributeur peut voir le statut de chaque article : <code>brouillon</code> → <code>en attente</code> → <code>approuve</code> / <code>rejete</code>.</p>
+<p><strong>Moderation (admin)</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /api/submissions</code></td>
+<td>Liste des soumissions a moderer (filtre par statut)</td>
+</tr>
+<tr>
+<td><code>GET /api/submissions/{id}</code></td>
+<td>Detail d&#39;une soumission</td>
+</tr>
+<tr>
+<td><code>POST /api/submissions/{id}/approve</code></td>
+<td>Approuver (avec notes optionnelles)</td>
+</tr>
+<tr>
+<td><code>POST /api/submissions/{id}/reject</code></td>
+<td>Rejeter (notes obligatoires pour expliquer pourquoi)</td>
+</tr>
+</tbody></table>
+<p><strong>Newsletter</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Ce qu&#39;il fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /api/newsletter/subscribe</code></td>
+<td>S&#39;abonner (email + minimum 3 centres d&#39;interet)</td>
+</tr>
+<tr>
+<td><code>GET /api/newsletter/confirm?token=xxx</code></td>
+<td>Confirmer son abonnement par token</td>
+</tr>
+<tr>
+<td><code>POST /api/newsletter/unsubscribe</code></td>
+<td>Se desabonner par token</td>
+</tr>
+<tr>
+<td><code>GET /api/newsletter/subscribers</code></td>
+<td>(Admin) Liste des abonnes</td>
+</tr>
+</tbody></table>
+<p>L&#39;abonne recoit un email de confirmation avec un token unique. Il peut se desabonner a tout moment avec un autre token unique.</p>
+<p><strong>Paiement Stripe</strong> (publication ponctuelle d&#39;article) :</p>
+<p>Le flux complet :</p>
+<ol>
+<li>Le contributeur soumet un article et veut le publier (payant)</li>
+<li>Il appelle <code>POST /api/contributor/payments/create-intent</code> → le backend cree un PaymentIntent Stripe (15 EUR) et retourne un <code>client_secret</code></li>
+<li>Le frontend utilise Stripe.js pour afficher le formulaire de paiement et confirmer</li>
+<li>Le contributeur appelle <code>POST /api/contributor/payments/confirm</code> → le backend verifie aupres de Stripe que le paiement a reussi, marque le paiement comme &quot;paye&quot;, et soumet automatiquement l&#39;article pour validation</li>
+<li>L&#39;admin approuve ou rejette l&#39;article</li>
+<li>Si rejete : l&#39;admin peut rembourser via <code>POST /api/payments/{id}/refund</code> → le backend cree un remboursement Stripe</li>
+</ol>
+<p>Le contributeur peut suivre ses paiements via <code>GET /api/contributor/payments</code> avec les statuts : <code>en attente</code> → <code>paye</code> → <code>rembourse</code> (si rejete).</p>
+<hr>
+<h3>Etape 19 — Amelioration de la logique de selection (feedback mentor)</h3>
+<p><strong>Objectif</strong> : Repondre au feedback du mentor pour ameliorer la logique de selection et rendre les choix de l&#39;IA plus explicites et bases sur des regles predefinies.</p>
+<p><strong>Problematiques identifiees</strong> :</p>
+<ul>
+<li>Pas assez connecte a l&#39;actu (actualite chaude)</li>
+<li>Manque d&#39;elements de correlation (si 10 articles sur 50 traitent du meme sujet, ce sujet est plus important)</li>
+<li>Comment l&#39;IA fait un choix ? (manque de transparence)</li>
+<li>Pas de distinction entre hot news (breve) et articles de fond (analyse longue)</li>
+<li>Besoin de tester les prompts pour etre sur que l&#39;IA ressort ce qu&#39;on veut</li>
+<li>Pour les tendances : besoin d&#39;exporter en CSV (500-1000 articles) pour analyse data science / ChatGPT</li>
+</ul>
+<p><strong>Solutions implementees</strong> :</p>
+<p><strong>1. Regles predefinies configurables</strong> (<code>config/selection.php</code>) :</p>
+<ul>
+<li><strong>4 profils de ponderation</strong> : <code>default</code>, <code>actu_focus</code> (plus connecte a l&#39;actu), <code>seo_focus</code>, <code>long_form_focus</code> (articles de fond)</li>
+<li><strong>Poids configurables</strong> : fraicheur, qualite, SEO, diversite, <strong>topic_frequency</strong> (nouveau critere)</li>
+<li><strong>Bonus &quot;frequence du sujet&quot;</strong> : si sur N articles du pool, M traitent du meme sujet (ex: 10/50), ce sujet recoit un bonus de score → priorite tendance, correlation</li>
+<li><strong>Types d&#39;article</strong> : <strong>hot_news</strong> (400-650 mots, percutant, &lt; 48h), <strong>long_form</strong> (1000-1800 mots, analytique, multi-sources), <strong>standard</strong> (800-1200 mots)</li>
+</ul>
+<p><strong>2. Selection intelligente amelioree</strong> (<code>ArticleSelectionService</code>) :</p>
+<ul>
+<li>Utilise les poids depuis la config (plus de constantes hardcodees)</li>
+<li>Calcule le bonus &quot;frequence du sujet&quot; : ratio = nombre d&#39;items du groupe / taille totale du pool. Si ratio &gt;= seuil (ex: 10%), bonus ajoute au score</li>
+<li>Retourne pour chaque proposition :<ul>
+<li><strong>reasoning</strong> : explication detaillee (sources, qualite, SEO, fraicheur, <strong>priorite sujet si applicable</strong>)</li>
+<li><strong>suggested_article_type</strong> : hot_news | long_form | standard (determine automatiquement selon fraicheur et nombre de sources)</li>
+<li><strong>suggested_min_words</strong> / <strong>suggested_max_words</strong> : longueur cible pour l&#39;IA</li>
+<li><strong>context_priority</strong> : phrase reutilisable dans le prompt (ex: &quot;Sur 50 articles analyses, 10 portent sur ce sujet (tendance). Ce sujet est prioritaire.&quot;)</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. Generation avec contexte</strong> (<code>ArticleGeneratorService</code>) :</p>
+<ul>
+<li>Accepte maintenant : <code>articleType</code>, <code>minWords</code>, <code>maxWords</code>, <code>contextPriority</code></li>
+<li><strong>System prompt adapte</strong> : si <code>articleType = hot_news</code> → &quot;Brève / actualité chaude. Style percutant, direct, factuel. 400-650 mots.&quot; Si <code>long_form</code> → &quot;Article de fond. Approfondi, analytique. 1000-1800 mots.&quot;</li>
+<li><strong>User prompt enrichi</strong> : injection de <code>contextPriority</code> pour que l&#39;IA sache que ce sujet est prioritaire (ex: &quot;Sur 50 articles, 10 sur ce sujet → priorite tendance&quot;)</li>
+</ul>
+<p><strong>4. Export CSV pour analyse tendances</strong> :</p>
+<ul>
+<li><strong>Commande</strong> : <code>php artisan pipeline:export-trends-csv --limit=1000</code></li>
+<li>Export CSV avec colonnes : date, title, category, source, primary_topic, seo_keywords, quality_score, seo_score, url, status</li>
+<li><strong>Usage</strong> : nettoyer les donnees, puis utiliser avec ChatGPT / SVC / data science pour identifier ce qui ressort (titres, sujets, min/top, references) et ameliorer les prompts</li>
+</ul>
+<p><strong>5. Documentation</strong> :</p>
+<ul>
+<li><strong><code>docs/LOGIQUE_SELECTION_ET_PROMPTS.md</code></strong> : regles predefinies, comment l&#39;IA fait un choix, variantes de poids, tests de prompts, guide trends (export CSV + utilisation avec ChatGPT)</li>
+</ul>
+<p><strong>Fichiers crees/modifies</strong> :</p>
+<ul>
+<li><code>config/selection.php</code> (nouveau) : profils, poids, topic_frequency, article_types</li>
+<li><code>app/Services/ArticleSelectionService.php</code> : poids configurables, bonus frequence sujet, suggested_article_type, context_priority</li>
+<li><code>app/Services/ArticleGeneratorService.php</code> : parametres articleType/minWords/maxWords/contextPriority, prompts adaptes</li>
+<li><code>app/Http/Requests/GenerateArticleRequest.php</code> : nouveaux champs optionnels</li>
+<li><code>app/Console/Commands/ExportTrendsCsvCommand.php</code> (nouveau) : export CSV pour trends</li>
+<li><code>.env.example</code> : <code>SELECTION_WEIGHT_PROFILE=default</code></li>
+</ul>
+<p><strong>Resultat</strong> : La logique de selection est maintenant basee sur des <strong>regles predefinies</strong> configurables, <strong>connectee a l&#39;actu</strong> (fraicheur + frequence sujet), avec <strong>correlation</strong> (bonus si beaucoup d&#39;articles sur le meme sujet), <strong>transparente</strong> (reasoning + context_priority), et <strong>adaptative</strong> (hot_news vs article de fond selon le contexte). L&#39;export CSV permet d&#39;analyser de gros volumes (500-1000+ articles) avec ChatGPT / data science pour affiner encore les prompts.</p>
+<hr>
+<h2>Documentation produite</h2>
+<h3>Stack technique documentee</h3>
+<p>En plus du code, j&#39;ai produit un document de stack technique complet (<code>docs/STACK_TECHNIQUE.md</code>) qui couvre :</p>
+<ul>
+<li>L&#39;architecture logicielle (pourquoi Controllers fins + Services + Jobs)</li>
+<li>Le detail du pipeline en 5 etapes avec les fichiers concernes</li>
+<li>Le schema complet des 36 tables</li>
+<li>L&#39;authentification, les roles, la securite</li>
+<li>L&#39;integration IA (OpenAI GPT-4o) avec les prompts</li>
+<li>Le cache et la performance (Redis)</li>
+<li>L&#39;infrastructure Docker</li>
+<li>L&#39;inventaire complet du code</li>
+</ul>
+<p>Ce document est concu pour etre presente au chef de projet ou a un nouveau developpeur.</p>
+<h3>Schema de base de donnees</h3>
+<p>Un document detaille (<code>docs/SCHEMA_COMPLET_TABLES.md</code>) qui decrit chaque table colonne par colonne, avec les types, les relations, les index, et surtout <strong>la logique d&#39;affichage des articles</strong> (homepage, a la une, recommandations, recherche).</p>
+<hr>
+<h2>Chiffres cles du projet</h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Nombre</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Routes API</strong></td>
+<td>94</td>
+</tr>
+<tr>
+<td><strong>Tables en base de donnees</strong></td>
+<td>36</td>
+</tr>
+<tr>
+<td><strong>Models Eloquent</strong></td>
+<td>17</td>
+</tr>
+<tr>
+<td><strong>Controllers API</strong></td>
+<td>16</td>
+</tr>
+<tr>
+<td><strong>Services metier</strong></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Jobs asynchrones</strong></td>
+<td>3</td>
+</tr>
+<tr>
+<td><strong>Migrations de base de donnees</strong></td>
+<td>24</td>
+</tr>
+<tr>
+<td><strong>Roles</strong></td>
+<td>2 (admin, contributor)</td>
+</tr>
+<tr>
+<td><strong>Permissions</strong></td>
+<td>21</td>
+</tr>
+<tr>
+<td><strong>Donnees legacy importees</strong></td>
+<td>3 830 enregistrements</td>
+</tr>
+<tr>
+<td><strong>Tests automatises</strong></td>
+<td>12 tests, 39 assertions</td>
+</tr>
+<tr>
+<td><strong>Documents de reference</strong></td>
+<td>10</td>
+</tr>
+<tr>
+<td><strong>Commandes Artisan</strong></td>
+<td>5 (rss:fetch, content:enrich, cleanup:old, articles:generate, pipeline:export-trends-csv)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Livrables</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>docs/STACK_TECHNIQUE.md</code></td>
+<td>Stack technique complete</td>
+</tr>
+<tr>
+<td><code>docs/SCHEMA_COMPLET_TABLES.md</code></td>
+<td>Schema detaille des 36 tables + logique d&#39;affichage</td>
+</tr>
+<tr>
+<td><code>docs/TESTING_POSTMAN.md</code></td>
+<td>Guide de test Postman (94 endpoints)</td>
+</tr>
+<tr>
+<td><code>docs/SCHEMA_BASE_EXISTANTE.md</code></td>
+<td>Analyse de l&#39;ancienne base de donnees</td>
+</tr>
+<tr>
+<td><code>docs/JOURNAL_AVANCEMENT.md</code></td>
+<td>Journal detaille de chaque etape</td>
+</tr>
+<tr>
+<td><code>docs/DOCKER.md</code></td>
+<td>Guide d&#39;installation Docker</td>
+</tr>
+<tr>
+<td><code>docs/RESUME_AVANCEMENT.md</code></td>
+<td>Resume compact pour le chef de projet</td>
+</tr>
+<tr>
+<td><code>docs/RAPPORT_COMPLET.md</code></td>
+<td>Ce document</td>
+</tr>
+<tr>
+<td><code>docs/LOGIQUE_SELECTION_ET_PROMPTS.md</code></td>
+<td>Regles predefinies, logique de selection, tests prompts, guide trends</td>
+</tr>
+<tr>
+<td><code>docs/AUDIT_PERFORMANCE.md</code></td>
+<td>Audit performance (score 7/10 → 8,5/10) avec optimisations</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Ce qui reste a faire</h2>
+<table>
+<thead>
+<tr>
+<th>Priorite</th>
+<th>Tache</th>
+<th>Effort estime</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Haute</strong></td>
+<td>Crediter la cle OpenAI (l&#39;enrichissement IA et la generation sont bloques par le quota)</td>
+<td>Configuration</td>
+</tr>
+<tr>
+<td><strong>Haute</strong></td>
+<td>Deploiement sur un VPS (DigitalOcean/Hetzner) avec Nginx + SSL</td>
+<td>1-2 jours</td>
+</tr>
+<tr>
+<td><strong>Moyenne</strong></td>
+<td>Integration frontend (le frontend consomme les endpoints <code>/api/public/*</code>)</td>
+<td>Selon le frontend</td>
+</tr>
+<tr>
+<td><strong>Moyenne</strong></td>
+<td>Configuration d&#39;un vrai service email (Resend/Mailgun) pour la newsletter</td>
+<td>0.5 jour</td>
+</tr>
+<tr>
+<td><strong>Moyenne</strong></td>
+<td>Installer Sentry pour le monitoring d&#39;erreurs en production</td>
+<td>0.5 jour</td>
+</tr>
+<tr>
+<td><strong>Basse</strong></td>
+<td>Sitemap XML dynamique (<code>spatie/laravel-sitemap</code>)</td>
+<td>0.5 jour</td>
+</tr>
+<tr>
+<td><strong>Basse</strong></td>
+<td>Support multi-langues FR/NL (fichiers de traduction Laravel)</td>
+<td>1 jour</td>
+</tr>
+<tr>
+<td><strong>Basse</strong></td>
+<td>Laravel Telescope pour le debug en developpement</td>
+<td>0.5 jour</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>Rapport complet — Achraf Ben Ali — 17 fevrier 2026</em></p>
+
+</body>
+</html>

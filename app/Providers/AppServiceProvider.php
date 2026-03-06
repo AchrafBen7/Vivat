@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,11 +22,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Rate limiter for OpenAI API calls via queues
         RateLimiter::for('openai', function (object $job) {
             $key = property_exists($job, 'item') && $job->item !== null
                 ? $job->item->id
                 : ($job->job ?? 'default');
             return Limit::perMinute(50)->by($key);
+        });
+
+        // Rate limiter for public API
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

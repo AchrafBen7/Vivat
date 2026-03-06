@@ -26,8 +26,12 @@ return new class extends Migration
             $table->index('published_at');
             $table->index('fetched_at');
             $table->index(['status', 'fetched_at'], 'idx_items_processing');
-            $table->fullText(['title', 'description'], 'ft_items_content');
         });
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            Schema::table('rss_items', function (Blueprint $table) {
+                $table->fullText(['title', 'description'], 'ft_items_content');
+            });
+        }
     }
 
     public function down(): void

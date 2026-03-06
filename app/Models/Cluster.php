@@ -25,6 +25,7 @@ class Cluster extends Model
 
     protected $casts = [
         'keywords' => 'array',
+        'created_at' => 'datetime',
     ];
 
     public function category(): BelongsTo

@@ -7,6 +7,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         DB::unprepared('
             CREATE TRIGGER sources_updated_at_trigger
             BEFORE UPDATE ON sources
@@ -23,6 +26,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         DB::unprepared('DROP TRIGGER IF EXISTS sources_updated_at_trigger');
         DB::unprepared('DROP TRIGGER IF EXISTS articles_updated_at_trigger');
     }

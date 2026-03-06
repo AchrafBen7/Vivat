@@ -17,16 +17,21 @@ class EnrichedItem extends Model
         'lead',
         'headings',
         'key_points',
+        'seo_keywords',
+        'primary_topic',
         'extracted_text',
         'extraction_method',
         'quality_score',
+        'seo_score',
         'enriched_at',
     ];
 
     protected $casts = [
         'headings' => 'array',
         'key_points' => 'array',
+        'seo_keywords' => 'array',
         'quality_score' => 'integer',
+        'seo_score' => 'integer',
         'enriched_at' => 'datetime',
     ];
 

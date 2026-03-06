@@ -21,9 +21,20 @@ class ArticleGeneratorService
      * @param  array<int, string>  $itemIds  UUID des RssItem (enriched)
      * @param  string|null  $categoryId  UUID catégorie optionnelle
      * @param  string|null  $customPrompt  Instructions supplémentaires
+     * @param  string|null  $articleType  hot_news | long_form | standard — adapte ton et longueur
+     * @param  int|null  $minWords  Longueur min cible (sinon depuis config/template)
+     * @param  int|null  $maxWords  Longueur max cible
+     * @param  string|null  $contextPriority  Contexte pour l'IA (ex: "Sur 50 articles, 10 sur ce sujet → priorité tendance")
      */
-    public function generate(array $itemIds, ?string $categoryId = null, ?string $customPrompt = null): Article
-    {
+    public function generate(
+        array $itemIds,
+        ?string $categoryId = null,
+        ?string $customPrompt = null,
+        ?string $articleType = null,
+        ?int $minWords = null,
+        ?int $maxWords = null,
+        ?string $contextPriority = null
+    ): Article {
         $items = RssItem::query()
             ->with(['enrichedItem', 'rssFeed.source', 'category'])
             ->whereIn('id', $itemIds)
@@ -45,8 +56,8 @@ class ArticleGeneratorService
         }
         $categoryId = $categoryId ?? $items->first()->category_id;
 
-        $systemPrompt = $this->buildSystemPrompt($template);
-        $userPrompt = $this->buildUserPrompt($items, $customPrompt);
+        $systemPrompt = $this->buildSystemPrompt($template, $articleType, $minWords, $maxWords);
+        $userPrompt = $this->buildUserPrompt($items, $customPrompt, $contextPriority);
 
         $json = $this->callOpenAI($systemPrompt, $userPrompt);
         $content = $this->sanitizeContent($json['content'] ?? $json['body'] ?? '');
@@ -75,6 +86,7 @@ class ArticleGeneratorService
             'cluster_id' => null,
             'reading_time' => $readingTime,
             'status' => 'draft',
+            'article_type' => $articleType,
             'quality_score' => $qualityScore,
         ]);
 
@@ -91,20 +103,55 @@ class ArticleGeneratorService
         return $article->load('articleSources');
     }
 
-    private function buildSystemPrompt(?CategoryTemplate $template): string
-    {
-        $tone = $template?->tone ?? 'professional';
+    private function buildSystemPrompt(
+        ?CategoryTemplate $template,
+        ?string $articleType = null,
+        ?int $minWordsOverride = null,
+        ?int $maxWordsOverride = null
+    ): string {
+        $articleTypesConfig = config('selection.article_types', []);
+        $typeConfig = $articleType && isset($articleTypesConfig[$articleType])
+            ? $articleTypesConfig[$articleType]
+            : ($articleTypesConfig['standard'] ?? []);
+
+        $minWords = $minWordsOverride ?? $template?->min_word_count ?? $typeConfig['min_words'] ?? 900;
+        $maxWords = $maxWordsOverride ?? $template?->max_word_count ?? $typeConfig['max_words'] ?? 2000;
+        $tone = $template?->tone ?? $typeConfig['tone'] ?? 'professionnel et accessible';
         $structure = $template?->structure ?? 'standard';
-        $minWords = $template?->min_word_count ?? 900;
-        $maxWords = $template?->max_word_count ?? 2000;
         $styleNotes = $template?->style_notes ?? '';
         $seoRules = $template?->seo_rules ?? '';
 
+        $typeInstruction = '';
+        if ($articleType === 'hot_news') {
+            $typeInstruction = "\nTYPE D'ARTICLE : Brève / actualité chaude. Style percutant, direct, factuel. Titre accrocheur. Pas de développement long.";
+        } elseif ($articleType === 'long_form') {
+            $typeInstruction = "\nTYPE D'ARTICLE : Article de fond. Approfondi, analytique, bien structuré avec sous-parties. Contexte et mise en perspective.";
+        }
+
         return <<<PROMPT
-Tu es un rédacteur expert. Génère un article de synthèse original à partir des sources fournies.
+Tu es un rédacteur expert en contenu SEO. Génère un article de synthèse 100% original à partir des sources fournies.
+
+RÈGLES :
 - Ton : {$tone}. Structure : {$structure}.
-- Longueur : entre {$minWords} et {$maxWords} mots.
-- Réponds UNIQUEMENT en JSON avec les clés : title, excerpt, content (HTML avec h2/h3), meta_title, meta_description, keywords (tableau de chaînes).
+- Longueur OBLIGATOIRE : entre {$minWords} et {$maxWords} mots (respecte cette fourchette).
+- Contenu HTML avec h2/h3 bien structurés. Chaque section apporte de la valeur.
+- Le titre doit contenir le mot-clé principal et être accrocheur (50-65 caractères idéal).
+- Le premier paragraphe doit contenir le mot-clé principal naturellement.
+- Utiliser les mots-clés SEO fournis naturellement dans le texte (densité 1-2%).
+- meta_title : 50-60 caractères, contient le mot-clé principal.
+- meta_description : 150-160 caractères, incitative au clic.
+- keywords : mots-clés longue traîne et spécifiques (pas de termes génériques).
+{$typeInstruction}
+
+RÉPONSE UNIQUEMENT en JSON :
+{
+  "title": "...",
+  "excerpt": "...",
+  "content": "<h2>...</h2><p>...</p>...",
+  "meta_title": "...",
+  "meta_description": "...",
+  "keywords": ["mot-clé 1", "mot-clé 2", ...]
+}
 {$styleNotes}
 {$seoRules}
 PROMPT;
@@ -113,16 +160,54 @@ PROMPT;
     /**
      * @param  \Illuminate\Database\Eloquent\Collection<int, RssItem>  $items
      */
-    private function buildUserPrompt($items, ?string $customPrompt): string
+    private function buildUserPrompt($items, ?string $customPrompt, ?string $contextPriority = null): string
     {
         $parts = [];
+        $allSeoKeywords = [];
+
         foreach ($items as $item) {
             $enriched = $item->enrichedItem;
-            $parts[] = "## Source : {$item->title}\nURL : {$item->url}\nLead : " . ($enriched->lead ?? '') . "\nPoints clés : " . json_encode($enriched->key_points ?? []) . "\nTexte extrait (extrait) : " . Str::limit($enriched->extracted_text ?? '', 1500);
+            $sourceName = $item->rssFeed?->source?->name ?? 'Source inconnue';
+
+            $seoKw = $enriched->seo_keywords ?? [];
+            $allSeoKeywords = array_merge($allSeoKeywords, $seoKw);
+
+            $part = "## Source : {$item->title} ({$sourceName})";
+            $part .= "\nURL : {$item->url}";
+            $part .= "\nSujet principal : " . ($enriched->primary_topic ?? 'Non défini');
+            $part .= "\nLead : " . ($enriched->lead ?? '');
+            $part .= "\nPoints clés : " . json_encode($enriched->key_points ?? []);
+            if (! empty($seoKw)) {
+                $part .= "\nMots-clés SEO identifiés : " . implode(', ', $seoKw);
+            }
+            $part .= "\nTexte extrait : " . Str::limit($enriched->extracted_text ?? '', 2000);
+            $parts[] = $part;
         }
-        $sources = implode("\n\n", $parts);
-        $custom = $customPrompt ? "\n\nInstructions supplémentaires : " . $customPrompt : '';
-        return "Sources à synthétiser :\n\n{$sources}{$custom}";
+
+        $sources = implode("\n\n---\n\n", $parts);
+
+        $contextBlock = '';
+        if ($contextPriority !== null && $contextPriority !== '') {
+            $contextBlock = "\n\n## Contexte de priorité (base-toi sur ceci pour le choix éditorial) :\n"
+                . $contextPriority
+                . "\n\nCe sujet est prioritaire ; l'article doit refléter cette importance.";
+        }
+
+        $uniqueKeywords = array_unique($allSeoKeywords);
+        $seoSection = '';
+        if (! empty($uniqueKeywords)) {
+            $seoSection = "\n\n## Mots-clés SEO à intégrer (par ordre de priorité) :\n"
+                . implode(', ', array_slice($uniqueKeywords, 0, 15))
+                . "\n\nUtilise ces mots-clés naturellement dans le titre, les sous-titres et le corps du texte.";
+        }
+
+        $custom = $customPrompt ? "\n\n## Instructions supplémentaires :\n" . $customPrompt : '';
+
+        return "# Sources à synthétiser ({$items->count()} articles de {$items->pluck('rssFeed.source.name')->filter()->unique()->implode(', ')})\n\n"
+            . $sources
+            . $contextBlock
+            . $seoSection
+            . $custom;
     }
 
     /**
@@ -169,10 +254,10 @@ PROMPT;
 
     private function sanitizeContent(string $text): string
     {
-        $text = str_replace(['—', '–'], ['—', '—'], $text);
-        $text = preg_replace('/[""]/u', '"', $text ?? '');
-        $text = preg_replace('/['']/u', "'", $text ?? '');
-        return trim($text ?? '');
+        $text = str_replace(["\xe2\x80\x94", "\xe2\x80\x93"], ['&mdash;', '&mdash;'], $text);
+        $text = preg_replace('/[\x{201C}\x{201D}]/u', '"', $text);
+        $text = preg_replace('/[\x{2018}\x{2019}]/u', "'", $text);
+        return trim($text);
     }
 
     private function calculateReadingTime(string $content): int

@@ -21,16 +21,20 @@ class GenerateArticleJob implements ShouldQueue
 
     public int $timeout = 180;
 
-    public string $queue = 'generation';
-
     /**
      * @param  array<int, string>  $itemIds  UUID des RssItem enrichis
      */
     public function __construct(
         public array $itemIds,
         public ?string $categoryId = null,
-        public ?string $customPrompt = null
-    ) {}
+        public ?string $customPrompt = null,
+        public ?string $articleType = null,
+        public ?int $minWords = null,
+        public ?int $maxWords = null,
+        public ?string $contextPriority = null
+    ) {
+        $this->onQueue('generation');
+    }
 
     public function handle(ArticleGeneratorService $generator): void
     {
@@ -39,7 +43,11 @@ class GenerateArticleJob implements ShouldQueue
         $article = $generator->generate(
             itemIds: $this->itemIds,
             categoryId: $this->categoryId,
-            customPrompt: $this->customPrompt
+            customPrompt: $this->customPrompt,
+            articleType: $this->articleType,
+            minWords: $this->minWords,
+            maxWords: $this->maxWords,
+            contextPriority: $this->contextPriority
         );
 
         Log::info("GenerateArticleJob completed: article {$article->id}");

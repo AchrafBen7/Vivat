@@ -25,13 +25,13 @@ class EnrichContentJob implements ShouldQueue
 
     public int $timeout = 90;
 
-    public string $queue = 'enrichment';
-
     private const MIN_TEXT_LENGTH = 200;
 
     public function __construct(
         public RssItem $item
-    ) {}
+    ) {
+        $this->onQueue('enrichment');
+    }
 
     public function middleware(): array
     {
@@ -68,9 +68,13 @@ class EnrichContentJob implements ShouldQueue
                 'lead' => $enrichment['lead'] ?? null,
                 'headings' => $enrichment['headings'] ?? [],
                 'key_points' => $enrichment['key_points'] ?? [],
+                'seo_keywords' => $enrichment['seo_keywords'] ?? [],
+                'primary_topic' => $enrichment['primary_topic'] ?? null,
                 'extracted_text' => $data['text'],
                 'extraction_method' => 'readability',
                 'quality_score' => (int) ($enrichment['quality_score'] ?? 0),
+                'seo_score' => (int) ($enrichment['seo_score'] ?? 0),
+                'enriched_at' => now(),
             ]
         );
 
@@ -90,8 +94,16 @@ class EnrichContentJob implements ShouldQueue
         }
 
         $text = mb_substr($extractedData['text'] ?? '', 0, 6000);
-        $userContent = "Extrait d'article (titre: " . ($extractedData['title'] ?? '') . "):\n\n" . $text;
-        $userContent .= "\n\nGénère un JSON avec : lead (résumé 1-2 phrases), headings (tableau des titres H2/H3), key_points (tableau de 3-7 points clés), quality_score (0-100).";
+        $headings = implode(', ', array_slice($extractedData['headings'] ?? [], 0, 10));
+        $userContent = "Titre: " . ($extractedData['title'] ?? '') . "\nTitres de sections: " . $headings . "\n\nContenu:\n" . $text;
+        $userContent .= "\n\nAnalyse ce contenu et génère un JSON avec :\n"
+            . "- lead: résumé 1-2 phrases\n"
+            . "- headings: tableau des titres H2/H3\n"
+            . "- key_points: tableau de 3-7 points clés\n"
+            . "- seo_keywords: tableau de 5-10 mots-clés SEO pertinents (termes spécifiques, pas génériques, longue traîne si possible)\n"
+            . "- primary_topic: le sujet principal en 2-4 mots (ex: 'transition énergétique', 'biodiversité marine')\n"
+            . "- quality_score: 0-100 (qualité rédactionnelle et informative)\n"
+            . "- seo_score: 0-100 (potentiel SEO estimé : originalité du sujet, spécificité des mots-clés, intérêt de recherche)";
 
         try {
             $response = Http::withToken($apiKey)
@@ -99,12 +111,12 @@ class EnrichContentJob implements ShouldQueue
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model' => config('services.openai.model', 'gpt-4o'),
                     'messages' => [
-                        ['role' => 'system', 'content' => 'Tu analyses du contenu et produis un JSON avec lead, headings, key_points, quality_score. Réponds uniquement en JSON.'],
+                        ['role' => 'system', 'content' => "Tu es un analyste de contenu SEO expert. Tu analyses des articles et produis une analyse structurée avec des mots-clés SEO ciblés (longue traîne, spécifiques, faible concurrence). Privilégie les termes recherchés par les utilisateurs mais peu concurrentiels. Réponds uniquement en JSON."],
                         ['role' => 'user', 'content' => $userContent],
                     ],
                     'response_format' => ['type' => 'json_object'],
                     'temperature' => 0.3,
-                    'max_tokens' => 1500,
+                    'max_tokens' => 2000,
                 ]);
         } catch (Throwable $e) {
             Log::error("EnrichContentJob OpenAI request failed: {$e->getMessage()}");

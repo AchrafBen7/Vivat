@@ -19,7 +19,13 @@ class Category extends Model
         'name',
         'slug',
         'description',
-        'color',
+        'home_order',
+        'image_url',
+        'video_url',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
     ];
 
     public function rssFeeds(): HasMany
@@ -45,5 +51,10 @@ class Category extends Model
     public function template(): HasOne
     {
         return $this->hasOne(CategoryTemplate::class);
+    }
+
+    public function subCategories(): HasMany
+    {
+        return $this->hasMany(SubCategory::class, 'category_id')->orderBy('order');
     }
 }

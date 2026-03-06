@@ -28,6 +28,7 @@ class RssFeed extends Model
         'is_active' => 'boolean',
         'last_fetched_at' => 'datetime',
         'fetch_interval_minutes' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     public function source(): BelongsTo
@@ -46,7 +47,7 @@ class RssFeed extends Model
     }
 
     public function scopeActive($query)
-    {
+    {                   
         return $query->where('is_active', true);
     }
 

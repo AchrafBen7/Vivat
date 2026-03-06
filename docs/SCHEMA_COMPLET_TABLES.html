@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivat — Stack Technique Backend</title>
+<style>
+  @page {
+    size: A4;
+    margin: 25mm 20mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a2e;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 30px 40px;
+    background: #fff;
+  }
+  h1 {
+    font-size: 24pt;
+    color: #16213e;
+    border-bottom: 3px solid #0f3460;
+    padding-bottom: 10px;
+    margin-top: 0;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 16pt;
+    color: #0f3460;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-top: 35px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 13pt;
+    color: #1a365d;
+    margin-top: 25px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #2d3748;
+    margin-top: 20px;
+    page-break-after: avoid;
+  }
+  blockquote {
+    border-left: 4px solid #0f3460;
+    margin: 15px 0;
+    padding: 10px 20px;
+    background: #f0f4ff;
+    border-radius: 0 6px 6px 0;
+    font-size: 10pt;
+    color: #4a5568;
+  }
+  blockquote p { margin: 4px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #0f3460;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+  }
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background: #f7fafc; }
+  tr:hover { background: #edf2f7; }
+  code {
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+    font-size: 9.5pt;
+    color: #c53030;
+  }
+  pre {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.5;
+    page-break-inside: avoid;
+    margin: 15px 0;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 30px 0;
+  }
+  strong { color: #1a202c; }
+  a { color: #2b6cb0; text-decoration: none; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  p { margin: 8px 0; }
+
+  /* Print-specific */
+  @media print {
+    body { padding: 0; max-width: none; }
+    h1, h2, h3, h4 { page-break-after: avoid; }
+    table, pre, blockquote { page-break-inside: avoid; }
+    a { color: #2b6cb0; }
+    a::after { content: none; }
+  }
+
+  /* Table of contents links */
+  a[href^="#"] { color: #0f3460; font-weight: 500; }
+
+  /* Cover-like header */
+  h1:first-of-type {
+    text-align: center;
+    font-size: 28pt;
+    margin-bottom: 5px;
+  }
+  body > blockquote:first-of-type {
+    text-align: center;
+    border-left: none;
+    background: none;
+    padding: 0;
+    margin-bottom: 30px;
+  }
+</style>
+</head>
+<body>
+<h1>Vivat — Schema complet de la base de donnees</h1>
+<blockquote>
+<p><strong>36 tables</strong> | <strong>17 models Eloquent</strong> | <strong>UUID partout</strong> | MySQL 8.0
+Derniere mise a jour : 9 fevrier 2026</p>
+</blockquote>
+<hr>
+<h2>Table des matieres</h2>
+<ol>
+<li><a href="#logique-daffichage-des-articles">Logique d&#39;affichage des articles</a></li>
+<li><a href="#tables-du-pipeline">Tables du pipeline (11 tables)</a></li>
+<li><a href="#tables-utilisateurs-et-auth">Tables utilisateurs et auth (7 tables)</a></li>
+<li><a href="#tables-du-site-public">Tables du site public (5 tables)</a></li>
+<li><a href="#tables-legacy">Tables legacy importees (5 tables)</a></li>
+<li><a href="#tables-framework">Tables framework Laravel (6 tables)</a></li>
+<li><a href="#diagramme-des-relations">Diagramme des relations</a></li>
+</ol>
+<hr>
+<h2>Logique d&#39;affichage des articles</h2>
+<h3>Comment un article apparait-il sur le site ?</h3>
+<p>Chaque article passe par un <strong>cycle de vie</strong> avant d&#39;etre visible :</p>
+<pre><code>[Pipeline IA] → draft → review → published ← seul statut visible sur le site
+                                     |
+                          condition : quality_score &gt;= 60
+</code></pre>
+<p><strong>Un article est &quot;publie&quot;</strong> quand :</p>
+<ul>
+<li><code>status = &#39;published&#39;</code></li>
+<li><code>published_at IS NOT NULL</code></li>
+<li><code>quality_score &gt;= 60</code> (condition verifiee AVANT la publication)</li>
+</ul>
+<p>Tous les endpoints publics utilisent le scope <code>Article::published()</code> qui filtre automatiquement sur ces criteres.</p>
+<hr>
+<h3>Homepage — Liste des articles</h3>
+<p><strong>Endpoint</strong> : <code>GET /api/public/articles</code>
+<strong>Logique</strong> : Tous les articles publies, tries par date de publication (les plus recents d&#39;abord).</p>
+<table>
+<thead>
+<tr>
+<th>Critere</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Filtre obligatoire</td>
+<td><code>status = published</code> ET <code>published_at IS NOT NULL</code></td>
+</tr>
+<tr>
+<td>Tri par defaut</td>
+<td><code>published_at DESC</code> (les plus recents)</td>
+</tr>
+<tr>
+<td>Tris possibles</td>
+<td><code>published_at</code>, <code>reading_time</code>, <code>quality_score</code>, <code>title</code></td>
+</tr>
+<tr>
+<td>Filtres optionnels</td>
+<td>Par categorie (slug), par duree de lecture max</td>
+</tr>
+<tr>
+<td>Pagination</td>
+<td>12 articles/page (max 50)</td>
+</tr>
+</tbody></table>
+<p><strong>En resume</strong> : l&#39;article le plus recent apparait en premier. Le frontend peut trier autrement (par qualite, par duree de lecture, etc.).</p>
+<hr>
+<h3>A la une — Articles mis en avant</h3>
+<p><strong>Endpoint</strong> : <code>GET /api/public/categories/{slug}/hub</code>
+<strong>Logique</strong> : Pour chaque categorie, les 3 articles avec le <strong>meilleur <code>quality_score</code></strong> sont &quot;a la une&quot;.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Logique</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Featured (a la une)</strong></td>
+<td><code>status = published</code> + <code>category_id = X</code> + <strong>tri par <code>quality_score DESC</code></strong> + <strong>limit 3</strong></td>
+</tr>
+<tr>
+<td><strong>Recents</strong></td>
+<td><code>status = published</code> + <code>category_id = X</code> + tri par <code>published_at DESC</code> + limit 10</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td>Comptage de tous les articles publies de la categorie</td>
+</tr>
+</tbody></table>
+<p><strong>Ce qui determine qu&#39;un article est &quot;a la une&quot;</strong> :</p>
+<ul>
+<li>Il est <strong>publie</strong> (status = published)</li>
+<li>Il appartient a la <strong>categorie de la page hub</strong></li>
+<li>Il a le <strong>quality_score le plus eleve</strong> parmi les articles de cette categorie</li>
+<li>Le <code>quality_score</code> (0-100) est calcule par l&#39;IA lors de la generation : il mesure la qualite redactionnelle, la coherence, la richesse du contenu et la conformite SEO</li>
+</ul>
+<pre><code>Exemple :
+  Article A : quality_score = 92 → A la une (1er)
+  Article B : quality_score = 87 → A la une (2eme)
+  Article C : quality_score = 85 → A la une (3eme)
+  Article D : quality_score = 78 → Recents (pas a la une)
+</code></pre>
+<hr>
+<h3>Recommandations personnalisees</h3>
+<p><strong>Endpoint</strong> : <code>GET /api/public/recommendations?interests=environnement,sante&amp;session_id=xxx</code>
+<strong>Logique</strong> : Algorithme de scoring multi-criteres dans <code>RecommendationService</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Critere</th>
+<th>Poids</th>
+<th>Explication</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Centres d&#39;interet</strong></td>
+<td>40%</td>
+<td>L&#39;article correspond aux categories choisies par le visiteur ? +40 points</td>
+</tr>
+<tr>
+<td><strong>Qualite de l&#39;article</strong></td>
+<td>25%</td>
+<td><code>quality_score</code> normalise de 0 a 25 (un article a 80/100 → 20 points)</td>
+</tr>
+<tr>
+<td><strong>Fraicheur</strong></td>
+<td>20%</td>
+<td>Article publie il y a 0 jours → 20 pts, 15 jours → 10 pts, 30+ jours → 0 pts</td>
+</tr>
+<tr>
+<td><strong>Popularite</strong></td>
+<td>15%</td>
+<td>Approx. par <code>reading_time</code> comme indicateur d&#39;engagement (max 15 pts)</td>
+</tr>
+<tr>
+<td><strong>Penalite</strong></td>
+<td>Exclusion</td>
+<td>Articles deja lus a plus de 50% sont <strong>exclus</strong> (via <code>reading_histories</code>)</td>
+</tr>
+</tbody></table>
+<p><strong>Fonctionnement sans compte</strong> : Le visiteur envoie un <code>session_id</code> (cookie) et ses <code>interests</code> (categorie slugs). Le systeme ne requiert pas d&#39;inscription.</p>
+<p><strong>Fonctionnement avec compte</strong> : Le <code>user_id</code> du token Sanctum est utilise. Les interets viennent du profil utilisateur.</p>
+<pre><code>Exemple de scoring :
+  Article &quot;Transition energetique&quot; dans categorie &quot;Energie&quot;
+    Visiteur interesse par &quot;energie&quot; → +40 (interet match)
+    quality_score = 88              → +22 (qualite)
+    Publie il y a 2 jours           → +18.7 (frais)
+    reading_time = 7 min            → +10.5 (popularite)
+    TOTAL = 91.2 points → Tres bien classe
+
+  Article &quot;Recette zero dechet&quot; dans categorie &quot;Mode de vie&quot;
+    Visiteur PAS interesse par &quot;mode-de-vie&quot; → +0
+    quality_score = 72               → +18
+    Publie il y a 20 jours           → +6.7
+    reading_time = 4 min             → +6
+    TOTAL = 30.7 points → Classe plus bas
+</code></pre>
+<hr>
+<h3>Recherche</h3>
+<p><strong>Endpoint</strong> : <code>GET /api/public/search?q=climat&amp;category=environnement&amp;date_from=2026-01-01</code></p>
+<table>
+<thead>
+<tr>
+<th>Filtre</th>
+<th>Champ(s) cherche(s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>q</code> (mot-cle)</td>
+<td><code>title LIKE %q%</code> OU <code>excerpt LIKE %q%</code> OU <code>meta_description LIKE %q%</code></td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td>Via slug de la categorie</td>
+</tr>
+<tr>
+<td><code>date_from</code> / <code>date_to</code></td>
+<td>Sur <code>published_at</code></td>
+</tr>
+<tr>
+<td><code>reading_time_max</code></td>
+<td>Sur <code>reading_time</code></td>
+</tr>
+</tbody></table>
+<p>Toujours limite aux articles <strong>publies</strong> uniquement.</p>
+<hr>
+<h2>Tables du pipeline</h2>
+<h3>1. sources — Medias configures</h3>
+<blockquote>
+<p>Model : <code>Source</code> | 6 enregistrements</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Nom du media (ex: &quot;Reporterre&quot;, &quot;Futura Sciences&quot;)</td>
+</tr>
+<tr>
+<td><code>base_url</code></td>
+<td>string</td>
+<td>Non</td>
+<td>URL du site (ex: &quot;<a href="https://reporterre.net">https://reporterre.net</a>&quot;)</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>string(10)</td>
+<td>Non</td>
+<td>Langue (defaut: &quot;fr&quot;)</td>
+</tr>
+<tr>
+<td><code>is_active</code></td>
+<td>boolean</td>
+<td>Non</td>
+<td>Source active ? (defaut: true)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification (trigger MySQL)</td>
+</tr>
+</tbody></table>
+<p><strong>Index</strong> : <code>is_active</code>, <code>language</code>
+<strong>Relations</strong> : → rss_feeds (hasMany), → article_sources (hasMany)</p>
+<hr>
+<h3>2. categories — Categories thematiques</h3>
+<blockquote>
+<p>Model : <code>Category</code> | 14 enregistrements</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Nom (ex: &quot;Environnement&quot;, &quot;Sante&quot;)</td>
+</tr>
+<tr>
+<td><code>slug</code></td>
+<td>string (unique)</td>
+<td>Non</td>
+<td>Slug SEO (ex: &quot;environnement&quot;)</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Description de la categorie</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string(7)</td>
+<td>Non</td>
+<td>Couleur hex (defaut: &quot;#3B82F6&quot;)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Relations</strong> : → rss_feeds, rss_items, clusters, articles (hasMany), → template (hasOne)</p>
+<hr>
+<h3>3. rss_feeds — Flux RSS configures</h3>
+<blockquote>
+<p>Model : <code>RssFeed</code> | 5 enregistrements</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>UUID (FK → sources)</td>
+<td>Oui</td>
+<td>Media source</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (FK → categories)</td>
+<td>Oui</td>
+<td>Categorie du flux</td>
+</tr>
+<tr>
+<td><code>feed_url</code></td>
+<td>text</td>
+<td>Non</td>
+<td>URL du flux RSS/Atom</td>
+</tr>
+<tr>
+<td><code>is_active</code></td>
+<td>boolean</td>
+<td>Non</td>
+<td>Flux actif ? (defaut: true)</td>
+</tr>
+<tr>
+<td><code>last_fetched_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere recuperation</td>
+</tr>
+<tr>
+<td><code>fetch_interval_minutes</code></td>
+<td>smallint</td>
+<td>Non</td>
+<td>Intervalle de fetch (defaut: 30 min)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Index</strong> : <code>is_active</code>, <code>last_fetched_at</code>, composite <code>(is_active, last_fetched_at)</code>
+<strong>Scope</strong> : <code>dueForFetch()</code> — flux actifs dont le dernier fetch depasse l&#39;intervalle</p>
+<hr>
+<h3>4. rss_items — Articles bruts decouverts</h3>
+<blockquote>
+<p>Model : <code>RssItem</code> | ~120 enregistrements</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>rss_feed_id</code></td>
+<td>UUID (FK → rss_feeds)</td>
+<td>Oui</td>
+<td>Flux d&#39;origine</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (FK → categories)</td>
+<td>Oui</td>
+<td>Categorie</td>
+</tr>
+<tr>
+<td><code>guid</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>GUID du flux RSS</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Titre de l&#39;article source</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Description/resume du flux</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>text</td>
+<td>Non</td>
+<td>URL de l&#39;article original</td>
+</tr>
+<tr>
+<td><code>published_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de publication dans le flux</td>
+</tr>
+<tr>
+<td><code>fetched_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de recuperation</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>new</code> → <code>enriching</code> → <code>enriched</code> / <code>failed</code> / <code>ignored</code> / <code>used</code></td>
+</tr>
+<tr>
+<td><code>dedup_hash</code></td>
+<td>string(64) unique</td>
+<td>Oui</td>
+<td>Hash SHA-256 (url + title) pour deduplication</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<p><strong>Index</strong> : <code>dedup_hash</code> (unique), <code>status</code>, <code>published_at</code>, <code>fetched_at</code>, fulltext <code>(title, description)</code></p>
+<hr>
+<h3>5. enriched_items — Contenu structure par l&#39;IA</h3>
+<blockquote>
+<p>Model : <code>EnrichedItem</code> | Relation 1:1 avec rss_items</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>rss_item_id</code></td>
+<td>UUID (FK → rss_items, unique)</td>
+<td>Oui</td>
+<td>Item source (1:1)</td>
+</tr>
+<tr>
+<td><code>lead</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Resume 1-2 phrases genere par l&#39;IA</td>
+</tr>
+<tr>
+<td><code>headings</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>Titres H2/H3 extraits</td>
+</tr>
+<tr>
+<td><code>key_points</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>3-7 points cles</td>
+</tr>
+<tr>
+<td><code>seo_keywords</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>5-10 mots-cles SEO longue traine</td>
+</tr>
+<tr>
+<td><code>primary_topic</code></td>
+<td>string(255)</td>
+<td>Oui</td>
+<td>Sujet principal en 2-4 mots</td>
+</tr>
+<tr>
+<td><code>extracted_text</code></td>
+<td>longText</td>
+<td>Oui</td>
+<td>Texte brut extrait de la page</td>
+</tr>
+<tr>
+<td><code>extraction_method</code></td>
+<td>string(50)</td>
+<td>Non</td>
+<td>Methode (defaut: &quot;readability&quot;)</td>
+</tr>
+<tr>
+<td><code>quality_score</code></td>
+<td>tinyint (0-100)</td>
+<td>Non</td>
+<td>Score qualite contenu (defaut: 0)</td>
+</tr>
+<tr>
+<td><code>seo_score</code></td>
+<td>tinyint (0-100)</td>
+<td>Non</td>
+<td>Score potentiel SEO (defaut: 0)</td>
+</tr>
+<tr>
+<td><code>enriched_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date d&#39;enrichissement</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>6. clusters — Groupes thematiques</h3>
+<blockquote>
+<p>Model : <code>Cluster</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (FK → categories)</td>
+<td>Oui</td>
+<td>Categorie du cluster</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Nom du groupe thematique</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>Mots-cles du cluster</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>pending</code> → <code>processing</code> → <code>generated</code> / <code>failed</code></td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>7. cluster_items — Pivot cluster ↔ rss_item</h3>
+<blockquote>
+<p>Model : <code>ClusterItem</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>cluster_id</code></td>
+<td>UUID (FK → clusters)</td>
+<td>Oui</td>
+<td>Cluster</td>
+</tr>
+<tr>
+<td><code>rss_item_id</code></td>
+<td>UUID (FK → rss_items)</td>
+<td>Oui</td>
+<td>Item RSS</td>
+</tr>
+</tbody></table>
+<p><strong>Contrainte</strong> : unique <code>(cluster_id, rss_item_id)</code></p>
+<hr>
+<h3>8. articles — Articles generes par l&#39;IA</h3>
+<blockquote>
+<p>Model : <code>Article</code> | <strong>Table centrale du site</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Titre de l&#39;article</td>
+</tr>
+<tr>
+<td><code>slug</code></td>
+<td>string (unique)</td>
+<td>Non</td>
+<td>Slug SEO (URL)</td>
+</tr>
+<tr>
+<td><code>excerpt</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Chapeau / resume court</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>longText</td>
+<td>Non</td>
+<td>Contenu HTML complet</td>
+</tr>
+<tr>
+<td><code>meta_title</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>Titre SEO (50-60 chars)</td>
+</tr>
+<tr>
+<td><code>meta_description</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>Description SEO (150-160 chars)</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>Mots-cles SEO</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (FK → categories)</td>
+<td>Oui</td>
+<td>Categorie</td>
+</tr>
+<tr>
+<td><code>cluster_id</code></td>
+<td>UUID (FK → clusters)</td>
+<td>Oui</td>
+<td>Cluster source</td>
+</tr>
+<tr>
+<td><code>reading_time</code></td>
+<td>smallint</td>
+<td>Non</td>
+<td>Temps de lecture en minutes (defaut: 5)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>draft</code> → <code>review</code> → <code>published</code> / <code>archived</code> / <code>rejected</code></td>
+</tr>
+<tr>
+<td><code>quality_score</code></td>
+<td>tinyint (0-100)</td>
+<td>Non</td>
+<td><strong>Score qualite</strong> — determine le classement &quot;a la une&quot;</td>
+</tr>
+<tr>
+<td><code>published_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de publication</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification (trigger)</td>
+</tr>
+</tbody></table>
+<p><strong>Index</strong> : <code>status</code>, <code>published_at</code>, <code>quality_score</code>, <code>(status, published_at)</code>, <code>(category_id, status)</code>, fulltext <code>(title, excerpt)</code></p>
+<p><strong>Champs cles pour l&#39;affichage</strong> :</p>
+<ul>
+<li><code>status = &#39;published&#39;</code> + <code>published_at</code> → article visible sur le site</li>
+<li><code>quality_score</code> → determine le classement &quot;a la une&quot; dans les pages hub</li>
+<li><code>published_at</code> → determine l&#39;ordre &quot;recents&quot; sur la homepage</li>
+<li><code>category_id</code> → determine dans quelle page hub l&#39;article apparait</li>
+<li><code>reading_time</code> → affiche &quot;5 min de lecture&quot; sur chaque article</li>
+<li><code>keywords</code> → utilise pour la recherche et le SEO</li>
+</ul>
+<hr>
+<h3>9. article_sources — Tracabilite article → sources</h3>
+<blockquote>
+<p>Model : <code>ArticleSource</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>article_id</code></td>
+<td>UUID (FK → articles)</td>
+<td>Oui</td>
+<td>Article genere</td>
+</tr>
+<tr>
+<td><code>rss_item_id</code></td>
+<td>UUID (FK → rss_items)</td>
+<td>Oui</td>
+<td>Item RSS source</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>UUID (FK → sources)</td>
+<td>Oui</td>
+<td>Media source</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>text</td>
+<td>Non</td>
+<td>URL de la source originale</td>
+</tr>
+<tr>
+<td><code>used_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date d&#39;utilisation</td>
+</tr>
+</tbody></table>
+<p><strong>Contrainte</strong> : unique <code>(article_id, rss_item_id)</code> — un item ne peut etre utilise qu&#39;une fois par article.</p>
+<hr>
+<h3>10. category_templates — Config de generation par categorie</h3>
+<blockquote>
+<p>Model : <code>CategoryTemplate</code> | 14 enregistrements (1 par categorie)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (FK → categories, unique)</td>
+<td>Oui</td>
+<td>Categorie (1:1)</td>
+</tr>
+<tr>
+<td><code>tone</code></td>
+<td>string(50)</td>
+<td>Non</td>
+<td>Ton de l&#39;article (defaut: &quot;professional&quot;)</td>
+</tr>
+<tr>
+<td><code>structure</code></td>
+<td>string(50)</td>
+<td>Non</td>
+<td>Structure (defaut: &quot;standard&quot;)</td>
+</tr>
+<tr>
+<td><code>min_word_count</code></td>
+<td>smallint</td>
+<td>Non</td>
+<td>Minimum de mots (defaut: 900)</td>
+</tr>
+<tr>
+<td><code>max_word_count</code></td>
+<td>smallint</td>
+<td>Non</td>
+<td>Maximum de mots (defaut: 2000)</td>
+</tr>
+<tr>
+<td><code>style_notes</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Notes de style pour le prompt IA</td>
+</tr>
+<tr>
+<td><code>seo_rules</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Regles SEO pour le prompt IA</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>11. pipeline_jobs — Monitoring des jobs</h3>
+<blockquote>
+<p>Model : <code>PipelineJob</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>job_type</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>fetch_rss</code>, <code>enrich</code>, <code>cluster</code>, <code>generate</code>, <code>publish</code>, <code>cleanup</code></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>pending</code> → <code>running</code> → <code>completed</code> / <code>failed</code></td>
+</tr>
+<tr>
+<td><code>started_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Debut d&#39;execution</td>
+</tr>
+<tr>
+<td><code>completed_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Fin d&#39;execution</td>
+</tr>
+<tr>
+<td><code>error_message</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Message d&#39;erreur si echec</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>Donnees contextuelles</td>
+</tr>
+<tr>
+<td><code>retry_count</code></td>
+<td>tinyint</td>
+<td>Non</td>
+<td>Nombre de tentatives (defaut: 0)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Tables utilisateurs et auth</h2>
+<h3>12. users — Utilisateurs</h3>
+<blockquote>
+<p>Model : <code>User</code> | Traits : HasUuids, HasApiTokens (Sanctum), HasRoles (spatie)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Nom complet</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>string (unique)</td>
+<td>Non</td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>email_verified_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de verification email</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Mot de passe (hash bcrypt)</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>enum (fr, nl)</td>
+<td>Non</td>
+<td>Langue preferee (defaut: fr)</td>
+</tr>
+<tr>
+<td><code>interests</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>Categories preferees (slugs)</td>
+</tr>
+<tr>
+<td><code>avatar</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>URL de l&#39;avatar</td>
+</tr>
+<tr>
+<td><code>bio</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Biographie (pour contributeurs)</td>
+</tr>
+<tr>
+<td><code>remember_token</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>Token &quot;se souvenir de moi&quot;</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification</td>
+</tr>
+</tbody></table>
+<p><strong>Roles</strong> : <code>admin</code> (21 permissions), <code>contributor</code> (3 permissions)</p>
+<hr>
+<h3>13. personal_access_tokens — Tokens API Sanctum</h3>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>bigint (PK)</td>
+<td>ID auto-increment</td>
+</tr>
+<tr>
+<td><code>tokenable_type</code></td>
+<td>string</td>
+<td>Type du model (App\Models\User)</td>
+</tr>
+<tr>
+<td><code>tokenable_id</code></td>
+<td>UUID</td>
+<td>ID de l&#39;utilisateur</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>text</td>
+<td>Nom du token (ex: &quot;api&quot;)</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td>string(64) unique</td>
+<td>Hash du token</td>
+</tr>
+<tr>
+<td><code>abilities</code></td>
+<td>text</td>
+<td>Permissions du token</td>
+</tr>
+<tr>
+<td><code>last_used_at</code></td>
+<td>timestamp</td>
+<td>Derniere utilisation</td>
+</tr>
+<tr>
+<td><code>expires_at</code></td>
+<td>timestamp</td>
+<td>Date d&#39;expiration</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>14-18. Tables spatie/permission (5 tables)</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>roles</code></td>
+<td>Roles : admin, contributor</td>
+</tr>
+<tr>
+<td><code>permissions</code></td>
+<td>21 permissions (articles.view, pipeline.fetch-rss, etc.)</td>
+</tr>
+<tr>
+<td><code>model_has_roles</code></td>
+<td>Pivot user ↔ role</td>
+</tr>
+<tr>
+<td><code>model_has_permissions</code></td>
+<td>Pivot user ↔ permission directe</td>
+</tr>
+<tr>
+<td><code>role_has_permissions</code></td>
+<td>Pivot role ↔ permissions</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Tables du site public</h2>
+<h3>19. submissions — Articles soumis par les contributeurs</h3>
+<blockquote>
+<p>Model : <code>Submission</code> | Traits : HasUuids, HasSlug (spatie)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>UUID (FK → users)</td>
+<td>Non</td>
+<td>Auteur</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Non</td>
+<td>Titre de l&#39;article</td>
+</tr>
+<tr>
+<td><code>slug</code></td>
+<td>string (unique)</td>
+<td>Non</td>
+<td>Slug auto-genere depuis le titre</td>
+</tr>
+<tr>
+<td><code>excerpt</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Resume</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>longText</td>
+<td>Non</td>
+<td>Contenu complet</td>
+</tr>
+<tr>
+<td><code>category_id</code></td>
+<td>UUID (FK → categories)</td>
+<td>Oui</td>
+<td>Categorie</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>draft</code> → <code>pending</code> → <code>approved</code> / <code>rejected</code></td>
+</tr>
+<tr>
+<td><code>reviewer_notes</code></td>
+<td>text</td>
+<td>Oui</td>
+<td>Notes du moderateur</td>
+</tr>
+<tr>
+<td><code>reviewed_by</code></td>
+<td>UUID (FK → users)</td>
+<td>Oui</td>
+<td>Moderateur qui a valide/rejete</td>
+</tr>
+<tr>
+<td><code>reviewed_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de moderation</td>
+</tr>
+<tr>
+<td><code>payment_id</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>Reference au paiement</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>20. payments — Paiements Stripe</h3>
+<blockquote>
+<p>Model : <code>Payment</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>UUID (FK → users)</td>
+<td>Non</td>
+<td>Payeur</td>
+</tr>
+<tr>
+<td><code>submission_id</code></td>
+<td>UUID (FK → submissions)</td>
+<td>Oui</td>
+<td>Article paye</td>
+</tr>
+<tr>
+<td><code>stripe_payment_intent_id</code></td>
+<td>string (unique)</td>
+<td>Non</td>
+<td>ID Stripe</td>
+</tr>
+<tr>
+<td><code>amount</code></td>
+<td>unsigned int</td>
+<td>Non</td>
+<td>Montant en centimes (ex: 1500 = 15.00 EUR)</td>
+</tr>
+<tr>
+<td><code>currency</code></td>
+<td>string(3)</td>
+<td>Non</td>
+<td>Devise (defaut: &quot;eur&quot;)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td>Non</td>
+<td><code>pending</code> → <code>paid</code> → <code>refunded</code> / <code>failed</code></td>
+</tr>
+<tr>
+<td><code>refund_reason</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>Raison du remboursement</td>
+</tr>
+<tr>
+<td><code>stripe_refund_id</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>ID du remboursement Stripe</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>21. newsletter_subscribers — Abonnes newsletter</h3>
+<blockquote>
+<p>Model : <code>NewsletterSubscriber</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>string (unique)</td>
+<td>Non</td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Oui</td>
+<td>Nom</td>
+</tr>
+<tr>
+<td><code>interests</code></td>
+<td>JSON</td>
+<td>Non</td>
+<td>Min. 3 categories choisies</td>
+</tr>
+<tr>
+<td><code>confirmed</code></td>
+<td>boolean</td>
+<td>Non</td>
+<td>Email confirme ? (defaut: false)</td>
+</tr>
+<tr>
+<td><code>unsubscribe_token</code></td>
+<td>string(64) unique</td>
+<td>Non</td>
+<td>Token de desabonnement</td>
+</tr>
+<tr>
+<td><code>confirm_token</code></td>
+<td>string(64) unique</td>
+<td>Oui</td>
+<td>Token de confirmation (null apres confirmation)</td>
+</tr>
+<tr>
+<td><code>confirmed_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de confirmation</td>
+</tr>
+<tr>
+<td><code>unsubscribed_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de desabonnement</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>22. reading_histories — Progression de lecture</h3>
+<blockquote>
+<p>Model : <code>ReadingHistory</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>UUID (FK → users)</td>
+<td>Oui</td>
+<td>Utilisateur connecte (null si cookie)</td>
+</tr>
+<tr>
+<td><code>session_id</code></td>
+<td>string(100)</td>
+<td>Oui</td>
+<td>ID de session cookie (si pas connecte)</td>
+</tr>
+<tr>
+<td><code>article_id</code></td>
+<td>UUID (FK → articles)</td>
+<td>Non</td>
+<td>Article lu</td>
+</tr>
+<tr>
+<td><code>progress</code></td>
+<td>tinyint (0-100)</td>
+<td>Non</td>
+<td>Pourcentage lu (defaut: 0)</td>
+</tr>
+<tr>
+<td><code>read_at</code></td>
+<td>timestamp</td>
+<td>Non</td>
+<td>Date de lecture</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification</td>
+</tr>
+</tbody></table>
+<p><strong>Utilise par</strong> : <code>RecommendationService</code> (exclut les articles lus a &gt;50%), endpoint &quot;reprendre la lecture&quot;.</p>
+<hr>
+<h3>23. user_preferences — Preferences visiteurs non connectes</h3>
+<blockquote>
+<p>Model : <code>UserPreference</code></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Nullable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>UUID (PK)</td>
+<td>Non</td>
+<td>Identifiant unique</td>
+</tr>
+<tr>
+<td><code>session_id</code></td>
+<td>string(100) unique</td>
+<td>Non</td>
+<td>ID de session cookie</td>
+</tr>
+<tr>
+<td><code>interests</code></td>
+<td>JSON</td>
+<td>Oui</td>
+<td>Categories preferees (slugs)</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>enum (fr, nl)</td>
+<td>Non</td>
+<td>Langue (defaut: fr)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Date de creation</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamp</td>
+<td>Oui</td>
+<td>Derniere modification</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Tables legacy</h2>
+<h3>24. tbl_cont_pg — 3 756 articles importes de l&#39;ancien site</h3>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>contID</code></td>
+<td>int (PK, auto)</td>
+<td>ID article</td>
+</tr>
+<tr>
+<td><code>contTitle</code></td>
+<td>varchar(250)</td>
+<td>Titre</td>
+</tr>
+<tr>
+<td><code>contDesc</code></td>
+<td>text</td>
+<td>Description</td>
+</tr>
+<tr>
+<td><code>contContent</code></td>
+<td>longText</td>
+<td>Contenu HTML</td>
+</tr>
+<tr>
+<td><code>contKeywords</code></td>
+<td>text</td>
+<td>Mots-cles</td>
+</tr>
+<tr>
+<td><code>contImgs</code></td>
+<td>varchar(255)</td>
+<td>Chemin images</td>
+</tr>
+<tr>
+<td><code>contImgsAlt</code></td>
+<td>text</td>
+<td>Alt text images</td>
+</tr>
+<tr>
+<td><code>contLang</code></td>
+<td>char(10)</td>
+<td>Langue</td>
+</tr>
+<tr>
+<td><code>contRef1/2/3</code></td>
+<td>varchar(200)</td>
+<td>References (categories)</td>
+</tr>
+<tr>
+<td><code>online</code></td>
+<td>int</td>
+<td>En ligne (0/1)</td>
+</tr>
+<tr>
+<td><code>contDate</code></td>
+<td>date</td>
+<td>Date article</td>
+</tr>
+<tr>
+<td><code>contPgs</code></td>
+<td>int</td>
+<td>Type de page</td>
+</tr>
+<tr>
+<td><code>meta_title</code></td>
+<td>varchar(255)</td>
+<td>SEO titre</td>
+</tr>
+<tr>
+<td><code>meta_desc</code></td>
+<td>varchar(255)</td>
+<td>SEO description</td>
+</tr>
+<tr>
+<td><code>creation</code></td>
+<td>datetime</td>
+<td>Date creation</td>
+</tr>
+<tr>
+<td><code>modification</code></td>
+<td>datetime</td>
+<td>Derniere modification</td>
+</tr>
+<tr>
+<td><code>contPublishDate</code></td>
+<td>int</td>
+<td>Timestamp publication</td>
+</tr>
+</tbody></table>
+<h3>25. tbl_ref — 71 categories/references legacy</h3>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>int (PK, auto)</td>
+<td>ID</td>
+</tr>
+<tr>
+<td><code>refID</code></td>
+<td>int</td>
+<td>Parent (0 = racine)</td>
+</tr>
+<tr>
+<td><code>refTitle</code></td>
+<td>varchar(255)</td>
+<td>Libelle</td>
+</tr>
+<tr>
+<td><code>refLang</code></td>
+<td>varchar(2)</td>
+<td>Langue</td>
+</tr>
+<tr>
+<td><code>refUrl</code></td>
+<td>varchar(255)</td>
+<td>URL / slug</td>
+</tr>
+<tr>
+<td><code>meta_title/desc/kw</code></td>
+<td>varchar(255)</td>
+<td>SEO</td>
+</tr>
+</tbody></table>
+<h3>26. tbl_usr — 3 utilisateurs legacy</h3>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>usrID</code></td>
+<td>int (PK, auto)</td>
+<td>ID</td>
+</tr>
+<tr>
+<td><code>usrNickName</code></td>
+<td>varchar(255)</td>
+<td>Login</td>
+</tr>
+<tr>
+<td><code>usrPw</code></td>
+<td>varchar(255)</td>
+<td>Mot de passe (hash)</td>
+</tr>
+<tr>
+<td><code>usrRealLastName/FirstName</code></td>
+<td>varchar(255)</td>
+<td>Nom/prenom</td>
+</tr>
+<tr>
+<td><code>usrEmail</code></td>
+<td>varchar(255)</td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>usrType</code></td>
+<td>tinyint</td>
+<td>Role (1=admin, 2=editeur)</td>
+</tr>
+</tbody></table>
+<h3>27-28. logs + cloaked_ip — Tables techniques legacy (vides)</h3>
+<p>Conservees pour compatibilite avec le dump. Non essentielles.</p>
+<hr>
+<h2>Tables framework</h2>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cache</code></td>
+<td>Cache Laravel (cle/valeur)</td>
+</tr>
+<tr>
+<td><code>cache_locks</code></td>
+<td>Verrous de cache</td>
+</tr>
+<tr>
+<td><code>jobs</code></td>
+<td>Queue Redis (jobs en attente)</td>
+</tr>
+<tr>
+<td><code>job_batches</code></td>
+<td>Batches de jobs</td>
+</tr>
+<tr>
+<td><code>failed_jobs</code></td>
+<td>Jobs echoues (pour debug)</td>
+</tr>
+<tr>
+<td><code>migrations</code></td>
+<td>Suivi des migrations executees</td>
+</tr>
+<tr>
+<td><code>password_reset_tokens</code></td>
+<td>Tokens de reset mot de passe</td>
+</tr>
+<tr>
+<td><code>sessions</code></td>
+<td>Sessions utilisateur</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Diagramme des relations</h2>
+<pre><code>sources ─────────┐
+                  ├──→ rss_feeds ──→ rss_items ──→ enriched_items
+categories ──────┤                        |
+                  |                        ├──→ cluster_items ──→ clusters
+                  |                        |
+                  |                        └──→ article_sources ──→ articles
+                  |                                                    |
+                  └──→ category_templates                              |
+                                                                       |
+users ──→ submissions ──→ payments                                     |
+  |                                                                    |
+  └──→ reading_histories ←────────────────────────────────────────────┘
+  |
+  └──→ user_preferences
+  |
+  └──→ personal_access_tokens
+  |
+  └──→ model_has_roles ──→ roles ──→ role_has_permissions ──→ permissions
+
+newsletter_subscribers (independant)
+</code></pre>
+<hr>
+<p><em>Document complet — 36 tables, 17 models, logique d&#39;affichage detaillee.</em></p>
+
+</body>
+</html>
