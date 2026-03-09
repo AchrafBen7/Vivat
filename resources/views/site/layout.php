@@ -22,6 +22,13 @@ $meta_description = $meta_description ?? '';
             --vivat-card-glass: rgba(255, 255, 255, 0.11);
             --vivat-card-border: rgba(255, 255, 255, 0.15);
         }
+        /* Glass effect matte, sans contour */
+        .vivat-glass {
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: none;
+        }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
     </style>
@@ -56,13 +63,13 @@ $meta_description = $meta_description ?? '';
 
             <!-- Hamburger: 48x48, radius 30px - 3 barres pill-shaped #004241, pas de background -->
             <button type="button" id="hamburger-menu" class="flex flex-col items-center justify-center gap-1.5 rounded-full flex-shrink-0 w-12 h-12 bg-transparent" style="border-radius: 30px;" aria-label="Menu">
-                <span class="block rounded-full" style="width: 20px; height: 3px; background: #004241;"></span>
-                <span class="block rounded-full" style="width: 20px; height: 3px; background: #004241;"></span>
-                <span class="block rounded-full" style="width: 20px; height: 3px; background: #004241;"></span>
+                <span class="block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
+                <span class="block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
+                <span class="block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
             </button>
         </div>
     </header>
-    <main class="max-w-[1400px] mx-auto px-5 lg:px-20 py-8">
+    <main class="max-w-[1400px] mx-auto px-5 lg:px-20 pb-8 overflow-x-hidden" style="padding-top: 24px;">
         <?= $content ?? '' ?>
     </main>
     <footer class="border-t border-gray-200 mt-12 py-8">

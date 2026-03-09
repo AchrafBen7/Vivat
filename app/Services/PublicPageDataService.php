@@ -151,7 +151,7 @@ class PublicPageDataService
             'meta_title' => $a->meta_title,
             'meta_description' => $a->meta_description,
             'reading_time' => $a->reading_time,
-            'published_at' => $a->published_at?->format('d/m/Y H:i'),
+            'published_at' => $a->published_at?->format('d/m/Y'),
             'cover_image_url' => $a->cover_image_url,
             'cover_video_url' => $a->cover_video_url,
             'article_type' => $a->article_type,
