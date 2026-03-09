@@ -31,7 +31,8 @@ class CategoryController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'title' => 'Rubriques — Vivat',
-            'meta_description' => 'Découvrez les rubriques Vivat.',
+            'meta_description' => 'Découvrez les rubriques Vivat. Parcourez nos catégories d\'actualités.',
+            'canonical_url' => url('/categories'),
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -42,11 +43,13 @@ class CategoryController extends Controller
         $subCategorySlug = $request->input('sub_category');
         $data = $pageData->getCategoryHubData($slug, $subCategorySlug);
 
+        $categorySlug = $data['category']['slug'] ?? $slug;
         $content = render_php_view('site.category_hub', $data);
         $html = render_php_view('site.layout', [
             'content' => $content,
             'title' => ($data['category']['name'] ?? 'Rubrique') . ' — Vivat',
-            'meta_description' => $data['description'] ?? '',
+            'meta_description' => $data['description'] ?? 'Articles de la rubrique '.($data['category']['name'] ?? '').' sur Vivat.',
+            'canonical_url' => url('/categories/'.$categorySlug),
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

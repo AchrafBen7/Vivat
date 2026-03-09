@@ -16,7 +16,8 @@ class ArticleController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'title' => 'Toutes les actualités — Vivat',
-            'meta_description' => 'Découvrez tous les articles Vivat.',
+            'meta_description' => 'Découvrez tous les articles et actualités Vivat. Parcourez nos derniers contenus par rubrique.',
+            'canonical_url' => url('/articles'),
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -40,6 +41,7 @@ class ArticleController extends Controller
                 'meta_description' => $article->meta_description,
                 'reading_time' => $article->reading_time,
                 'published_at' => $article->published_at?->format('d/m/Y H:i'),
+                'published_at_iso' => $article->published_at?->toIso8601String(),
                 'cover_image_url' => $article->cover_image_url,
                 'cover_video_url' => $article->cover_video_url,
                 'category' => $article->category ? [
@@ -49,11 +51,19 @@ class ArticleController extends Controller
             ],
         ];
 
+        $articleUrl = url('/articles/'.$article->slug);
+        $ogImage = $article->cover_image_url
+            ? (str_starts_with($article->cover_image_url, 'http') ? $article->cover_image_url : url($article->cover_image_url))
+            : null;
+
         $content = render_php_view('site.article', $data);
         $html = render_php_view('site.layout', [
             'content' => $content,
             'title' => $article->meta_title ?: $article->title,
             'meta_description' => $article->meta_description ?: $article->excerpt,
+            'canonical_url' => $articleUrl,
+            'og_image' => $ogImage,
+            'og_article' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

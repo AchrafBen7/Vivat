@@ -1,14 +1,40 @@
 <?php
 $title = $title ?? 'Vivat';
-$meta_description = $meta_description ?? '';
+$meta_description = $meta_description ?? 'Vivat — Actualités et articles. Découvrez nos rubriques et derniers articles.';
+$canonical_url = $canonical_url ?? null;
+$og_image = $og_image ?? null;
+$og_article = $og_article ?? false;
+$meta_description_safe = htmlspecialchars($meta_description);
+$title_safe = htmlspecialchars($title);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title) ?></title>
-    <meta name="description" content="<?= htmlspecialchars($meta_description) ?>">
+    <title><?= $title_safe ?></title>
+    <meta name="description" content="<?= $meta_description_safe ?>">
+    <?php if (!empty($canonical_url)): ?>
+    <link rel="canonical" href="<?= htmlspecialchars($canonical_url) ?>">
+    <?php endif; ?>
+    <!-- Open Graph -->
+    <meta property="og:type" content="<?= isset($og_article) && $og_article ? 'article' : 'website' ?>">
+    <meta property="og:title" content="<?= $title_safe ?>">
+    <meta property="og:description" content="<?= $meta_description_safe ?>">
+    <?php if (!empty($canonical_url)): ?>
+    <meta property="og:url" content="<?= htmlspecialchars($canonical_url) ?>">
+    <?php endif; ?>
+    <meta property="og:locale" content="fr_FR">
+    <?php if (!empty($og_image)): ?>
+    <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
+    <?php endif; ?>
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= $title_safe ?>">
+    <meta name="twitter:description" content="<?= $meta_description_safe ?>">
+    <?php if (!empty($og_image)): ?>
+    <meta name="twitter:image" content="<?= htmlspecialchars($og_image) ?>">
+    <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +57,28 @@ $meta_description = $meta_description ?? '';
         }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
+
+        /* Scroll reveal: cartes qui apparaissent au scroll, une par une */
+        .vivat-reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+        }
+        .vivat-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Zoom image au survol des cartes avec image */
+        .vivat-card-with-image {
+            overflow: hidden;
+        }
+        .vivat-card-with-image img {
+            transition: transform 0.45s ease;
+        }
+        .vivat-card-with-image:hover img {
+            transform: scale(1.06);
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
@@ -38,7 +86,7 @@ $meta_description = $meta_description ?? '';
     <header class="bg-white border-b border-gray-100">
         <div class="max-w-[1400px] mx-auto px-5 lg:px-20 flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
             <!-- Logo: 32px, #004241, Righteous 400, letter-spacing 3%, 612px space avant searchbar -->
-            <a href="/" class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;">Vivat</a>
+            <h1 class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
 
             <!-- Espace logo - searchbar: 612px sur desktop -->
             <div class="hidden lg:block flex-shrink-0" style="width: 612px;"></div>
@@ -77,5 +125,33 @@ $meta_description = $meta_description ?? '';
             © <?= date('Y') ?> Vivat. Tous droits réservés.
         </div>
     </footer>
+    <script>
+    (function() {
+        function initScrollReveal() {
+            var groups = document.querySelectorAll('.vivat-reveal-group');
+            if (!groups.length) return;
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (!entry.isIntersecting) return;
+                    var group = entry.target;
+                    if (group.classList.contains('vivat-reveal-done')) return;
+                    group.classList.add('vivat-reveal-done');
+                    var items = group.querySelectorAll('.vivat-reveal');
+                    var delay = 180;
+                    items.forEach(function(el, i) {
+                        el.style.transitionDelay = (i * delay) + 'ms';
+                        el.classList.add('is-visible');
+                    });
+                });
+            }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
+            groups.forEach(function(g) { observer.observe(g); });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScrollReveal);
+        } else {
+            initScrollReveal();
+        }
+    })();
+    </script>
 </body>
 </html>

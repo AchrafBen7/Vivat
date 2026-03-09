@@ -15,7 +15,7 @@ $pagination = $pagination ?? null;
             <p class="text-[#004241] text-sm font-light mt-2"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
             <?php if (!empty($art['cover_image_url'])): ?>
             <div class="rounded-[21px] overflow-hidden mt-4 flex-shrink-0">
-                <img src="<?= htmlspecialchars($art['cover_image_url']) ?>" alt="" class="w-full h-40 object-cover">
+                <img src="<?= htmlspecialchars($art['cover_image_url']) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-40 object-cover" loading="lazy">
             </div>
             <?php endif; ?>
         </a>
