@@ -12,6 +12,19 @@ use Illuminate\Support\Facades\Cache;
  */
 class PublicPageDataService
 {
+    public function getArticlesIndexData(): array
+    {
+        $articles = Article::published()
+            ->with('category')
+            ->orderByDesc('published_at')
+            ->paginate(12);
+
+        return [
+            'articles' => $articles->getCollection()->map(fn ($a) => $this->articleToArray($a))->all(),
+            'pagination' => $articles,
+        ];
+    }
+
     public function getHomeData(): array
     {
         $cacheKey = 'vivat.home';

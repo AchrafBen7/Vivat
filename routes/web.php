@@ -14,4 +14,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', WebHomeController::class)->name('home');
 Route::get('/categories', [WebCategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{slug}', [WebCategoryController::class, 'hub'])->name('categories.hub');
+Route::get('/articles', [WebArticleController::class, 'index'])->name('articles.index');
 Route::get('/articles/{slug}', [WebArticleController::class, 'show'])->name('articles.show');

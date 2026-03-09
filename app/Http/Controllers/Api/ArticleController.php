@@ -160,6 +160,14 @@ class ArticleController extends Controller
             'quality_score' => $request->input('quality_score', 0),
         ]));
 
+        if ($article->status === 'published') {
+            Cache::forget('vivat.home');
+            if ($article->category) {
+                Cache::forget('vivat.hub.' . $article->category->slug);
+            }
+            Cache::forget('vivat.categories.index');
+        }
+
         return (new ArticleResource($article))->response()->setStatusCode(201);
     }
 

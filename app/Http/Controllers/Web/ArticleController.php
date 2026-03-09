@@ -9,6 +9,19 @@ use Illuminate\Http\Response;
 
 class ArticleController extends Controller
 {
+    public function index(): Response
+    {
+        $data = app(\App\Services\PublicPageDataService::class)->getArticlesIndexData();
+        $content = render_php_view('site.articles_index', $data);
+        $html = render_php_view('site.layout', [
+            'content' => $content,
+            'title' => 'Toutes les actualités — Vivat',
+            'meta_description' => 'Découvrez tous les articles Vivat.',
+        ]);
+
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
     public function show(Request $request, string $slug): Response
     {
         $article = Article::published()

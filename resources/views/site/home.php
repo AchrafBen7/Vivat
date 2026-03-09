@@ -5,99 +5,382 @@ $latest = $latest ?? [];
 $categories = $categories ?? [];
 $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
+
+// On prend les premiers articles pour la grille (hot news, 2 features, 2 standards)
+$feature1 = $featured[0] ?? null;
+$standard1 = $featured[1] ?? $latest[0] ?? null;
+$feature2 = $featured[2] ?? $latest[1] ?? null;
+$standard2 = $latest[0] ?? ($featured[3] ?? null);
+$catChunks = array_chunk($categories, 3);
 ?>
-<div class="space-y-12">
-    <?php if ($top_news): ?>
-    <section>
-        <a href="/articles/<?= htmlspecialchars($top_news['slug']) ?>" class="block rounded-xl overflow-hidden bg-gray-900 aspect-[2/1] relative">
-            <?php if (!empty($top_news['cover_image_url'])): ?>
-            <img src="<?= htmlspecialchars($top_news['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
+<!-- Grille articles - Design System Figma -->
+<div class="flex flex-col">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5" style="column-gap: 21px;">
+        <!-- Colonne gauche: Hot news + Standard 2 -->
+        <div class="lg:col-span-5 flex flex-col gap-5" style="gap: 31px;">
+            <?php if ($top_news): ?>
+            <!-- Hot news: 519x438, radius 30, overlay 20%, inner card glass -->
+            <a href="/articles/<?= htmlspecialchars($top_news['slug']) ?>" class="block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 519px; height: 438px;">
+                <?php if (!empty($top_news['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($top_news['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                <?php endif; ?>
+                <div class="absolute inset-0" style="background: rgba(0,0,0,0.2);"></div>
+                <div class="absolute bottom-6 left-6 rounded-[21px] flex flex-col p-6 gap-2 border" style="width: 299px; background: rgba(255,255,255,0.11); border: 1px solid rgba(255,255,255,0.15);">
+                    <span class="text-xs font-medium uppercase tracking-wide text-white/90">Top news</span>
+                    <h2 class="font-semibold text-white line-clamp-2" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($top_news['title']) ?></h2>
+                    <?php if (!empty($top_news['excerpt'])): ?>
+                    <p class="text-white/90 line-clamp-2" style="font-size: 16px;"><?= htmlspecialchars($top_news['excerpt']) ?></p>
+                    <?php endif; ?>
+                    <p class="text-white/80 text-sm mt-auto"><?= htmlspecialchars($top_news['published_at'] ?? '') ?> • <?= (int) ($top_news['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
             <?php endif; ?>
-            <div class="absolute inset-0 flex flex-col justify-end p-8">
-                <span class="text-sm font-medium text-amber-400 uppercase tracking-wide">Top news</span>
-                <h1 class="text-3xl md:text-4xl font-bold text-white mt-1"><?= htmlspecialchars($top_news['title']) ?></h1>
-                <?php if (!empty($top_news['excerpt'])): ?>
-                <p class="text-gray-300 mt-2 max-w-2xl"><?= htmlspecialchars($top_news['excerpt']) ?></p>
+
+            <?php if ($standard2): ?>
+            <!-- Standard 2: 519x280, #FFF0D4, radius 30, pas de photo -->
+            <a href="/articles/<?= htmlspecialchars($standard2['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-gray-200/50 p-6 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; background: #FFF0D4;">
+                <?php if (!empty($standard2['category'])): ?>
+                <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($standard2['category']['name']) ?></span>
                 <?php endif; ?>
+                <h3 class="font-semibold text-[#004241] line-clamp-2 mt-1" style="font-size: 18px;"><?= htmlspecialchars($standard2['title']) ?></h3>
+                <p class="text-sm text-[#004241]/70 mt-2"><?= htmlspecialchars($standard2['published_at'] ?? '') ?> • <?= (int) ($standard2['reading_time'] ?? 0) ?> min</p>
+            </a>
+            <?php endif; ?>
+        </div>
+
+        <!-- Colonne milieu: Feature + Standard 1 (21px marge avec hot news) -->
+        <div class="lg:col-span-4 flex flex-col gap-5" style="gap: 21px;">
+            <?php if ($feature1): ?>
+            <!-- Feature: 411x237, image + titre, pas de description -->
+            <a href="/articles/<?= htmlspecialchars($feature1['slug']) ?>" class="block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
+                <?php if (!empty($feature1['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($feature1['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                <?php endif; ?>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2">
+                    <?php if (!empty($feature1['category'])): ?>
+                    <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($feature1['category']['name']) ?></span>
+                    <?php endif; ?>
+                    <h3 class="font-semibold text-white line-clamp-2" style="font-size: 18px;"><?= htmlspecialchars($feature1['title']) ?></h3>
+                    <p class="text-white/80 text-sm"><?= htmlspecialchars($feature1['published_at'] ?? '') ?> • <?= (int) ($feature1['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
+            <?php endif; ?>
+
+            <?php if ($standard1): ?>
+            <!-- Standard 1: 413x221, #004241, pas de photo -->
+            <a href="/articles/<?= htmlspecialchars($standard1['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-[#004241]/20 p-4 flex flex-col justify-end" style="width: 100%; max-width: 413px; height: 221px; background: #004241;">
+                <div class="flex flex-col gap-2">
+                    <?php if (!empty($standard1['category'])): ?>
+                    <span class="text-xs font-medium text-white/80"><?= htmlspecialchars($standard1['category']['name']) ?></span>
+                    <?php endif; ?>
+                    <h3 class="font-semibold text-white line-clamp-2" style="font-size: 16px;"><?= htmlspecialchars($standard1['title']) ?></h3>
+                    <p class="text-white/70 text-sm"><?= htmlspecialchars($standard1['published_at'] ?? '') ?> • <?= (int) ($standard1['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
+            <?php endif; ?>
+
+            <?php if ($feature2): ?>
+            <!-- Feature 2: 411x237, image + titre, pas de description (en dessous du standard vert) -->
+            <a href="/articles/<?= htmlspecialchars($feature2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
+                <?php if (!empty($feature2['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($feature2['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                <?php endif; ?>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2">
+                    <?php if (!empty($feature2['category'])): ?>
+                    <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($feature2['category']['name']) ?></span>
+                    <?php endif; ?>
+                    <h3 class="font-semibold text-white line-clamp-2" style="font-size: 18px;"><?= htmlspecialchars($feature2['title']) ?></h3>
+                    <p class="text-white/80 text-sm"><?= htmlspecialchars($feature2['published_at'] ?? '') ?> • <?= (int) ($feature2['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
+            <?php endif; ?>
+        </div>
+
+        <!-- Colonne droite: Espace pub + CTA aligné avec featured -->
+        <div class="lg:col-span-3 flex flex-col gap-5" style="gap: 21px;">
+            <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm" style="width: 300px; height: 600px; padding-right: 48px; padding-bottom: 48px; gap: 8px;">
+                <div class="flex-1 flex items-center justify-center">Espace publicitaire</div>
             </div>
-        </a>
-    </section>
-    <?php endif; ?>
-
-    <?php if (count($featured) > 0): ?>
-    <section>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">À la une</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <?php foreach ($featured as $article): ?>
-            <a href="/articles/<?= htmlspecialchars($article['slug']) ?>" class="group block rounded-lg overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition">
-                <?php if (!empty($article['cover_image_url'])): ?>
-                <div class="aspect-video bg-gray-100">
-                    <img src="<?= htmlspecialchars($article['cover_image_url']) ?>" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                </div>
-                <?php endif; ?>
-                <div class="p-4">
-                    <?php if (!empty($article['category'])): ?>
-                    <span class="text-xs font-medium text-gray-500"><?= htmlspecialchars($article['category']['name']) ?></span>
-                    <?php endif; ?>
-                    <h3 class="font-semibold text-gray-900 mt-1 line-clamp-2 group-hover:text-amber-600"><?= htmlspecialchars($article['title']) ?></h3>
-                    <?php if (!empty($article['published_at'])): ?>
-                    <p class="text-sm text-gray-500 mt-2"><?= htmlspecialchars($article['published_at']) ?></p>
-                    <?php endif; ?>
+            <!-- CTA: 301x114, flow vertical, aligné avec featured à gauche -->
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="flex flex-col rounded-[30px] overflow-hidden flex-shrink-0" style="width: 301px; height: 114px; background: #FFF0D4; padding: 18px 8px 8px 18px; gap: 18px;">
+                <p class="text-[#004241] font-medium text-sm leading-snug flex-1">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+                <div class="flex justify-end">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#004241] text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
                 </div>
             </a>
-            <?php endforeach; ?>
         </div>
-    </section>
-    <?php endif; ?>
+    </div>
 
-    <?php if (count($latest) > 0): ?>
-    <section>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Dernières actualités</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php foreach ($latest as $article): ?>
-            <a href="/articles/<?= htmlspecialchars($article['slug']) ?>" class="group flex gap-4 rounded-lg p-3 hover:bg-white hover:shadow border border-transparent hover:border-gray-200 transition">
-                <?php if (!empty($article['cover_image_url'])): ?>
-                <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
-                    <img src="<?= htmlspecialchars($article['cover_image_url']) ?>" alt="" class="w-full h-full object-cover">
-                </div>
-                <?php endif; ?>
-                <div class="min-w-0 flex-1">
-                    <?php if (!empty($article['category'])): ?>
-                    <span class="text-xs font-medium text-gray-500"><?= htmlspecialchars($article['category']['name']) ?></span>
-                    <?php endif; ?>
-                    <h3 class="font-semibold text-gray-900 mt-0.5 line-clamp-2 group-hover:text-amber-600"><?= htmlspecialchars($article['title']) ?></h3>
-                    <?php if (!empty($article['reading_time'])): ?>
-                    <p class="text-sm text-gray-500 mt-1"><?= (int) $article['reading_time'] ?> min</p>
-                    <?php endif; ?>
-                </div>
-            </a>
-            <?php endforeach; ?>
-        </div>
-    </section>
-    <?php endif; ?>
+    <!-- 2ème pub : en dessous des articles, 65px de marge -->
+    <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm overflow-hidden" style="width: 100%; max-width: 970px; height: 250px; padding: 48px; gap: 8px; margin-top: 65px;">
+        <div class="flex-1 flex items-center justify-center">Espace publicitaire (bannière)</div>
+    </div>
 
     <?php if (count($categories) > 0): ?>
-    <section>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Découvrez nos rubriques</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <?php foreach ($categories as $cat): ?>
-            <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="block rounded-lg border border-gray-200 bg-white p-4 hover:border-amber-500 hover:shadow transition text-center">
-                <?php if (!empty($cat['image_url'])): ?>
-                <img src="<?= htmlspecialchars($cat['image_url']) ?>" alt="" class="w-12 h-12 mx-auto rounded-lg object-cover">
-                <?php endif; ?>
-                <span class="font-medium text-gray-900 mt-2 block"><?= htmlspecialchars($cat['name']) ?></span>
-                <?php if (isset($cat['published_articles_count'])): ?>
-                <span class="text-sm text-gray-500"><?= (int) $cat['published_articles_count'] ?> articles</span>
-                <?php endif; ?>
+    <!-- Découvrez vos rubriques préférées - 65px en dessous de la pub -->
+    <section id="categories-section" style="margin-top: 65px;">
+        <div class="flex flex-col lg:flex-row gap-6" style="gap: 24px;">
+            <!-- Grande carte gauche: 732x523, titre 48px Figtree 600, description 24px 400 -->
+            <a href="/categories" class="flex-shrink-0 rounded-[30px] overflow-hidden relative block" style="width: 100%; max-width: 732px; height: 523px;">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="" class="absolute inset-0 w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-8">
+                    <h2 class="font-semibold text-white" style="font-family: Figtree, sans-serif; font-size: 48px; font-weight: 600;">Découvrez vos rubriques préférées</h2>
+                    <p class="text-white/95 mt-2" style="font-size: 24px; font-weight: 400;">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                </div>
             </a>
-            <?php endforeach; ?>
+
+            <!-- Droite: 2 petites + 1 grande + flèche, 24px marge à gauche -->
+            <div class="flex flex-shrink-0 items-center" style="gap: 24px;">
+                <div class="categories-carousel flex items-start gap-3">
+                    <?php foreach ($catChunks as $chunkIdx => $chunk):
+                        $cat1 = $chunk[0] ?? null;
+                        $cat2 = $chunk[1] ?? null;
+                        $cat3 = $chunk[2] ?? null;
+                    ?>
+                    <div class="categories-group flex items-stretch gap-3 <?= $chunkIdx > 0 ? 'hidden' : '' ?>" data-group="<?= $chunkIdx ?>">
+                        <!-- 2 petites cartes (193x250) à gauche -->
+                        <div class="flex flex-col gap-3">
+                            <?php if ($cat1): ?>
+                            <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="block rounded-[30px] overflow-hidden relative flex-shrink-0" style="width: 193px; height: 250px;">
+                                <?php if (!empty($cat1['image_url'])): ?>
+                                <img src="<?= htmlspecialchars($cat1['image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                                <?php endif; ?>
+                                <div class="absolute inset-0" style="background: #00000040;"></div>
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <span class="text-white font-semibold" style="font-size: 20px;"><?= htmlspecialchars($cat1['name']) ?></span>
+                                </div>
+                            </a>
+                            <?php endif; ?>
+                            <?php if ($cat2): ?>
+                            <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative flex-shrink-0" style="width: 193px; height: 250px;">
+                                <?php if (!empty($cat2['image_url'])): ?>
+                                <img src="<?= htmlspecialchars($cat2['image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                                <?php endif; ?>
+                                <div class="absolute inset-0" style="background: #00000040;"></div>
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <span class="text-white font-semibold" style="font-size: 20px;"><?= htmlspecialchars($cat2['name']) ?></span>
+                                </div>
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                        <!-- Grande carte (298x523) à droite -->
+                        <?php if ($cat3): ?>
+                        <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="block rounded-[30px] overflow-hidden relative flex-shrink-0 self-stretch" style="width: 298px; height: 523px;">
+                            <?php if (!empty($cat3['image_url'])): ?>
+                            <img src="<?= htmlspecialchars($cat3['image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                            <?php endif; ?>
+                            <div class="absolute inset-0" style="background: #00000033;"></div>
+                            <div class="absolute bottom-0 left-0 right-0 p-6">
+                                <span class="text-white font-semibold" style="font-size: 20px;"><?= htmlspecialchars($cat3['name']) ?></span>
+                            </div>
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php if (count($catChunks) > 1): ?>
+                <!-- Flèche: 42x42, radius 29px, #004241 - pointant à droite, moitié collée à la grande carte -->
+                <button type="button" id="categories-next" class="flex-shrink-0 flex items-center justify-center rounded-full bg-[#004241] text-white hover:bg-[#003535] transition -ml-[45px] relative z-10" style="width: 42px; height: 42px; border-radius: 29px;" aria-label="Rubriques suivantes">
+                    <svg class="w-4 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+    <?php if (count($catChunks) > 1): ?>
+    <script>
+    (function() {
+        var groups = document.querySelectorAll('.categories-group');
+        var nextBtn = document.getElementById('categories-next');
+        if (!nextBtn || groups.length < 2) return;
+        var idx = 0;
+        nextBtn.addEventListener('click', function() {
+            groups[idx].classList.add('hidden');
+            idx = (idx + 1) % groups.length;
+            groups[idx].classList.remove('hidden');
+        });
+    })();
+    </script>
+    <?php endif; ?>
+    <?php endif; ?>
+
+    <?php
+    $shown = [($top_news ?? [])['id'] ?? null, ($feature1 ?? [])['id'] ?? null, ($standard1 ?? [])['id'] ?? null, ($feature2 ?? [])['id'] ?? null, ($standard2 ?? [])['id'] ?? null];
+    $restArticles = array_values(array_filter(array_merge($featured, $latest), fn($a) => !in_array($a['id'] ?? null, $shown)));
+    // Padd pour afficher 10 cartes : si moins de 12 articles, on répète pour remplir les slots
+    if (count($restArticles) > 0 && count($restArticles) < 12) {
+        $pad = [];
+        for ($i = 0; $i < 12; $i++) {
+            $pad[] = $restArticles[$i % count($restArticles)];
+        }
+        $restArticles = $pad;
+    }
+    ?>
+    <?php if (count($restArticles) > 0): ?>
+    <section class="mt-12">
+        <!-- Titre: Figtree 32px Medium -->
+        <h2 class="font-medium text-[#004241] mb-6" style="font-size: 32px;">Dernières actualités</h2>
+
+        <div class="flex flex-col lg:flex-row gap-6" style="gap: 22px;">
+            <!-- Colonne gauche: 2 featured + hot news -->
+            <div class="flex flex-col" style="gap: 25px;">
+                <!-- 2 featured cards (302x419), 22px entre elles -->
+                <div class="flex gap-5" style="gap: 22px;">
+                    <?php foreach (array_slice($restArticles, 0, 2) as $art): ?>
+                    <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 p-6" style="width: 302px; height: 419px; background: #EBF1EF; gap: 18px;">
+                        <div class="flex flex-col justify-end flex-1 min-h-0" style="gap: 18px;">
+                            <?php if (!empty($art['category'])): ?>
+                            <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($art['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
+                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                        <?php if (!empty($art['cover_image_url'])): ?>
+                        <div class="rounded-[21px] overflow-hidden flex-shrink-0" style="width: 254px; height: 190px;">
+                            <img src="<?= htmlspecialchars($art['cover_image_url']) ?>" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <?php endif; ?>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Hot news (626x240), photo prend toute la card -->
+                <?php $hotNewsArt = $restArticles[2] ?? null; if ($hotNewsArt): ?>
+                <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="block rounded-[32px] overflow-hidden relative" style="width: 100%; max-width: 626px; height: 240px;">
+                    <?php if (!empty($hotNewsArt['cover_image_url'])): ?>
+                    <img src="<?= htmlspecialchars($hotNewsArt['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <?php endif; ?>
+                    <div class="absolute inset-0 flex items-center justify-end p-6">
+                        <div class="rounded-[21px] flex flex-col p-6 gap-2 border" style="width: 264px; background: rgba(255,255,255,0.11); border: 1px solid rgba(255,255,255,0.15);">
+                            <?php if (!empty($hotNewsArt['category'])): ?>
+                            <span class="inline-flex items-center rounded-full text-xs font-medium text-white/90 self-start px-3 py-2" style="border: 2px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.32);"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($hotNewsArt['title']) ?></h3>
+                            <p class="text-white/80 text-sm"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                    </div>
+                </a>
+                <?php endif; ?>
+
+                <!-- 3e ligne gauche: #FFEFD1 + #EBF1EF côte à côte (left 82px et 405px) -->
+                <div class="flex gap-5" style="gap: 22px; margin-top: 25px;">
+                    <?php $artLeft = $restArticles[10] ?? null; if ($artLeft): ?>
+                    <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 p-6" style="width: 302px; height: 419px; background: #FFEFD1; gap: 18px;">
+                        <div class="flex flex-col justify-end flex-1 min-h-0" style="gap: 18px;">
+                            <?php if (!empty($artLeft['category'])): ?>
+                            <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft['title']) ?></h3>
+                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                        <?php if (!empty($artLeft['cover_image_url'])): ?>
+                        <div class="rounded-[21px] overflow-hidden flex-shrink-0" style="width: 254px; height: 190px;">
+                            <img src="<?= htmlspecialchars($artLeft['cover_image_url']) ?>" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <?php endif; ?>
+                    </a>
+                    <?php endif; ?>
+                    <?php $artLeft2 = $restArticles[6] ?? null; if ($artLeft2): ?>
+                    <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 p-6" style="width: 302px; height: 419px; background: #EBF1EF; gap: 18px;">
+                        <div class="flex flex-col justify-end flex-1 min-h-0" style="gap: 18px;">
+                            <?php if (!empty($artLeft2['category'])): ?>
+                            <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft2['title']) ?></h3>
+                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                        <?php if (!empty($artLeft2['cover_image_url'])): ?>
+                        <div class="rounded-[21px] overflow-hidden flex-shrink-0" style="width: 254px; height: 190px;">
+                            <img src="<?= htmlspecialchars($artLeft2['cover_image_url']) ?>" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <?php endif; ?>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Colonne droite: 2 standards + double (#EBF1EF + image) + wide card -->
+            <div class="flex flex-col flex-1" style="gap: 24px; max-width: 629px;">
+                <?php
+                $stdColors = ['#004241', '#FFEFD1'];
+                foreach (array_slice($restArticles, 3, 2) as $i => $art):
+                    $bg = $stdColors[$i % 2];
+                    $isDark = ($bg === '#004241');
+                ?>
+                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden border p-6 relative" style="width: 100%; height: 198px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
+                    <?php if (!$isDark && !empty($art['cover_image_url'])): ?>
+                    <img src="<?= htmlspecialchars($art['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30" style="filter: blur(60px);">
+                    <?php endif; ?>
+                    <?php if (!empty($art['category'])): ?>
+                    <span class="inline-flex items-center rounded-full text-xs font-medium self-start px-3 py-2 <?= $isDark ? 'text-white/90' : 'text-[#004241]/90' ?>" style="border: 2px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.32);"><?= htmlspecialchars($art['category']['name']) ?></span>
+                    <?php endif; ?>
+                    <h3 class="font-medium line-clamp-2 flex-1 <?= $isDark ? 'text-white' : 'text-[#004241]' ?>" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
+                    <p class="text-sm <?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                </a>
+                <?php endforeach; ?>
+
+                <!-- 3e ligne droite: #EBF1EF + card image complète côte à côte -->
+                <div class="flex gap-5" style="gap: 22px;">
+                    <?php $artRight = $restArticles[11] ?? null; if ($artRight): ?>
+                    <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden flex-shrink-0" style="width: 302px; height: 419px; padding: 24px; gap: 18px; background: #EBF1EF;">
+                        <div class="flex flex-col justify-end flex-1 min-h-0" style="gap: 18px;">
+                            <?php if (!empty($artRight['category'])): ?>
+                            <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($artRight['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artRight['title']) ?></h3>
+                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                        <?php if (!empty($artRight['cover_image_url'])): ?>
+                        <div class="rounded-[21px] overflow-hidden flex-shrink-0" style="width: 254px; height: 190px;">
+                            <img src="<?= htmlspecialchars($artRight['cover_image_url']) ?>" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <?php endif; ?>
+                    </a>
+                    <?php endif; ?>
+                    <?php $artImageFull = $restArticles[5] ?? null; if ($artImageFull && !empty($artImageFull['cover_image_url'])): ?>
+                    <a href="/articles/<?= htmlspecialchars($artImageFull['slug']) ?>" class="flex flex-col rounded-[25px] overflow-hidden flex-shrink-0 relative" style="width: 302px; height: 419px; padding: 18px; gap: 24px;">
+                        <img src="<?= htmlspecialchars($artImageFull['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                        <div class="relative flex flex-col justify-end flex-1 min-h-0 z-10" style="gap: 24px;">
+                            <?php if (!empty($artImageFull['category'])): ?>
+                            <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($artImageFull['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artImageFull['title']) ?></h3>
+                            <p class="text-white/80 text-sm"><?= htmlspecialchars($artImageFull['published_at'] ?? '') ?> • <?= (int) ($artImageFull['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                    </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Wide card photo complète (629x235) - juste en dessous du double -->
+                <?php $artWide = $restArticles[7] ?? null; if ($artWide && !empty($artWide['cover_image_url'])): ?>
+                <a href="/articles/<?= htmlspecialchars($artWide['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0" style="height: 235px;">
+                    <img src="<?= htmlspecialchars($artWide['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-2">
+                        <?php if (!empty($artWide['category'])): ?>
+                        <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($artWide['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($artWide['title']) ?></h3>
+                        <p class="text-white/80 text-sm"><?= htmlspecialchars($artWide['published_at'] ?? '') ?> • <?= (int) ($artWide['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Bouton Autres actualités - 23px en dessous -->
+        <div class="flex justify-center mt-6" style="margin-top: 23px;">
+            <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 transition" style="width: 226px; height: 48px; background: #004241; padding: 12px 18px;">
+                Autres actualités
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
         </div>
     </section>
     <?php endif; ?>
-
-    <section class="pt-8 border-t border-gray-200">
-        <p class="text-gray-600 text-center">
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="font-medium text-amber-600 hover:text-amber-700">Rédiger un article</a>
-        </p>
-    </section>
 </div>

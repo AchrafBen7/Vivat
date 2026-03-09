@@ -8,7 +8,7 @@ Ce document regroupe les réponses aux questions fréquentes sur l’utilisation
 
 ### Réponse : **Non**
 
-Le **site public HTML** (pages `/`, `/categories`, `/articles/{slug}`) **n’appelle pas** les endpoints API. Il utilise la même logique backend (modèles, services, cache) directement en PHP, sans requête HTTP vers l’API.
+Le **site public HTML** (pages `/`, `/categories`, `/categories/{slug}`, `/articles`, `/articles/{slug}`) **n’appelle pas** les endpoints API. Il utilise la même logique backend (modèles, services, cache) directement en PHP, sans requête HTTP vers l’API.
 
 | Endpoint | Utilisé par le site public ? | Utilisé par qui ? |
 |----------|------------------------------|-------------------|
@@ -23,6 +23,7 @@ Le **site public HTML** (pages `/`, `/categories`, `/articles/{slug}`) **n’app
 - **Accueil** (`/`) : `PublicPageDataService::getHomeData()` → même logique et **même cache** (`vivat.home`) que l’API, mais en PHP direct.
 - **Liste catégories** (`/categories`) : `Category::query()->...` dans le contrôleur Web.
 - **Hub catégorie** (`/categories/{slug}`) : `PublicPageDataService::getCategoryHubData()` → même cache que l’API hub.
+- **Liste des articles** (`/articles`) : `PublicPageDataService::getArticlesIndexData()` → articles paginés (12 par page), **sans cache** (données fraîches à chaque requête).
 - **Article** (`/articles/{slug}`) : `Article::published()->where('slug', $slug)` dans le contrôleur Web.
 
 **En résumé** : site public et API partagent la même logique et le même cache, mais le site public ne fait pas d’appels HTTP vers l’API.
@@ -93,3 +94,14 @@ Donc : le chargement des nouvelles données se fait **au moment de cette premiè
 | **À la prochaine visite** (ex. quelqu’un ouvre `/` ou appelle l’API home) | `Cache::remember` ne trouve rien → il relance les requêtes → les nouvelles données sont chargées et servies. |
 
 Il n’y a pas de rechargement automatique en tâche de fond : les données sont rafraîchies **à la demande**, au premier hit après l’invalidation.
+
+---
+
+## 4. Dernières modifications
+
+### Page « Toutes les actualités » (`/articles`)
+
+- **Route ajoutée** : `GET /articles` → liste paginée des articles (12 par page).
+- **Service** : `PublicPageDataService::getArticlesIndexData()` — récupère les articles publiés, formatés via `articleToArray()`, sans cache.
+- **Vue** : `resources/views/site/articles_index.php` — grille de cartes (catégorie, titre, date, temps de lecture, image) avec pagination.
+- **Lien** : le bouton « Autres actualités » sur l’accueil (section Dernières actualités) pointe vers `/articles`.
