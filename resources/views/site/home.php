@@ -212,7 +212,7 @@ $catChunks = array_chunk($categories, 3);
     <?php
     $shown = [($top_news ?? [])['id'] ?? null, ($feature1 ?? [])['id'] ?? null, ($standard1 ?? [])['id'] ?? null, ($feature2 ?? [])['id'] ?? null, ($standard2 ?? [])['id'] ?? null];
     $restArticles = array_values(array_filter(array_merge($featured, $latest), fn($a) => !in_array($a['id'] ?? null, $shown)));
-    // Padd pour afficher 10 cartes : si moins de 12 articles, on répète pour remplir les slots
+    // Padd pour afficher 12 cartes : si moins de 12 articles, on répète pour remplir les slots
     if (count($restArticles) > 0 && count($restArticles) < 12) {
         $pad = [];
         for ($i = 0; $i < 12; $i++) {
@@ -220,6 +220,10 @@ $catChunks = array_chunk($categories, 3);
         }
         $restArticles = $pad;
     }
+    // Pour les 2 cartes "photo complète" (slots 5 et 7), on privilégie des articles avec cover_image_url
+    $withCover = array_values(array_filter($restArticles, fn($a) => !empty($a['cover_image_url'])));
+    $artForFullPhoto1 = $withCover[0] ?? $restArticles[5] ?? null;
+    $artForFullPhoto2 = (count($withCover) > 1) ? $withCover[1] : ($restArticles[7] ?? null);
     ?>
     <?php if (count($restArticles) > 0): ?>
     <section class="mt-12">
@@ -252,9 +256,10 @@ $catChunks = array_chunk($categories, 3);
                 <!-- Hot news (626x240), photo prend toute la card -->
                 <?php $hotNewsArt = $restArticles[2] ?? null; if ($hotNewsArt): ?>
                 <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="block rounded-[32px] overflow-hidden relative" style="width: 100%; max-width: 626px; height: 240px;">
-                    <?php if (!empty($hotNewsArt['cover_image_url'])): ?>
-                    <img src="<?= htmlspecialchars($hotNewsArt['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
-                    <?php endif; ?>
+                    <?php
+                    $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($hotNewsArt['slug'] ?? '') . '/626/240';
+                    ?>
+                    <img src="<?= htmlspecialchars($hotNewsImg) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 flex items-center justify-end p-6">
                         <div class="rounded-[21px] flex flex-col p-6 gap-2 border" style="width: 264px; background: rgba(255,255,255,0.11); border: 1px solid rgba(255,255,255,0.15);">
                             <?php if (!empty($hotNewsArt['category'])): ?>
@@ -342,32 +347,34 @@ $catChunks = array_chunk($categories, 3);
                         <?php endif; ?>
                     </a>
                     <?php endif; ?>
-                    <?php $artImageFull = $restArticles[5] ?? null; if ($artImageFull && !empty($artImageFull['cover_image_url'])): ?>
-                    <a href="/articles/<?= htmlspecialchars($artImageFull['slug']) ?>" class="flex flex-col rounded-[25px] overflow-hidden flex-shrink-0 relative" style="width: 302px; height: 419px; padding: 18px; gap: 24px;">
-                        <img src="<?= htmlspecialchars($artImageFull['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <?php if ($artForFullPhoto1): ?>
+                    <?php $fullPhoto1Img = !empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($artForFullPhoto1['slug'] ?? '') . '/302/419'; ?>
+                    <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="flex flex-col rounded-[25px] overflow-hidden flex-shrink-0 relative" style="width: 302px; height: 419px; padding: 18px; gap: 24px;">
+                        <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <div class="relative flex flex-col justify-end flex-1 min-h-0 z-10" style="gap: 24px;">
-                            <?php if (!empty($artImageFull['category'])): ?>
-                            <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($artImageFull['category']['name']) ?></span>
+                            <?php if (!empty($artForFullPhoto1['category'])): ?>
+                            <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
                             <?php endif; ?>
-                            <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artImageFull['title']) ?></h3>
-                            <p class="text-white/80 text-sm"><?= htmlspecialchars($artImageFull['published_at'] ?? '') ?> • <?= (int) ($artImageFull['reading_time'] ?? 0) ?> min</p>
+                            <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artForFullPhoto1['title']) ?></h3>
+                            <p class="text-white/80 text-sm"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </a>
                     <?php endif; ?>
                 </div>
 
                 <!-- Wide card photo complète (629x235) - juste en dessous du double -->
-                <?php $artWide = $restArticles[7] ?? null; if ($artWide && !empty($artWide['cover_image_url'])): ?>
-                <a href="/articles/<?= htmlspecialchars($artWide['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0" style="height: 235px;">
-                    <img src="<?= htmlspecialchars($artWide['cover_image_url']) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
+                <?php if ($artForFullPhoto2): ?>
+                <?php $fullPhoto2Img = !empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($artForFullPhoto2['slug'] ?? '') . '/629/235'; ?>
+                <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0" style="height: 235px;">
+                    <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                     <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-2">
-                        <?php if (!empty($artWide['category'])): ?>
-                        <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($artWide['category']['name']) ?></span>
+                        <?php if (!empty($artForFullPhoto2['category'])): ?>
+                        <span class="text-xs font-medium text-white/90"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
                         <?php endif; ?>
-                        <h3 class="font-medium text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($artWide['title']) ?></h3>
-                        <p class="text-white/80 text-sm"><?= htmlspecialchars($artWide['published_at'] ?? '') ?> • <?= (int) ($artWide['reading_time'] ?? 0) ?> min</p>
+                        <h3 class="font-medium text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($artForFullPhoto2['title']) ?></h3>
+                        <p class="text-white/80 text-sm"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </a>
                 <?php endif; ?>
