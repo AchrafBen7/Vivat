@@ -57,73 +57,6 @@ $title_safe = htmlspecialchars($title);
         }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
-
-        /* Scroll reveal: cartes qui apparaissent au scroll, une par une */
-        .vivat-reveal {
-            opacity: 0;
-            transform: translateY(32px);
-            transition: opacity 0.9s ease-out, transform 0.9s ease-out;
-        }
-        .vivat-reveal.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Zoom image au survol des cartes avec image */
-        .vivat-card-with-image {
-            overflow: hidden;
-        }
-        .vivat-card-with-image img {
-            transition: transform 0.45s ease;
-        }
-        .vivat-card-with-image:hover img {
-            transform: scale(1.06);
-        }
-
-        /* Cartes sans image: flèche au survol, 24px du bord */
-        .vivat-card-no-image {
-            position: relative;
-        }
-        .vivat-card-no-image .vivat-card-arrow {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            pointer-events: none;
-        }
-        .vivat-card-no-image .vivat-card-arrow-bottom {
-            top: auto;
-            right: 18px;
-            bottom: 18px;
-        }
-        .vivat-card-no-image .vivat-card-arrow svg {
-            transform: rotate(-45deg);
-        }
-        .vivat-card-no-image .vivat-card-arrow-bottom svg {
-            transform: none;
-        }
-        .vivat-card-no-image:hover .vivat-card-arrow {
-            opacity: 1;
-        }
-        .vivat-card-no-image.vivat-card-dark .vivat-card-arrow {
-            background: rgba(255, 255, 255, 0.25);
-            color: #fff;
-        }
-        .vivat-card-no-image.vivat-card-jaune .vivat-card-arrow {
-            background: #004241;
-            color: #fff;
-        }
-        .vivat-card-no-image:not(.vivat-card-dark):not(.vivat-card-jaune) .vivat-card-arrow {
-            background: rgba(0, 66, 65, 0.12);
-            color: #004241;
-        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
@@ -185,7 +118,7 @@ $title_safe = htmlspecialchars($title);
                     var delay = 180;
                     items.forEach(function(el, i) {
                         el.style.transitionDelay = (i * delay) + 'ms';
-                        el.classList.add('is-visible');
+                        el.classList.add('opacity-100', 'translate-y-0');
                     });
                 });
             }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
