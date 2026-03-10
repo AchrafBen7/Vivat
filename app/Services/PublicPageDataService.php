@@ -36,7 +36,7 @@ class PublicPageDataService
             $latestLimit = (int) config('vivat.home_latest_count', 12);
             $categoriesLimit = (int) config('vivat.home_categories_count', 9);
 
-            // Highlight = 5 emplacements : d'abord tous les hot_news (jusqu'à 5), puis compléter avec des featured
+            // Highlight = 5 emplacements : d'abord hot_news (jusqu'à 5), puis avec image, puis n'importe quel publié
             $hotNewsForHighlight = Article::published()
                 ->where('article_type', 'hot_news')
                 ->with('category')
@@ -57,6 +57,17 @@ class PublicPageDataService
                     ->limit($remaining)
                     ->get();
                 $highlight = $highlight->merge($featuredFill)->take($highlightSize);
+                $highlightIds = $highlight->pluck('id')->all();
+                $remaining = $highlightSize - $highlight->count();
+            }
+            if ($remaining > 0) {
+                $fallbackFill = Article::published()
+                    ->with('category')
+                    ->whereNotIn('id', $highlightIds)
+                    ->orderByDesc('published_at')
+                    ->limit($remaining)
+                    ->get();
+                $highlight = $highlight->merge($fallbackFill)->take($highlightSize);
             }
 
             $highlightIds = $highlight->pluck('id')->all();
@@ -90,19 +101,23 @@ class PublicPageDataService
             ];
         });
 
-        $highlightArray = $data['highlight']->map(fn ($a) => $this->articleToArray($a))->values()->all();
-        // S'assurer d'avoir exactement 5 slots (null si pas assez d'articles)
+        $highlightCollection = $data['highlight'] ?? collect();
+        $highlightArray = $highlightCollection->map(fn ($a) => $this->articleToArray($a))->values()->all();
         while (count($highlightArray) < 5) {
             $highlightArray[] = null;
         }
         $highlightArray = array_slice($highlightArray, 0, 5);
 
+        $topNews = $data['top_news'] ?? $highlightCollection->first();
+        $featuredCollection = $data['featured'] ?? collect();
+        $latestCollection = $data['latest'] ?? collect();
+
         return [
             'highlight' => $highlightArray,
-            'top_news' => $data['top_news'] ? $this->articleToArray($data['top_news']) : null,
-            'featured' => $data['featured']->map(fn ($a) => $this->articleToArray($a))->all(),
-            'latest' => $data['latest']->map(fn ($a) => $this->articleToArray($a))->all(),
-            'categories' => $data['categories']->map(fn ($c) => $this->categoryToArray($c))->all(),
+            'top_news' => $topNews instanceof Article ? $this->articleToArray($topNews) : null,
+            'featured' => $featuredCollection->map(fn ($a) => $this->articleToArray($a))->all(),
+            'latest' => $latestCollection->map(fn ($a) => $this->articleToArray($a))->all(),
+            'categories' => ($data['categories'] ?? collect())->map(fn ($c) => $this->categoryToArray($c))->all(),
         ];
     }
 
@@ -112,7 +127,7 @@ class PublicPageDataService
         $cacheKey = 'vivat.hub.' . $category->slug . ($subCategorySlug ? '.' . $subCategorySlug : '');
 
         $data = Cache::remember($cacheKey, 900, function () use ($category, $subCategorySlug) {
-            $category->load(['subCategories' => fn ($q) => $q->orderBy('order')->limit(5)]);
+            $category->load(['subCategories' => fn ($q) => $q->orderBy('order')]);
 
             $query = Article::published()
                 ->where('category_id', $category->id)
@@ -126,7 +141,7 @@ class PublicPageDataService
             }
 
             $totalPublished = (clone $query)->count();
-            $articles = (clone $query)->orderByDesc('published_at')->limit(16)->get();
+            $articles = (clone $query)->orderByDesc('published_at')->limit(24)->get();
 
             return [
                 'category' => $category,

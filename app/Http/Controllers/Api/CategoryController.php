@@ -54,7 +54,7 @@ class CategoryController extends Controller
         $cacheKey = 'vivat.hub.'.$category->slug.($subCategorySlug ? '.'.(string) $subCategorySlug : '');
 
         $data = Cache::remember($cacheKey, 900, function () use ($category, $subCategorySlug) {
-            $category->load(['subCategories' => fn ($q) => $q->orderBy('order')->limit(5)]);
+            $category->load(['subCategories' => fn ($q) => $q->orderBy('order')]);
 
             $query = Article::published()
                 ->where('category_id', $category->id)

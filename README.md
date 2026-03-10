@@ -7,6 +7,23 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Vivat — Développement local
+
+### Vider le cache (sans PHP installé en local)
+
+Si le projet tourne avec **Docker** (e.g. `docker compose up`), PHP s’exécute dans le conteneur. Pas besoin d’avoir PHP installé sur ta machine.
+
+1. Ouvrir un terminal.
+2. Aller dans le dossier du projet :  
+   `cd "/Users/manalboulahya/Documents/EHB - 3/Stage/Vivat-1"`  
+   (ou le chemin correspondant sur ta machine.)
+3. Lancer :  
+   **`docker compose exec app php artisan cache:clear`**
+
+Si tu n’utilises pas Docker (pas de `docker compose up`), soit tu installes PHP (php.net, MAMP, XAMPP, etc.), soit le cache est vidé sur l’environnement partagé (même serveur / même Redis) par quelqu’un qui y a accès.
+
+---
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
