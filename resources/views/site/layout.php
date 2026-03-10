@@ -36,6 +36,15 @@ $title_safe = htmlspecialchars($title);
     <meta name="twitter:image" content="<?= htmlspecialchars($og_image) ?>">
     <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    screens: { 'tablet': '834px' }
+                }
+            }
+        };
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
@@ -51,12 +60,14 @@ $title_safe = htmlspecialchars($title);
         html {
             scroll-behavior: smooth;
         }
-        /* Glass effect matte, légèrement sombre pour lisibilité sur images claires */
+        /* Glass effect matte : padding intérieur 24px fixe (ne jamais modifier en responsive) */
         .vivat-glass {
             background: rgba(190, 190, 190, 0.1);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(1px);
             border: 1px solid rgba(230, 230, 230, 0.2);
+            padding: 24px;
+            box-sizing: border-box;
         }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
@@ -65,18 +76,18 @@ $title_safe = htmlspecialchars($title);
 <body class="bg-white text-gray-900 antialiased">
     <!-- Navbar - Design System Figma -->
     <header class="bg-white">
-        <div class="max-w-[1400px] mx-auto px-5 lg:px-20 flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
-            <!-- Logo: 32px, #004241, Righteous 400, letter-spacing 3%, 612px space avant searchbar -->
+        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
+            <!-- Logo: 32px, #004241 ; tablet: margin 40px -->
             <h1 class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
 
-            <!-- Espace logo - searchbar: 612px sur desktop -->
-            <div class="hidden lg:block flex-shrink-0" style="width: 612px;"></div>
-            <div class="flex-1 lg:hidden"></div>
+            <!-- Espace logo - searchbar: visible tablet+ -->
+            <div class="hidden tablet:block flex-shrink-0 flex-1 min-w-4"></div>
+            <div class="flex-1 tablet:flex-none tablet:flex-shrink-0"></div>
 
-            <!-- Search bar: 326x48, #EBF1EF, full radius -->
-            <div class="flex items-center flex-shrink-0 rounded-full border border-gray-200 h-12 px-4 gap-2" style="width: 326px; min-width: 120px; background: #EBF1EF;">
-                <input type="search" placeholder="Rechercher un article" class="flex-1 bg-transparent text-sm outline-none placeholder:opacity-80" style="color: #004241;">
-                <svg class="w-5 h-5 flex-shrink-0" style="color: #004241;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <!-- Search: mobile & tablet = pastille ronde, desktop = barre complète -->
+            <div class="flex items-center justify-center lg:justify-start flex-shrink-0 rounded-full border border-gray-200 h-9 w-9 tablet:h-9 tablet:w-9 lg:h-12 lg:w-[326px] lg:px-4" style="background: #EBF1EF;">
+                <input type="search" placeholder="Rechercher un article" class="hidden lg:block flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:opacity-80 mr-2" style="color: #004241;">
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style="color: #004241;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
             <!-- 9px espace -->
@@ -98,11 +109,11 @@ $title_safe = htmlspecialchars($title);
             </button>
         </div>
     </header>
-    <main class="max-w-[1400px] mx-auto px-5 lg:px-20 pb-8 overflow-x-hidden">
+    <main class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 pb-8 overflow-x-hidden">
         <?= $content ?? '' ?>
     </main>
     <footer class="border-t border-gray-200 mt-12 py-8">
-        <div class="max-w-[1400px] mx-auto px-5 lg:px-20 text-center text-gray-500 text-sm">
+        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 text-center text-gray-500 text-sm">
             © <?= date('Y') ?> Vivat. Tous droits réservés.
         </div>
     </footer>

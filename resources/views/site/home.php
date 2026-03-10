@@ -1,5 +1,4 @@
 <?php
-$highlight = $highlight ?? [];
 $top_news = $top_news ?? null;
 $featured = $featured ?? [];
 $latest = $latest ?? [];
@@ -7,12 +6,11 @@ $categories = $categories ?? [];
 $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
 
-// Grille highlight : 5 emplacements (hot_news puis featured), tous avec tag "Top news"
-$h0 = $highlight[0] ?? null;  // grande carte
-$h1 = $highlight[1] ?? null; // feature 1
-$h2 = $highlight[2] ?? null; // standard 1 (vert)
-$h3 = $highlight[3] ?? null; // feature 2
-$h4 = $highlight[4] ?? null; // standard 2 (jaune)
+// On prend les premiers articles pour la grille (hot news, 2 features, 2 standards)
+$feature1 = $featured[0] ?? null;
+$standard1 = $featured[1] ?? $latest[0] ?? null;
+$feature2 = $featured[2] ?? $latest[1] ?? null;
+$standard2 = $latest[0] ?? ($featured[3] ?? null);
 $catChunks = array_chunk($categories, 3);
 
 // Styles des tags par type de card (H 30px, padding 6px 12px, 14px font)
@@ -41,94 +39,117 @@ $truncateGlassTitle = function (?string $t): string {
     return implode(' ', array_slice($w, 0, $keep)) . ' …';
 };
 ?>
-<!-- Grille articles - Design System Figma (12 cols, gutter 24px ; margin 80px via layout lg:px-20) -->
+<!-- Bandeau publicitaire header 728×90 : uniquement en version tablette (834px), masqué en mobile et desktop -->
+<div class="hidden tablet:block lg:hidden w-full" style="margin-bottom: 24px;">
+    <div class="rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm flex items-center justify-center mx-auto" style="width: 728px; max-width: 100%; height: 90px;">
+        Publicité 728×90
+    </div>
+</div>
+<!-- Grille articles - mobile 1 col, tablet 2 cols (gauche 462px, droite 1fr, 24px gap), lg 12 cols -->
 <div class="flex flex-col w-full">
-    <div class="vivat-reveal-group grid grid-cols-1 lg:grid-cols-12 gap-6" style="column-gap: 24px; row-gap: 24px;">
-        <!-- Colonne gauche: Hot news + Standard 2 -->
-        <div class="lg:col-span-5 flex flex-col" style="gap: 24px;">
-            <?php if ($h0): ?>
-            <!-- Highlight 0: grande carte 519x438, radius 30, overlay 20%, tag Top news -->
-            <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 519px; height: 438px;">
-                <?php if (!empty($h0['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($h0['cover_image_url']) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
+    <div class="vivat-reveal-group grid grid-cols-1 tablet:grid-cols-[462px_1fr] lg:grid-cols-12" style="column-gap: 24px; row-gap: 24px;">
+        <!-- Colonne gauche: Top news 462×438 + Standard 2 + CTA | tablet largeur 462px, lg 5 cols -->
+        <div class="tablet:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
+            <?php if ($top_news): ?>
+            <!-- Hot news: 462×438 tablet, 519×438 lg -->
+            <a href="/articles/<?= htmlspecialchars($top_news['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
+                <?php if (!empty($top_news['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($top_news['cover_image_url']) ?>" alt="<?= htmlspecialchars($top_news['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
                 <?php endif; ?>
                 <div class="absolute inset-0" style="background: rgba(0,0,0,0.2);"></div>
-                <div class="absolute rounded-[21px] flex flex-col vivat-glass" style="width: 300px; max-width: 60%; bottom: 18px; left: 18px; padding: 24px; gap: 8px;">
+                <!-- Carré glass toujours à 18px du bord de la carte -->
+                <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-full max-w-[300px]" style="gap: 8px;">
                     <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: #EBF1EF; color: #004241;">Top news</span>
-                    <h2 class="font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
-                    <?php if (!empty($h0['excerpt'])): ?>
-                    <p class="text-white/90 line-clamp-4" style="font-size: 16px;"><?= htmlspecialchars($h0['excerpt']) ?></p>
+                    <h2 class="font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($top_news['title'] ?? '')) ?></h2>
+                    <?php if (!empty($top_news['excerpt'])): ?>
+                    <p class="text-white/90 line-clamp-4" style="font-size: 16px;"><?= htmlspecialchars($top_news['excerpt']) ?></p>
                     <?php endif; ?>
-                    <p class="text-white/80" style="font-size: 14px;"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
+                    <p class="text-white/80" style="font-size: 14px;"><?= htmlspecialchars($top_news['published_at'] ?? '') ?> • <?= (int) ($top_news['reading_time'] ?? 0) ?> min</p>
+                    </div>
                 </div>
             </a>
             <?php endif; ?>
 
-            <?php if ($h4): ?>
-            <!-- Highlight 4: Standard 2 - 519x280, #FFF0D4, tag Top news -->
-            <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
+            <?php if ($standard2): ?>
+            <!-- Standard 2: 519x280, #FFF0D4, radius 30, pas de photo -->
+            <a href="/articles/<?= htmlspecialchars($standard2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
                 <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;">Top news</span>
-                <h3 class="font-semibold text-[#004241] line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h4['title']) ?></h3>
-                <p class="text-[#004241]/70" style="font-size: 14px;"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
+                <?php if (!empty($standard2['category'])): ?>
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($standard2['category']['name']) ?></span>
+                <?php endif; ?>
+                <h3 class="font-semibold text-[#004241] line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($standard2['title']) ?></h3>
+                <p class="text-[#004241]/70" style="font-size: 14px;"><?= htmlspecialchars($standard2['published_at'] ?? '') ?> • <?= (int) ($standard2['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php endif; ?>
+
+            <!-- CTA en dessous de la colonne gauche (visible tablette uniquement) -->
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-full lg:hidden" style="height: 118px; background: #FFF0D4;">
+                <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+            </a>
         </div>
 
-        <!-- Colonne milieu: Feature + Standard 1 (21px marge avec hot news) -->
-        <div class="lg:col-span-4 flex flex-col" style="gap: 24px;">
-            <?php if ($h1): ?>
-            <!-- Highlight 1: Feature 411x237, tag Top news -->
-            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
-                <?php if (!empty($h1['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($h1['cover_image_url']) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+        <!-- Colonne droite: Feature 1 + carte verte (270×221) + Feature 2 | tablet 1 col, lg 4 cols -->
+        <div class="tablet:col-span-1 lg:col-span-4 flex flex-col" style="gap: 24px;">
+            <?php if ($feature1): ?>
+            <!-- Feature: 411x237, image + titre -->
+            <a href="/articles/<?= htmlspecialchars($feature1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
+                <?php if (!empty($feature1['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($feature1['cover_image_url']) ?>" alt="<?= htmlspecialchars($feature1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <?php endif; ?>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
-                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;">Top news</span>
-                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h1['title'] ?? '')) ?></h3>
-                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
+                <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
+                        <?php if (!empty($feature1['category'])): ?>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($feature1['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($feature1['title'] ?? '')) ?></h3>
+                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($feature1['published_at'] ?? '') ?> • <?= (int) ($feature1['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
             <?php endif; ?>
 
-            <?php if ($h2): ?>
-            <!-- Highlight 2: Standard 1 - 413x221, #004241, tag Top news -->
-            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end" style="width: 100%; max-width: 413px; height: 221px; padding: 24px; gap: 8px; background: #004241;">
+            <?php if ($standard1): ?>
+            <!-- Standard 1 (carte verte): tablet 270×221 (max 100% si colonne plus étroite), lg 413×221 -->
+            <a href="/articles/<?= htmlspecialchars($standard1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end w-full tablet:max-w-[270px] lg:max-w-[413px] lg:w-full" style="height: 221px; padding: 24px; gap: 8px; background: #004241;">
                 <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;">Top news</span>
-                <h3 class="font-semibold text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h2['title']) ?></h3>
-                <p class="text-white/70" style="font-size: 14px;"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
+                <?php if (!empty($standard1['category'])): ?>
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($standard1['category']['name']) ?></span>
+                <?php endif; ?>
+                <h3 class="font-semibold text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($standard1['title']) ?></h3>
+                <p class="text-white/70" style="font-size: 14px;"><?= htmlspecialchars($standard1['published_at'] ?? '') ?> • <?= (int) ($standard1['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php endif; ?>
 
-            <?php if ($h3): ?>
-            <!-- Highlight 3: Feature 2 - 411x237, tag Top news -->
-            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
-                <?php if (!empty($h3['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($h3['cover_image_url']) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+            <?php if ($feature2): ?>
+            <!-- Feature 2: 411x237, en dessous de la carte verte -->
+            <a href="/articles/<?= htmlspecialchars($feature2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
+                <?php if (!empty($feature2['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($feature2['cover_image_url']) ?>" alt="<?= htmlspecialchars($feature2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <?php endif; ?>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
-                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;">Top news</span>
-                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h3['title'] ?? '')) ?></h3>
-                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
+                <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
+                        <?php if (!empty($feature2['category'])): ?>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($feature2['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($feature2['title'] ?? '')) ?></h3>
+                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($feature2['published_at'] ?? '') ?> • <?= (int) ($feature2['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
             <?php endif; ?>
         </div>
 
-        <!-- Colonne droite: Espace pub + CTA aligné avec featured -->
-        <div class="lg:col-span-3 flex flex-col" style="gap: 24px;">
-            <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm" style="width: 300px; height: 600px; padding-right: 48px; padding-bottom: 48px; gap: 8px;">
+        <!-- Colonne droite desktop: Espace pub (xl+) + CTA (visible lg uniquement, CTA tablet = dans colonne gauche) -->
+        <div class="hidden lg:flex lg:col-span-3 flex-col" style="gap: 24px;">
+            <div class="hidden xl:flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm w-full xl:max-w-[300px]" style="height: 600px; padding-right: 48px; padding-bottom: 48px; gap: 8px;">
                 <div class="flex-1 flex items-center justify-center">Espace publicitaire</div>
             </div>
-            <!-- CTA: hauteur 118px pour aligner la colonne droite avec la gauche (438+24+280 = 742 ; 600+24+118 = 742) -->
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0" style="width: 301px; height: 118px; background: #FFF0D4;">
+            <!-- CTA desktop -->
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-[301px]" style="height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
             </a>
@@ -141,10 +162,10 @@ $truncateGlassTitle = function (?string $t): string {
     </div>
 
     <?php if (count($categories) > 0): ?>
-    <!-- Découvrez vos rubriques préférées - même layout grid 12 cols, 24px gap, 80px via main -->
-    <section id="categories-section" class="grid grid-cols-1 lg:grid-cols-12 w-full" style="margin-top: 65px; column-gap: 24px; row-gap: 24px;">
-            <!-- Grande carte gauche: 7 colonnes, titre 48px Figtree 600, description 24px 400 -->
-            <a href="/categories" class="vivat-card-with-image group lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
+    <!-- Découvrez vos rubriques - tablet 8 cols (24px gap), lg 12 cols -->
+    <section id="categories-section" class="grid grid-cols-1 tablet:grid-cols-8 lg:grid-cols-12 w-full" style="margin-top: 65px; column-gap: 24px; row-gap: 24px;">
+            <!-- Grande carte gauche | tablet 4 cols, lg 7 cols -->
+            <a href="/categories" class="vivat-card-with-image group tablet:col-span-4 lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
                 <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="Découvrez vos rubriques préférées sur Vivat" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <div class="absolute inset-0 flex flex-col items-start justify-center" style="padding: 32px;">
@@ -153,8 +174,8 @@ $truncateGlassTitle = function (?string $t): string {
                 </div>
             </a>
 
-            <!-- Droite: 5 colonnes, 2 petites + 1 grande + flèche, tout dans la grille -->
-            <div class="lg:col-span-5 flex items-center w-full min-w-0" style="gap: 24px;">
+            <!-- Droite: 3 petites cartes + flèche | tablet 4 cols, lg 5 cols -->
+            <div class="tablet:col-span-4 lg:col-span-5 flex items-center w-full min-w-0" style="gap: 24px;">
                 <div class="categories-carousel flex items-stretch min-w-0 flex-1" style="gap: 24px;">
                     <?php foreach ($catChunks as $chunkIdx => $chunk):
                         $cat1 = $chunk[0] ?? null;
@@ -228,8 +249,8 @@ $truncateGlassTitle = function (?string $t): string {
     <?php endif; ?>
 
     <?php
-    $highlightIds = array_values(array_filter(array_map(fn($a) => isset($a['id']) ? $a['id'] : null, $highlight)));
-    $restArticles = array_values(array_filter(array_merge($featured, $latest), fn($a) => !in_array($a['id'] ?? null, $highlightIds)));
+    $shown = [($top_news ?? [])['id'] ?? null, ($feature1 ?? [])['id'] ?? null, ($standard1 ?? [])['id'] ?? null, ($feature2 ?? [])['id'] ?? null, ($standard2 ?? [])['id'] ?? null];
+    $restArticles = array_values(array_filter(array_merge($featured, $latest), fn($a) => !in_array($a['id'] ?? null, $shown)));
     // Padd pour afficher 12 cartes : si moins de 12 articles, on répète pour remplir les slots
     if (count($restArticles) > 0 && count($restArticles) < 12) {
         $pad = [];
@@ -244,12 +265,12 @@ $truncateGlassTitle = function (?string $t): string {
     $artForFullPhoto2 = (count($withCover) > 1) ? $withCover[1] : ($restArticles[7] ?? null);
     ?>
     <?php if (count($restArticles) > 0): ?>
-    <section class="vivat-reveal-group mt-12 grid grid-cols-1 lg:grid-cols-12 w-full min-w-0" style="column-gap: 24px; row-gap: 24px;">
+    <section class="vivat-reveal-group mt-12 grid grid-cols-1 tablet:grid-cols-8 lg:grid-cols-12 w-full min-w-0" style="column-gap: 24px; row-gap: 24px;">
         <!-- Titre: Figtree 32px Medium -->
-        <h2 class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out font-medium text-[#004241] mb-6 lg:col-span-12" style="font-size: 32px;">Dernières actualités</h2>
+        <h2 class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out font-medium text-[#004241] mb-6 tablet:col-span-8 lg:col-span-12" style="font-size: 32px;">Dernières actualités</h2>
 
-        <!-- Colonne gauche (6 cols = moitié) -->
-        <div class="lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
+        <!-- Colonne gauche | tablet 4 cols, lg 6 cols -->
+        <div class="tablet:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php foreach (array_slice($restArticles, 0, 2) as $art): ?>
                 <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
@@ -274,8 +295,8 @@ $truncateGlassTitle = function (?string $t): string {
                     $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($hotNewsArt['slug'] ?? '') . '/626/240';
                     ?>
                     <img src="<?= htmlspecialchars($hotNewsImg) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                    <div class="absolute inset-0 flex justify-end items-end" style="padding: 18px;">
-                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="width: 264px; max-width: 60%; padding: 24px; gap: 8px;">
+                    <div class="absolute flex justify-end items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 8px;">
                             <?php if (!empty($hotNewsArt['category'])): ?>
                             <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
                             <?php endif; ?>
@@ -320,8 +341,8 @@ $truncateGlassTitle = function (?string $t): string {
             </div>
         </div>
 
-        <!-- Colonne droite (6 cols = moitié) -->
-        <div class="lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
+        <!-- Colonne droite | tablet 4 cols, lg 6 cols -->
+        <div class="tablet:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
                 <?php
                 $stdColors = ['#004241', '#FFEFD1'];
                 foreach (array_slice($restArticles, 3, 2) as $i => $art):
@@ -360,8 +381,8 @@ $truncateGlassTitle = function (?string $t): string {
                     <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[25px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                         <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 z-10" style="padding: 18px; max-width: 60%; min-width: 220px;">
-                            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full min-w-0" style="padding: 24px; gap: 8px; min-width: 180px;">
+                        <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 8px; min-width: 180px;">
                                 <?php if (!empty($artForFullPhoto1['category'])): ?>
                                 <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
                                 <?php endif; ?>
@@ -378,8 +399,8 @@ $truncateGlassTitle = function (?string $t): string {
             <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="height: 235px;">
                     <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
-                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
+                    <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
                             <?php if (!empty($artForFullPhoto2['category'])): ?>
                             <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
                             <?php endif; ?>
@@ -391,8 +412,8 @@ $truncateGlassTitle = function (?string $t): string {
             <?php endif; ?>
         </div>
 
-        <!-- Bouton Autres actualités - 24px au-dessus (row-gap de la section) -->
-        <div class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out flex justify-center lg:col-span-12">
+        <!-- Bouton Autres actualités -->
+        <div class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out flex justify-center tablet:col-span-8 lg:col-span-12">
             <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 transition box-border" style="width: 226px; height: 48px; background: #004241; padding: 12px 18px;">
                 Autres actualités
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
