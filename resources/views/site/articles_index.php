@@ -29,7 +29,6 @@ $pagination = $pagination ?? null;
     <?php if (empty($articles)): ?>
     <p class="text-gray-500 text-center py-12">Aucun article pour le moment.</p>
     <?php endif; ?>
-
     <?php if ($pagination && $pagination->hasPages()): ?>
     <nav class="flex justify-center gap-2 mt-10">
         <?php if ($pagination->onFirstPage()): ?>

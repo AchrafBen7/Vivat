@@ -41,7 +41,7 @@ L’URL `http://localhost:8000/api/public/categories/019c8a1f-2ddb-7160-a2bb-03a
 
 Avec l’invalidation du cache en place, les changements (nouveaux articles, publication, modification, suppression, catégories) sont pris en compte **dès la prochaine requête** sur le site public et l’API.
 
-Sans invalidation, le cache (5 min pour la home, 15 min pour les hubs) aurait continué à servir l’ancienne version.
+Sans invalidation, le cache (30 min pour la home, 15 min pour les hubs) aurait continué à servir l’ancienne version.
 
 ### Ce qui était déjà invalidé (avant les corrections)
 
@@ -78,10 +78,10 @@ Les nouvelles données sont chargées **à la demande**, au moment de la **premi
 1. **Tu modifies les données** (article publié/supprimé/modifié, catégorie modifiée, etc.).
 2. Le contrôleur fait **`Cache::forget('vivat.home')`** (et les autres clés concernées) → le cache est vidé immédiatement pour ces clés.
 3. **La requête suivante** qui demande la home (ou le hub, ou la liste des catégories) :
-   - appelle `Cache::remember('vivat.home', 300, function () { ... })`,
+   - appelle `Cache::remember('vivat.home', 1800, function () { ... })`,
    - ne trouve **rien** en cache (car on vient de le supprimer),
    - **exécute la closure** → requêtes en base → **charge les nouvelles données**,
-   - les remet en cache pour 5 min (home) ou 15 min (hub),
+   - les remet en cache pour 30 min (home) ou 15 min (hub),
    - renvoie cette réponse (HTML ou JSON).
 
 Donc : le chargement des nouvelles données se fait **au moment de cette première requête après l’invalidation**, pas avant et pas en arrière-plan.
