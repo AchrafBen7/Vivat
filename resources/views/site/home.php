@@ -64,7 +64,8 @@ $truncateGlassTitle = function (?string $t): string {
 
             <?php if ($standard2): ?>
             <!-- Standard 2: 519x280, #FFF0D4, radius 30, pas de photo -->
-            <a href="/articles/<?= htmlspecialchars($standard2['slug']) ?>" class="vivat-reveal block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
+            <a href="/articles/<?= htmlspecialchars($standard2['slug']) ?>" class="vivat-reveal vivat-card-no-image vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
+                <span class="vivat-card-arrow" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($standard2['category'])): ?>
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($standard2['category']['name']) ?></span>
                 <?php endif; ?>
@@ -97,7 +98,8 @@ $truncateGlassTitle = function (?string $t): string {
 
             <?php if ($standard1): ?>
             <!-- Standard 1: 413x221, #004241, pas de photo -->
-            <a href="/articles/<?= htmlspecialchars($standard1['slug']) ?>" class="vivat-reveal block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end" style="width: 100%; max-width: 413px; height: 221px; padding: 24px; gap: 8px; background: #004241;">
+            <a href="/articles/<?= htmlspecialchars($standard1['slug']) ?>" class="vivat-reveal vivat-card-no-image vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end" style="width: 100%; max-width: 413px; height: 221px; padding: 24px; gap: 8px; background: #004241;">
+                <span class="vivat-card-arrow" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($standard1['category'])): ?>
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($standard1['category']['name']) ?></span>
                 <?php endif; ?>
@@ -131,12 +133,10 @@ $truncateGlassTitle = function (?string $t): string {
             <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm" style="width: 300px; height: 600px; padding-right: 48px; padding-bottom: 48px; gap: 8px;">
                 <div class="flex-1 flex items-center justify-center">Espace publicitaire</div>
             </div>
-            <!-- CTA: 301x114, style Figma - texte en haut à gauche, bouton flèche dans le coin bas-droit (quart de cercle visible) -->
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0" style="width: 301px; height: 114px; background: #FFF0D4;">
+            <!-- CTA: hauteur 118px pour aligner la colonne droite avec la gauche (438+24+280 = 742 ; 600+24+118 = 742) -->
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal vivat-card-no-image vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0" style="width: 301px; height: 118px; background: #FFF0D4;">
+                <span class="vivat-card-arrow vivat-card-arrow-bottom" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
-                <span class="absolute flex items-center justify-center w-10 h-10 rounded-full bg-[#004241] text-white z-10 box-border" style="right: 18px; bottom: 18px; padding: 8px;">
-                    <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </span>
             </a>
         </div>
     </div>
@@ -334,7 +334,8 @@ $truncateGlassTitle = function (?string $t): string {
                     $bg = $stdColors[$i % 2];
                     $isDark = ($bg === '#004241');
                 ?>
-                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal flex flex-col rounded-[30px] overflow-hidden border relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
+                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal vivat-card-no-image <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col rounded-[30px] overflow-hidden border relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
+                    <span class="vivat-card-arrow" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <?php if (!empty($art['category'])): ?>
                     <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
                     <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles[$tagVariant]['bg'] ?>; color: <?= $tagStyles[$tagVariant]['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>

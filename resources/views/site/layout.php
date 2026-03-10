@@ -79,6 +79,51 @@ $title_safe = htmlspecialchars($title);
         .vivat-card-with-image:hover img {
             transform: scale(1.06);
         }
+
+        /* Cartes sans image: flèche au survol, 24px du bord */
+        .vivat-card-no-image {
+            position: relative;
+        }
+        .vivat-card-no-image .vivat-card-arrow {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+        .vivat-card-no-image .vivat-card-arrow-bottom {
+            top: auto;
+            right: 18px;
+            bottom: 18px;
+        }
+        .vivat-card-no-image .vivat-card-arrow svg {
+            transform: rotate(-45deg);
+        }
+        .vivat-card-no-image .vivat-card-arrow-bottom svg {
+            transform: none;
+        }
+        .vivat-card-no-image:hover .vivat-card-arrow {
+            opacity: 1;
+        }
+        .vivat-card-no-image.vivat-card-dark .vivat-card-arrow {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+        .vivat-card-no-image.vivat-card-jaune .vivat-card-arrow {
+            background: #004241;
+            color: #fff;
+        }
+        .vivat-card-no-image:not(.vivat-card-dark):not(.vivat-card-jaune) .vivat-card-arrow {
+            background: rgba(0, 66, 65, 0.12);
+            color: #004241;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">

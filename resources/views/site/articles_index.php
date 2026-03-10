@@ -7,7 +7,11 @@ $pagination = $pagination ?? null;
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($articles as $art): ?>
-        <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-gray-200/40 p-6 flex flex-col bg-[#EBF1EF] hover:bg-[#E5ECEA] transition" style="min-height: 300px;">
+        <?php $isCardNoImage = empty($art['cover_image_url']); ?>
+        <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-gray-200/40 p-6 flex flex-col relative <?= $isCardNoImage ? 'vivat-card-no-image ' : '' ?>bg-[#EBF1EF] hover:bg-[#E5ECEA] transition" style="min-height: 300px;">
+            <?php if ($isCardNoImage): ?>
+            <span class="vivat-card-arrow" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+            <?php endif; ?>
             <?php if (!empty($art['category'])): ?>
             <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($art['category']['name']) ?></span>
             <?php endif; ?>
