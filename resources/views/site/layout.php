@@ -48,20 +48,23 @@ $title_safe = htmlspecialchars($title);
             --vivat-card-glass: rgba(255, 255, 255, 0.11);
             --vivat-card-border: rgba(255, 255, 255, 0.15);
         }
-        /* Glass effect matte, sans contour */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Glass effect matte, légèrement sombre pour lisibilité sur images claires */
         .vivat-glass {
-            background: rgba(255, 255, 255, 0.14);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: none;
+            background: rgba(190, 190, 190, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(1px);
+            border: 1px solid rgba(230, 230, 230, 0.2);
         }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
+<body class="bg-white text-gray-900 antialiased">
     <!-- Navbar - Design System Figma -->
-    <header class="bg-white border-b border-gray-100">
+    <header class="bg-white">
         <div class="max-w-[1400px] mx-auto px-5 lg:px-20 flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
             <!-- Logo: 32px, #004241, Righteous 400, letter-spacing 3%, 612px space avant searchbar -->
             <h1 class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
@@ -95,7 +98,7 @@ $title_safe = htmlspecialchars($title);
             </button>
         </div>
     </header>
-    <main class="max-w-[1400px] mx-auto px-5 lg:px-20 pb-8 overflow-x-hidden" style="padding-top: 24px;">
+    <main class="max-w-[1400px] mx-auto px-5 lg:px-20 pb-8 overflow-x-hidden">
         <?= $content ?? '' ?>
     </main>
     <footer class="border-t border-gray-200 mt-12 py-8">
