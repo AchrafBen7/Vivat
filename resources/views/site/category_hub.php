@@ -73,11 +73,15 @@ $restArticles = array_values($articles);
     </div>
 
     <?php
-    // Même système que \"Dernières actualités\" sur la home, mais avec les articles de la rubrique
+    // Même système que "Dernières actualités" sur la home, mais avec les articles de la rubrique
     $restArticles = array_values($articles);
+    // Éviter les doublons : les cartes "pleine photo" doivent être des articles pas déjà affichés en 0,1,2,3,4,6,10,11
+    $usedIndicesBlock1 = [0, 1, 2, 3, 4, 6, 10, 11];
+    $usedIdsBlock1 = array_filter(array_map(fn($i) => $restArticles[$i]['id'] ?? null, $usedIndicesBlock1));
     $withCover = array_values(array_filter($restArticles, fn($a) => !empty($a['cover_image_url'])));
-    $artForFullPhoto1 = $withCover[0] ?? $restArticles[5] ?? null;
-    $artForFullPhoto2 = (count($withCover) > 1) ? $withCover[1] : ($restArticles[7] ?? null);
+    $withCoverNotUsed1 = array_values(array_filter($withCover, fn($a) => !in_array($a['id'] ?? null, $usedIdsBlock1)));
+    $artForFullPhoto1 = $withCoverNotUsed1[0] ?? $restArticles[5] ?? null;
+    $artForFullPhoto2 = isset($withCoverNotUsed1[1]) ? $withCoverNotUsed1[1] : ($restArticles[7] ?? null);
     ?>
     <?php if (count($restArticles) > 0): ?>
     <section class="vivat-reveal-group mt-12 grid grid-cols-1 lg:grid-cols-12 w-full min-w-0" style="column-gap: 24px; row-gap: 24px;">
@@ -227,5 +231,158 @@ $restArticles = array_values($articles);
     </section>
     <?php else: ?>
     <p class="text-[#004241]/70">Aucun article dans cette rubrique pour le moment.</p>
+    <?php endif; ?>
+
+    <!-- Bloc pub sous les articles : 24px marge, 970×250, padding 48px, fond #686868 -->
+    <div class="flex flex-col rounded-[30px] overflow-hidden box-border" style="margin-top: 24px; width: 970px; max-width: 100%; height: 250px; padding: 48px; gap: 8px; background: #686868;">
+        <div class="flex-1 flex items-center justify-center text-white/80 text-sm">Espace publicitaire</div>
+    </div>
+
+    <?php
+    // Deuxième bloc de 12 articles (même design que les 12 premiers), 24px sous la pub
+    $m = isset($restArticles) ? array_slice($restArticles, 12, 12) : [];
+    $usedIndicesBlock2 = [0, 1, 2, 3, 4, 6, 10, 11];
+    $usedIdsBlock2 = array_filter(array_map(fn($i) => isset($m[$i]) ? ($m[$i]['id'] ?? null) : null, $usedIndicesBlock2));
+    $moreWithCover = array_values(array_filter($m, fn($a) => !empty($a['cover_image_url'])));
+    $moreWithCoverNotUsed = array_values(array_filter($moreWithCover, fn($a) => !in_array($a['id'] ?? null, $usedIdsBlock2)));
+    $moreFull1 = $moreWithCoverNotUsed[0] ?? $m[5] ?? null;
+    $moreFull2 = isset($moreWithCoverNotUsed[1]) ? $moreWithCoverNotUsed[1] : ($m[7] ?? null);
+    $stdColors = ['#004241', '#FFEFD1'];
+    ?>
+    <?php if (count($m) > 0): ?>
+    <section class="vivat-reveal-group grid grid-cols-1 lg:grid-cols-12 w-full min-w-0" style="margin-top: 24px; column-gap: 24px; row-gap: 24px;">
+        <!-- Colonne gauche (6 cols) -->
+        <div class="lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
+            <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
+                <?php foreach (array_slice($m, 0, 2) as $art): ?>
+                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
+                    <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
+                        <?php if (!empty($art['category'])): ?>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
+                        <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                    <?php $artImg = !empty($art['cover_image_url']) ? $art['cover_image_url'] : 'https://picsum.photos/seed/'.rawurlencode($art['slug'] ?? '').'/254/190'; ?>
+                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
+                        <img src="<?= htmlspecialchars($artImg) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+
+            <?php $hotNewsArt = $m[2] ?? null; if ($hotNewsArt): ?>
+            <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
+                <?php $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : 'https://picsum.photos/seed/'.rawurlencode($hotNewsArt['slug'] ?? '').'/626/240'; ?>
+                <img src="<?= htmlspecialchars($hotNewsImg) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                <div class="absolute inset-0 flex justify-end items-end" style="padding: 18px;">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="width: 264px; max-width: 60%; padding: 24px; gap: 8px;">
+                        <?php if (!empty($hotNewsArt['category'])): ?>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($hotNewsArt['title'] ?? '')) ?></h3>
+                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </div>
+            </a>
+            <?php endif; ?>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
+                <?php $artLeft = $m[10] ?? null; if ($artLeft): ?>
+                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFEFD1; padding: 24px; gap: 18px;">
+                    <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                    <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
+                        <?php if (!empty($artLeft['category'])): ?>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft['title']) ?></h3>
+                        <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </a>
+                <?php endif; ?>
+                <?php $artLeft2 = $m[6] ?? null; if ($artLeft2): ?>
+                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
+                    <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
+                        <?php if (!empty($artLeft2['category'])): ?>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft2['title']) ?></h3>
+                        <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                    <?php $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : 'https://picsum.photos/seed/'.rawurlencode($artLeft2['slug'] ?? '').'/254/190'; ?>
+                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
+                        <img src="<?= htmlspecialchars($artLeft2Img) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    </div>
+                </a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Colonne droite (6 cols) -->
+        <div class="lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
+            <?php foreach (array_slice($m, 3, 2) as $i => $art): $bg = $stdColors[$i % 2]; $isDark = ($bg === '#004241'); ?>
+            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col rounded-[30px] overflow-hidden border min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
+                <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 <?= $isDark ? 'bg-white/25 text-white' : 'bg-[#004241] text-white' ?>" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <?php if (!empty($art['category'])): ?>
+                <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles[$tagVariant]['bg'] ?>; color: <?= $tagStyles[$tagVariant]['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>
+                <?php endif; ?>
+                <h3 class="font-medium line-clamp-2 flex-1 <?= $isDark ? 'text-white' : 'text-[#004241]' ?>" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
+                <p class="<?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>" style="font-size: 14px;"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+            </a>
+            <?php endforeach; ?>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
+                <?php $artRight = $m[11] ?? null; if ($artRight): ?>
+                <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px; background: #EBF1EF;">
+                    <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
+                        <?php if (!empty($artRight['category'])): ?>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artRight['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artRight['title']) ?></h3>
+                        <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                    <?php $artRightImg = !empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : 'https://picsum.photos/seed/'.rawurlencode($artRight['slug'] ?? '').'/254/190'; ?>
+                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
+                        <img src="<?= htmlspecialchars($artRightImg) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    </div>
+                </a>
+                <?php endif; ?>
+                <?php if ($moreFull1): ?>
+                <?php $fullPhoto1Img = !empty($moreFull1['cover_image_url']) ? $moreFull1['cover_image_url'] : 'https://picsum.photos/seed/'.rawurlencode($moreFull1['slug'] ?? '').'/302/419'; ?>
+                <a href="/articles/<?= htmlspecialchars($moreFull1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[25px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
+                    <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" alt="<?= htmlspecialchars($moreFull1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 z-10" style="padding: 18px; max-width: 60%; min-width: 220px;">
+                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full min-w-0" style="padding: 24px; gap: 8px; min-width: 180px;">
+                            <?php if (!empty($moreFull1['category'])): ?>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($moreFull1['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($moreFull1['title'] ?? '')) ?></h3>
+                            <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($moreFull1['published_at'] ?? '') ?> • <?= (int) ($moreFull1['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                    </div>
+                </a>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($moreFull2): ?>
+            <?php $fullPhoto2Img = !empty($moreFull2['cover_image_url']) ? $moreFull2['cover_image_url'] : 'https://picsum.photos/seed/'.rawurlencode($moreFull2['slug'] ?? '').'/629/235'; ?>
+            <a href="/articles/<?= htmlspecialchars($moreFull2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="height: 235px;">
+                <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" alt="<?= htmlspecialchars($moreFull2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
+                        <?php if (!empty($moreFull2['category'])): ?>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($moreFull2['category']['name']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($moreFull2['title'] ?? '')) ?></h3>
+                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($moreFull2['published_at'] ?? '') ?> • <?= (int) ($moreFull2['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </div>
+            </a>
+            <?php endif; ?>
+        </div>
+    </section>
     <?php endif; ?>
 </div>
