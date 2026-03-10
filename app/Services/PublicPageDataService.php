@@ -31,32 +31,45 @@ class PublicPageDataService
         $cacheTtl = (int) config('vivat.home_cache_ttl', 300);
 
         $data = Cache::remember($cacheKey, $cacheTtl, function () {
-            $topNews = Article::published()
-                ->where('article_type', 'hot_news')
-                ->with('category')
-                ->orderByDesc('published_at')
-                ->first();
-
+            $highlightSize = 5;
             $featuredLimit = (int) config('vivat.home_featured_count', 4);
             $latestLimit = (int) config('vivat.home_latest_count', 12);
             $categoriesLimit = (int) config('vivat.home_categories_count', 9);
 
-            $baseQuery = Article::published()->with('category')->orderByDesc('published_at');
-            $excludeId = $topNews?->id;
+            // Highlight = 5 emplacements : d'abord tous les hot_news (jusqu'à 5), puis compléter avec des featured
+            $hotNewsForHighlight = Article::published()
+                ->where('article_type', 'hot_news')
+                ->with('category')
+                ->orderByDesc('published_at')
+                ->limit($highlightSize)
+                ->get();
 
-            $featuredQuery = clone $baseQuery;
-            if ($excludeId) {
-                $featuredQuery->where('id', '!=', $excludeId);
-            }
-            $featuredQuery->where(fn ($q) => $q->where('article_type', 'hot_news')->orWhereNotNull('cover_image_url'));
-            $featured = $featuredQuery->limit($featuredLimit)->get();
+            $highlightIds = $hotNewsForHighlight->pluck('id')->all();
+            $remaining = $highlightSize - count($highlightIds);
 
-            $featuredIds = $featured->pluck('id')->push($excludeId)->filter()->all();
-            $latestQuery = Article::published()->with('category')->orderByDesc('published_at');
-            if (count($featuredIds) > 0) {
-                $latestQuery->whereNotIn('id', $featuredIds);
+            $highlight = $hotNewsForHighlight;
+            if ($remaining > 0) {
+                $featuredFill = Article::published()
+                    ->with('category')
+                    ->whereNotIn('id', $highlightIds)
+                    ->where(fn ($q) => $q->where('article_type', 'hot_news')->orWhereNotNull('cover_image_url'))
+                    ->orderByDesc('published_at')
+                    ->limit($remaining)
+                    ->get();
+                $highlight = $highlight->merge($featuredFill)->take($highlightSize);
             }
-            $latest = $latestQuery->limit($latestLimit)->get();
+
+            $highlightIds = $highlight->pluck('id')->all();
+
+            // "Dernières actualités" = les plus récents après les 5 highlight (une seule liste par date)
+            $restCount = max($featuredLimit + $latestLimit, 16);
+            $latest = Article::published()
+                ->with('category')
+                ->whereNotIn('id', $highlightIds)
+                ->orderByDesc('published_at')
+                ->limit($restCount)
+                ->get();
+            $featured = collect();
 
             $categories = Category::query()
                 ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')])
@@ -69,14 +82,23 @@ class PublicPageDataService
                 ->get();
 
             return [
-                'top_news' => $topNews,
+                'highlight' => $highlight,
+                'top_news' => $highlight->first(),
                 'featured' => $featured,
                 'latest' => $latest,
                 'categories' => $categories,
             ];
         });
 
+        $highlightArray = $data['highlight']->map(fn ($a) => $this->articleToArray($a))->values()->all();
+        // S'assurer d'avoir exactement 5 slots (null si pas assez d'articles)
+        while (count($highlightArray) < 5) {
+            $highlightArray[] = null;
+        }
+        $highlightArray = array_slice($highlightArray, 0, 5);
+
         return [
+            'highlight' => $highlightArray,
             'top_news' => $data['top_news'] ? $this->articleToArray($data['top_news']) : null,
             'featured' => $data['featured']->map(fn ($a) => $this->articleToArray($a))->all(),
             'latest' => $data['latest']->map(fn ($a) => $this->articleToArray($a))->all(),
@@ -104,25 +126,14 @@ class PublicPageDataService
             }
 
             $totalPublished = (clone $query)->count();
-            $featured = (clone $query)
-                ->where(fn ($q) => $q->whereNotNull('cover_image_url')->orWhereNotNull('cover_video_url'))
-                ->orderByDesc('quality_score')
-                ->limit(3)
-                ->get();
-            $excludeIds = $featured->pluck('id')->all();
-            $latestQuery = (clone $query)->orderByDesc('published_at')->limit(12);
-            if (count($excludeIds) > 0) {
-                $latestQuery->whereNotIn('id', $excludeIds);
-            }
-            $latest = $latestQuery->get();
+            $articles = (clone $query)->orderByDesc('published_at')->limit(16)->get();
 
             return [
                 'category' => $category,
                 'description' => $category->description,
                 'total_published' => $totalPublished,
                 'sub_categories' => $category->subCategories,
-                'featured' => $featured,
-                'latest' => $latest,
+                'articles' => $articles,
             ];
         });
 
@@ -130,13 +141,13 @@ class PublicPageDataService
             'category' => $this->categoryToArray($data['category']->load('subCategories')),
             'description' => $data['description'],
             'total_published' => $data['total_published'],
+            'current_sub_category_slug' => $subCategorySlug,
             'sub_categories' => $data['sub_categories']->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->name,
                 'slug' => $s->slug,
             ])->all(),
-            'featured' => $data['featured']->map(fn ($a) => $this->articleToArray($a))->all(),
-            'latest' => $data['latest']->map(fn ($a) => $this->articleToArray($a))->all(),
+            'articles' => $data['articles']->map(fn ($a) => $this->articleToArray($a))->all(),
         ];
     }
 

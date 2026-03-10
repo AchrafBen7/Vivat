@@ -18,8 +18,14 @@ class DatabaseSeeder extends Seeder
         // Roles & Permissions must be seeded FIRST
         $this->call(RolesAndPermissionsSeeder::class);
 
-        // Pipeline data (categories, sources, feeds, templates)
-        $this->call(PipelineSeeder::class);
+        // 9 catégories Vivat (au-quotidien, energie, finance, technologie, chez-soi, mode, sante, voyage, famille)
+        $this->call(VivatNineCategoriesSeeder::class);
+
+        // 4-5 sous-catégories par catégorie (filtres page catégorie)
+        $this->call(SubCategoriesSeeder::class);
+
+        // 5 articles par catégorie (sous-catégories et types variés, base visuelle)
+        $this->call(CategoryArticlesSeeder::class);
 
         // Admin user
         $admin = User::firstOrCreate(

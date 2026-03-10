@@ -1,4 +1,5 @@
 <?php
+$highlight = $highlight ?? [];
 $top_news = $top_news ?? null;
 $featured = $featured ?? [];
 $latest = $latest ?? [];
@@ -6,11 +7,12 @@ $categories = $categories ?? [];
 $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
 
-// On prend les premiers articles pour la grille (hot news, 2 features, 2 standards)
-$feature1 = $featured[0] ?? null;
-$standard1 = $featured[1] ?? $latest[0] ?? null;
-$feature2 = $featured[2] ?? $latest[1] ?? null;
-$standard2 = $latest[0] ?? ($featured[3] ?? null);
+// Grille highlight : 5 emplacements (hot_news puis featured), tous avec tag "Top news"
+$h0 = $highlight[0] ?? null;  // grande carte
+$h1 = $highlight[1] ?? null; // feature 1
+$h2 = $highlight[2] ?? null; // standard 1 (vert)
+$h3 = $highlight[3] ?? null; // feature 2
+$h4 = $highlight[4] ?? null; // standard 2 (jaune)
 $catChunks = array_chunk($categories, 3);
 
 // Styles des tags par type de card (H 30px, padding 6px 12px, 14px font)
@@ -44,84 +46,76 @@ $truncateGlassTitle = function (?string $t): string {
     <div class="vivat-reveal-group grid grid-cols-1 lg:grid-cols-12 gap-6" style="column-gap: 24px; row-gap: 24px;">
         <!-- Colonne gauche: Hot news + Standard 2 -->
         <div class="lg:col-span-5 flex flex-col" style="gap: 24px;">
-            <?php if ($top_news): ?>
-            <!-- Hot news: 519x438, radius 30, overlay 20%, inner card glass -->
-            <a href="/articles/<?= htmlspecialchars($top_news['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 519px; height: 438px;">
-                <?php if (!empty($top_news['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($top_news['cover_image_url']) ?>" alt="<?= htmlspecialchars($top_news['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
+            <?php if ($h0): ?>
+            <!-- Highlight 0: grande carte 519x438, radius 30, overlay 20%, tag Top news -->
+            <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 519px; height: 438px;">
+                <?php if (!empty($h0['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($h0['cover_image_url']) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
                 <?php endif; ?>
                 <div class="absolute inset-0" style="background: rgba(0,0,0,0.2);"></div>
                 <div class="absolute rounded-[21px] flex flex-col vivat-glass" style="width: 300px; max-width: 60%; bottom: 18px; left: 18px; padding: 24px; gap: 8px;">
                     <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: #EBF1EF; color: #004241;">Top news</span>
-                    <h2 class="font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($top_news['title'] ?? '')) ?></h2>
-                    <?php if (!empty($top_news['excerpt'])): ?>
-                    <p class="text-white/90 line-clamp-4" style="font-size: 16px;"><?= htmlspecialchars($top_news['excerpt']) ?></p>
+                    <h2 class="font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
+                    <?php if (!empty($h0['excerpt'])): ?>
+                    <p class="text-white/90 line-clamp-4" style="font-size: 16px;"><?= htmlspecialchars($h0['excerpt']) ?></p>
                     <?php endif; ?>
-                    <p class="text-white/80" style="font-size: 14px;"><?= htmlspecialchars($top_news['published_at'] ?? '') ?> • <?= (int) ($top_news['reading_time'] ?? 0) ?> min</p>
+                    <p class="text-white/80" style="font-size: 14px;"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
                 </div>
             </a>
             <?php endif; ?>
 
-            <?php if ($standard2): ?>
-            <!-- Standard 2: 519x280, #FFF0D4, radius 30, pas de photo -->
-            <a href="/articles/<?= htmlspecialchars($standard2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
+            <?php if ($h4): ?>
+            <!-- Highlight 4: Standard 2 - 519x280, #FFF0D4, tag Top news -->
+            <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
                 <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <?php if (!empty($standard2['category'])): ?>
-                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($standard2['category']['name']) ?></span>
-                <?php endif; ?>
-                <h3 class="font-semibold text-[#004241] line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($standard2['title']) ?></h3>
-                <p class="text-[#004241]/70" style="font-size: 14px;"><?= htmlspecialchars($standard2['published_at'] ?? '') ?> • <?= (int) ($standard2['reading_time'] ?? 0) ?> min</p>
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;">Top news</span>
+                <h3 class="font-semibold text-[#004241] line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h4['title']) ?></h3>
+                <p class="text-[#004241]/70" style="font-size: 14px;"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php endif; ?>
         </div>
 
         <!-- Colonne milieu: Feature + Standard 1 (21px marge avec hot news) -->
         <div class="lg:col-span-4 flex flex-col" style="gap: 24px;">
-            <?php if ($feature1): ?>
-            <!-- Feature: 411x237, image + titre, pas de description -->
-            <a href="/articles/<?= htmlspecialchars($feature1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
-                <?php if (!empty($feature1['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($feature1['cover_image_url']) ?>" alt="<?= htmlspecialchars($feature1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+            <?php if ($h1): ?>
+            <!-- Highlight 1: Feature 411x237, tag Top news -->
+            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
+                <?php if (!empty($h1['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($h1['cover_image_url']) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <?php endif; ?>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
-                        <?php if (!empty($feature1['category'])): ?>
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($feature1['category']['name']) ?></span>
-                        <?php endif; ?>
-                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($feature1['title'] ?? '')) ?></h3>
-                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($feature1['published_at'] ?? '') ?> • <?= (int) ($feature1['reading_time'] ?? 0) ?> min</p>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;">Top news</span>
+                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h1['title'] ?? '')) ?></h3>
+                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
             <?php endif; ?>
 
-            <?php if ($standard1): ?>
-            <!-- Standard 1: 413x221, #004241, pas de photo -->
-            <a href="/articles/<?= htmlspecialchars($standard1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end" style="width: 100%; max-width: 413px; height: 221px; padding: 24px; gap: 8px; background: #004241;">
+            <?php if ($h2): ?>
+            <!-- Highlight 2: Standard 1 - 413x221, #004241, tag Top news -->
+            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end" style="width: 100%; max-width: 413px; height: 221px; padding: 24px; gap: 8px; background: #004241;">
                 <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <?php if (!empty($standard1['category'])): ?>
-                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($standard1['category']['name']) ?></span>
-                <?php endif; ?>
-                <h3 class="font-semibold text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($standard1['title']) ?></h3>
-                <p class="text-white/70" style="font-size: 14px;"><?= htmlspecialchars($standard1['published_at'] ?? '') ?> • <?= (int) ($standard1['reading_time'] ?? 0) ?> min</p>
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;">Top news</span>
+                <h3 class="font-semibold text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h2['title']) ?></h3>
+                <p class="text-white/70" style="font-size: 14px;"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php endif; ?>
 
-            <?php if ($feature2): ?>
-            <!-- Feature 2: 411x237, image + titre, pas de description (en dessous du standard vert) -->
-            <a href="/articles/<?= htmlspecialchars($feature2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
-                <?php if (!empty($feature2['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($feature2['cover_image_url']) ?>" alt="<?= htmlspecialchars($feature2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+            <?php if ($h3): ?>
+            <!-- Highlight 3: Feature 2 - 411x237, tag Top news -->
+            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative" style="width: 100%; max-width: 411px; height: 237px;">
+                <?php if (!empty($h3['cover_image_url'])): ?>
+                <img src="<?= htmlspecialchars($h3['cover_image_url']) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <?php endif; ?>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
-                        <?php if (!empty($feature2['category'])): ?>
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($feature2['category']['name']) ?></span>
-                        <?php endif; ?>
-                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($feature2['title'] ?? '')) ?></h3>
-                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($feature2['published_at'] ?? '') ?> • <?= (int) ($feature2['reading_time'] ?? 0) ?> min</p>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;">Top news</span>
+                        <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h3['title'] ?? '')) ?></h3>
+                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -234,8 +228,8 @@ $truncateGlassTitle = function (?string $t): string {
     <?php endif; ?>
 
     <?php
-    $shown = [($top_news ?? [])['id'] ?? null, ($feature1 ?? [])['id'] ?? null, ($standard1 ?? [])['id'] ?? null, ($feature2 ?? [])['id'] ?? null, ($standard2 ?? [])['id'] ?? null];
-    $restArticles = array_values(array_filter(array_merge($featured, $latest), fn($a) => !in_array($a['id'] ?? null, $shown)));
+    $highlightIds = array_values(array_filter(array_map(fn($a) => isset($a['id']) ? $a['id'] : null, $highlight)));
+    $restArticles = array_values(array_filter(array_merge($featured, $latest), fn($a) => !in_array($a['id'] ?? null, $highlightIds)));
     // Padd pour afficher 12 cartes : si moins de 12 articles, on répète pour remplir les slots
     if (count($restArticles) > 0 && count($restArticles) < 12) {
         $pad = [];
