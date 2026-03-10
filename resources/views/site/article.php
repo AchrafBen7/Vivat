@@ -25,11 +25,15 @@ $excerpt = $article['excerpt'] ?? '';
             <?php endif; ?>
         </div>
     </header>
-    <?php if ($cover_image_url): ?>
+    <?php
+    $catSlug = ($category ?? [])['slug'] ?? null;
+    $artId = $article['id'] ?? $slug ?? null;
+    $coverFallback = vivat_category_fallback_image($catSlug, 800, 450, $artId, 'cover');
+    $coverSrc = !empty($cover_image_url) ? $cover_image_url : $coverFallback;
+    ?>
     <figure class="rounded-xl overflow-hidden mb-8">
-        <img src="<?= htmlspecialchars($cover_image_url) ?>" alt="<?= htmlspecialchars($title) ?>" class="w-full aspect-video object-cover" loading="eager">
+        <img src="<?= htmlspecialchars($coverSrc) ?>" data-fallback-url="<?= htmlspecialchars($coverFallback) ?>" alt="<?= htmlspecialchars($title) ?>" class="w-full aspect-video object-cover" loading="eager">
     </figure>
-    <?php endif; ?>
     <?php if ($excerpt): ?>
     <p class="text-xl text-gray-600 mb-8"><?= nl2br(htmlspecialchars($excerpt)) ?></p>
     <?php endif; ?>

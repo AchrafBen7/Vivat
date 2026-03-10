@@ -20,21 +20,24 @@ class CategoryController extends Controller
     /*  LIST & SHOW (public + admin)                                      */
     /* ================================================================== */
 
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $categories = Cache::remember('vivat.categories.index', 3600, function () {
+        $locale = content_locale($request);
+        $closure = function () use ($locale) {
             return Category::query()
-                ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')])
+                ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)])
                 ->orderBy('name')
                 ->get();
-        });
+        };
+        $categories = config('vivat.disable_page_cache') ? $closure() : Cache::remember('vivat.categories.index.' . $locale, 3600, $closure);
 
         return CategoryResource::collection($categories);
     }
 
-    public function show(Category $category): CategoryResource
+    public function show(Request $request, Category $category): CategoryResource
     {
-        $category->loadCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')]);
+        $locale = content_locale($request);
+        $category->loadCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)]);
 
         return new CategoryResource($category);
     }
@@ -50,13 +53,14 @@ class CategoryController extends Controller
      */
     public function hub(Request $request, Category $category): JsonResponse
     {
+        $locale = content_locale($request);
         $subCategorySlug = $request->input('sub_category');
-        $cacheKey = 'vivat.hub.'.$category->slug.($subCategorySlug ? '.'.(string) $subCategorySlug : '');
-
-        $data = Cache::remember($cacheKey, 900, function () use ($category, $subCategorySlug) {
+        $cacheKey = 'vivat.hub.'.$category->slug.($subCategorySlug ? '.'.(string) $subCategorySlug : '').'.'.$locale;
+        $closure = function () use ($category, $subCategorySlug, $locale) {
             $category->load(['subCategories' => fn ($q) => $q->orderBy('order')]);
 
             $query = Article::published()
+                ->forLocale($locale)
                 ->where('category_id', $category->id)
                 ->with(['category', 'subCategory']);
 
@@ -92,7 +96,8 @@ class CategoryController extends Controller
                 'featured' => $featured,
                 'latest' => $latest,
             ];
-        });
+        };
+        $data = config('vivat.disable_page_cache') ? $closure() : Cache::remember($cacheKey, 900, $closure);
 
         $requestForResource = $request;
         $featuredResources = $data['featured']->map(fn ($a) => array_merge(
@@ -135,8 +140,10 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
         $category->refresh(); // charge created_at défini par la BDD (useCurrent)
-        Cache::forget('vivat.categories.index');
-        Cache::forget('vivat.home');
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget('vivat.categories.index.' . $loc);
+            Cache::forget('vivat.home.' . $loc);
+        }
 
         return (new CategoryResource($category))->response()->setStatusCode(201);
     }
@@ -153,9 +160,11 @@ class CategoryController extends Controller
         ]);
 
         $category->update($validated);
-        Cache::forget('vivat.categories.index');
-        Cache::forget('vivat.hub.'.$category->slug);
-        Cache::forget('vivat.home');
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget('vivat.categories.index.' . $loc);
+            Cache::forget('vivat.hub.' . $category->slug . '.' . $loc);
+            Cache::forget('vivat.home.' . $loc);
+        }
 
         return new CategoryResource($category->fresh());
     }
@@ -164,9 +173,11 @@ class CategoryController extends Controller
     {
         $slug = $category->slug;
         $category->delete();
-        Cache::forget('vivat.categories.index');
-        Cache::forget('vivat.hub.'.$slug);
-        Cache::forget('vivat.home');
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget('vivat.categories.index.' . $loc);
+            Cache::forget('vivat.hub.' . $slug . '.' . $loc);
+            Cache::forget('vivat.home.' . $loc);
+        }
 
         return response()->json(null, 204);
     }

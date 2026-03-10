@@ -20,6 +20,7 @@ class Article extends Model
         'meta_description',
         'keywords',
         'category_id',
+        'language',
         'sub_category_id',
         'cluster_id',
         'reading_time',
@@ -73,6 +74,19 @@ class Article extends Model
     {
         return $query->where('status', 'published')
             ->whereNotNull('published_at');
+    }
+
+    /** Filtre par langue de contenu (fr ou nl). Les articles sans langue (NULL) sont considérés français. */
+    public function scopeForLocale($query, string $locale)
+    {
+        $lang = strtolower($locale);
+        if (! in_array($lang, ['fr', 'nl'], true)) {
+            $lang = 'fr';
+        }
+        if ($lang === 'fr') {
+            return $query->where(fn ($q) => $q->where('language', 'fr')->orWhereNull('language'));
+        }
+        return $query->where('language', 'nl');
     }
 
     public function scopeDraft($query)

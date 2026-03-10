@@ -1,4 +1,5 @@
 <?php
+$content_locale = $content_locale ?? content_locale();
 $title = $title ?? 'Vivat';
 $meta_description = $meta_description ?? 'Vivat — Actualités et articles. Découvrez nos rubriques et derniers articles.';
 $canonical_url = $canonical_url ?? null;
@@ -8,7 +9,7 @@ $meta_description_safe = htmlspecialchars($meta_description);
 $title_safe = htmlspecialchars($title);
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?= htmlspecialchars($content_locale) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +25,7 @@ $title_safe = htmlspecialchars($title);
     <?php if (!empty($canonical_url)): ?>
     <meta property="og:url" content="<?= htmlspecialchars($canonical_url) ?>">
     <?php endif; ?>
-    <meta property="og:locale" content="fr_FR">
+    <meta property="og:locale" content="<?= $content_locale === 'nl' ? 'nl_BE' : 'fr_FR' ?>">
     <?php if (!empty($og_image)): ?>
     <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
     <?php endif; ?>
@@ -143,6 +144,42 @@ $title_safe = htmlspecialchars($title);
         } else {
             initScrollReveal();
         }
+        // Fallback image : si une image a data-fallback-url et échoue au chargement, utiliser l’URL de repli (par catégorie)
+        function applyFallback(img) {
+            var fallback = img.getAttribute('data-fallback-url');
+            if (fallback && img.src !== fallback) {
+                img.removeAttribute('data-fallback-url');
+                img.src = fallback;
+            }
+        }
+        function onImageError(e) {
+            var img = e.target;
+            if (img.tagName !== 'IMG') return;
+            applyFallback(img);
+        }
+        function attachFallbackToImages() {
+            document.querySelectorAll('img[data-fallback-url]').forEach(function(img) {
+                if (img.dataset.fallbackAttached) return;
+                img.dataset.fallbackAttached = '1';
+                if (img.complete && img.naturalWidth === 0) {
+                    applyFallback(img);
+                }
+                img.addEventListener('error', onImageError);
+            });
+        }
+        function repairBrokenFallbacks() {
+            document.querySelectorAll('img[data-fallback-url]').forEach(function(img) {
+                if (img.naturalWidth === 0) applyFallback(img);
+            });
+        }
+        attachFallbackToImages();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachFallbackToImages);
+        }
+        setTimeout(repairBrokenFallbacks, 1500);
+        setTimeout(repairBrokenFallbacks, 4000);
+        window.addEventListener('load', repairBrokenFallbacks);
+        document.body.addEventListener('error', onImageError, true);
     })();
     </script>
 </body>

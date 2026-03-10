@@ -71,6 +71,24 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Développement local (Docker)
+
+Si tu n'as pas PHP installé en local, utilise Docker pour les commandes Laravel.
+
+**Vider le cache** (depuis la racine du projet) :
+```bash
+docker compose exec app php artisan cache:clear
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan view:clear
+```
+
+En une seule ligne :
+```bash
+docker compose exec app php artisan cache:clear && docker compose exec app php artisan config:clear && docker compose exec app php artisan view:clear
+```
+
+Assure-toi que les conteneurs tournent (`docker compose up -d`) avant d’exécuter ces commandes.
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

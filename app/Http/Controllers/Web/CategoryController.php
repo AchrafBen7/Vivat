@@ -10,10 +10,11 @@ use Illuminate\Http\Response;
 
 class CategoryController extends Controller
 {
-    public function index(PublicPageDataService $pageData): Response
+    public function index(Request $request, PublicPageDataService $pageData): Response
     {
+        $locale = content_locale($request);
         $categories = Category::query()
-            ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')])
+            ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)])
             ->orderBy('name')
             ->get()
             ->map(fn ($c) => [
@@ -30,6 +31,7 @@ class CategoryController extends Controller
         $content = render_php_view('site.categories', $data);
         $html = render_php_view('site.layout', [
             'content' => $content,
+            'content_locale' => $locale,
             'title' => 'Rubriques — Vivat',
             'meta_description' => 'Découvrez les rubriques Vivat. Parcourez nos catégories d\'actualités.',
             'canonical_url' => url('/categories'),
@@ -40,13 +42,15 @@ class CategoryController extends Controller
 
     public function hub(Request $request, string $slug, PublicPageDataService $pageData): Response
     {
+        $locale = content_locale($request);
         $subCategorySlug = $request->input('sub_category');
-        $data = $pageData->getCategoryHubData($slug, $subCategorySlug);
+        $data = $pageData->getCategoryHubData($slug, $subCategorySlug, $locale);
 
         $categorySlug = $data['category']['slug'] ?? $slug;
         $content = render_php_view('site.category_hub', $data);
         $html = render_php_view('site.layout', [
             'content' => $content,
+            'content_locale' => $locale,
             'title' => ($data['category']['name'] ?? 'Rubrique') . ' — Vivat',
             'meta_description' => $data['description'] ?? 'Articles de la rubrique '.($data['category']['name'] ?? '').' sur Vivat.',
             'canonical_url' => url('/categories/'.$categorySlug),

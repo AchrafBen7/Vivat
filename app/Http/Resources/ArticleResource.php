@@ -30,6 +30,7 @@ class ArticleResource extends JsonResource
             'meta_description' => $this->meta_description,
             'keywords' => $this->keywords,
             'category_id' => $this->category_id,
+            'language' => $this->language ?? 'fr',
             'sub_category_id' => $this->sub_category_id,
             'cluster_id' => $this->cluster_id,
             'reading_time' => $this->reading_time,

@@ -40,6 +40,7 @@ class AdditionalArticlesSeeder extends Seeder
                 'meta_description' => $data['meta_description'] ?? $data['excerpt'],
                 'keywords' => $data['keywords'] ?? [],
                 'category_id' => $category->id,
+                'language' => 'fr',
                 'cluster_id' => null,
                 'reading_time' => $data['reading_time'],
                 'status' => 'review',

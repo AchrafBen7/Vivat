@@ -6,8 +6,15 @@ $pagination = $pagination ?? null;
     <h1 class="font-medium text-[#004241] mb-10" style="font-size: 32px; font-family: Figtree, sans-serif;">Toutes les actualités</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php foreach ($articles as $art): ?>
-        <?php $isCardNoImage = empty($art['cover_image_url']); ?>
+        <?php foreach ($articles as $idx => $art): ?>
+        <?php
+        $catSlug = $art['category']['slug'] ?? null;
+        $artId = $art['id'] ?? $art['slug'] ?? null;
+        $fallbackImg = vivat_category_fallback_image($catSlug, 400, 160, $artId, 'list-' . $idx);
+        $coverUrl = $art['cover_image_url'] ?? null;
+        $imgSrc = !empty($coverUrl) ? $coverUrl : $fallbackImg;
+        $isCardNoImage = empty($coverUrl);
+        ?>
         <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-gray-200/40 p-6 flex flex-col relative <?= $isCardNoImage ? 'vivat-card-no-image group ' : '' ?>bg-[#EBF1EF] hover:bg-[#E5ECEA] transition" style="min-height: 300px;">
             <?php if ($isCardNoImage): ?>
             <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241]/10 text-[#004241]" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
@@ -17,11 +24,9 @@ $pagination = $pagination ?? null;
             <?php endif; ?>
             <h2 class="font-medium text-[#004241] line-clamp-3 mt-2 flex-1" style="font-size: 18px;"><?= htmlspecialchars($art['title']) ?></h2>
             <p class="text-[#004241] text-sm font-light mt-2"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
-            <?php if (!empty($art['cover_image_url'])): ?>
             <div class="rounded-[21px] overflow-hidden mt-4 flex-shrink-0">
-                <img src="<?= htmlspecialchars($art['cover_image_url']) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-40 object-cover" loading="lazy">
+                <img src="<?= htmlspecialchars($imgSrc) ?>" data-fallback-url="<?= htmlspecialchars($fallbackImg) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-40 object-cover" loading="lazy">
             </div>
-            <?php endif; ?>
         </a>
         <?php endforeach; ?>
     </div>

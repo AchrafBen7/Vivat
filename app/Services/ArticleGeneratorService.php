@@ -83,6 +83,7 @@ class ArticleGeneratorService
             'meta_description' => $metaDescription,
             'keywords' => $keywords,
             'category_id' => $categoryId,
+            'language' => 'fr',
             'cluster_id' => null,
             'reading_time' => $readingTime,
             'status' => 'draft',

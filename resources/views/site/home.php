@@ -52,10 +52,10 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne gauche: Top news 462×438 + Standard 2 + CTA | tablet largeur 462px, lg 5 cols -->
         <div class="tablet:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
             <?php if ($h0): ?>
-            <?php $h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($h0['slug'] ?? 'vivat') . '/800/600'; ?>
+            <?php $h0CatSlug = $h0['category']['slug'] ?? null; $h0ArtId = $h0['id'] ?? $h0['slug'] ?? null; $h0Fallback = vivat_category_fallback_image($h0CatSlug, 800, 600, $h0ArtId, 'h0'); $h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : $h0Fallback; ?>
             <!-- Highlight 0: grande carte 462×438 tablet, 519×438 lg -->
             <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
-                <img src="<?= htmlspecialchars($h0Img) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
+                <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
                 <div class="absolute inset-0" style="background: rgba(0,0,0,0.2);"></div>
                 <!-- Carré glass toujours à 18px du bord de la carte -->
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -93,11 +93,10 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne droite: Feature 1 + carte verte (270×221) + Feature 2 | tablet 1 col, lg 4 cols -->
         <div class="tablet:col-span-1 lg:col-span-4 flex flex-col" style="gap: 24px;">
             <?php if ($h1): ?>
+            <?php $h1CatSlug = $h1['category']['slug'] ?? null; $h1ArtId = $h1['id'] ?? $h1['slug'] ?? null; $h1Fallback = vivat_category_fallback_image($h1CatSlug, 411, 237, $h1ArtId, 'h1'); $h1Img = !empty($h1['cover_image_url']) ? $h1['cover_image_url'] : $h1Fallback; ?>
             <!-- Highlight 1: Feature 411x237 -->
             <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
-                <?php if (!empty($h1['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($h1['cover_image_url']) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                <?php endif; ?>
+                <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
@@ -124,11 +123,10 @@ $truncateGlassTitle = function (?string $t): string {
             <?php endif; ?>
 
             <?php if ($h3): ?>
+            <?php $h3CatSlug = $h3['category']['slug'] ?? null; $h3ArtId = $h3['id'] ?? $h3['slug'] ?? null; $h3Fallback = vivat_category_fallback_image($h3CatSlug, 411, 237, $h3ArtId, 'h3'); $h3Img = !empty($h3['cover_image_url']) ? $h3['cover_image_url'] : $h3Fallback; ?>
             <!-- Highlight 3: Feature 2 - 411x237 -->
             <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
-                <?php if (!empty($h3['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($h3['cover_image_url']) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                <?php endif; ?>
+                <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
@@ -257,6 +255,22 @@ $truncateGlassTitle = function (?string $t): string {
         ($h4 ?? [])['id'] ?? null,
     ]);
     $restArticles = array_values(array_filter($latest, fn($a) => !in_array($a['id'] ?? null, $highlightIds)));
+    // Une seule occurrence par article : déduplication stricte par id puis par slug (évite doublons même si 2 lignes en base)
+    $byId = [];
+    foreach ($restArticles as $a) {
+        $id = $a['id'] ?? null;
+        if ($id !== null && !isset($byId[$id])) {
+            $byId[$id] = $a;
+        }
+    }
+    $bySlug = [];
+    foreach (array_values($byId) as $a) {
+        $slug = $a['slug'] ?? null;
+        if ($slug !== null && $slug !== '' && !isset($bySlug[$slug])) {
+            $bySlug[$slug] = $a;
+        }
+    }
+    $restArticles = array_values($bySlug);
     // Pas de duplication : on affiche uniquement les articles uniques (jusqu'à 12 slots, certains peuvent rester vides)
     // Pour les 2 cartes "photo complète" (slots 5 et 7), on privilégie des articles avec cover_image_url
     $withCover = array_values(array_filter($restArticles, fn($a) => !empty($a['cover_image_url'])));
@@ -271,7 +285,7 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne gauche | tablet 4 cols, lg 6 cols -->
         <div class="tablet:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
-                <?php foreach (array_slice($restArticles, 0, 2) as $art): ?>
+                <?php foreach (array_slice($restArticles, 0, 2) as $ci => $art): ?>
                 <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
                         <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
                             <?php if (!empty($art['category'])): ?>
@@ -280,20 +294,18 @@ $truncateGlassTitle = function (?string $t): string {
                             <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
                             <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
                         </div>
-                        <?php $artImg = !empty($art['cover_image_url']) ? $art['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($art['slug'] ?? '') . '/254/190'; ?>
+                        <?php $artCatSlug = $art['category']['slug'] ?? null; $artId = $art['id'] ?? $art['slug'] ?? null; $artFallback = vivat_category_fallback_image($artCatSlug, 254, 190, $artId, 'card-' . $ci); $artImg = !empty($art['cover_image_url']) ? $art['cover_image_url'] : $artFallback; ?>
                     <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
-                        <img src="<?= htmlspecialchars($artImg) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                        <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     </div>
                 </a>
                 <?php endforeach; ?>
             </div>
 
             <?php $hotNewsArt = $restArticles[2] ?? null; if ($hotNewsArt): ?>
+            <?php $hotCatSlug = $hotNewsArt['category']['slug'] ?? null; $hotArtId = $hotNewsArt['id'] ?? $hotNewsArt['slug'] ?? null; $hotFallback = vivat_category_fallback_image($hotCatSlug, 626, 240, $hotArtId, 'hot'); $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : $hotFallback; ?>
             <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
-                    <?php
-                    $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($hotNewsArt['slug'] ?? '') . '/626/240';
-                    ?>
-                    <img src="<?= htmlspecialchars($hotNewsImg) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute flex justify-end items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 8px;">
                             <?php if (!empty($hotNewsArt['category'])): ?>
@@ -331,9 +343,9 @@ $truncateGlassTitle = function (?string $t): string {
                             <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft2['title']) ?></h3>
                             <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
                         </div>
-                    <?php $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($artLeft2['slug'] ?? '') . '/254/190'; ?>
+                    <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null; $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null; $left2Fallback = vivat_category_fallback_image($left2CatSlug, 254, 190, $left2ArtId, 'left2'); $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
                     <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
-                        <img src="<?= htmlspecialchars($artLeft2Img) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                        <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     </div>
                 </a>
                 <?php endif; ?>
@@ -369,16 +381,16 @@ $truncateGlassTitle = function (?string $t): string {
                             <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artRight['title']) ?></h3>
                             <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
                         </div>
-                        <?php $artRightImg = !empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($artRight['slug'] ?? '') . '/254/190'; ?>
+                        <?php $rightCatSlug = $artRight['category']['slug'] ?? null; $rightArtId = $artRight['id'] ?? $artRight['slug'] ?? null; $rightFallback = vivat_category_fallback_image($rightCatSlug, 254, 190, $rightArtId, 'right'); $artRightImg = !empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
                         <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
-                            <img src="<?= htmlspecialchars($artRightImg) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                            <img src="<?= htmlspecialchars($artRightImg) ?>" data-fallback-url="<?= htmlspecialchars($rightFallback) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                         </div>
                     </a>
                     <?php endif; ?>
                     <?php if ($artForFullPhoto1): ?>
-                    <?php $fullPhoto1Img = !empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($artForFullPhoto1['slug'] ?? '') . '/302/419'; ?>
+                    <?php $full1CatSlug = $artForFullPhoto1['category']['slug'] ?? null; $full1ArtId = $artForFullPhoto1['id'] ?? $artForFullPhoto1['slug'] ?? null; $full1Fallback = vivat_category_fallback_image($full1CatSlug, 302, 419, $full1ArtId, 'full1'); $fullPhoto1Img = !empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : $full1Fallback; ?>
                     <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[25px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
-                        <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                        <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                             <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 8px; min-width: 180px;">
@@ -394,9 +406,9 @@ $truncateGlassTitle = function (?string $t): string {
                 </div>
 
             <?php if ($artForFullPhoto2): ?>
-            <?php $fullPhoto2Img = !empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($artForFullPhoto2['slug'] ?? '') . '/629/235'; ?>
+            <?php $full2CatSlug = $artForFullPhoto2['category']['slug'] ?? null; $full2ArtId = $artForFullPhoto2['id'] ?? $artForFullPhoto2['slug'] ?? null; $full2Fallback = vivat_category_fallback_image($full2CatSlug, 629, 235, $full2ArtId, 'full2'); $fullPhoto2Img = !empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : $full2Fallback; ?>
             <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="height: 235px;">
-                    <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                     <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">

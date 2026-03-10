@@ -29,7 +29,8 @@ class RecommendationService
         array $interests = [],
         ?string $userId = null,
         ?string $sessionId = null,
-        int $limit = 6
+        int $limit = 6,
+        string $locale = 'fr'
     ): Collection {
         // Get articles already read to exclude or deprioritize
         $readArticleIds = collect();
@@ -45,8 +46,11 @@ class RecommendationService
             $interestCategoryIds = Category::whereIn('slug', $interests)->pluck('id');
         }
 
-        // Fetch candidate articles
+        $lang = in_array($locale, ['fr', 'nl'], true) ? $locale : 'fr';
+
+        // Fetch candidate articles (filtrés par langue)
         $candidates = Article::published()
+            ->forLocale($lang)
             ->with('category')
             ->whereNotIn('id', $readArticleIds)
             ->orderByDesc('published_at')

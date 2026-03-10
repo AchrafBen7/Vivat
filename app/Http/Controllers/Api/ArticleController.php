@@ -50,7 +50,8 @@ class ArticleController extends Controller
      */
     public function published(Request $request): AnonymousResourceCollection
     {
-        $query = Article::published()->with('category');
+        $locale = content_locale($request);
+        $query = Article::published()->forLocale($locale)->with('category');
 
         if ($request->filled('category')) {
             $query->whereHas('category', fn ($q) => $q->where('slug', $request->string('category')));
@@ -72,10 +73,14 @@ class ArticleController extends Controller
     }
 
     /**
-     * GET /api/public/articles/{slug} — article par slug
+     * GET /api/public/articles/{slug} — article par slug (uniquement si langue = locale requête)
      */
-    public function showBySlug(Article $article): ArticleResource
+    public function showBySlug(Request $request, Article $article): ArticleResource
     {
+        $locale = content_locale($request);
+        if ($article->language !== $locale || $article->status !== 'published') {
+            abort(404);
+        }
         $article->load(['category', 'articleSources']);
 
         return new ArticleResource($article);
@@ -86,7 +91,8 @@ class ArticleController extends Controller
      */
     public function search(Request $request): AnonymousResourceCollection
     {
-        $query = Article::published()->with('category');
+        $locale = content_locale($request);
+        $query = Article::published()->forLocale($locale)->with('category');
 
         if ($request->filled('q')) {
             $q = $request->string('q')->toString();
@@ -142,12 +148,14 @@ class ArticleController extends Controller
             $interests = array_filter(explode(',', $interests));
         }
 
+        $locale = content_locale($request);
         $service = app(\App\Services\RecommendationService::class);
         $articles = $service->recommend(
             interests: $interests,
             userId: $userId,
             sessionId: $sessionId,
-            limit: $limit
+            limit: $limit,
+            locale: $locale
         );
 
         return ArticleResource::collection($articles);
@@ -161,11 +169,15 @@ class ArticleController extends Controller
         ]));
 
         if ($article->status === 'published') {
-            Cache::forget('vivat.home');
-            if ($article->category) {
-                Cache::forget('vivat.hub.' . $article->category->slug);
+            foreach (['fr', 'nl'] as $loc) {
+                Cache::forget('vivat.home.' . $loc);
+                Cache::forget('vivat.categories.index.' . $loc);
             }
-            Cache::forget('vivat.categories.index');
+            if ($article->category) {
+                foreach (['fr', 'nl'] as $loc) {
+                    Cache::forget('vivat.hub.' . $article->category->slug . '.' . $loc);
+                }
+            }
         }
 
         return (new ArticleResource($article))->response()->setStatusCode(201);
@@ -184,11 +196,15 @@ class ArticleController extends Controller
         $article->update($request->validated());
 
         if ($article->status === 'published') {
-            Cache::forget('vivat.home');
-            if ($article->category) {
-                Cache::forget('vivat.hub.' . $article->category->slug);
+            foreach (['fr', 'nl'] as $loc) {
+                Cache::forget('vivat.home.' . $loc);
+                Cache::forget('vivat.categories.index.' . $loc);
             }
-            Cache::forget('vivat.categories.index');
+            if ($article->category) {
+                foreach (['fr', 'nl'] as $loc) {
+                    Cache::forget('vivat.hub.' . $article->category->slug . '.' . $loc);
+                }
+            }
         }
 
         return new ArticleResource($article->fresh(['category', 'articleSources']));
@@ -201,10 +217,12 @@ class ArticleController extends Controller
         $article->delete();
 
         // Invalider le cache pour que le site public et l'API reflètent la suppression tout de suite
-        Cache::forget('vivat.home');
-        Cache::forget('vivat.categories.index');
-        if ($categorySlug) {
-            Cache::forget('vivat.hub.' . $categorySlug);
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget('vivat.home.' . $loc);
+            Cache::forget('vivat.categories.index.' . $loc);
+            if ($categorySlug) {
+                Cache::forget('vivat.hub.' . $categorySlug . '.' . $loc);
+            }
         }
 
         return response()->json(null, 204);
@@ -283,10 +301,14 @@ class ArticleController extends Controller
         $article->publish();
         $article->load('category');
         if ($article->category) {
-            Cache::forget('vivat.hub.'.$article->category->slug);
-            Cache::forget('vivat.categories.index');
+            foreach (['fr', 'nl'] as $loc) {
+                Cache::forget('vivat.hub.' . $article->category->slug . '.' . $loc);
+                Cache::forget('vivat.categories.index.' . $loc);
+            }
         }
-        Cache::forget('vivat.home');
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget('vivat.home.' . $loc);
+        }
 
         return new ArticleResource($article->fresh(['category', 'articleSources']));
     }

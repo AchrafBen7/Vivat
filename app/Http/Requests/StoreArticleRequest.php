@@ -24,6 +24,7 @@ class StoreArticleRequest extends FormRequest
             'meta_title' => 'nullable|string|max:70',
             'meta_description' => 'nullable|string|max:160',
             'category_id' => 'nullable|uuid|exists:categories,id',
+            'language' => 'nullable|in:fr,nl',
             'sub_category_id' => 'nullable|uuid|exists:sub_categories,id',
             'reading_time' => 'nullable|integer|min:1|max:60',
             'status' => 'nullable|in:draft,review,published,archived,rejected',
@@ -43,6 +44,9 @@ class StoreArticleRequest extends FormRequest
         }
         if (! $this->has('reading_time')) {
             $this->merge(['reading_time' => 5]);
+        }
+        if (! $this->has('language')) {
+            $this->merge(['language' => 'fr']);
         }
     }
 }

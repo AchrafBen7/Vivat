@@ -25,11 +25,12 @@ class HomeController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $cacheKey = 'vivat.home';
+        $locale = content_locale($request);
+        $cacheKey = 'vivat.home.' . $locale;
         $cacheTtl = (int) config('vivat.home_cache_ttl', 300); // 5 min
-
-        $data = Cache::remember($cacheKey, $cacheTtl, function () {
+        $closure = function () use ($locale) {
             $topNews = Article::published()
+                ->forLocale($locale)
                 ->where('article_type', 'hot_news')
                 ->with('category')
                 ->orderByDesc('published_at')
@@ -39,7 +40,7 @@ class HomeController extends Controller
             $latestLimit = (int) config('vivat.home_latest_count', 12);
             $categoriesLimit = (int) config('vivat.home_categories_count', 9);
 
-            $baseQuery = Article::published()->with('category')->orderByDesc('published_at');
+            $baseQuery = Article::published()->forLocale($locale)->with('category')->orderByDesc('published_at');
             $excludeId = $topNews?->id;
 
             $featuredQuery = clone $baseQuery;
@@ -51,15 +52,15 @@ class HomeController extends Controller
             });
             $featured = $featuredQuery->limit($featuredLimit)->get();
 
-            $featuredIds = $featured->pluck('id')->push($excludeId)->filter()->all();
-            $latestQuery = Article::published()->with('category')->orderByDesc('published_at');
+            $featuredIds = $featured->pluck('id')->push($excludeId)->filter()->unique()->values()->all();
+            $latestQuery = Article::published()->forLocale($locale)->with('category')->orderByDesc('published_at');
             if (count($featuredIds) > 0) {
                 $latestQuery->whereNotIn('id', $featuredIds);
             }
-            $latest = $latestQuery->limit($latestLimit)->get();
+            $latest = $latestQuery->limit($latestLimit + 5)->get()->unique('id')->values()->take($latestLimit);
 
             $categories = Category::query()
-                ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')])
+                ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)])
                 ->when(
                     Category::whereNotNull('home_order')->exists(),
                     fn ($q) => $q->whereNotNull('home_order')->orderBy('home_order'),
@@ -74,7 +75,8 @@ class HomeController extends Controller
                 'latest' => $latest,
                 'categories' => $categories,
             ];
-        });
+        };
+        $data = config('vivat.disable_page_cache') ? $closure() : Cache::remember($cacheKey, $cacheTtl, $closure);
 
         $request = $request; // for ArticleResource
         $topNewsResource = $data['top_news']

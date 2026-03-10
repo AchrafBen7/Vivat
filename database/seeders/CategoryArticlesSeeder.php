@@ -99,6 +99,7 @@ class CategoryArticlesSeeder extends Seeder
                     'meta_description' => $excerpt,
                     'keywords' => [],
                     'category_id' => $category->id,
+                    'language' => 'fr',
                     'sub_category_id' => $subCategoryId,
                     'cluster_id' => null,
                     'reading_time' => rand(3, 8),

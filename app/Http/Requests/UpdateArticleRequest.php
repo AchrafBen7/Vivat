@@ -23,6 +23,7 @@ class UpdateArticleRequest extends FormRequest
             'meta_title' => 'nullable|string|max:70',
             'meta_description' => 'nullable|string|max:160',
             'category_id' => 'nullable|uuid|exists:categories,id',
+            'language' => 'nullable|in:fr,nl',
             'sub_category_id' => 'nullable|uuid|exists:sub_categories,id',
             'status' => 'nullable|in:draft,review,published,archived,rejected',
             'article_type' => 'nullable|string|in:hot_news,long_form,standard',
