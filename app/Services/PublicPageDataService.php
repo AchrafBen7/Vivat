@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Article;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -70,6 +71,22 @@ class PublicPageDataService
                 $highlight = $highlight->merge($fallbackFill)->take($highlightSize);
             }
 
+            $highlight = $highlight->unique('id')->values()->take($highlightSize);
+
+            // Premier slot (h0) = grande carte : privilégier un article avec image si possible
+            $highlightItems = $highlight->values()->all();
+            if (count($highlightItems) > 0 && empty($highlightItems[0]->cover_image_url)) {
+                for ($i = 1; $i < count($highlightItems); $i++) {
+                    if (! empty($highlightItems[$i]->cover_image_url)) {
+                        $swap = $highlightItems[0];
+                        $highlightItems[0] = $highlightItems[$i];
+                        $highlightItems[$i] = $swap;
+                        break;
+                    }
+                }
+                $highlight = collect($highlightItems);
+            }
+
             $highlightIds = $highlight->pluck('id')->all();
 
             // "Dernières actualités" = les plus récents après les 5 highlight (une seule liste par date)
@@ -79,7 +96,9 @@ class PublicPageDataService
                 ->whereNotIn('id', $highlightIds)
                 ->orderByDesc('published_at')
                 ->limit($restCount)
-                ->get();
+                ->get()
+                ->unique('id')
+                ->values();
             $featured = collect();
 
             $categories = Category::query()
@@ -101,7 +120,8 @@ class PublicPageDataService
             ];
         });
 
-        $highlightCollection = $data['highlight'] ?? collect();
+        $highlightCollection = EloquentCollection::make($data['highlight'] ?? []);
+        $highlightCollection->load('category');
         $highlightArray = $highlightCollection->map(fn ($a) => $this->articleToArray($a))->values()->all();
         while (count($highlightArray) < 5) {
             $highlightArray[] = null;
@@ -109,8 +129,10 @@ class PublicPageDataService
         $highlightArray = array_slice($highlightArray, 0, 5);
 
         $topNews = $data['top_news'] ?? $highlightCollection->first();
-        $featuredCollection = $data['featured'] ?? collect();
-        $latestCollection = $data['latest'] ?? collect();
+        $featuredCollection = EloquentCollection::make($data['featured'] ?? []);
+        $latestCollection = EloquentCollection::make($data['latest'] ?? []);
+        $latestCollection->load('category');
+        $featuredCollection->load('category');
 
         return [
             'highlight' => $highlightArray,
@@ -141,7 +163,7 @@ class PublicPageDataService
             }
 
             $totalPublished = (clone $query)->count();
-            $articles = (clone $query)->orderByDesc('published_at')->limit(24)->get();
+            $articles = (clone $query)->orderByDesc('published_at')->limit(24)->get()->unique('id')->values();
 
             return [
                 'category' => $category,
@@ -151,6 +173,9 @@ class PublicPageDataService
                 'articles' => $articles,
             ];
         });
+
+        $articlesCollection = EloquentCollection::make($data['articles'] ?? []);
+        $articlesCollection->load('category');
 
         return [
             'category' => $this->categoryToArray($data['category']->load('subCategories')),
@@ -162,12 +187,20 @@ class PublicPageDataService
                 'name' => $s->name,
                 'slug' => $s->slug,
             ])->all(),
-            'articles' => $data['articles']->map(fn ($a) => $this->articleToArray($a))->all(),
+            'articles' => $articlesCollection->map(fn ($a) => $this->articleToArray($a))->all(),
         ];
     }
 
     private function articleToArray(Article $a): array
     {
+        $category = null;
+        if ($a->relationLoaded('category') && $a->category !== null && $a->category->id === $a->category_id) {
+            $category = $this->categoryToArray($a->category);
+        } elseif ($a->category_id) {
+            $resolved = Category::find($a->category_id);
+            $category = $resolved ? $this->categoryToArray($resolved) : null;
+        }
+
         return [
             'id' => $a->id,
             'title' => $a->title,
@@ -181,7 +214,7 @@ class PublicPageDataService
             'cover_image_url' => $a->cover_image_url,
             'cover_video_url' => $a->cover_video_url,
             'article_type' => $a->article_type,
-            'category' => $a->relationLoaded('category') ? $this->categoryToArray($a->category) : null,
+            'category' => $category,
         ];
     }
 

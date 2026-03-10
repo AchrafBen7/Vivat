@@ -52,11 +52,10 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne gauche: Top news 462×438 + Standard 2 + CTA | tablet largeur 462px, lg 5 cols -->
         <div class="tablet:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
             <?php if ($h0): ?>
+            <?php $h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : 'https://picsum.photos/seed/' . rawurlencode($h0['slug'] ?? 'vivat') . '/800/600'; ?>
             <!-- Highlight 0: grande carte 462×438 tablet, 519×438 lg -->
             <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
-                <?php if (!empty($h0['cover_image_url'])): ?>
-                <img src="<?= htmlspecialchars($h0['cover_image_url']) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
-                <?php endif; ?>
+                <img src="<?= htmlspecialchars($h0Img) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
                 <div class="absolute inset-0" style="background: rgba(0,0,0,0.2);"></div>
                 <!-- Carré glass toujours à 18px du bord de la carte -->
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -258,14 +257,7 @@ $truncateGlassTitle = function (?string $t): string {
         ($h4 ?? [])['id'] ?? null,
     ]);
     $restArticles = array_values(array_filter($latest, fn($a) => !in_array($a['id'] ?? null, $highlightIds)));
-    // Padd pour afficher 12 cartes : si moins de 12 articles, on répète pour remplir les slots
-    if (count($restArticles) > 0 && count($restArticles) < 12) {
-        $pad = [];
-        for ($i = 0; $i < 12; $i++) {
-            $pad[] = $restArticles[$i % count($restArticles)];
-        }
-        $restArticles = $pad;
-    }
+    // Pas de duplication : on affiche uniquement les articles uniques (jusqu'à 12 slots, certains peuvent rester vides)
     // Pour les 2 cartes "photo complète" (slots 5 et 7), on privilégie des articles avec cover_image_url
     $withCover = array_values(array_filter($restArticles, fn($a) => !empty($a['cover_image_url'])));
     $artForFullPhoto1 = $withCover[0] ?? $restArticles[5] ?? null;
