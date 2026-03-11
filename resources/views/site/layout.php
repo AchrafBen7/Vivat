@@ -90,6 +90,41 @@ $title_safe = htmlspecialchars($title);
             background: #527E7E;
             color: #FFFFFF;
         }
+        /* Menu mobile hamburger : panneau en popup au-dessus du contenu */
+        .header-nav-wrap {
+            position: relative;
+            z-index: 50;
+        }
+        .mobile-menu-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 66, 65, 0.15);
+            transition: max-height 0.35s ease-out, opacity 0.25s ease;
+        }
+        .mobile-menu-panel.is-open {
+            max-height: 700px;
+            opacity: 1;
+            transition: max-height 0.4s ease-in, opacity 0.25s ease;
+        }
+        /* Croix X : les 3 barres se rejoignent au centre (centre du groupe = 10.5px) */
+        .hamburger-line {
+            transform-origin: center center;
+            transition: transform 0.25s ease, opacity 0.2s ease;
+        }
+        .hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(1) {
+            transform: translateY(9px) rotate(45deg);
+        }
+        .hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(3) {
+            transform: translateY(-9px) rotate(-45deg);
+        }
         .nav-search-bar {
             width: 48px;
             justify-content: center;
@@ -125,7 +160,8 @@ $title_safe = htmlspecialchars($title);
 <body class="bg-white text-gray-900 antialiased">
     <!-- Navbar - Design System Figma -->
     <header class="bg-white">
-        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
+        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 header-nav-wrap">
+            <div class="flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
             <!-- Logo: 32px, #004241 ; tablet: margin 40px -->
             <h1 class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
 
@@ -150,12 +186,35 @@ $title_safe = htmlspecialchars($title);
             <!-- 19px espace -->
             <div class="w-[19px] flex-shrink-0"></div>
 
-            <!-- Hamburger: 48x48, radius 30px - 3 barres pill-shaped #004241, pas de background -->
-            <button type="button" id="hamburger-menu" class="flex flex-col items-center justify-center gap-1.5 rounded-full flex-shrink-0 w-12 h-12 bg-transparent" style="border-radius: 30px;" aria-label="Menu">
-                <span class="block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
-                <span class="block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
-                <span class="block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
+            <!-- Hamburger: simple, 48x48, border-radius 30px, visible mobile uniquement -->
+            <button type="button" id="hamburger-menu" class="hamburger-btn flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-12 h-12 bg-transparent border-none cursor-pointer" style="border-radius: 30px;" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
+                <span class="hamburger-line block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
+                <span class="hamburger-line block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
+                <span class="hamburger-line block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
             </button>
+            </div>
+
+            <!-- Panneau mobile bento : popup blanc, aligné grille (pleine largeur), plus grand -->
+            <div id="mobile-menu-panel" class="mobile-menu-panel rounded-[30px] w-full max-w-[450px] p-6 tablet:p-8" style="background: #FFFFFF; border: 1px solid rgba(0,66,65,0.08);" role="dialog" aria-label="Menu de navigation">
+                <nav class="flex flex-col gap-1" aria-label="Navigation principale">
+                    <a href="/" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Home</a>
+                    <a href="/a-propos" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">À propos</a>
+                    <a href="/contact" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Contact</a>
+                    <a href="/faq" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">FAQ</a>
+                </nav>
+                <p class="font-semibold text-gray-900 text-base mt-5 mb-2 pt-4" style="border-top: 1px solid rgba(0,66,65,0.1);">Rubriques</p>
+                <nav class="flex flex-col gap-1" aria-label="Rubriques">
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Actualités</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Durabilités</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Economie</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Ecologie</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Lifestyle</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Finance</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Société</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Culture</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">International</a>
+                </nav>
+            </div>
         </div>
     </header>
     <main class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 pb-8 overflow-x-hidden">
@@ -258,10 +317,24 @@ $title_safe = htmlspecialchars($title);
             }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
             groups.forEach(function(g) { observer.observe(g); });
         }
+        function initHamburgerMenu() {
+            var btn = document.getElementById('hamburger-menu');
+            var panel = document.getElementById('mobile-menu-panel');
+            if (!btn || !panel) return;
+            btn.addEventListener('click', function() {
+                var open = panel.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+            });
+        }
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initScrollReveal);
+            document.addEventListener('DOMContentLoaded', function() {
+                initScrollReveal();
+                initHamburgerMenu();
+            });
         } else {
             initScrollReveal();
+            initHamburgerMenu();
         }
         // Fallback image : si une image a data-fallback-url et échoue au chargement, utiliser l’URL de repli (par catégorie)
         function applyFallback(img) {
