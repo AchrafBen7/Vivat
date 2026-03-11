@@ -17,13 +17,13 @@ $pagination = $pagination ?? null;
         ?>
         <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-gray-200/40 p-6 flex flex-col relative <?= $isCardNoImage ? 'vivat-card-no-image group ' : '' ?>bg-[#EBF1EF] hover:bg-[#E5ECEA] transition" style="min-height: 300px;">
             <?php if ($isCardNoImage): ?>
-            <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241]/10 text-[#004241]" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+            <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241]/10 text-[#004241]" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
             <?php endif; ?>
             <?php if (!empty($art['category'])): ?>
             <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($art['category']['name']) ?></span>
             <?php endif; ?>
             <h2 class="font-medium text-[#004241] line-clamp-3 mt-2 flex-1" style="font-size: 18px;"><?= htmlspecialchars($art['title']) ?></h2>
-            <p class="text-[#004241] text-sm font-light mt-2"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+            <p class="text-[#004241] font-light mt-2" style="font-size: 12px;"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
             <div class="rounded-[21px] overflow-hidden mt-4 flex-shrink-0">
                 <img src="<?= htmlspecialchars($imgSrc) ?>" data-fallback-url="<?= htmlspecialchars($fallbackImg) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-40 object-cover" loading="lazy">
             </div>

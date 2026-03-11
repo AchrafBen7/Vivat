@@ -16,7 +16,7 @@ $excerpt = $article['excerpt'] ?? '';
         <a href="/categories/<?= htmlspecialchars($category['slug']) ?>" class="text-sm font-medium text-amber-600 hover:text-amber-700"><?= htmlspecialchars($category['name']) ?></a>
         <?php endif; ?>
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-2"><?= htmlspecialchars($title) ?></h1>
-        <div class="flex gap-4 mt-4 text-sm text-gray-500">
+        <div class="flex gap-4 mt-4 text-gray-500" style="font-size: 12px;">
             <?php if ($published_at): ?>
             <time datetime="<?= htmlspecialchars($published_at_iso ?? $published_at) ?>"><?= htmlspecialchars($published_at) ?></time>
             <?php endif; ?>

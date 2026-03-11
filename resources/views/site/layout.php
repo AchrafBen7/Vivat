@@ -61,13 +61,13 @@ $title_safe = htmlspecialchars($title);
         html {
             scroll-behavior: smooth;
         }
-        /* Glass effect matte : padding intérieur 24px fixe (ne jamais modifier en responsive) */
+        /* Glass effect matte : 18px padding intérieur pour 18px d’espace visuel depuis la card */
         .vivat-glass {
             background: rgba(190, 190, 190, 0.1);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(1px);
             border: 1px solid rgba(230, 230, 230, 0.2);
-            padding: 24px;
+            padding: 18px;
             box-sizing: border-box;
         }
         body { font-family: 'Figtree', sans-serif; }
@@ -86,9 +86,9 @@ $title_safe = htmlspecialchars($title);
             <div class="flex-1 tablet:flex-none tablet:flex-shrink-0"></div>
 
             <!-- Search: mobile & tablet = pastille ronde, desktop = barre complète -->
-            <div class="flex items-center justify-center lg:justify-start flex-shrink-0 rounded-full border border-gray-200 h-9 w-9 tablet:h-9 tablet:w-9 lg:h-12 lg:w-[326px] lg:px-4" style="background: #EBF1EF;">
-                <input type="search" placeholder="Rechercher un article" class="hidden lg:block flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:opacity-80 mr-2" style="color: #004241;">
-                <svg class="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style="color: #004241;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <div class="flex items-center justify-center lg:justify-start flex-shrink-0 rounded-full h-9 w-9 tablet:h-9 tablet:w-9 lg:h-12 lg:w-[326px] lg:px-4" style="background: #E5EDEB;">
+                <input type="search" placeholder="Rechercher un article" class="hidden lg:block flex-1 min-w-0 bg-transparent text-sm outline-none mr-2 placeholder:text-[#226E65]" style="color: #226E65;">
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style="color: #226E65;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
             <!-- 9px espace -->
@@ -116,7 +116,7 @@ $title_safe = htmlspecialchars($title);
     <!-- CTA contribution : juste au-dessus du footer, 24px de marge avant le footer -->
     <section class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
         <a href="<?= url('/contribution') ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80');">
-            <span class="absolute inset-0 bg-black/40" aria-hidden="true"></span>
+            <span class="absolute inset-0 bg-black/30" aria-hidden="true"></span>
             <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
                 <span class="text-white font-semibold text-xl lg:text-2xl leading-tight">
                     Une idée, une histoire, un point de vue ?<br>

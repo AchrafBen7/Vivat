@@ -28,13 +28,13 @@ $tagStyles = [
 $tagClass = 'font-medium tracking-wide w-fit rounded-full inline-flex items-center';
 $tagStyleBase = 'height: 30px; padding: 0 12px; font-size: 12px; box-sizing: border-box;';
 
-// Titre min 7 mots / max 8 mots dans les carrés glass (position et padding 24px inchangés)
+// Titre min 8 mots / max 9 mots dans les carrés glass (position et padding 24px inchangés)
 $truncateGlassTitle = function (?string $t): string {
     $t = trim((string) $t);
     if ($t === '') return '';
     $w = preg_split('/\s+/u', $t, -1, PREG_SPLIT_NO_EMPTY);
-    $minWords = 7;
-    $maxWords = 8;
+    $minWords = 8;
+    $maxWords = 9;
     if (count($w) <= $maxWords) return $t;
     $keep = max($minWords, min($maxWords, count($w)));
     return implode(' ', array_slice($w, 0, $keep)) . ' …';
@@ -56,16 +56,16 @@ $truncateGlassTitle = function (?string $t): string {
             <!-- Highlight 0: grande carte 462×438 tablet, 519×438 lg -->
             <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
                 <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
-                <div class="absolute inset-0" style="background: rgba(0,0,0,0.2);"></div>
-                <!-- Carré glass toujours à 18px du bord de la carte -->
+                <div class="absolute inset-0" style="background: rgba(0,0,0,0.3);"></div>
+                <!-- Carré glass : 18px d’espace depuis le bord de la carte -->
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                    <div class="rounded-[21px] flex flex-col vivat-glass w-full max-w-[300px]" style="gap: 8px;">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-full max-w-[300px]" style="gap: 6px;">
                     <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: #EBF1EF; color: #004241;">Top news</span>
                     <h2 class="font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
                     <?php if (!empty($h0['excerpt'])): ?>
-                    <p class="text-white/90 line-clamp-4" style="font-size: 16px;"><?= htmlspecialchars($h0['excerpt']) ?></p>
+                    <p class="text-white/90 line-clamp-3" style="font-size: 14px;"><?= htmlspecialchars($h0['excerpt']) ?></p>
                     <?php endif; ?>
-                    <p class="text-white/80" style="font-size: 14px;"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
+                    <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -74,12 +74,12 @@ $truncateGlassTitle = function (?string $t): string {
             <?php if ($h4): ?>
             <!-- Highlight 4: Standard 2 - 519x280, #FFF0D4 -->
             <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
-                <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($h4['category'])): ?>
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($h4['category']['name']) ?></span>
                 <?php endif; ?>
                 <h3 class="font-semibold text-[#004241] line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h4['title']) ?></h3>
-                <p class="text-[#004241]/70" style="font-size: 14px;"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
+                <p class="text-[#004241]/70" style="font-size: 12px;"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php endif; ?>
 
@@ -97,14 +97,14 @@ $truncateGlassTitle = function (?string $t): string {
             <!-- Highlight 1: Feature 411x237 -->
             <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
                 <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 6px; min-width: min(100%, 220px);">
                         <?php if (!empty($h1['category'])): ?>
                         <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h1['title'] ?? '')) ?></h3>
-                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
+                        <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -113,12 +113,12 @@ $truncateGlassTitle = function (?string $t): string {
             <?php if ($h2): ?>
             <!-- Highlight 2: Standard 1 (carte verte) - tablet 270×221, lg 413×221 -->
             <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end w-full tablet:max-w-[270px] lg:max-w-[413px] lg:w-full" style="height: 221px; padding: 24px; gap: 8px; background: #004241;">
-                <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($h2['category'])): ?>
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($h2['category']['name']) ?></span>
                 <?php endif; ?>
                 <h3 class="font-semibold text-white line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h2['title']) ?></h3>
-                <p class="text-white/70" style="font-size: 14px;"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
+                <p class="text-white/70" style="font-size: 12px;"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php endif; ?>
 
@@ -127,14 +127,14 @@ $truncateGlassTitle = function (?string $t): string {
             <!-- Highlight 3: Feature 2 - 411x237 -->
             <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
                 <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
+                    <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 6px; min-width: min(100%, 220px);">
                         <?php if (!empty($h3['category'])): ?>
                         <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h3['title'] ?? '')) ?></h3>
-                        <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
+                        <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -165,7 +165,7 @@ $truncateGlassTitle = function (?string $t): string {
             <!-- Grande carte gauche | tablet 4 cols, lg 7 cols -->
             <a href="/categories" class="vivat-card-with-image group tablet:col-span-4 lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
                 <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="Découvrez vos rubriques préférées sur Vivat" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute inset-0 flex flex-col items-start justify-center" style="padding: 32px;">
                     <h2 class="font-semibold text-white text-left max-w-[85%]" style="font-family: Figtree, sans-serif; font-size: 48px; font-weight: 600;">Découvrez vos rubriques préférées</h2>
                     <p class="text-white/95 mt-2 text-left max-w-[85%]" style="font-size: 24px; font-weight: 400;">Explorez dès maintenant les contenus qui vous correspondent.</p>
@@ -188,7 +188,8 @@ $truncateGlassTitle = function (?string $t): string {
                                 <?php if (!empty($cat1['image_url'])): ?>
                                 <img src="<?= htmlspecialchars($cat1['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat1['name']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                                 <?php endif; ?>
-                                <div class="absolute inset-0" style="background: #00000040;"></div>
+                                <div class="absolute inset-0 transition-opacity duration-300" style="background: rgba(0,0,0,0.3);"></div>
+                                <div class="absolute inset-0 bg-[#004241] opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
                                 <div class="absolute inset-0 flex items-center justify-center" style="padding: 18px;">
                                     <span class="text-white font-semibold text-center" style="font-size: 20px;"><?= htmlspecialchars($cat1['name']) ?></span>
                                 </div>
@@ -199,7 +200,8 @@ $truncateGlassTitle = function (?string $t): string {
                                 <?php if (!empty($cat2['image_url'])): ?>
                                 <img src="<?= htmlspecialchars($cat2['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat2['name']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                                 <?php endif; ?>
-                                <div class="absolute inset-0" style="background: #00000040;"></div>
+                                <div class="absolute inset-0 transition-opacity duration-300" style="background: rgba(0,0,0,0.3);"></div>
+                                <div class="absolute inset-0 bg-[#004241] opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
                                 <div class="absolute inset-0 flex items-center justify-center" style="padding: 18px;">
                                     <span class="text-white font-semibold text-center" style="font-size: 20px;"><?= htmlspecialchars($cat2['name']) ?></span>
                                 </div>
@@ -212,7 +214,8 @@ $truncateGlassTitle = function (?string $t): string {
                             <?php if (!empty($cat3['image_url'])): ?>
                             <img src="<?= htmlspecialchars($cat3['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat3['name']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                             <?php endif; ?>
-                            <div class="absolute inset-0" style="background: #00000033;"></div>
+                            <div class="absolute inset-0 transition-opacity duration-300" style="background: rgba(0,0,0,0.3);"></div>
+                            <div class="absolute inset-0 bg-[#004241] opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
                             <div class="absolute inset-0 flex items-center justify-center" style="padding: 18px;">
                                 <span class="text-white font-semibold text-center" style="font-size: 20px;"><?= htmlspecialchars($cat3['name']) ?></span>
                             </div>
@@ -302,21 +305,41 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne gauche | tablet 4 cols, lg 6 cols -->
         <div class="tablet:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
-                <?php foreach (array_slice($restArticles, 0, 2) as $ci => $art): ?>
-                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
-                        <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
-                            <?php if (!empty($art['category'])): ?>
-                            <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>
+                <?php
+                $firstArt = $restArticles[0] ?? null;
+                $secondArt = $restArticles[1] ?? null;
+                ?>
+                <?php if ($firstArt): ?>
+                <?php $f0CatSlug = $firstArt['category']['slug'] ?? null; $f0ArtId = $firstArt['id'] ?? $firstArt['slug'] ?? null; $f0Fallback = vivat_category_fallback_image($f0CatSlug, 302, 419, $f0ArtId, 'card-0'); $f0Img = !empty($firstArt['cover_image_url']) ? $firstArt['cover_image_url'] : $f0Fallback; ?>
+                <a href="/articles/<?= htmlspecialchars($firstArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
+                    <img src="<?= htmlspecialchars($f0Img) ?>" data-fallback-url="<?= htmlspecialchars($f0Fallback) ?>" alt="<?= htmlspecialchars($firstArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
+                            <?php if (!empty($firstArt['category'])): ?>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
                             <?php endif; ?>
-                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
-                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                            <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($firstArt['title'] ?? '')) ?></h3>
+                            <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
                         </div>
-                        <?php $artCatSlug = $art['category']['slug'] ?? null; $artId = $art['id'] ?? $art['slug'] ?? null; $artFallback = vivat_category_fallback_image($artCatSlug, 254, 190, $artId, 'card-' . $ci); $artImg = !empty($art['cover_image_url']) ? $art['cover_image_url'] : $artFallback; ?>
-                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
-                        <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     </div>
                 </a>
-                <?php endforeach; ?>
+                <?php endif; ?>
+                <?php if ($secondArt): ?>
+                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
+                        <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
+                            <?php if (!empty($secondArt['category'])): ?>
+                            <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
+                            <?php endif; ?>
+                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($secondArt['title']) ?></h3>
+                            <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                        <?php $artCatSlug = $secondArt['category']['slug'] ?? null; $artId = $secondArt['id'] ?? $secondArt['slug'] ?? null; $artFallback = vivat_category_fallback_image($artCatSlug, 254, 190, $artId, 'card-1'); $artImg = !empty($secondArt['cover_image_url']) ? $secondArt['cover_image_url'] : $artFallback; ?>
+                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
+                        <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($secondArt['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    </div>
+                </a>
+                <?php endif; ?>
             </div>
 
             <?php $hotNewsArt = $restArticles[2] ?? null; if ($hotNewsArt): ?>
@@ -324,12 +347,12 @@ $truncateGlassTitle = function (?string $t): string {
             <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
                     <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute flex justify-end items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 8px;">
+                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 6px;">
                             <?php if (!empty($hotNewsArt['category'])): ?>
                             <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($hotNewsArt['title'] ?? '')) ?></h3>
-                            <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
+                            <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
             </a>
@@ -337,33 +360,34 @@ $truncateGlassTitle = function (?string $t): string {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php $artLeft = $restArticles[10] ?? null; if ($artLeft): ?>
-                <!-- Carte jaune sans image (variante texte only) -->
-                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFEFD1; padding: 24px; gap: 18px;">
-                    <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true">
+                <!-- Carte jaune sans image (variante texte only) : tag + titre + date en bas -->
+                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFEFD1; padding: 24px; gap: 18px;">
+                    <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true">
                         <svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </span>
-                    <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
+                    <div class="flex flex-col min-h-0" style="gap: 8px;">
                         <?php if (!empty($artLeft['category'])): ?>
                         <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft['title']) ?></h3>
-                        <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
+                        <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </a>
                 <?php endif; ?>
                 <?php $artLeft2 = $restArticles[6] ?? null; if ($artLeft2): ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
-                        <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
-                            <?php if (!empty($artLeft2['category'])): ?>
-                            <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
-                            <?php endif; ?>
-                            <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft2['title']) ?></h3>
-                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
+                    <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null; $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null; $left2Fallback = vivat_category_fallback_image($left2CatSlug, 302, 419, $left2ArtId, 'left2'); $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
+                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
+                        <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                        <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
+                                <?php if (!empty($artLeft2['category'])): ?>
+                                <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
+                                <?php endif; ?>
+                                <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($artLeft2['title'] ?? '')) ?></h3>
+                                <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
+                            </div>
                         </div>
-                    <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null; $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null; $left2Fallback = vivat_category_fallback_image($left2CatSlug, 254, 190, $left2ArtId, 'left2'); $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
-                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
-                        <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                    </div>
                 </a>
                 <?php endif; ?>
             </div>
@@ -377,14 +401,14 @@ $truncateGlassTitle = function (?string $t): string {
                     $bg = $stdColors[$i % 2];
                     $isDark = ($bg === '#004241');
                 ?>
-                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col rounded-[30px] overflow-hidden border relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
-                    <span class="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 <?= $isDark ? 'bg-white/25 text-white' : 'bg-[#004241] text-white' ?>" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col justify-end rounded-[30px] overflow-hidden border relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
+                    <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 <?= $isDark ? 'bg-white/25 text-white' : 'bg-[#004241] text-white' ?>" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <?php if (!empty($art['category'])): ?>
                     <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
                     <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles[$tagVariant]['bg'] ?>; color: <?= $tagStyles[$tagVariant]['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>
                     <?php endif; ?>
-                    <h3 class="font-medium line-clamp-2 flex-1 <?= $isDark ? 'text-white' : 'text-[#004241]' ?>" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
-                    <p class="<?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>" style="font-size: 14px;"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                    <h3 class="font-medium line-clamp-2 <?= $isDark ? 'text-white' : 'text-[#004241]' ?>" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
+                    <p class="<?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>" style="font-size: 12px;"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
                 </a>
                 <?php endforeach; ?>
 
@@ -396,7 +420,7 @@ $truncateGlassTitle = function (?string $t): string {
                             <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artRight['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artRight['title']) ?></h3>
-                            <p class="text-[#004241] text-sm font-light"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
+                            <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
                         </div>
                         <?php $rightCatSlug = $artRight['category']['slug'] ?? null; $rightArtId = $artRight['id'] ?? $artRight['slug'] ?? null; $rightFallback = vivat_category_fallback_image($rightCatSlug, 254, 190, $rightArtId, 'right'); $artRightImg = !empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
                         <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full" style="height: 190px;">
@@ -408,14 +432,14 @@ $truncateGlassTitle = function (?string $t): string {
                     <?php $full1CatSlug = $artForFullPhoto1['category']['slug'] ?? null; $full1ArtId = $artForFullPhoto1['id'] ?? $artForFullPhoto1['slug'] ?? null; $full1Fallback = vivat_category_fallback_image($full1CatSlug, 302, 419, $full1ArtId, 'full1'); $fullPhoto1Img = !empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : $full1Fallback; ?>
                     <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[25px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                         <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 8px; min-width: 180px;">
+                            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
                                 <?php if (!empty($artForFullPhoto1['category'])): ?>
                                 <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
                                 <?php endif; ?>
                                 <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($artForFullPhoto1['title'] ?? '')) ?></h3>
-                                <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
+                                <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
                             </div>
                         </div>
                     </a>
@@ -426,14 +450,14 @@ $truncateGlassTitle = function (?string $t): string {
             <?php $full2CatSlug = $artForFullPhoto2['category']['slug'] ?? null; $full2ArtId = $artForFullPhoto2['id'] ?? $artForFullPhoto2['slug'] ?? null; $full2Fallback = vivat_category_fallback_image($full2CatSlug, 629, 235, $full2ArtId, 'full2'); $fullPhoto2Img = !empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : $full2Fallback; ?>
             <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="height: 235px;">
                     <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 8px; min-width: min(100%, 220px);">
+                        <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 6px; min-width: min(100%, 220px);">
                             <?php if (!empty($artForFullPhoto2['category'])): ?>
                             <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($artForFullPhoto2['title'] ?? '')) ?></h3>
-                            <p class="text-white/80 text-sm" style="font-size: 14px;"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
+                            <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
             </a>
