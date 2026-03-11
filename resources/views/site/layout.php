@@ -72,6 +72,54 @@ $title_safe = htmlspecialchars($title);
         }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
+        .nav-contact-btn {
+            background: #004241;
+            color: #FFFFFF;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+        .nav-contact-btn:hover {
+            background: #527E7E;
+            color: #FFFFFF;
+        }
+        .vivat-btn-teal-hover {
+            background: #004241;
+            color: #FFFFFF;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .vivat-btn-teal-hover:hover {
+            background: #527E7E;
+            color: #FFFFFF;
+        }
+        .nav-search-bar {
+            width: 48px;
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+            transition: width 0.7s ease, padding 0.7s ease;
+        }
+        .nav-search-bar:hover {
+            width: 326px;
+            justify-content: flex-end;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+        .nav-search-bar .nav-search-input {
+            flex: 0 0 0;
+            width: 0;
+            min-width: 0;
+            margin-right: 0;
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+            transition: opacity 0.6s ease;
+        }
+        .nav-search-bar:hover .nav-search-input {
+            flex: 1 1 0;
+            min-width: 120px;
+            margin-right: 8px;
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased">
@@ -85,17 +133,17 @@ $title_safe = htmlspecialchars($title);
             <div class="hidden tablet:block flex-shrink-0 flex-1 min-w-4"></div>
             <div class="flex-1 tablet:flex-none tablet:flex-shrink-0"></div>
 
-            <!-- Search: mobile & tablet = pastille ronde, desktop = barre complète -->
-            <div class="flex items-center justify-center lg:justify-start flex-shrink-0 rounded-full h-9 w-9 tablet:h-9 tablet:w-9 lg:h-12 lg:w-[326px] lg:px-4" style="background: #E5EDEB;">
-                <input type="search" placeholder="Rechercher un article" class="hidden lg:block flex-1 min-w-0 bg-transparent text-sm outline-none mr-2 placeholder:text-[#226E65]" style="color: #226E65;">
-                <svg class="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style="color: #226E65;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <!-- Search: par défaut rond avec icône, au hover s’étend en barre avec placeholder -->
+            <div class="nav-search-bar hidden tablet:flex items-center flex-shrink-0 rounded-full h-12 overflow-hidden" style="background: #E5EDEB;">
+                <input type="search" placeholder="Rechercher un article" class="nav-search-input flex-1 min-w-0 bg-transparent text-sm outline-none border-none placeholder:text-[#226E65]" style="color: #226E65;">
+                <svg class="w-5 h-5 flex-shrink-0" style="color: #226E65;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
             <!-- 9px espace -->
             <div class="w-[9px] flex-shrink-0"></div>
 
             <!-- Contactez-nous: 162x48, #004241, Figtree 500 16px, text #FFFFFF -->
-            <a href="/contact" class="flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none" style="width: 162px; background: #004241; color: #FFFFFF; padding: 12px 20px;">
+            <a href="/contact" class="nav-contact-btn flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none" style="width: 162px; padding: 12px 20px;">
                 Contactez-nous
             </a>
 
@@ -139,7 +187,7 @@ $title_safe = htmlspecialchars($title);
                 </div>
                 <form action="#" method="post" class="flex flex-col sm:flex-row gap-3 flex-wrap justify-center w-full max-w-md">
                     <input type="email" name="email" placeholder="you@example.com" class="flex-1 min-w-[220px] h-12 pl-5 pr-5 rounded-full border-0 bg-white text-gray-900 placeholder:text-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#004241]/25 focus:shadow-md text-left" style="font-size: 16px;">
-                    <button type="submit" class="flex items-center justify-center h-12 px-8 rounded-full font-semibold text-white whitespace-nowrap shadow-sm transition hover:shadow-md hover:brightness-105 active:scale-[0.98]" style="background: var(--vivat-teal, #004241); font-size: 16px;">
+                    <button type="submit" class="vivat-btn-teal-hover flex items-center justify-center h-12 px-8 rounded-full font-semibold whitespace-nowrap shadow-sm transition hover:shadow-md active:scale-[0.98]" style="font-size: 16px;">
                         S'abonner
                     </button>
                 </form>
@@ -192,8 +240,16 @@ $title_safe = htmlspecialchars($title);
                     var group = entry.target;
                     if (group.classList.contains('vivat-reveal-done')) return;
                     group.classList.add('vivat-reveal-done');
-                    var items = group.querySelectorAll('.vivat-reveal');
+                    var items = Array.from(group.querySelectorAll('.vivat-reveal'));
                     var delay = 180;
+                    // Trier par position verticale (haut → bas) puis horizontale (gauche → droite) pour un reveal top-to-bottom
+                    items.sort(function(a, b) {
+                        var ra = a.getBoundingClientRect();
+                        var rb = b.getBoundingClientRect();
+                        var dy = ra.top - rb.top;
+                        if (Math.abs(dy) > 2) return dy;
+                        return ra.left - rb.left;
+                    });
                     items.forEach(function(el, i) {
                         el.style.transitionDelay = (i * delay) + 'ms';
                         el.classList.add('opacity-100', 'translate-y-0');
