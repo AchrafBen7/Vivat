@@ -113,8 +113,71 @@ $title_safe = htmlspecialchars($title);
     <main class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 pb-8 overflow-x-hidden">
         <?= $content ?? '' ?>
     </main>
-    <footer class="border-t border-gray-200 mt-12 py-8">
-        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 text-center text-gray-500 text-sm">
+    <!-- CTA contribution : juste au-dessus du footer, 24px de marge avant le footer -->
+    <section class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
+        <a href="<?= url('/contribution') ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80');">
+            <span class="absolute inset-0 bg-black/40" aria-hidden="true"></span>
+            <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+                <span class="text-white font-semibold text-xl lg:text-2xl leading-tight">
+                    Une idée, une histoire, un point de vue ?<br>
+                    Vivat est ouvert aux nouvelles voix
+                </span>
+                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap transition hover:opacity-90" style="background: #FFEFD1; color: #004241; font-size: 16px;">
+                    Rédigez un article
+                </span>
+            </span>
+        </a>
+    </section>
+    <footer>
+        <!-- 2 carrés avec 24px d'espace entre eux -->
+        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 mb-6 flex flex-col lg:flex-row gap-6 w-full">
+            <!-- Carré 1 : Newsletter (2/5 de l'espace) -->
+            <div class="flex-[2] min-w-0 flex flex-col justify-center items-center gap-5 rounded-[30px] p-8 shadow-sm text-center min-h-[200px]" style="background: #EBF1EF;">
+                <div class="flex flex-col gap-1">
+                    <span class="font-semibold" style="color: #004241; font-size: 16px;">Newsletter</span>
+                    <p class="text-gray-900 font-normal leading-snug" style="font-size: 16px;">Recevez une sélection d'articles chaque semaine.</p>
+                </div>
+                <form action="#" method="post" class="flex flex-col sm:flex-row gap-3 flex-wrap justify-center w-full max-w-md">
+                    <input type="email" name="email" placeholder="you@example.com" class="flex-1 min-w-[220px] h-12 pl-5 pr-5 rounded-full border-0 bg-white text-gray-900 placeholder:text-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#004241]/25 focus:shadow-md text-left" style="font-size: 16px;">
+                    <button type="submit" class="flex items-center justify-center h-12 px-8 rounded-full font-semibold text-white whitespace-nowrap shadow-sm transition hover:shadow-md hover:brightness-105 active:scale-[0.98]" style="background: var(--vivat-teal, #004241); font-size: 16px;">
+                        S'abonner
+                    </button>
+                </form>
+            </div>
+            <!-- Carré 2 : Informations, Rubriques, Légal (3/5, 48px vertical, centré et équilibré) -->
+            <div class="flex-[3] min-w-0 flex flex-wrap justify-center items-start gap-12 rounded-[30px] p-10" style="background: #EBF1EF;">
+                <nav class="flex flex-col gap-2 text-left min-w-[140px]" aria-label="Informations">
+                    <h3 class="font-semibold text-gray-900 text-base">Informations</h3>
+                    <ul class="flex flex-col list-none p-0 m-0 gap-2">
+                        <li><a href="/" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Home</a></li>
+                        <li><a href="/a-propos" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">À propos</a></li>
+                        <li><a href="/contact" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Contact</a></li>
+                        <li><a href="/faq" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">FAQ</a></li>
+                    </ul>
+                </nav>
+                <nav class="flex flex-col gap-2 text-left min-w-[140px]" aria-label="Rubriques">
+                    <h3 class="font-semibold text-gray-900 text-base">Rubriques</h3>
+                    <ul class="flex flex-col list-none p-0 m-0 gap-2">
+                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Actualités</a></li>
+                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Durabilités</a></li>
+                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Economie</a></li>
+                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Ecologie</a></li>
+                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Lifestyle</a></li>
+                    </ul>
+                </nav>
+                <nav class="flex flex-col gap-2 text-left min-w-[200px]" aria-label="Légal">
+                    <h3 class="font-semibold text-gray-900 text-base">Légal</h3>
+                    <ul class="flex flex-col list-none p-0 m-0 gap-2">
+                        <li><a href="/mentions-legales" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Mentions légales</a></li>
+                        <li><a href="/politique-confidentialite" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Politique de confidentialité</a></li>
+                        <li><a href="/conditions-generales" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Conditions générales</a></li>
+                        <li><a href="/politique-cookies" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Politique de cookies</a></li>
+                        <li><a href="/accessibilite" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Accessibilité</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 pb-8 text-center text-gray-500 text-sm">
             © <?= date('Y') ?> Vivat. Tous droits réservés.
         </div>
     </footer>
