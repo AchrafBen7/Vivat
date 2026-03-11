@@ -57,6 +57,7 @@ $title_safe = htmlspecialchars($title);
             --vivat-overlay-dark: rgba(0, 0, 0, 0.2);
             --vivat-card-glass: rgba(255, 255, 255, 0.11);
             --vivat-card-border: rgba(255, 255, 255, 0.15);
+            --vivat-nav-glass: #004241;
         }
         html {
             scroll-behavior: smooth;
@@ -97,19 +98,36 @@ $title_safe = htmlspecialchars($title);
         }
         .mobile-menu-panel {
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 100%;
+            right: 80px;
+            top: calc(100%);
+            width: min(100%, 715px);
             max-height: 0;
             opacity: 0;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0, 66, 65, 0.15);
             transition: max-height 0.35s ease-out, opacity 0.25s ease;
         }
+        .mobile-menu-panel.vivat-glass {
+            background: var(--vivat-nav-glass);
+            border: 1px solid rgba(230, 230, 230, 0.18);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
         .mobile-menu-panel.is-open {
-            max-height: 700px;
+            max-height: 980px;
             opacity: 1;
             transition: max-height 0.4s ease-in, opacity 0.25s ease;
+        }
+        @media (max-width: 833px) {
+            .mobile-menu-panel {
+                left: 0;
+                right: 0;
+                top: 100%;
+                width: auto;
+            }
+            .mobile-menu-panel.is-open {
+                max-height: 650px;
+            }
         }
         /* Croix X : les 3 barres se rejoignent au centre (centre du groupe = 10.5px) */
         .hamburger-line {
@@ -195,24 +213,24 @@ $title_safe = htmlspecialchars($title);
             </div>
 
             <!-- Panneau mobile bento : popup blanc, aligné grille (pleine largeur), plus grand -->
-            <div id="mobile-menu-panel" class="mobile-menu-panel rounded-[30px] w-full max-w-[450px] p-6 tablet:p-8" style="background: #FFFFFF; border: 1px solid rgba(0,66,65,0.08);" role="dialog" aria-label="Menu de navigation">
+            <div id="mobile-menu-panel" class="mobile-menu-panel vivat-glass rounded-[30px] p-6 tablet:p-8" role="dialog" aria-label="Menu de navigation">
                 <nav class="flex flex-col gap-1" aria-label="Navigation principale">
-                    <a href="/" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Home</a>
-                    <a href="/a-propos" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">À propos</a>
-                    <a href="/contact" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Contact</a>
-                    <a href="/faq" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">FAQ</a>
+                    <a href="/" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Home</a>
+                    <a href="/a-propos" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">À propos</a>
+                    <a href="/contact" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Contact</a>
+                    <a href="/faq" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">FAQ</a>
                 </nav>
-                <p class="font-semibold text-gray-900 text-base mt-5 mb-2 pt-4" style="border-top: 1px solid rgba(0,66,65,0.1);">Rubriques</p>
-                <nav class="flex flex-col gap-1" aria-label="Rubriques">
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Actualités</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Durabilités</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Economie</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Ecologie</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Lifestyle</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Finance</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Société</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">Culture</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-[#004241] font-medium text-base no-underline hover:bg-[#004241]/10 transition">International</a>
+                <p class="font-semibold text-white text-base mt-5 mb-2 pt-4" style="border-top: 1px solid rgba(255,255,255,0.18);">Rubriques</p>
+                <nav class="grid grid-cols-3 gap-x-3 gap-y-1" aria-label="Rubriques">
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Actualités</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Durabilités</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Economie</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Ecologie</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Lifestyle</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Finance</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Société</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Culture</a>
+                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">International</a>
                 </nav>
             </div>
         </div>
