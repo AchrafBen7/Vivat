@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 
@@ -175,7 +176,10 @@ class PublicPageDataService
         $category = Category::where('slug', $categorySlug)->firstOrFail();
         $cacheKey = 'vivat.hub.' . $category->slug . ($subCategorySlug ? '.' . $subCategorySlug : '') . '.' . $locale;
         $closure = function () use ($category, $subCategorySlug, $locale) {
-            $category->load(['subCategories' => fn ($q) => $q->orderBy('order')]);
+            // Sous-catégories réelles de cette catégorie uniquement (table sub_categories, category_id = catégorie courante)
+            $subCategories = SubCategory::where('category_id', $category->id)
+                ->orderBy('order')
+                ->get();
 
             $query = Article::published()
                 ->forLocale($locale)
@@ -183,7 +187,7 @@ class PublicPageDataService
                 ->with(['category', 'subCategory']);
 
             if ($subCategorySlug) {
-                $sub = \App\Models\SubCategory::where('category_id', $category->id)->where('slug', $subCategorySlug)->first();
+                $sub = $subCategories->firstWhere('slug', $subCategorySlug);
                 if ($sub) {
                     $query->where('sub_category_id', $sub->id);
                 }
@@ -196,7 +200,7 @@ class PublicPageDataService
                 'category' => $category,
                 'description' => $category->description,
                 'total_published' => $totalPublished,
-                'sub_categories' => $category->subCategories,
+                'sub_categories' => $subCategories,
                 'articles' => $articles,
             ];
         };
@@ -205,16 +209,19 @@ class PublicPageDataService
         $articlesCollection = EloquentCollection::make($data['articles'] ?? []);
         $articlesCollection->load('category');
 
+        // sub_categories = sous-catégories liées à cette catégorie en DB (déjà filtrées par category_id)
+        $subCategoriesCollection = $data['sub_categories'] ?? collect();
+
         return [
-            'category' => $this->categoryToArray($data['category']->load('subCategories')),
+            'category' => $this->categoryToArray($data['category']),
             'description' => $data['description'],
             'total_published' => $data['total_published'],
             'current_sub_category_slug' => $subCategorySlug,
-            'sub_categories' => $data['sub_categories']->map(fn ($s) => [
+            'sub_categories' => $subCategoriesCollection->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->name,
                 'slug' => $s->slug,
-            ])->all(),
+            ])->values()->all(),
             'articles' => $articlesCollection->map(fn ($a) => $this->articleToArray($a))->all(),
         ];
     }
