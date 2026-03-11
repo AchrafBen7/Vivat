@@ -16,7 +16,7 @@ return new class extends Migration
     {
         // --- cloaked_ip (dump: latin1) ---
         Schema::create('cloaked_ip', function (Blueprint $table) {
-            $table->integer('id')->autoIncrement()->primary();
+            $table->id();
             $table->string('ip_address_v4', 15);
             $table->string('dns_name', 255);
             $table->dateTime('date_discover');
@@ -42,7 +42,7 @@ return new class extends Migration
 
         // --- tbl_ref : catégories / références éditoriales (dump: utf8) ---
         Schema::create('tbl_ref', function (Blueprint $table) {
-            $table->integer('id')->autoIncrement()->primary();
+            $table->id();
             $table->integer('refID')->nullable();
             $table->string('refTitle', 255)->nullable();
             $table->string('refLang', 2)->nullable();
@@ -55,8 +55,13 @@ return new class extends Migration
         });
 
         // --- tbl_usr : utilisateurs site (dump: utf8) ---
-        Schema::create('tbl_usr', function (Blueprint $table) {
-            $table->integer('usrID')->autoIncrement()->primary();
+        $driver = Schema::getConnection()->getDriverName();
+        Schema::create('tbl_usr', function (Blueprint $table) use ($driver) {
+            if ($driver === 'sqlite') {
+                $table->integer('usrID')->primary();
+            } else {
+                $table->integer('usrID')->autoIncrement()->primary();
+            }
             $table->string('usrNickName', 255)->nullable();
             $table->string('usrPw', 255)->nullable();
             $table->string('usrRealLastName', 255)->nullable();
@@ -66,8 +71,12 @@ return new class extends Migration
         });
 
         // --- tbl_cont_pg : articles / pages de contenu site (dump: utf8) ---
-        Schema::create('tbl_cont_pg', function (Blueprint $table) {
-            $table->integer('contID')->autoIncrement()->primary();
+        Schema::create('tbl_cont_pg', function (Blueprint $table) use ($driver) {
+            if ($driver === 'sqlite') {
+                $table->integer('contID')->primary();
+            } else {
+                $table->integer('contID')->autoIncrement()->primary();
+            }
             $table->string('contTitle', 250)->nullable();
             $table->text('contDesc')->nullable();
             $table->longText('contContent')->nullable();

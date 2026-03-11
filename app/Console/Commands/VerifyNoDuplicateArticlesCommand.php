@@ -105,6 +105,21 @@ class VerifyNoDuplicateArticlesCommand extends Command
             }
         }
 
+        $latestTitles = [];
+        foreach ($latest as $item) {
+            $t = $item['title'] ?? '';
+            $key = mb_strtolower(trim((string) $t));
+            if ($key !== '') {
+                $latestTitles[$key] = ($latestTitles[$key] ?? 0) + 1;
+            }
+        }
+        foreach ($latestTitles as $titleKey => $count) {
+            if ($count > 1) {
+                $this->error("  Home LATEST (Dernières actualités) : le titre « {$titleKey} » apparaît {$count} fois.");
+                $ok = false;
+            }
+        }
+
         $overlap = array_intersect($highlightIds, $latestIds);
         if (count($overlap) > 0) {
             foreach ($overlap as $id) {

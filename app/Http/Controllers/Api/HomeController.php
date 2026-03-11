@@ -9,6 +9,7 @@ use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
@@ -57,7 +58,8 @@ class HomeController extends Controller
             if (count($featuredIds) > 0) {
                 $latestQuery->whereNotIn('id', $featuredIds);
             }
-            $latest = $latestQuery->limit($latestLimit + 5)->get()->unique('id')->values()->take($latestLimit);
+            $latestCollection = $latestQuery->limit($latestLimit + 30)->get()->unique('id')->values();
+            $latest = $this->dedupeLatestByTitle($latestCollection, $latestLimit);
 
             $categories = Category::query()
                 ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)])
@@ -107,6 +109,30 @@ class HomeController extends Controller
             'categories' => CategoryResource::collection($data['categories']),
             'writer_cta' => $this->writerCta($request),
         ]);
+    }
+
+    /**
+     * Garde une seule occurrence par titre normalisé dans "Dernières actualités", puis limite au nombre demandé.
+     *
+     * @param  Collection<int, Article>  $articles
+     * @return Collection<int, Article>
+     */
+    private function dedupeLatestByTitle(Collection $articles, int $limit): Collection
+    {
+        $seenTitle = [];
+        $out = [];
+        foreach ($articles as $article) {
+            $key = mb_strtolower(trim((string) ($article->title ?? '')));
+            if ($key === '' || isset($seenTitle[$key])) {
+                continue;
+            }
+            $seenTitle[$key] = true;
+            $out[] = $article;
+            if (count($out) >= $limit) {
+                break;
+            }
+        }
+        return collect($out);
     }
 
     /**

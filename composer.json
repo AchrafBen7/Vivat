@@ -57,6 +57,10 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "migrate": [
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "DB_CONNECTION=sqlite DB_DATABASE=database/database.sqlite CACHE_STORE=array php artisan migrate --force"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

@@ -7,6 +7,24 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleResource extends JsonResource
 {
+    private function resolveCoverImageUrl(): string
+    {
+        $cover = $this->cover_image_url;
+        if (empty($cover)
+            || (is_string($cover) && stripos($cover, 'picsum') !== false)
+            || (is_string($cover) && ! str_starts_with($cover, 'http'))) {
+            return vivat_category_fallback_image(
+                $this->relationLoaded('category') ? $this->category?->slug : null,
+                800,
+                600,
+                (string) $this->id,
+                'api'
+            );
+        }
+
+        return $cover;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -36,7 +54,7 @@ class ArticleResource extends JsonResource
             'reading_time' => $this->reading_time,
             'status' => $this->status,
             'article_type' => $this->article_type, // hot_news | long_form | standard — pour affichage home
-            'cover_image_url' => $this->cover_image_url,
+            'cover_image_url' => $this->resolveCoverImageUrl(),
             'cover_video_url' => $this->cover_video_url,
             'quality_score' => $this->quality_score,
             'published_at' => $this->published_at?->toIso8601String(),

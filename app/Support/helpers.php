@@ -40,10 +40,12 @@ if (! function_exists('vivat_category_fallback_image')) {
     {
         $key = $categorySlug !== null && $categorySlug !== '' ? strtolower(trim($categorySlug)) : 'default';
         $map = config('vivat.unsplash_fallback_by_category', []);
-        $ids = $map[$key] ?? $map['default'] ?? ['1524758631624-e2822e304c36'];
+        $defaultIds = config('vivat.unsplash_fallback_ids', ['1524758631624-e2822e304c36']);
+        $ids = $map[$key] ?? $map['default'] ?? $defaultIds;
         if (! is_array($ids) || empty($ids)) {
-            $ids = ['1524758631624-e2822e304c36'];
+            $ids = is_array($defaultIds) && ! empty($defaultIds) ? $defaultIds : ['1524758631624-e2822e304c36'];
         }
+        // Un seed par article (+ contexte) pour varier l’image entre articles
         $seed = (string) ($articleIdentifier ?? '') . ($contextSeed !== null && $contextSeed !== '' ? '-' . $contextSeed : '');
         $index = $seed !== '' ? abs(crc32($seed)) % count($ids) : 0;
         $photoId = $ids[$index];

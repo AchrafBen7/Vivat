@@ -52,7 +52,7 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne gauche: Top news 462×438 + Standard 2 + CTA | tablet largeur 462px, lg 5 cols -->
         <div class="tablet:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
             <?php if ($h0): ?>
-            <?php $h0CatSlug = $h0['category']['slug'] ?? null; $h0ArtId = $h0['id'] ?? $h0['slug'] ?? null; $h0Fallback = vivat_category_fallback_image($h0CatSlug, 800, 600, $h0ArtId, 'h0'); $h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : $h0Fallback; ?>
+            <?php $h0CatSlug = $h0['category']['slug'] ?? null; $h0ArtId = $h0['id'] ?? $h0['slug'] ?? null; $h0Fallback = vivat_category_fallback_image($h0CatSlug, 800, 600, $h0ArtId, 'h0'); $h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : $h0Fallback; $h0Img = $h0Img ?: $h0Fallback; ?>
             <!-- Highlight 0: grande carte 462×438 tablet, 519×438 lg -->
             <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
                 <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
@@ -93,7 +93,7 @@ $truncateGlassTitle = function (?string $t): string {
         <!-- Colonne droite: Feature 1 + carte verte (270×221) + Feature 2 | tablet 1 col, lg 4 cols -->
         <div class="tablet:col-span-1 lg:col-span-4 flex flex-col" style="gap: 24px;">
             <?php if ($h1): ?>
-            <?php $h1CatSlug = $h1['category']['slug'] ?? null; $h1ArtId = $h1['id'] ?? $h1['slug'] ?? null; $h1Fallback = vivat_category_fallback_image($h1CatSlug, 411, 237, $h1ArtId, 'h1'); $h1Img = !empty($h1['cover_image_url']) ? $h1['cover_image_url'] : $h1Fallback; ?>
+            <?php $h1CatSlug = $h1['category']['slug'] ?? null; $h1ArtId = $h1['id'] ?? $h1['slug'] ?? null; $h1Fallback = vivat_category_fallback_image($h1CatSlug, 411, 237, $h1ArtId, 'h1'); $h1Img = (!empty($h1['cover_image_url']) ? $h1['cover_image_url'] : $h1Fallback) ?: $h1Fallback; ?>
             <!-- Highlight 1: Feature 411x237 -->
             <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
                 <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
@@ -123,7 +123,7 @@ $truncateGlassTitle = function (?string $t): string {
             <?php endif; ?>
 
             <?php if ($h3): ?>
-            <?php $h3CatSlug = $h3['category']['slug'] ?? null; $h3ArtId = $h3['id'] ?? $h3['slug'] ?? null; $h3Fallback = vivat_category_fallback_image($h3CatSlug, 411, 237, $h3ArtId, 'h3'); $h3Img = !empty($h3['cover_image_url']) ? $h3['cover_image_url'] : $h3Fallback; ?>
+            <?php $h3CatSlug = $h3['category']['slug'] ?? null; $h3ArtId = $h3['id'] ?? $h3['slug'] ?? null; $h3Fallback = vivat_category_fallback_image($h3CatSlug, 411, 237, $h3ArtId, 'h3'); $h3Img = (!empty($h3['cover_image_url']) ? $h3['cover_image_url'] : $h3Fallback) ?: $h3Fallback; ?>
             <!-- Highlight 3: Feature 2 - 411x237 -->
             <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
                 <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
@@ -254,6 +254,7 @@ $truncateGlassTitle = function (?string $t): string {
         ($h3 ?? [])['id'] ?? null,
         ($h4 ?? [])['id'] ?? null,
     ]);
+    // $latest est déjà ordonné du plus récent au moins récent (hors highlights) par le backend
     $restArticles = array_values(array_filter($latest, fn($a) => !in_array($a['id'] ?? null, $highlightIds)));
     // Une seule occurrence par article : déduplication stricte par id puis par slug (évite doublons même si 2 lignes en base)
     $byId = [];
@@ -271,11 +272,27 @@ $truncateGlassTitle = function (?string $t): string {
         }
     }
     $restArticles = array_values($bySlug);
-    // Pas de duplication : on affiche uniquement les articles uniques (jusqu'à 12 slots, certains peuvent rester vides)
-    // Pour les 2 cartes "photo complète" (slots 5 et 7), on privilégie des articles avec cover_image_url
-    $withCover = array_values(array_filter($restArticles, fn($a) => !empty($a['cover_image_url'])));
-    $artForFullPhoto1 = $withCover[0] ?? $restArticles[5] ?? null;
-    $artForFullPhoto2 = (count($withCover) > 1) ? $withCover[1] : ($restArticles[7] ?? null);
+    // Pas de duplication : chaque slot affiche un article différent.
+    // Indices déjà réservés : 0,1 (première ligne), 2 (hot), 3,4 (ligne), 6 (artLeft2), 10 (artLeft), 11 (artRight).
+    // Les 2 cartes "photo complète" prennent des articles uniquement parmi les indices 5, 7, 8, 9, … (jamais 6, 10, 11).
+    $reservedIndices = [0, 1, 2, 3, 4, 6, 10, 11];
+    $restForPhotos = [];
+    foreach ($restArticles as $idx => $a) {
+        if (! in_array($idx, $reservedIndices, true)) {
+            $restForPhotos[] = $a;
+        }
+    }
+    $withCover = array_values(array_filter($restForPhotos, fn($a) => !empty($a['cover_image_url'])));
+    $artForFullPhoto1 = $withCover[0] ?? $restForPhotos[0] ?? $restArticles[5] ?? null;
+    $artForFullPhoto2 = (count($withCover) > 1) ? $withCover[1] : ($restForPhotos[1] ?? $restArticles[7] ?? null);
+    if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhoto2['id'] ?? null) === ($artForFullPhoto1['id'] ?? null)) {
+        $full1Id = $artForFullPhoto1['id'] ?? null;
+        $artForFullPhoto2 = null;
+        foreach ($restForPhotos as $a) {
+            if (($a['id'] ?? null) !== $full1Id) { $artForFullPhoto2 = $a; break; }
+        }
+        $artForFullPhoto2 = $artForFullPhoto2 ?? $restArticles[7] ?? null;
+    }
     ?>
     <?php if (count($restArticles) > 0): ?>
     <section class="vivat-reveal-group mt-12 grid grid-cols-1 tablet:grid-cols-8 lg:grid-cols-12 w-full min-w-0" style="column-gap: 24px; row-gap: 24px;">

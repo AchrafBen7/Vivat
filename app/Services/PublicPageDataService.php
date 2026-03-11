@@ -93,20 +93,20 @@ class PublicPageDataService
 
             $highlightIds = $highlight->pluck('id')->unique()->values()->all();
 
-            // "Dernières actualités" = les plus récents après les 5 highlight, sans aucun doublon ni article déjà en highlight
-            $restCount = max($featuredLimit + $latestLimit, 20);
+            // "Dernières actualités" = les plus récents (published_at desc) déjà exclus des 5 highlight, sans doublon (id, slug, titre).
+            // L'ordre est conservé après déduplication pour que la vue affiche bien du plus récent au moins récent.
+            $fetchLatest = $latestLimit + 30;
             $latest = Article::published()
                 ->forLocale($locale)
                 ->with('category')
                 ->whereNotIn('id', $highlightIds)
                 ->orderByDesc('published_at')
-                ->limit($restCount)
+                ->limit($fetchLatest)
                 ->get()
                 ->filter(fn ($a) => ! in_array($a->id, $highlightIds, true))
                 ->filter(fn ($a) => $a->language === $locale || ($a->language === null && $locale === 'fr'))
                 ->unique('id')
-                ->values()
-                ->take($restCount);
+                ->values();
             $featured = collect();
 
             $categories = Category::query()
@@ -151,6 +151,10 @@ class PublicPageDataService
         $latestAsArray = $latestCollection->map(fn ($a) => $this->articleToArray($a))->all();
         $latestAsArray = $this->dedupeArticlesByIdAndExclude($latestAsArray, $highlightIdsForLatest);
         $latestAsArray = $this->dedupeArticlesBySlug($latestAsArray);
+        $latestAsArray = $this->dedupeArticlesByTitle($latestAsArray);
+        $latestLimit = (int) config('vivat.home_latest_count', 12);
+        // Garder uniquement les N premiers (déjà triés du plus récent au moins récent)
+        $latestAsArray = array_slice($latestAsArray, 0, $latestLimit);
         // Garde-fou : ne jamais inclure un article dont la langue ne correspond pas (évite NL quand locale = fr)
         $latestAsArray = array_values(array_filter($latestAsArray, function ($row) use ($locale) {
             $lang = $row['language'] ?? 'fr';
@@ -258,6 +262,28 @@ class PublicPageDataService
         return array_values($out);
     }
 
+    /**
+     * Garde une seule occurrence par titre normalisé (évite deux articles avec le même titre dans "Dernières actualités").
+     *
+     * @param  array<int, array<string, mixed>>  $articles
+     * @return array<int, array<string, mixed>>
+     */
+    private function dedupeArticlesByTitle(array $articles): array
+    {
+        $seenTitle = [];
+        $out = [];
+        foreach ($articles as $row) {
+            $title = $row['title'] ?? '';
+            $key = mb_strtolower(trim((string) $title));
+            if ($key === '' || ! empty($seenTitle[$key])) {
+                continue;
+            }
+            $seenTitle[$key] = true;
+            $out[] = $row;
+        }
+        return array_values($out);
+    }
+
     private function articleToArray(Article $a): array
     {
         // Toujours résoudre la catégorie depuis la DB via category_id pour garantir la cohérence (éviter affichage mauvaise catégorie)
@@ -266,6 +292,11 @@ class PublicPageDataService
             $resolved = Category::find($a->category_id);
             $category = $resolved ? $this->categoryToArray($resolved) : null;
         }
+
+        $cover = $a->cover_image_url;
+        $useFallback = empty($cover)
+            || (is_string($cover) && stripos($cover, 'picsum') !== false)
+            || (is_string($cover) && ! str_starts_with($cover, 'http'));
 
         return [
             'id' => $a->id,
@@ -277,7 +308,15 @@ class PublicPageDataService
             'meta_description' => $a->meta_description,
             'reading_time' => $a->reading_time,
             'published_at' => $a->published_at?->format('d/m/Y'),
-            'cover_image_url' => $a->cover_image_url,
+            'cover_image_url' => $useFallback
+                ? vivat_category_fallback_image(
+                    $category['slug'] ?? null,
+                    800,
+                    450,
+                    (string) $a->id,
+                    'page'
+                )
+                : $cover,
             'cover_video_url' => $a->cover_video_url,
             'article_type' => $a->article_type,
             'language' => $a->language ?? 'fr',
