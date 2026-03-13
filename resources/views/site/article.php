@@ -50,6 +50,7 @@ $alsoCarouselItems = array_merge(
     ]],
     array_map(fn (array $item): array => ['type' => 'article'] + $item, $relatedItems)
 );
+$tagClass = 'vivat-tag';
 ?>
 <article class="max-w-3xl mx-auto">
     <header class="mb-8">
@@ -136,7 +137,7 @@ $alsoCarouselItems = array_merge(
                     <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
                     <div class="absolute left-[18px] right-[18px] bottom-[18px]">
                         <div class="rounded-[21px] vivat-glass flex flex-col" style="padding: 24px; gap: 8px;">
-                            <span class="font-medium tracking-wide w-fit rounded-full inline-flex items-center" style="height: 30px; padding: 0 12px; font-size: 12px; box-sizing: border-box; background: rgba(255,255,255,0.18); color: #fff;"><?= htmlspecialchars($itemCategory) ?></span>
+                            <span class="<?= $tagClass ?>" style="background: rgba(255,255,255,0.18); color: #fff;"><?= htmlspecialchars($itemCategory) ?></span>
                             <h3 class="font-medium text-white leading-tight" style="font-size: 20px;"><?= htmlspecialchars($item['title']) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($item['date']) ?> • <?= (int) $item['reading_time'] ?> min</p>
                         </div>

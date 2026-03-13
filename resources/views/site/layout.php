@@ -58,6 +58,10 @@ $title_safe = htmlspecialchars($title);
             --vivat-card-glass: rgba(255, 255, 255, 0.11);
             --vivat-card-border: rgba(255, 255, 255, 0.15);
             --vivat-nav-glass: #004241;
+            --vivat-tag-height: 30px;
+            --vivat-tag-padding-x: 12px;
+            --vivat-tag-font-size: 12px;
+            --vivat-tag-letter-spacing: 0.02em;
         }
         html {
             scroll-behavior: smooth;
@@ -70,6 +74,23 @@ $title_safe = htmlspecialchars($title);
             border: 1px solid rgba(230, 230, 230, 0.2);
             padding: 18px;
             box-sizing: border-box;
+        }
+        .vivat-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            max-width: 100%;
+            min-height: var(--vivat-tag-height);
+            padding: 0 var(--vivat-tag-padding-x);
+            border-radius: 9999px;
+            box-sizing: border-box;
+            font-size: var(--vivat-tag-font-size);
+            line-height: 1;
+            font-weight: 500;
+            letter-spacing: var(--vivat-tag-letter-spacing);
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }

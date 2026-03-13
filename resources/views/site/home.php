@@ -25,8 +25,8 @@ $tagStyles = [
     'glass' => ['bg' => '#787879', 'color' => '#fff'],
     'gris'  => ['bg' => '#ffffff', 'color' => '#004241'],
 ];
-$tagClass = 'font-medium tracking-wide w-fit rounded-full inline-flex items-center';
-$tagStyleBase = 'height: 30px; padding: 0 12px; font-size: 12px; box-sizing: border-box;';
+$tagClass = 'vivat-tag';
+$tagStyleBase = '';
 
 // Titre min 8 mots / max 9 mots dans les carrés glass (position et padding 24px inchangés)
 $truncateGlassTitle = function (?string $t): string {
