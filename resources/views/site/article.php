@@ -34,7 +34,22 @@ $relatedItems = [
         'category' => $relatedCategoryName,
         'image' => vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-3'),
     ],
+    [
+        'title' => 'Des fouilles révèlent de nouvelles pistes sur les premiers peuples européens',
+        'date' => '12 février 2026',
+        'reading_time' => 4,
+        'category' => $relatedCategoryName,
+        'image' => vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-4'),
+    ],
 ];
+$alsoCarouselItems = array_merge(
+    [[
+        'type' => 'ad',
+        'label' => 'Publicité',
+        'size' => '400×400',
+    ]],
+    array_map(fn (array $item): array => ['type' => 'article'] + $item, $relatedItems)
+);
 ?>
 <article class="max-w-3xl mx-auto">
     <header class="mb-8">
@@ -69,56 +84,87 @@ $relatedItems = [
 </article>
 
 <section class="max-w-[1400px] mx-auto mt-16" aria-label="À lire aussi">
+    <style>
+        #also-carousel-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            #also-carousel-frame {
+                max-width: 1200px;
+            }
+
+            #also-carousel-rail [data-carousel-card] {
+                width: 380px;
+                min-width: 380px;
+                flex-basis: 380px;
+            }
+        }
+    </style>
     <h2 class="text-[#004241] font-medium mb-6" style="font-size: 32px;">À lire aussi</h2>
-    <div class="relative min-w-0">
-        <div id="also-carousel-track" class="overflow-hidden">
-            <div id="also-carousel-slides" class="flex transition-transform duration-500 ease-out">
-                <?php foreach ($relatedItems as $item): ?>
-                <article class="w-full flex-shrink-0">
-                    <div class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_minmax(0,1fr)] gap-6 items-stretch">
-                        <aside class="rounded-[30px] flex items-center justify-center text-center text-white/90" style="background: #4B4B4B; height: 400px;">
-                            <div class="flex flex-col items-center justify-center gap-3">
-                                <span class="font-semibold" style="font-size: 22px;">Publicité</span>
-                                <span style="font-size: 18px;">240×400</span>
-                            </div>
-                        </aside>
-
-                        <?php $itemCategory = $item['category'] ?? 'À la une'; ?>
-                        <a href="#" class="group block rounded-[30px] overflow-hidden relative h-[400px]">
-                            <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
-                            <div class="absolute left-[18px] right-[18px] bottom-[18px]">
-                                <div class="rounded-[21px] vivat-glass flex flex-col" style="padding: 24px; gap: 8px;">
-                                    <span class="font-medium tracking-wide w-fit rounded-full inline-flex items-center" style="height: 30px; padding: 0 12px; font-size: 12px; box-sizing: border-box; background: rgba(255,255,255,0.18); color: #fff;"><?= htmlspecialchars($itemCategory) ?></span>
-                                    <h3 class="font-medium text-white leading-tight" style="font-size: 20px;"><?= htmlspecialchars($item['title']) ?></h3>
-                                    <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($item['date']) ?> • <?= (int) $item['reading_time'] ?> min</p>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a href="#" class="group block rounded-[30px] overflow-hidden relative h-[400px]">
-                            <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
-                            <div class="absolute left-[18px] right-[18px] bottom-[18px]">
-                                <div class="rounded-[21px] vivat-glass flex flex-col" style="padding: 24px; gap: 8px;">
-                                    <span class="font-medium tracking-wide w-fit rounded-full inline-flex items-center" style="height: 30px; padding: 0 12px; font-size: 12px; box-sizing: border-box; background: rgba(255,255,255,0.18); color: #fff;"><?= htmlspecialchars($itemCategory) ?></span>
-                                    <h3 class="font-medium text-white leading-tight" style="font-size: 20px;"><?= htmlspecialchars($item['title']) ?></h3>
-                                    <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($item['date']) ?> • <?= (int) $item['reading_time'] ?> min</p>
-                                </div>
-                            </div>
-                        </a>
+    <div id="also-carousel-frame" class="relative min-w-0 lg:mx-auto">
+        <div
+            id="also-carousel-track"
+            class="overflow-x-auto overflow-y-hidden"
+            style="scrollbar-width: none; -ms-overflow-style: none;"
+        >
+            <div id="also-carousel-rail" class="flex gap-6 w-max pr-6">
+                <?php for ($copy = 0; $copy < 3; $copy++): ?>
+                <?php foreach ($alsoCarouselItems as $idx => $item): ?>
+                <?php $isAd = ($item['type'] ?? 'article') === 'ad'; ?>
+                <?php $isMiddleSequence = $copy === 1; ?>
+                <?php if ($isAd): ?>
+                <aside
+                    class="hidden lg:flex flex-shrink-0 rounded-[30px] items-center justify-center text-center text-white/90"
+                    style="background: #4B4B4B; width: 380px; height: 380px;"
+                    <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>
+                >
+                    <div class="flex flex-col items-center justify-center gap-3">
+                        <span class="font-semibold" style="font-size: 22px;"><?= htmlspecialchars($item['label']) ?></span>
+                        <span style="font-size: 18px;">380×380</span>
                     </div>
-                </article>
+                </aside>
+                <?php else: ?>
+                <?php $itemCategory = $item['category'] ?? 'À la une'; ?>
+                <a
+                    href="#"
+                    class="group block flex-shrink-0 rounded-[30px] overflow-hidden relative w-[240px] sm:w-[320px] lg:w-[380px] h-[380px]"
+                    data-carousel-card="<?= ($isMiddleSequence ? $idx : '') ?>"
+                    <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>
+                >
+                    <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
+                    <div class="absolute left-[18px] right-[18px] bottom-[18px]">
+                        <div class="rounded-[21px] vivat-glass flex flex-col" style="padding: 24px; gap: 8px;">
+                            <span class="font-medium tracking-wide w-fit rounded-full inline-flex items-center" style="height: 30px; padding: 0 12px; font-size: 12px; box-sizing: border-box; background: rgba(255,255,255,0.18); color: #fff;"><?= htmlspecialchars($itemCategory) ?></span>
+                            <h3 class="font-medium text-white leading-tight" style="font-size: 20px;"><?= htmlspecialchars($item['title']) ?></h3>
+                            <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($item['date']) ?> • <?= (int) $item['reading_time'] ?> min</p>
+                        </div>
+                    </div>
+                </a>
+                <?php endif; ?>
                 <?php endforeach; ?>
+                <?php endfor; ?>
             </div>
         </div>
 
         <?php if (count($relatedItems) > 1): ?>
         <button
             type="button"
+            id="also-carousel-prev"
+            class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition"
+            style="left: -29px; width: 58px; height: 58px; background: #F2E8D2;"
+            aria-label="Article précédent"
+        >
+            <svg class="w-7 h-7 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+        </button>
+        <button
+            type="button"
             id="also-carousel-next"
-            class="absolute right-[-24px] top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition"
-            style="width: 58px; height: 58px; background: #F2E8D2;"
+            class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition"
+            style="right: -29px; width: 58px; height: 58px; background: #F2E8D2;"
             aria-label="Article suivant"
         >
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,17 +173,121 @@ $relatedItems = [
         </button>
         <script>
         (function() {
+            var prevBtn = document.getElementById('also-carousel-prev');
             var nextBtn = document.getElementById('also-carousel-next');
-            var slides = document.getElementById('also-carousel-slides');
-            if (!nextBtn || !slides) {
+            var track = document.getElementById('also-carousel-track');
+            var rail = document.getElementById('also-carousel-rail');
+            if (!prevBtn || !nextBtn || !track || !rail) {
                 return;
             }
-            var total = slides.children.length;
-            var index = 0;
-            nextBtn.addEventListener('click', function() {
-                index = (index + 1) % total;
-                slides.style.transform = 'translateX(' + (-100 * index) + '%)';
+
+            var normalizeTimer = null;
+
+            function getGap() {
+                return 24;
+            }
+
+            function getCycleWidth() {
+                var cycleItems = rail.querySelectorAll('[data-cycle-item="1"]');
+                if (!cycleItems.length) {
+                    return 0;
+                }
+                var width = 0;
+                cycleItems.forEach(function(item, index) {
+                    width += item.getBoundingClientRect().width;
+                    if (index < cycleItems.length - 1) {
+                        width += getGap();
+                    }
+                });
+                return width;
+            }
+
+            function getStep() {
+                var firstCard = rail.querySelector('[data-carousel-card]');
+                return firstCard ? firstCard.getBoundingClientRect().width + getGap() : 0;
+            }
+
+            function getSequenceSpan() {
+                var cycleWidth = getCycleWidth();
+                return cycleWidth ? cycleWidth + getGap() : 0;
+            }
+
+            function getViewportNudge() {
+                return 4;
+            }
+
+            function getStartOffset() {
+                var sequenceSpan = getSequenceSpan();
+                return sequenceSpan ? sequenceSpan - getViewportNudge() : 0;
+            }
+
+            function normalizePosition() {
+                var sequenceSpan = getSequenceSpan();
+                if (!sequenceSpan) {
+                    return;
+                }
+
+                if (track.scrollLeft <= sequenceSpan * 0.5) {
+                    track.scrollLeft += sequenceSpan;
+                } else if (track.scrollLeft >= sequenceSpan * 1.5) {
+                    track.scrollLeft -= sequenceSpan;
+                }
+            }
+
+            function scheduleNormalize() {
+                if (normalizeTimer) {
+                    window.clearTimeout(normalizeTimer);
+                }
+
+                normalizeTimer = window.setTimeout(function() {
+                    normalizePosition();
+                }, 180);
+            }
+
+            function setInitialPosition() {
+                var startOffset = getStartOffset();
+                if (startOffset) {
+                    track.scrollLeft = startOffset;
+                }
+            }
+
+            function move(direction) {
+                var step = getStep();
+                if (!step) {
+                    return;
+                }
+
+                track.scrollBy({ left: direction * step, behavior: 'smooth' });
+                window.setTimeout(normalizePosition, 420);
+            }
+
+            setInitialPosition();
+
+            prevBtn.addEventListener('click', function() {
+                move(-1);
             });
+            nextBtn.addEventListener('click', function() {
+                move(1);
+            });
+
+            track.addEventListener('scroll', function() {
+                scheduleNormalize();
+            }, { passive: true });
+
+            window.addEventListener('resize', function() {
+                var sequenceSpan = getSequenceSpan();
+                if (!sequenceSpan) {
+                    return;
+                }
+
+                var relativeOffset = (track.scrollLeft + getViewportNudge()) % sequenceSpan;
+                track.scrollLeft = sequenceSpan + relativeOffset - getViewportNudge();
+            });
+
+            window.setTimeout(function() {
+                setInitialPosition();
+                scheduleNormalize();
+            }, 0);
         })();
         </script>
         <?php endif; ?>
