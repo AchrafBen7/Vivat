@@ -39,6 +39,27 @@ $truncateGlassTitle = function (?string $t): string {
     $keep = max($minWords, min($maxWords, count($w)));
     return implode(' ', array_slice($w, 0, $keep)) . ' …';
 };
+
+$h0CatSlug = $h0['category']['slug'] ?? null;
+$h0ArtId = $h0['id'] ?? $h0['slug'] ?? null;
+$h0Fallback = vivat_category_fallback_image($h0CatSlug, 800, 600, $h0ArtId, 'h0');
+$h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : $h0Fallback;
+$h0Img = $h0Img ?: $h0Fallback;
+
+$h1CatSlug = $h1['category']['slug'] ?? null;
+$h1ArtId = $h1['id'] ?? $h1['slug'] ?? null;
+$h1Fallback = vivat_category_fallback_image($h1CatSlug, 411, 237, $h1ArtId, 'h1');
+$h1Img = (!empty($h1['cover_image_url']) ? $h1['cover_image_url'] : $h1Fallback) ?: $h1Fallback;
+
+$h3CatSlug = $h3['category']['slug'] ?? null;
+$h3ArtId = $h3['id'] ?? $h3['slug'] ?? null;
+$h3Fallback = vivat_category_fallback_image($h3CatSlug, 411, 237, $h3ArtId, 'h3');
+$h3Img = (!empty($h3['cover_image_url']) ? $h3['cover_image_url'] : $h3Fallback) ?: $h3Fallback;
+
+$h4CatSlug = $h4['category']['slug'] ?? null;
+$h4ArtId = $h4['id'] ?? $h4['slug'] ?? null;
+$h4Fallback = vivat_category_fallback_image($h4CatSlug, 519, 280, $h4ArtId, 'h4');
+$h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback) ?: $h4Fallback;
 ?>
 <style>
     @media (max-width: 767px) {
@@ -130,18 +151,19 @@ $truncateGlassTitle = function (?string $t): string {
     @media (min-width: 768px) and (max-width: 1023px) {
         .home-highlight-primary {
             max-width: none !important;
-            height: 412px !important;
+            height: 420px !important;
         }
 
         .home-highlight-secondary {
             max-width: none !important;
-            min-height: 220px;
-            height: auto !important;
+            min-height: 204px;
+            height: 204px !important;
         }
 
         .home-highlight-feature,
         .home-highlight-standard {
             max-width: none !important;
+            height: 204px !important;
         }
 
         .home-categories-hero {
@@ -168,9 +190,89 @@ $truncateGlassTitle = function (?string $t): string {
         Publicité 728×90
     </div>
 </div>
-<!-- Grille articles - mobile 1 col, tablet 2 cols (gauche 462px, droite 1fr, 24px gap), lg 12 cols -->
+<!-- Grille articles tablette dédiée : bloc plus compact et carré -->
+<div class="vivat-reveal-group hidden md:grid lg:hidden grid-cols-8 w-full" style="column-gap: 24px; row-gap: 24px;">
+    <?php if ($h0): ?>
+    <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="home-highlight-primary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group col-span-5 block rounded-[30px] overflow-hidden relative w-full">
+        <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
+        <div class="absolute inset-0" style="background: rgba(0,0,0,0.3);"></div>
+        <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+            <div class="rounded-[21px] flex flex-col vivat-glass w-full max-w-[300px]" style="gap: 6px;">
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: #EBF1EF; color: #004241;">Top news</span>
+                <h2 class="font-semibold text-white line-clamp-4" style="font-size: 24px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
+                <?php if (!empty($h0['excerpt'])): ?>
+                <p class="text-white/90 line-clamp-3" style="font-size: 14px;"><?= htmlspecialchars($h0['excerpt']) ?></p>
+                <?php endif; ?>
+                <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
+            </div>
+        </div>
+    </a>
+    <?php endif; ?>
+
+    <div class="col-span-3 flex flex-col" style="gap: 24px;">
+        <?php if ($h2): ?>
+        <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="home-highlight-standard vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end w-full" style="padding: 24px; gap: 8px; background: #004241;">
+            <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+            <?php if (!empty($h2['category'])): ?>
+            <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($h2['category']['name']) ?></span>
+            <?php endif; ?>
+            <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($h2['title']) ?></h3>
+            <p class="text-white/70" style="font-size: 12px;"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
+        </a>
+        <?php endif; ?>
+
+        <?php if ($h3): ?>
+        <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="home-highlight-feature vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full">
+            <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+                <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
+                    <?php if (!empty($h3['category'])): ?>
+                    <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
+                    <?php endif; ?>
+                    <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h3['title'] ?? '')) ?></h3>
+                    <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </div>
+        </a>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($h4): ?>
+    <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune col-span-5 block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="padding: 24px; gap: 8px; background: #FFF0D4;">
+        <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+        <?php if (!empty($h4['category'])): ?>
+        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($h4['category']['name']) ?></span>
+        <?php endif; ?>
+        <h3 class="font-semibold text-[#004241] line-clamp-2" style="font-size: 20px;"><?= htmlspecialchars($h4['title']) ?></h3>
+        <p class="text-[#004241]/70" style="font-size: 12px;"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
+    </a>
+    <?php endif; ?>
+
+    <?php if ($h1): ?>
+    <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="home-highlight-feature vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group col-span-3 block rounded-[30px] overflow-hidden relative w-full">
+        <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
+            <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
+                <?php if (!empty($h1['category'])): ?>
+                <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
+                <?php endif; ?>
+                <h3 class="font-semibold text-white line-clamp-3" style="font-size: 18px;"><?= htmlspecialchars($truncateGlassTitle($h1['title'] ?? '')) ?></h3>
+                <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
+            </div>
+        </div>
+    </a>
+    <?php endif; ?>
+
+    <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune col-span-8 flex items-center rounded-[30px] overflow-hidden" style="min-height: 132px; padding: 24px; background: #FFF0D4;">
+        <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+        <p class="text-[#004241] font-medium leading-snug pr-16" style="font-size: 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+    </a>
+</div>
+<!-- Grille articles - mobile 1 col, desktop lg 12 cols -->
 <div class="flex flex-col w-full">
-    <div class="vivat-reveal-group grid grid-cols-1 md:grid-cols-[462px_1fr] lg:grid-cols-12" style="column-gap: 24px; row-gap: 24px;">
+    <div class="vivat-reveal-group grid grid-cols-1 md:hidden lg:grid lg:grid-cols-12" style="column-gap: 24px; row-gap: 24px;">
         <!-- Colonne gauche: Top news 462×438 + Standard 2 + CTA | tablet largeur 462px, lg 5 cols -->
         <div class="md:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
             <?php if ($h0): ?>
@@ -262,7 +364,7 @@ $truncateGlassTitle = function (?string $t): string {
             </a>
             <?php endif; ?>
 
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="hidden md:flex xl:hidden home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex-col rounded-[30px] overflow-hidden w-full" style="min-height: 118px; background: #FFF0D4;">
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="hidden lg:flex xl:hidden home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex-col rounded-[30px] overflow-hidden w-full" style="min-height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <p class="text-[#004241] font-medium leading-snug flex-1 z-10" style="padding: 24px 88px 24px 24px; font-size: 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
             </a>
