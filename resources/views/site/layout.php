@@ -194,22 +194,29 @@ $title_safe = htmlspecialchars($title);
             opacity: 1;
             pointer-events: auto;
         }
+        @media (max-width: 767px) {
+            .site-header-row {
+                height: 72px;
+                padding-top: 18px;
+                padding-bottom: 18px;
+            }
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased">
     <!-- Navbar - Design System Figma -->
     <header class="bg-white">
-        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 header-nav-wrap">
-            <div class="flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 header-nav-wrap">
+            <div class="site-header-row flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
             <!-- Logo: 32px, #004241 ; tablet: margin 40px -->
             <h1 class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
 
             <!-- Espace logo - searchbar: visible tablet+ -->
-            <div class="hidden tablet:block flex-shrink-0 flex-1 min-w-4"></div>
-            <div class="flex-1 tablet:flex-none tablet:flex-shrink-0"></div>
+            <div class="hidden md:block flex-shrink-0 flex-1 min-w-4"></div>
+            <div class="flex-1 md:flex-none md:flex-shrink-0"></div>
 
             <!-- Search: par défaut rond avec icône, au hover s’étend en barre avec placeholder -->
-            <div class="nav-search-bar hidden tablet:flex items-center flex-shrink-0 rounded-full h-12 overflow-hidden" style="background: #E5EDEB;">
+            <div class="nav-search-bar hidden md:flex items-center flex-shrink-0 rounded-full h-12 overflow-hidden" style="background: #E5EDEB;">
                 <input type="search" placeholder="Rechercher un article" class="nav-search-input flex-1 min-w-0 bg-transparent text-sm outline-none border-none placeholder:text-[#226E65]" style="color: #226E65;">
                 <svg class="w-5 h-5 flex-shrink-0" style="color: #226E65;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
@@ -218,12 +225,12 @@ $title_safe = htmlspecialchars($title);
             <div class="w-[9px] flex-shrink-0"></div>
 
             <!-- Contactez-nous: 162x48, #004241, Figtree 500 16px, text #FFFFFF -->
-            <a href="/contact" class="nav-contact-btn flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none" style="width: 162px; padding: 12px 20px;">
+            <a href="/contact" class="nav-contact-btn hidden md:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none" style="width: 162px; padding: 12px 20px;">
                 Contactez-nous
             </a>
 
             <!-- 19px espace -->
-            <div class="w-[19px] flex-shrink-0"></div>
+            <div class="hidden md:block w-[19px] flex-shrink-0"></div>
 
             <!-- Hamburger: simple, 48x48, border-radius 30px, visible mobile uniquement -->
             <button type="button" id="hamburger-menu" class="hamburger-btn flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-12 h-12 bg-transparent border-none cursor-pointer" style="border-radius: 30px;" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
@@ -256,11 +263,11 @@ $title_safe = htmlspecialchars($title);
             </div>
         </div>
     </header>
-    <main class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 pb-8 overflow-x-hidden">
+    <main class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
         <?= $content ?? '' ?>
     </main>
     <!-- CTA contribution : juste au-dessus du footer, 24px de marge avant le footer -->
-    <section class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
+    <section class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
         <a href="<?= url('/contribution') ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80');">
             <span class="absolute inset-0 bg-black/30" aria-hidden="true"></span>
             <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
@@ -276,14 +283,14 @@ $title_safe = htmlspecialchars($title);
     </section>
     <footer>
         <!-- 2 carrés avec 24px d'espace entre eux -->
-        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 mb-6 flex flex-col lg:flex-row gap-6 w-full">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 mb-6 flex flex-col lg:flex-row gap-6 w-full">
             <!-- Carré 1 : Newsletter (2/5 de l'espace) -->
-            <div class="flex-[2] min-w-0 flex flex-col justify-center items-center gap-5 rounded-[30px] p-8 shadow-sm text-center min-h-[200px]" style="background: #EBF1EF;">
+            <div class="flex-[2] min-w-0 flex flex-col justify-center items-center lg:items-start gap-5 rounded-[30px] p-8 shadow-sm text-center lg:text-left min-h-[200px]" style="background: #EBF1EF;">
                 <div class="flex flex-col gap-1">
                     <span class="font-semibold" style="color: #004241; font-size: 16px;">Newsletter</span>
                     <p class="text-gray-900 font-normal leading-snug" style="font-size: 16px;">Recevez une sélection d'articles chaque semaine.</p>
                 </div>
-                <form action="#" method="post" class="flex flex-col sm:flex-row gap-3 flex-wrap justify-center w-full max-w-md">
+                <form action="#" method="post" class="flex flex-col sm:flex-row gap-3 flex-wrap justify-center lg:justify-start w-full max-w-md lg:max-w-none">
                     <input type="email" name="email" placeholder="you@example.com" class="flex-1 min-w-[220px] h-12 pl-5 pr-5 rounded-full border-0 bg-white text-gray-900 placeholder:text-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#004241]/25 focus:shadow-md text-left" style="font-size: 16px;">
                     <button type="submit" class="vivat-btn-teal-hover flex items-center justify-center h-12 px-8 rounded-full font-semibold whitespace-nowrap shadow-sm transition hover:shadow-md active:scale-[0.98]" style="font-size: 16px;">
                         S'abonner
@@ -291,8 +298,8 @@ $title_safe = htmlspecialchars($title);
                 </form>
             </div>
             <!-- Carré 2 : Informations, Rubriques, Légal (3/5, 48px vertical, centré et équilibré) -->
-            <div class="flex-[3] min-w-0 flex flex-wrap justify-center items-start gap-12 rounded-[30px] p-10" style="background: #EBF1EF;">
-                <nav class="flex flex-col gap-2 text-left min-w-[140px]" aria-label="Informations">
+            <div class="flex-[3] min-w-0 flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-8 xl:gap-12 rounded-[30px] p-8 lg:p-10" style="background: #EBF1EF;">
+                <nav class="flex flex-col gap-2 text-left min-w-[120px] lg:min-w-0 lg:flex-1" aria-label="Informations">
                     <h3 class="font-semibold text-gray-900 text-base">Informations</h3>
                     <ul class="flex flex-col list-none p-0 m-0 gap-2">
                         <li><a href="/" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Home</a></li>
@@ -301,7 +308,7 @@ $title_safe = htmlspecialchars($title);
                         <li><a href="/faq" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">FAQ</a></li>
                     </ul>
                 </nav>
-                <nav class="flex flex-col gap-2 text-left min-w-[140px]" aria-label="Rubriques">
+                <nav class="flex flex-col gap-2 text-left min-w-[120px] lg:min-w-0 lg:flex-1" aria-label="Rubriques">
                     <h3 class="font-semibold text-gray-900 text-base">Rubriques</h3>
                     <ul class="flex flex-col list-none p-0 m-0 gap-2">
                         <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Actualités</a></li>
@@ -311,7 +318,7 @@ $title_safe = htmlspecialchars($title);
                         <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Lifestyle</a></li>
                     </ul>
                 </nav>
-                <nav class="flex flex-col gap-2 text-left min-w-[200px]" aria-label="Légal">
+                <nav class="flex flex-col gap-2 text-left min-w-[160px] lg:min-w-0 lg:flex-1" aria-label="Légal">
                     <h3 class="font-semibold text-gray-900 text-base">Légal</h3>
                     <ul class="flex flex-col list-none p-0 m-0 gap-2">
                         <li><a href="/mentions-legales" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Mentions légales</a></li>
@@ -323,7 +330,7 @@ $title_safe = htmlspecialchars($title);
                 </nav>
             </div>
         </div>
-        <div class="max-w-[1400px] mx-auto px-5 tablet:px-10 lg:px-20 pb-8 text-center text-gray-500 text-sm">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 pb-8 text-center text-gray-500 text-sm">
             © <?= date('Y') ?> Vivat. Tous droits réservés.
         </div>
     </footer>

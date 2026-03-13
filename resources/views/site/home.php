@@ -40,28 +40,150 @@ $truncateGlassTitle = function (?string $t): string {
     return implode(' ', array_slice($w, 0, $keep)) . ' …';
 };
 ?>
+<style>
+    @media (max-width: 767px) {
+        .home-highlight-primary {
+            height: clamp(320px, 82vw, 420px) !important;
+            max-width: none !important;
+        }
+
+        .home-highlight-primary-title {
+            font-size: clamp(28px, 9vw, 32px) !important;
+        }
+
+        .home-highlight-secondary,
+        .home-highlight-standard {
+            max-width: none !important;
+            min-height: 220px;
+            height: auto !important;
+        }
+
+        .home-highlight-feature {
+            max-width: none !important;
+            height: 220px !important;
+        }
+
+        .home-highlight-rail {
+            display: none !important;
+        }
+
+        .home-banner-ad {
+            margin-top: 40px !important;
+            height: 180px !important;
+            padding: 24px !important;
+        }
+
+        .home-categories-section {
+            margin-top: 40px !important;
+        }
+
+        .home-categories-hero {
+            min-height: 360px !important;
+            height: 360px !important;
+        }
+
+        .home-categories-side {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .categories-carousel {
+            width: 100%;
+        }
+
+        .categories-group {
+            grid-template-columns: 1fr !important;
+            grid-template-rows: none !important;
+        }
+
+        .categories-group > div {
+            grid-row: auto !important;
+        }
+
+        .home-categories-card,
+        .home-categories-card-tall {
+            height: 220px !important;
+        }
+
+        .home-categories-next {
+            margin-left: auto !important;
+        }
+
+        .home-latest-section {
+            margin-top: 40px !important;
+        }
+
+        .home-latest-tall-card {
+            height: 360px !important;
+        }
+
+        .home-latest-wide-card {
+            height: 220px !important;
+        }
+
+        .home-latest-standard-card {
+            min-height: 190px;
+            height: auto !important;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .home-highlight-primary {
+            max-width: none !important;
+            height: 412px !important;
+        }
+
+        .home-highlight-secondary {
+            max-width: none !important;
+            min-height: 220px;
+            height: auto !important;
+        }
+
+        .home-highlight-feature,
+        .home-highlight-standard {
+            max-width: none !important;
+        }
+
+        .home-categories-hero {
+            min-height: 460px !important;
+            height: 460px !important;
+        }
+
+        .home-latest-tall-card {
+            height: 390px !important;
+        }
+    }
+
+    @media (min-width: 1024px) and (max-width: 1279px) {
+        .home-highlight-feature,
+        .home-highlight-standard {
+            max-width: none !important;
+        }
+    }
+
+</style>
 <!-- Bandeau publicitaire header 728×90 : uniquement en version tablette (834px), masqué en mobile et desktop -->
-<div class="hidden tablet:block lg:hidden w-full" style="margin-bottom: 24px;">
+<div class="hidden md:block lg:hidden w-full" style="margin-bottom: 24px;">
     <div class="rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm flex items-center justify-center mx-auto" style="width: 728px; max-width: 100%; height: 90px;">
         Publicité 728×90
     </div>
 </div>
 <!-- Grille articles - mobile 1 col, tablet 2 cols (gauche 462px, droite 1fr, 24px gap), lg 12 cols -->
 <div class="flex flex-col w-full">
-    <div class="vivat-reveal-group grid grid-cols-1 tablet:grid-cols-[462px_1fr] lg:grid-cols-12" style="column-gap: 24px; row-gap: 24px;">
+    <div class="vivat-reveal-group grid grid-cols-1 md:grid-cols-[462px_1fr] lg:grid-cols-12" style="column-gap: 24px; row-gap: 24px;">
         <!-- Colonne gauche: Top news 462×438 + Standard 2 + CTA | tablet largeur 462px, lg 5 cols -->
-        <div class="tablet:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
+        <div class="md:col-span-1 lg:col-span-5 flex flex-col" style="gap: 24px;">
             <?php if ($h0): ?>
             <?php $h0CatSlug = $h0['category']['slug'] ?? null; $h0ArtId = $h0['id'] ?? $h0['slug'] ?? null; $h0Fallback = vivat_category_fallback_image($h0CatSlug, 800, 600, $h0ArtId, 'h0'); $h0Img = !empty($h0['cover_image_url']) ? $h0['cover_image_url'] : $h0Fallback; $h0Img = $h0Img ?: $h0Fallback; ?>
             <!-- Highlight 0: grande carte 462×438 tablet, 519×438 lg -->
-            <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
+            <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="home-highlight-primary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full lg:max-w-[519px]" style="height: 438px;">
                 <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
                 <div class="absolute inset-0" style="background: rgba(0,0,0,0.3);"></div>
                 <!-- Carré glass : 18px d’espace depuis le bord de la carte -->
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full max-w-[300px]" style="gap: 6px;">
                     <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: #EBF1EF; color: #004241;">Top news</span>
-                    <h2 class="font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
+                    <h2 class="home-highlight-primary-title font-semibold text-white line-clamp-4" style="font-size: 32px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
                     <?php if (!empty($h0['excerpt'])): ?>
                     <p class="text-white/90 line-clamp-3" style="font-size: 14px;"><?= htmlspecialchars($h0['excerpt']) ?></p>
                     <?php endif; ?>
@@ -73,7 +195,7 @@ $truncateGlassTitle = function (?string $t): string {
 
             <?php if ($h4): ?>
             <!-- Highlight 4: Standard 2 - 519x280, #FFF0D4 -->
-            <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
+            <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end" style="width: 100%; max-width: 519px; height: 280px; padding: 24px; gap: 8px; background: #FFF0D4;">
                 <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($h4['category'])): ?>
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($h4['category']['name']) ?></span>
@@ -84,18 +206,18 @@ $truncateGlassTitle = function (?string $t): string {
             <?php endif; ?>
 
             <!-- CTA en dessous de la colonne gauche (visible tablette uniquement) -->
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-full lg:hidden" style="height: 118px; background: #FFF0D4;">
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-full lg:hidden" style="height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
             </a>
         </div>
 
         <!-- Colonne droite: Feature 1 + carte verte (270×221) + Feature 2 | tablet 1 col, lg 4 cols -->
-        <div class="tablet:col-span-1 lg:col-span-4 flex flex-col" style="gap: 24px;">
+        <div class="md:col-span-1 lg:col-span-7 xl:col-span-4 flex flex-col" style="gap: 24px;">
             <?php if ($h1): ?>
             <?php $h1CatSlug = $h1['category']['slug'] ?? null; $h1ArtId = $h1['id'] ?? $h1['slug'] ?? null; $h1Fallback = vivat_category_fallback_image($h1CatSlug, 411, 237, $h1ArtId, 'h1'); $h1Img = (!empty($h1['cover_image_url']) ? $h1['cover_image_url'] : $h1Fallback) ?: $h1Fallback; ?>
             <!-- Highlight 1: Feature 411x237 -->
-            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
+            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="home-highlight-feature vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
                 <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -112,7 +234,7 @@ $truncateGlassTitle = function (?string $t): string {
 
             <?php if ($h2): ?>
             <!-- Highlight 2: Standard 1 (carte verte) - tablet 270×221, lg 413×221 -->
-            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end w-full tablet:max-w-[270px] lg:max-w-[413px] lg:w-full" style="height: 221px; padding: 24px; gap: 8px; background: #004241;">
+            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="home-highlight-standard vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end w-full md:max-w-[270px] lg:max-w-[413px] lg:w-full" style="height: 221px; padding: 24px; gap: 8px; background: #004241;">
                 <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($h2['category'])): ?>
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($h2['category']['name']) ?></span>
@@ -125,7 +247,7 @@ $truncateGlassTitle = function (?string $t): string {
             <?php if ($h3): ?>
             <?php $h3CatSlug = $h3['category']['slug'] ?? null; $h3ArtId = $h3['id'] ?? $h3['slug'] ?? null; $h3Fallback = vivat_category_fallback_image($h3CatSlug, 411, 237, $h3ArtId, 'h3'); $h3Img = (!empty($h3['cover_image_url']) ? $h3['cover_image_url'] : $h3Fallback) ?: $h3Fallback; ?>
             <!-- Highlight 3: Feature 2 - 411x237 -->
-            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
+            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="home-highlight-feature vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full" style="max-width: 411px; height: 237px;">
                 <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -139,14 +261,19 @@ $truncateGlassTitle = function (?string $t): string {
                 </div>
             </a>
             <?php endif; ?>
+
+            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="hidden md:flex xl:hidden home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex-col rounded-[30px] overflow-hidden w-full" style="min-height: 118px; background: #FFF0D4;">
+                <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <p class="text-[#004241] font-medium leading-snug flex-1 z-10" style="padding: 24px 88px 24px 24px; font-size: 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+            </a>
         </div>
 
-        <!-- Colonne droite desktop: Espace pub (xl+) + CTA (visible lg uniquement, CTA tablet = dans colonne gauche) -->
-        <div class="hidden lg:flex lg:col-span-3 flex-col" style="gap: 24px;">
-            <div class="hidden xl:flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm w-full xl:max-w-[300px]" style="height: 600px; padding-right: 48px; padding-bottom: 48px; gap: 8px;">
+        <!-- Colonne droite desktop large: espace pub + CTA, réservée aux écrans xl+ -->
+        <div class="home-highlight-rail hidden xl:flex xl:col-span-3 flex-col" style="gap: 24px;">
+            <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm w-full xl:max-w-[300px]" style="height: 600px; padding-right: 48px; padding-bottom: 48px; gap: 8px;">
                 <div class="flex-1 flex items-center justify-center">Espace publicitaire</div>
             </div>
-            <!-- CTA desktop -->
+            <!-- CTA desktop large -->
             <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-[301px]" style="height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
@@ -155,15 +282,15 @@ $truncateGlassTitle = function (?string $t): string {
     </div>
 
     <!-- 2ème pub : en dessous des articles, 65px de marge -->
-    <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm overflow-hidden" style="width: 100%; max-width: 970px; height: 250px; padding: 48px; gap: 8px; margin-top: 65px;">
+    <div class="home-banner-ad flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm overflow-hidden" style="width: 100%; max-width: 970px; height: 250px; padding: 48px; gap: 8px; margin-top: 65px;">
         <div class="flex-1 flex items-center justify-center">Espace publicitaire (bannière)</div>
     </div>
 
     <?php if (count($categories) > 0): ?>
     <!-- Découvrez vos rubriques - tablet 8 cols (24px gap), lg 12 cols -->
-    <section id="categories-section" class="grid grid-cols-1 tablet:grid-cols-8 lg:grid-cols-12 w-full" style="margin-top: 65px; column-gap: 24px; row-gap: 24px;">
+    <section id="categories-section" class="home-categories-section grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 w-full" style="margin-top: 65px; column-gap: 24px; row-gap: 24px;">
             <!-- Grande carte gauche | tablet 4 cols, lg 7 cols -->
-            <a href="/categories" class="vivat-card-with-image group tablet:col-span-4 lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
+            <a href="/categories" class="home-categories-hero vivat-card-with-image group md:col-span-4 lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
                 <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="Découvrez vos rubriques préférées sur Vivat" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute inset-0 flex flex-col items-start justify-center" style="padding: 32px;">
@@ -173,7 +300,7 @@ $truncateGlassTitle = function (?string $t): string {
             </a>
 
             <!-- Droite: 3 petites cartes + flèche | tablet 4 cols, lg 5 cols -->
-            <div class="tablet:col-span-4 lg:col-span-5 flex items-center w-full min-w-0" style="gap: 24px;">
+            <div class="home-categories-side md:col-span-4 lg:col-span-5 flex items-center w-full min-w-0" style="gap: 24px;">
                 <div class="categories-carousel flex items-stretch min-w-0 flex-1" style="gap: 24px;">
                     <?php foreach ($catChunks as $chunkIdx => $chunk):
                         $cat1 = $chunk[0] ?? null;
@@ -184,7 +311,7 @@ $truncateGlassTitle = function (?string $t): string {
                         <!-- 2 petites cartes à gauche (1 col, 2 rows) -->
                         <div class="flex flex-col min-w-0" style="gap: 24px; grid-row: span 2;">
                             <?php if ($cat1): ?>
-                            <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 min-h-0" style="height: 250px;">
+                            <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="home-categories-card vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 min-h-0" style="height: 250px;">
                                 <?php if (!empty($cat1['image_url'])): ?>
                                 <img src="<?= htmlspecialchars($cat1['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat1['name']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                                 <?php endif; ?>
@@ -196,7 +323,7 @@ $truncateGlassTitle = function (?string $t): string {
                             </a>
                             <?php endif; ?>
                             <?php if ($cat2): ?>
-                            <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 min-h-0" style="height: 250px;">
+                            <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="home-categories-card vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 min-h-0" style="height: 250px;">
                                 <?php if (!empty($cat2['image_url'])): ?>
                                 <img src="<?= htmlspecialchars($cat2['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat2['name']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                                 <?php endif; ?>
@@ -210,7 +337,7 @@ $truncateGlassTitle = function (?string $t): string {
                         </div>
                         <!-- Grande carte à droite (1 col, span 2 rows) -->
                         <?php if ($cat3): ?>
-                        <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="grid-row: span 2; height: 523px;">
+                        <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="home-categories-card-tall vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="grid-row: span 2; height: 523px;">
                             <?php if (!empty($cat3['image_url'])): ?>
                             <img src="<?= htmlspecialchars($cat3['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat3['name']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                             <?php endif; ?>
@@ -226,7 +353,7 @@ $truncateGlassTitle = function (?string $t): string {
                 </div>
                 <?php if (count($catChunks) > 1): ?>
                 <!-- Flèche: 42x42, sur le bord de la dernière carte, 80px zone blanche à droite -->
-                <button type="button" id="categories-next" class="flex-shrink-0 flex items-center justify-center rounded-full bg-[#004241] text-white hover:bg-[#003535] transition relative z-10 -ml-[45px] box-border" style="width: 42px; height: 42px; border-radius: 29px; padding: 8px;" aria-label="Rubriques suivantes">
+                <button type="button" id="categories-next" class="home-categories-next flex-shrink-0 flex items-center justify-center rounded-full bg-[#004241] text-white hover:bg-[#003535] transition relative z-10 -ml-[45px] box-border" style="width: 42px; height: 42px; border-radius: 29px; padding: 8px;" aria-label="Rubriques suivantes">
                     <svg class="w-6 h-6 flex-shrink-0 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
                 <?php endif; ?>
@@ -298,12 +425,12 @@ $truncateGlassTitle = function (?string $t): string {
     }
     ?>
     <?php if (count($restArticles) > 0): ?>
-    <section class="vivat-reveal-group mt-12 grid grid-cols-1 tablet:grid-cols-8 lg:grid-cols-12 w-full min-w-0" style="column-gap: 24px; row-gap: 24px;">
+    <section class="home-latest-section vivat-reveal-group mt-12 grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 w-full min-w-0" style="column-gap: 24px; row-gap: 24px;">
         <!-- Titre: Figtree 32px Medium -->
-        <h2 class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out font-medium text-[#004241] mb-6 tablet:col-span-8 lg:col-span-12" style="font-size: 32px;">Dernières actualités</h2>
+        <h2 class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out font-medium text-[#004241] mb-6 md:col-span-8 lg:col-span-12" style="font-size: 32px;">Dernières actualités</h2>
 
         <!-- Colonne gauche | tablet 4 cols, lg 6 cols -->
-        <div class="tablet:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
+        <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php
                 $firstArt = $restArticles[0] ?? null;
@@ -311,7 +438,7 @@ $truncateGlassTitle = function (?string $t): string {
                 ?>
                 <?php if ($firstArt): ?>
                 <?php $f0CatSlug = $firstArt['category']['slug'] ?? null; $f0ArtId = $firstArt['id'] ?? $firstArt['slug'] ?? null; $f0Fallback = vivat_category_fallback_image($f0CatSlug, 302, 419, $f0ArtId, 'card-0'); $f0Img = !empty($firstArt['cover_image_url']) ? $firstArt['cover_image_url'] : $f0Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($firstArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
+                <a href="/articles/<?= htmlspecialchars($firstArt['slug']) ?>" class="home-latest-tall-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                     <img src="<?= htmlspecialchars($f0Img) ?>" data-fallback-url="<?= htmlspecialchars($f0Fallback) ?>" alt="<?= htmlspecialchars($firstArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -326,7 +453,7 @@ $truncateGlassTitle = function (?string $t): string {
                 </a>
                 <?php endif; ?>
                 <?php if ($secondArt): ?>
-                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
+                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="home-latest-tall-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
                         <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
                             <?php if (!empty($secondArt['category'])): ?>
                             <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
@@ -344,7 +471,7 @@ $truncateGlassTitle = function (?string $t): string {
 
             <?php $hotNewsArt = $restArticles[2] ?? null; if ($hotNewsArt): ?>
             <?php $hotCatSlug = $hotNewsArt['category']['slug'] ?? null; $hotArtId = $hotNewsArt['id'] ?? $hotNewsArt['slug'] ?? null; $hotFallback = vivat_category_fallback_image($hotCatSlug, 626, 240, $hotArtId, 'hot'); $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : $hotFallback; ?>
-            <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
+            <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="home-latest-wide-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
                     <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute flex justify-end items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 6px;">
@@ -361,7 +488,7 @@ $truncateGlassTitle = function (?string $t): string {
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php $artLeft = $restArticles[10] ?? null; if ($artLeft): ?>
                 <!-- Carte jaune sans image (variante texte only) : tag + titre + date en bas -->
-                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFEFD1; padding: 24px; gap: 18px;">
+                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="home-latest-tall-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFEFD1; padding: 24px; gap: 18px;">
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true">
                         <svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </span>
@@ -376,7 +503,7 @@ $truncateGlassTitle = function (?string $t): string {
                 <?php endif; ?>
                 <?php $artLeft2 = $restArticles[6] ?? null; if ($artLeft2): ?>
                     <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null; $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null; $left2Fallback = vivat_category_fallback_image($left2CatSlug, 302, 419, $left2ArtId, 'left2'); $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
+                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="home-latest-tall-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                         <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -394,14 +521,14 @@ $truncateGlassTitle = function (?string $t): string {
         </div>
 
         <!-- Colonne droite | tablet 4 cols, lg 6 cols -->
-        <div class="tablet:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
+        <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full" style="gap: 24px;">
                 <?php
                 $stdColors = ['#004241', '#FFEFD1'];
                 foreach (array_slice($restArticles, 3, 2) as $i => $art):
                     $bg = $stdColors[$i % 2];
                     $isDark = ($bg === '#004241');
                 ?>
-                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col justify-end rounded-[30px] overflow-hidden border relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
+                <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="home-latest-standard-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col justify-end rounded-[30px] overflow-hidden border relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; border: 1px solid rgba(255,255,255,0.1); gap: 8px;">
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 <?= $isDark ? 'bg-white/25 text-white' : 'bg-[#004241] text-white' ?>" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <?php if (!empty($art['category'])): ?>
                     <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
@@ -414,7 +541,7 @@ $truncateGlassTitle = function (?string $t): string {
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                     <?php $artRight = $restArticles[11] ?? null; if ($artRight): ?>
-                    <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px; background: #EBF1EF;">
+                    <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="home-latest-tall-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px; background: #EBF1EF;">
                         <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
                             <?php if (!empty($artRight['category'])): ?>
                             <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artRight['category']['name']) ?></span>
@@ -430,7 +557,7 @@ $truncateGlassTitle = function (?string $t): string {
                     <?php endif; ?>
                     <?php if ($artForFullPhoto1): ?>
                     <?php $full1CatSlug = $artForFullPhoto1['category']['slug'] ?? null; $full1ArtId = $artForFullPhoto1['id'] ?? $artForFullPhoto1['slug'] ?? null; $full1Fallback = vivat_category_fallback_image($full1CatSlug, 302, 419, $full1ArtId, 'full1'); $fullPhoto1Img = !empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : $full1Fallback; ?>
-                    <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[25px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
+                    <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="home-latest-tall-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[25px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                         <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -448,7 +575,7 @@ $truncateGlassTitle = function (?string $t): string {
 
             <?php if ($artForFullPhoto2): ?>
             <?php $full2CatSlug = $artForFullPhoto2['category']['slug'] ?? null; $full2ArtId = $artForFullPhoto2['id'] ?? $artForFullPhoto2['slug'] ?? null; $full2Fallback = vivat_category_fallback_image($full2CatSlug, 629, 235, $full2ArtId, 'full2'); $fullPhoto2Img = !empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : $full2Fallback; ?>
-            <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="height: 235px;">
+            <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="home-latest-wide-card vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative w-full min-w-0" style="height: 235px;">
                     <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
@@ -465,7 +592,7 @@ $truncateGlassTitle = function (?string $t): string {
         </div>
 
         <!-- Bouton Autres actualités -->
-        <div class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out flex justify-center tablet:col-span-8 lg:col-span-12">
+        <div class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out flex justify-center md:col-span-8 lg:col-span-12">
             <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 transition box-border" style="width: 226px; height: 48px; background: #004241; padding: 12px 18px;">
                 Autres actualités
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
