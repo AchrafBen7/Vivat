@@ -3,11 +3,14 @@ $category = $category ?? [];
 $description = $description ?? '';
 $total_published = $total_published ?? 0;
 $current_sub_category_slug = $current_sub_category_slug ?? null;
+$current_sub_category_name = $current_sub_category_name ?? null;
 $sub_categories = $sub_categories ?? [];
 $articles = $articles ?? [];
 $category_name = $category['name'] ?? 'Rubrique';
 $category_slug = $category['slug'] ?? '';
 $category_image_url = $category['image_url'] ?? null;
+// Badge des articles : sous-catégorie active si filtre sélectionné, sinon nom de la catégorie
+$badgeLabel = $current_sub_category_name ?? $category_name;
 
 // Styles des tags (comme home)
 $tagStyles = [
@@ -110,7 +113,7 @@ $restArticles = array_values($byId);
                     <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
                             <?php if (!empty($featured0['category'])): ?>
-                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($featured0['category']['name']) ?></span>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($featured0['title'] ?? '')) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($featured0['published_at'] ?? '') ?> • <?= (int) ($featured0['reading_time'] ?? 0) ?> min</p>
@@ -124,7 +127,7 @@ $restArticles = array_values($byId);
                 <a href="/articles/<?= htmlspecialchars($featured1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
                     <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
                         <?php if (!empty($featured1['category'])): ?>
-                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($featured1['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($featured1['title']) ?></h3>
                         <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($featured1['published_at'] ?? '') ?> • <?= (int) ($featured1['reading_time'] ?? 0) ?> min</p>
@@ -143,7 +146,7 @@ $restArticles = array_values($byId);
                 <div class="absolute flex justify-end items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 6px;">
                         <?php if (!empty($featured2['category'])): ?>
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($featured2['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($featured2['title'] ?? '')) ?></h3>
                         <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($featured2['published_at'] ?? '') ?> • <?= (int) ($featured2['reading_time'] ?? 0) ?> min</p>
@@ -161,7 +164,7 @@ $restArticles = array_values($byId);
                 <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 6px; min-width: min(100%, 220px);">
                         <?php if (!empty($featured3['category'])): ?>
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($featured3['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($featured3['title'] ?? '')) ?></h3>
                         <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($featured3['published_at'] ?? '') ?> • <?= (int) ($featured3['reading_time'] ?? 0) ?> min</p>
@@ -176,7 +179,7 @@ $restArticles = array_values($byId);
                 <a href="/articles/<?= htmlspecialchars($featured4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #EBF1EF; padding: 24px; gap: 18px;">
                     <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
                         <?php if (!empty($featured4['category'])): ?>
-                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($featured4['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($featured4['title']) ?></h3>
                         <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($featured4['published_at'] ?? '') ?> • <?= (int) ($featured4['reading_time'] ?? 0) ?> min</p>
@@ -195,7 +198,7 @@ $restArticles = array_values($byId);
                     <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
                             <?php if (!empty($featured5['category'])): ?>
-                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($featured5['category']['name']) ?></span>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($featured5['title'] ?? '')) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($featured5['published_at'] ?? '') ?> • <?= (int) ($featured5['reading_time'] ?? 0) ?> min</p>
@@ -242,7 +245,7 @@ $restArticles = array_values($byId);
                     <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
                             <?php if (!empty($firstArt['category'])): ?>
-                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($firstArt['title'] ?? '')) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
@@ -259,7 +262,7 @@ $restArticles = array_values($byId);
                     <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
                             <?php if (!empty($secondArt['category'])): ?>
-                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($secondArt['title'] ?? '')) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
@@ -276,7 +279,7 @@ $restArticles = array_values($byId);
                 <div class="absolute flex justify-end items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="width: 264px; min-width: min(100%, 240px); gap: 6px;">
                         <?php if (!empty($hotNewsArt['category'])): ?>
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($hotNewsArt['title'] ?? '')) ?></h3>
                         <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
@@ -291,7 +294,7 @@ $restArticles = array_values($byId);
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <div class="flex flex-col min-h-0" style="gap: 8px;">
                         <?php if (!empty($artLeft['category'])): ?>
-                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artLeft['title']) ?></h3>
                         <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
@@ -307,7 +310,7 @@ $restArticles = array_values($byId);
                     <div class="absolute flex items-end z-10" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%] min-w-0" style="gap: 6px; min-width: 180px;">
                             <?php if (!empty($artLeft2['category'])): ?>
-                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($artLeft2['title'] ?? '')) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
@@ -324,7 +327,7 @@ $restArticles = array_values($byId);
                 <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 <?= $isDark ? 'bg-white/25 text-white' : 'bg-[#004241] text-white' ?>" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (!empty($art['category'])): ?>
                 <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
-                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles[$tagVariant]['bg'] ?>; color: <?= $tagStyles[$tagVariant]['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>
+                <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles[$tagVariant]['bg'] ?>; color: <?= $tagStyles[$tagVariant]['color'] ?>;"><?= htmlspecialchars($badgeLabel) ?></span>
                 <?php endif; ?>
                 <h3 class="font-medium line-clamp-2 <?= $isDark ? 'text-white' : 'text-[#004241]' ?>" style="font-size: 20px;"><?= htmlspecialchars($art['title']) ?></h3>
                 <p class="<?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>" style="font-size: 12px;"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
@@ -336,7 +339,7 @@ $restArticles = array_values($byId);
                 <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px; background: #EBF1EF;">
                     <div class="flex flex-col flex-1 min-h-0" style="gap: 8px;">
                         <?php if (!empty($artRight['category'])): ?>
-                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artRight['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($artRight['title']) ?></h3>
                         <p class="text-[#004241] font-light" style="font-size: 12px;"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
@@ -356,7 +359,7 @@ $restArticles = array_values($byId);
                     <div class="absolute bottom-0 left-0 z-10" style="padding: 18px; max-width: 60%; min-width: 220px;">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full min-w-0" style="padding: 24px; gap: 8px; min-width: 180px;">
                             <?php if (!empty($moreFull1['category'])): ?>
-                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($moreFull1['category']['name']) ?></span>
+                            <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($moreFull1['title'] ?? '')) ?></h3>
                             <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($moreFull1['published_at'] ?? '') ?> • <?= (int) ($moreFull1['reading_time'] ?? 0) ?> min</p>
@@ -374,7 +377,7 @@ $restArticles = array_values($byId);
                 <div class="absolute bottom-0 left-0" style="padding: 18px; max-width: 60%;">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-full" style="padding: 24px; gap: 8px;">
                         <?php if (!empty($moreFull2['category'])): ?>
-                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($moreFull2['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($badgeLabel) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-white line-clamp-3" style="font-size: 20px;"><?= htmlspecialchars($truncateGlassTitle($moreFull2['title'] ?? '')) ?></h3>
                         <p class="text-white/80" style="font-size: 12px;"><?= htmlspecialchars($moreFull2['published_at'] ?? '') ?> • <?= (int) ($moreFull2['reading_time'] ?? 0) ?> min</p>

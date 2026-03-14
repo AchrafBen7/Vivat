@@ -89,6 +89,49 @@ docker compose exec app php artisan cache:clear && docker compose exec app php a
 
 Assure-toi que les conteneurs tournent (`docker compose up -d`) avant d’exécuter ces commandes.
 
+### Après un git pull
+
+Après avoir récupéré les dernières modifications, **exécuter les migrations** pour que la base (ex. colonne `language` sur `articles`) soit à jour :
+
+```bash
+docker compose exec app php artisan migrate
+```
+
+Sans Docker (PHP en local) : `php artisan migrate`
+
+Si tu vois une erreur *Unknown column 'language' in 'where clause'*, c’est que cette migration n’a pas encore été jouée.
+
+### Pourquoi je vois moins de pages d’articles qu’un collègue ?
+
+La liste d’articles est paginée à **12 par page**. Le nombre de pages dépend donc du nombre d’articles **dans ta base locale** (7 pages ≈ 84 articles, 18 pages ≈ 216 articles). Chaque poste a sa propre base ; ce n’est pas un bug du code.
+
+**Pour avoir (au moins) un jeu de données complet côté seed :**
+
+```bash
+docker compose exec app php artisan db:seed
+```
+
+Cela crée les 9 catégories, les sous-catégories et environ **17 articles par catégorie** (~153 articles, une douzaine de pages). Ensuite, optionnel :
+
+```bash
+docker compose exec app php artisan db:seed --class=AdditionalArticlesSeeder
+docker compose exec app php artisan db:seed --class=HomeArticlesSeeder
+```
+
+**Pour avoir exactement la même base qu’un collègue** (même nombre d’articles, mêmes données) : il faut **partager la base**. (Utilisateur MySQL : `vivat`, mot de passe : `vivat_secret`.)
+
+- **Sur la machine qui a la base à jour** (celle qui a 18 pages), exporter :
+
+```bash
+docker compose exec mysql mysqldump -u vivat -pvivat_secret vivat > vivat_dump.sql
+```
+
+- **Sur la machine du collègue** : s’assurer que la base `vivat` existe (sinon la créer via phpMyAdmin ou un utilisateur ayant les droits), puis importer le fichier reçu (`vivat_dump.sql`) :
+
+```bash
+docker compose exec -T mysql mysql -u vivat -pvivat_secret vivat < vivat_dump.sql
+```
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

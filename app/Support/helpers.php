@@ -56,6 +56,28 @@ if (! function_exists('vivat_category_fallback_image')) {
     }
 }
 
+if (! function_exists('get_layout_categories')) {
+    /**
+     * Catégories pour le menu (hamburger, footer). Même logique que la home.
+     *
+     * @return array<int, array{name: string, slug: string}>
+     */
+    function get_layout_categories(): array
+    {
+        $limit = (int) config('vivat.home_categories_count', 9);
+        $categories = \App\Models\Category::query()
+            ->when(
+                \App\Models\Category::whereNotNull('home_order')->exists(),
+                fn ($q) => $q->whereNotNull('home_order')->orderBy('home_order'),
+                fn ($q) => $q->orderBy('name')
+            )
+            ->limit($limit)
+            ->get(['name', 'slug']);
+
+        return $categories->map(fn ($c) => ['name' => $c->name, 'slug' => $c->slug])->all();
+    }
+}
+
 if (! function_exists('content_locale')) {
     /**
      * Langue de contenu courante (fr ou nl) pour filtrer les articles.

@@ -44,9 +44,4 @@ class EnrichedItem extends Model
     {
         return str_word_count($this->extracted_text ?? '');
     }
-
-    public function isHighQuality(): bool
-    {
-        return $this->quality_score >= 70;
-    }
 }

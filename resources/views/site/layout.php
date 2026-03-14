@@ -1,6 +1,7 @@
 <?php
 $content_locale = $content_locale ?? content_locale();
 $title = $title ?? 'Vivat';
+$categories = $categories ?? get_layout_categories();
 $meta_description = $meta_description ?? 'Vivat — Actualités et articles. Découvrez nos rubriques et derniers articles.';
 $canonical_url = $canonical_url ?? null;
 $og_image = $og_image ?? null;
@@ -250,15 +251,9 @@ $title_safe = htmlspecialchars($title);
                 </nav>
                 <p class="font-semibold text-white text-base mt-5 mb-2 pt-4" style="border-top: 1px solid rgba(255,255,255,0.18);">Rubriques</p>
                 <nav class="grid grid-cols-3 gap-x-3 gap-y-1" aria-label="Rubriques">
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Actualités</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Durabilités</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Economie</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Ecologie</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Lifestyle</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Finance</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Société</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Culture</a>
-                    <a href="/categories" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">International</a>
+                    <?php foreach ($categories as $cat): ?>
+                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition"><?= htmlspecialchars($cat['name']) ?></a>
+                    <?php endforeach; ?>
                 </nav>
             </div>
         </div>
@@ -311,11 +306,9 @@ $title_safe = htmlspecialchars($title);
                 <nav class="flex flex-col gap-2 text-left min-w-[120px] lg:min-w-0 lg:flex-1" aria-label="Rubriques">
                     <h3 class="font-semibold text-gray-900 text-base">Rubriques</h3>
                     <ul class="flex flex-col list-none p-0 m-0 gap-2">
-                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Actualités</a></li>
-                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Durabilités</a></li>
-                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Economie</a></li>
-                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Ecologie</a></li>
-                        <li><a href="/categories" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Lifestyle</a></li>
+                        <?php foreach ($categories as $cat): ?>
+                        <li><a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="text-gray-700 hover:text-[#004241] transition no-underline text-base"><?= htmlspecialchars($cat['name']) ?></a></li>
+                        <?php endforeach; ?>
                     </ul>
                 </nav>
                 <nav class="flex flex-col gap-2 text-left min-w-[160px] lg:min-w-0 lg:flex-1" aria-label="Légal">

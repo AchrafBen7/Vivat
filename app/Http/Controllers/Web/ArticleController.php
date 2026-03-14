@@ -49,6 +49,7 @@ class ArticleController extends Controller
                 'meta_description' => $article->meta_description,
                 'reading_time' => $article->reading_time,
                 'published_at' => $article->published_at?->format('d/m/Y H:i'),
+                'published_at_display' => $article->published_at?->locale('fr')->isoFormat('D MMMM YYYY'),
                 'published_at_iso' => $article->published_at?->toIso8601String(),
                 'cover_image_url' => $this->articleCoverOrFallback($article, $category),
                 'cover_video_url' => $article->cover_video_url,

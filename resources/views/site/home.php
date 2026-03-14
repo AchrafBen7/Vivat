@@ -392,7 +392,8 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     <!-- Découvrez vos rubriques - tablet 8 cols (24px gap), lg 12 cols -->
     <section id="categories-section" class="home-categories-section grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 w-full" style="margin-top: 65px; column-gap: 24px; row-gap: 24px;">
             <!-- Grande carte gauche | tablet 4 cols, lg 7 cols -->
-            <a href="/categories" class="home-categories-hero vivat-card-with-image group md:col-span-4 lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
+            <?php $firstCat = $categories[0] ?? null; ?>
+            <a href="<?= $firstCat ? '/categories/'.htmlspecialchars($firstCat['slug']) : '/' ?>" class="home-categories-hero vivat-card-with-image group md:col-span-4 lg:col-span-7 rounded-[30px] overflow-hidden relative block w-full min-h-[523px]" style="height: 523px;">
                 <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="Découvrez vos rubriques préférées sur Vivat" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute inset-0 flex flex-col items-start justify-center" style="padding: 32px;">

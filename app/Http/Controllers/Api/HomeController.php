@@ -80,7 +80,6 @@ class HomeController extends Controller
         };
         $data = config('vivat.disable_page_cache') ? $closure() : Cache::remember($cacheKey, $cacheTtl, $closure);
 
-        $request = $request; // for ArticleResource
         $topNewsResource = $data['top_news']
             ? array_merge(
                 (new ArticleResource($data['top_news']))->toArray($request),

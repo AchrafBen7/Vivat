@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArticleResource;
 use App\Http\Resources\CategoryResource;
-use App\Http\Resources\SubCategoryResource;
 use App\Models\Article;
 use App\Models\Category;
-use App\Models\SubCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -57,10 +55,8 @@ class CategoryController extends Controller
         $subCategorySlug = $request->input('sub_category');
         $cacheKey = 'vivat.hub.'.$category->slug.($subCategorySlug ? '.'.(string) $subCategorySlug : '').'.'.$locale;
         $closure = function () use ($category, $subCategorySlug, $locale) {
-            // Sous-catégories réelles de cette catégorie uniquement (table sub_categories, category_id = catégorie courante)
-            $subCategories = SubCategory::where('category_id', $category->id)
-                ->orderBy('order')
-                ->get();
+            // Sous-catégories = termes extraits de la description (ex. "Innovation, tech, numérique")
+            $subCategories = $category->getDescriptionSubCategories();
 
             $query = Article::published()
                 ->forLocale($locale)
@@ -68,9 +64,18 @@ class CategoryController extends Controller
                 ->with(['category', 'subCategory']);
 
             if ($subCategorySlug) {
-                $subCategory = $subCategories->firstWhere('slug', $subCategorySlug);
-                if ($subCategory) {
-                    $query->where('sub_category_id', $subCategory->id);
+                $term = collect($subCategories)->firstWhere('slug', $subCategorySlug);
+                if ($term) {
+                    $searchTerm = $term['name'];
+                    $query->where(function ($q) use ($searchTerm) {
+                        $like = '%' . addcslashes($searchTerm, '%_\\') . '%';
+                        $q->where('title', 'like', $like)
+                            ->orWhere('content', 'like', $like)
+                            ->orWhere('excerpt', 'like', $like)
+                            ->orWhere('meta_title', 'like', $like)
+                            ->orWhere('meta_description', 'like', $like)
+                            ->orWhere('keywords', 'like', $like);
+                    });
                 }
             }
 
@@ -116,7 +121,7 @@ class CategoryController extends Controller
             'category' => new CategoryResource($data['category']),
             'description' => $data['description'],
             'total_published' => $data['total_published'],
-            'sub_categories' => SubCategoryResource::collection($data['sub_categories']),
+            'sub_categories' => $data['sub_categories'],
             'featured' => $featuredResources,
             'latest' => [
                 'label' => 'Dernières actualités',
