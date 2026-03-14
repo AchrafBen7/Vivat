@@ -64,7 +64,7 @@ $shareUrl = url('/articles/'.$slug);
 $shareTitle = $title;
 
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
-$adMidContent = '<div class="flex items-center justify-center my-12" style="padding: 48px; gap: 8px;"><div class="flex items-center justify-center rounded-[30px] text-white/90" style="width: 100%; max-width: 970px; height: 250px; background: #686868;"><span class="text-sm">Espace publicitaire 970×250</span></div></div>';
+$adMidContent = '<div class="flex items-center justify-center" style="padding: 48px; gap: 8px; margin-top: 24px; margin-bottom: 24px;"><div class="flex items-center justify-center rounded-[30px] text-white/90" style="width: 100%; max-width: 970px; height: 250px; background: #686868;"><span class="text-sm">Espace publicitaire 970×250</span></div></div>';
 $paraCount = preg_match_all('/<\/p>\s*/i', $content);
 $insertAfterPara = $paraCount >= 2 ? (int) floor($paraCount / 2) : 1;
 $count = 0;
@@ -83,7 +83,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
 
     <!-- Grand carré hero : photo + overlay + bouton retour, titre, date -->
     <div class="relative w-full mx-auto rounded-[30px] overflow-hidden mb-[54px]" style="max-width: 1282px; height: 444px; min-height: 280px; background: rgba(0,0,0,0.3);">
-        <img src="<?= htmlspecialchars($coverSrc) ?>" data-fallback-url="<?= htmlspecialchars($coverFallback) ?>" alt="<?= htmlspecialchars($title) ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager">
+        <img src="<?= htmlspecialchars($coverSrc) ?>" data-fallback-url="<?= htmlspecialchars($coverFallback) ?>" alt="<?= htmlspecialchars($title) ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
         <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
         <div class="absolute inset-0 flex flex-col" style="padding: 32px; top: 0; left: 0;">
             <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center gap-2.5 self-start rounded-full font-normal transition hover:opacity-90" style="width: 127px; height: 48px; padding: 12px 18px; background: #EBF1EF; border: 1px solid rgba(255,255,255,0.11); font-family: Figtree, sans-serif; font-size: 20px; line-height: 100%; color: #004241; margin-bottom: 85px;">
