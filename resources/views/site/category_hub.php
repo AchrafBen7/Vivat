@@ -48,26 +48,26 @@ $restArticles = array_values($byId);
     <!-- 1) Marge 24px sous la navbar déjà gérée par le main -->
 
     <!-- 2) Pub 728x90 - flow vertical, border 1px, padding right/bottom/left 48px, gap 8 -->
-    <div class="flex flex-col rounded-[30px] bg-gray-100 border border-gray-300 text-gray-400 text-sm overflow-hidden box-border" style="padding-right: 48px; padding-bottom: 48px; padding-left: 48px; gap: 8px; margin-bottom: 24px;">
-        <div class="flex items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300" style="width: 728px; max-width: 100%; height: 90px;">Publicité</div>
+    <div class="flex flex-col rounded-[30px] bg-gray-100 border border-gray-300 text-gray-400 text-sm overflow-hidden box-border pr-12 pb-12 pl-12 gap-2 mb-6">
+        <div class="flex items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 w-full max-w-[728px] h-[90px]">Publicité</div>
     </div>
 
     <!-- 3) Grand carré hero catégorie: 1280x443, titre + description + filtres dans le carré. Image fixe pour ne jamais changer au filtre/rechargement. -->
-    <div class="rounded-[30px] overflow-hidden relative w-full max-w-[1280px] mx-auto" style="height: 443px; margin-bottom: 24px;">
+    <div class="rounded-[30px] overflow-hidden relative w-full max-w-[1280px] mx-auto h-[443px] mb-6">
         <?php
         // Image hero stable (même URL toujours) pour que la grande photo ne change pas au changement de filtre ou rechargement
         $heroImg = 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1280';
         ?>
         <img src="<?= htmlspecialchars($heroImg) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-        <div class="absolute left-0 top-0 flex flex-col" style="padding: 32px; max-width: 500px;">
-            <h1 class="font-semibold text-white leading-none" style="font-family: Figtree, sans-serif; font-size: 48px; line-height: 100%;"><?= htmlspecialchars($category_name) ?></h1>
+        <div class="absolute left-0 top-0 flex flex-col p-8 max-w-[500px]">
+            <h1 class="font-semibold text-white leading-none text-5xl font-sans"><?= htmlspecialchars($category_name) ?></h1>
             <?php if ($description): ?>
-            <p class="font-light text-white/95 mt-4" style="font-family: Figtree, sans-serif; font-size: 20px;"><?= htmlspecialchars($description) ?></p>
+            <p class="font-light text-white/95 mt-4 text-xl font-sans"><?= htmlspecialchars($description) ?></p>
             <?php endif; ?>
         </div>
         <!-- Filtres dans le carré: left 32px, bottom, marge 11px entre les filtres -->
-        <nav class="absolute flex items-center flex-wrap" style="left: 32px; bottom: 32px; gap: 11px;" aria-label="Filtrer par sous-rubrique">
+        <nav class="absolute flex items-center flex-wrap left-8 bottom-8 gap-[11px]" aria-label="Filtrer par sous-rubrique">
             <?php $allSelected = !$current_sub_category_slug; ?>
             <a href="/categories/<?= htmlspecialchars($category_slug) ?>" class="inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $allSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
                 Tous

@@ -18,7 +18,11 @@ class HomeController extends Controller
         }
         $data = $pageData->getHomeData($locale);
         $data['writer_signup_url'] = config('vivat.writer_signup_url', '/register');
-        $data['writer_dashboard_url'] = config('vivat.writer_dashboard_url', '/contributor/submissions');
+        $data['writer_dashboard_url'] = url('/contributor/dashboard');
+        $isContributor = $request->user() && $request->user()->hasRole(['contributor', 'admin']);
+        $data['writer_cta_url'] = $isContributor ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register');
+        $data['writer_cta_label'] = $isContributor ? 'Accéder au bureau' : 'Rédigez un article';
+        $data['writer_cta_description'] = $isContributor ? 'Accédez à votre espace rédacteur.' : 'Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.';
 
         $content = render_php_view('site.home', $data);
         $html = render_php_view('site.layout', [

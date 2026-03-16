@@ -42,7 +42,8 @@ $title_safe = htmlspecialchars($title);
         tailwind.config = {
             theme: {
                 extend: {
-                    screens: { 'tablet': '834px' }
+                    screens: { 'tablet': '834px' },
+                    fontFamily: { sans: ['Figtree', 'sans-serif'] }
                 }
             }
         };
@@ -93,7 +94,6 @@ $title_safe = htmlspecialchars($title);
             white-space: nowrap;
             flex-shrink: 0;
         }
-        body { font-family: 'Figtree', sans-serif; }
         .font-righteous { font-family: 'Righteous', cursive; }
         .nav-contact-btn {
             background: #004241;
@@ -204,29 +204,31 @@ $title_safe = htmlspecialchars($title);
         }
     </style>
 </head>
-<body class="bg-white text-gray-900 antialiased">
+<body class="bg-white text-gray-900 antialiased font-sans">
     <!-- Navbar - Design System Figma -->
     <header class="bg-white">
         <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 header-nav-wrap">
-            <div class="site-header-row flex items-center h-[88px]" style="padding-top: 35px; padding-bottom: 35px;">
+            <div class="site-header-row flex items-center h-[88px] pt-[35px] pb-[35px]">
             <!-- Logo: 32px, #004241 ; tablet: margin 40px -->
-            <h1 class="font-righteous text-[32px] font-normal flex-shrink-0" style="color: #004241; letter-spacing: 0.03em;"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
+            <h1 class="font-righteous text-[32px] font-normal flex-shrink-0 text-[#004241] tracking-[0.03em]"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
 
             <!-- Espace logo - searchbar: visible tablet+ -->
             <div class="hidden md:block flex-shrink-0 flex-1 min-w-4"></div>
             <div class="flex-1 md:flex-none md:flex-shrink-0"></div>
 
             <!-- Search: par défaut rond avec icône, au hover s’étend en barre avec placeholder -->
-            <div class="nav-search-bar hidden md:flex items-center flex-shrink-0 rounded-full h-12 overflow-hidden" style="background: #E5EDEB;">
-                <input type="search" placeholder="Rechercher un article" class="nav-search-input flex-1 min-w-0 bg-transparent text-sm outline-none border-none placeholder:text-[#226E65]" style="color: #226E65;">
-                <svg class="w-5 h-5 flex-shrink-0" style="color: #226E65;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </div>
+            <form action="/search" method="get" class="nav-search-bar hidden md:flex items-center flex-shrink-0 rounded-full h-12 overflow-hidden bg-[#E5EDEB]">
+                <input type="search" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="Rechercher un article ou une catégorie" class="nav-search-input flex-1 min-w-0 bg-transparent text-sm outline-none border-none text-[#226E65] placeholder:text-[#226E65]">
+                <button type="submit" class="flex items-center justify-center flex-shrink-0 p-2 text-[#226E65] hover:text-[#004241] transition" aria-label="Rechercher">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </button>
+            </form>
 
             <!-- 9px espace -->
             <div class="w-[9px] flex-shrink-0"></div>
 
             <!-- Contactez-nous: 162x48, #004241, Figtree 500 16px, text #FFFFFF -->
-            <a href="/contact" class="nav-contact-btn hidden md:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none" style="width: 162px; padding: 12px 20px;">
+            <a href="/contact" class="nav-contact-btn hidden md:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none w-[162px] py-3 px-5">
                 Contactez-nous
             </a>
 
@@ -234,22 +236,40 @@ $title_safe = htmlspecialchars($title);
             <div class="hidden md:block w-[19px] flex-shrink-0"></div>
 
             <!-- Hamburger: simple, 48x48, border-radius 30px, visible mobile uniquement -->
-            <button type="button" id="hamburger-menu" class="hamburger-btn flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-12 h-12 bg-transparent border-none cursor-pointer" style="border-radius: 30px;" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
-                <span class="hamburger-line block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
-                <span class="hamburger-line block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
-                <span class="hamburger-line block rounded-full" style="width: 28px; height: 3px; background: #004241;"></span>
+            <button type="button" id="hamburger-menu" class="hamburger-btn flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-12 h-12 bg-transparent border-none cursor-pointer rounded-[30px]" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
+                <span class="hamburger-line block rounded-full w-7 h-[3px] bg-[#004241]"></span>
+                <span class="hamburger-line block rounded-full w-7 h-[3px] bg-[#004241]"></span>
+                <span class="hamburger-line block rounded-full w-7 h-[3px] bg-[#004241]"></span>
             </button>
             </div>
 
             <!-- Panneau mobile bento : popup blanc, aligné grille (pleine largeur), plus grand -->
             <div id="mobile-menu-panel" class="mobile-menu-panel vivat-glass rounded-[30px] p-6 tablet:p-8" role="dialog" aria-label="Menu de navigation">
+                <?php if (auth()->check()): ?>
+                <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="block rounded-2xl bg-white/15 border border-white/20 p-4 mb-4 hover:bg-white/20 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-[#004241] flex items-center justify-center text-white font-semibold text-sm">
+                            <?= strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) ?>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-white text-base truncate"><?= htmlspecialchars(auth()->user()->name ?? 'Mon compte') ?></p>
+                            <p class="text-white/80 text-sm"><?= auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Mon profil' ?></p>
+                        </div>
+                        <svg class="w-5 h-5 text-white/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+                <form action="<?= url('/logout') ?>" method="post" class="mb-4">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="w-full py-2 px-3 rounded-2xl text-white/80 text-sm hover:bg-white/10 transition text-left">Se déconnecter</button>
+                </form>
+                <?php endif; ?>
                 <nav class="flex flex-col gap-1" aria-label="Navigation principale">
                     <a href="/" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Home</a>
                     <a href="/a-propos" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">À propos</a>
                     <a href="/contact" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">Contact</a>
                     <a href="/faq" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">FAQ</a>
                 </nav>
-                <p class="font-semibold text-white text-base mt-5 mb-2 pt-4" style="border-top: 1px solid rgba(255,255,255,0.18);">Rubriques</p>
+                <p class="font-semibold text-white text-base mt-5 mb-2 pt-4 border-t border-white/20">Rubriques</p>
                 <nav class="grid grid-cols-3 gap-x-3 gap-y-1" aria-label="Rubriques">
                     <?php foreach ($categories as $cat): ?>
                     <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition"><?= htmlspecialchars($cat['name']) ?></a>
@@ -259,41 +279,53 @@ $title_safe = htmlspecialchars($title);
         </div>
     </header>
     <main class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
+        <?php if (session('success')): ?>
+        <div class="mb-6 rounded-[20px] bg-[#004241] text-white px-6 py-4 flex items-center gap-3" role="alert">
+            <svg class="w-6 h-6 flex-shrink-0 text-[#7DD3C1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="font-medium"><?= htmlspecialchars(session('success')) ?></p>
+        </div>
+        <?php endif; ?>
         <?= $content ?? '' ?>
     </main>
+    <?php if (empty($hide_cta_section)): ?>
     <!-- CTA contribution : juste au-dessus du footer, 24px de marge avant le footer -->
     <section class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
-        <a href="<?= url('/contribution') ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80');">
+        <a href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 bg-[url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80')]">
             <span class="absolute inset-0 bg-black/30" aria-hidden="true"></span>
             <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
                 <span class="text-white font-semibold text-xl lg:text-2xl leading-tight">
+                    <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])): ?>
+                    Accédez à votre espace rédacteur
+                    <?php else: ?>
                     Une idée, une histoire, un point de vue ?<br>
                     Vivat est ouvert aux nouvelles voix
+                    <?php endif; ?>
                 </span>
-                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap transition hover:opacity-90" style="background: #FFEFD1; color: #004241; font-size: 16px;">
-                    Rédigez un article
+                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap transition hover:opacity-90 bg-[#FFEFD1] text-[#004241] text-base">
+                    <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Accéder au bureau' : 'Rédigez un article' ?>
                 </span>
             </span>
         </a>
     </section>
+    <?php endif; ?>
     <footer>
         <!-- 2 carrés avec 24px d'espace entre eux -->
         <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 mb-6 flex flex-col lg:flex-row gap-6 w-full">
             <!-- Carré 1 : Newsletter (2/5 de l'espace) -->
-            <div class="flex-[2] min-w-0 flex flex-col justify-center items-center lg:items-start gap-5 rounded-[30px] p-8 shadow-sm text-center lg:text-left min-h-[200px]" style="background: #EBF1EF;">
+            <div class="flex-[2] min-w-0 flex flex-col justify-center items-center lg:items-start gap-5 rounded-[30px] p-8 shadow-sm text-center lg:text-left min-h-[200px] bg-[#EBF1EF]">
                 <div class="flex flex-col gap-1">
-                    <span class="font-semibold" style="color: #004241; font-size: 16px;">Newsletter</span>
-                    <p class="text-gray-900 font-normal leading-snug" style="font-size: 16px;">Recevez une sélection d'articles chaque semaine.</p>
+                    <span class="font-semibold text-[#004241] text-base">Newsletter</span>
+                    <p class="text-gray-900 font-normal leading-snug text-base">Recevez une sélection d'articles chaque semaine.</p>
                 </div>
                 <form action="#" method="post" class="flex flex-col sm:flex-row gap-3 flex-wrap justify-center lg:justify-start w-full max-w-md lg:max-w-none">
-                    <input type="email" name="email" placeholder="you@example.com" class="flex-1 min-w-[220px] h-12 pl-5 pr-5 rounded-full border-0 bg-white text-gray-900 placeholder:text-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#004241]/25 focus:shadow-md text-left" style="font-size: 16px;">
-                    <button type="submit" class="vivat-btn-teal-hover flex items-center justify-center h-12 px-8 rounded-full font-semibold whitespace-nowrap shadow-sm transition hover:shadow-md active:scale-[0.98]" style="font-size: 16px;">
+                    <input type="email" name="email" placeholder="you@example.com" class="flex-1 min-w-[220px] h-12 pl-5 pr-5 rounded-full border-0 bg-white text-gray-900 placeholder:text-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#004241]/25 focus:shadow-md text-left text-base">
+                    <button type="submit" class="vivat-btn-teal-hover flex items-center justify-center h-12 px-8 rounded-full font-semibold whitespace-nowrap shadow-sm transition hover:shadow-md active:scale-[0.98] text-base">
                         S'abonner
                     </button>
                 </form>
             </div>
             <!-- Carré 2 : Informations, Rubriques, Légal (3/5, 48px vertical, centré et équilibré) -->
-            <div class="flex-[3] min-w-0 flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-8 xl:gap-12 rounded-[30px] p-8 lg:p-10" style="background: #EBF1EF;">
+            <div class="flex-[3] min-w-0 flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-8 xl:gap-12 rounded-[30px] p-8 lg:p-10 bg-[#EBF1EF]">
                 <nav class="flex flex-col gap-2 text-left min-w-[120px] lg:min-w-0 lg:flex-1" aria-label="Informations">
                     <h3 class="font-semibold text-gray-900 text-base">Informations</h3>
                     <ul class="flex flex-col list-none p-0 m-0 gap-2">

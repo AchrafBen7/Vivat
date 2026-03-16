@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Données pour les pages publiques (site HTML).
@@ -25,6 +26,64 @@ class PublicPageDataService
         return [
             'articles' => $articles->getCollection()->map(fn ($a) => $this->articleToArray($a))->all(),
             'pagination' => $articles,
+        ];
+    }
+
+    /**
+     * Données pour la page de recherche.
+     * Si le terme correspond à une catégorie (nom ou slug), filtre par cette catégorie.
+     * Sinon, recherche full-text dans title, excerpt, meta_description.
+     */
+    public function getSearchData(string $locale = 'fr', string $q = ''): array
+    {
+        $query = Article::published()
+            ->forLocale($locale)
+            ->with('category');
+
+        $matchedCategory = null;
+        $normalized = strtolower(trim($q));
+
+        // Sans terme de recherche, ne rien retourner
+        if ($normalized === '') {
+            return [
+                'articles' => [],
+                'pagination' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12),
+                'search_term' => $q,
+                'matched_category' => null,
+            ];
+        }
+
+        // Si le terme correspond à une catégorie (nom ou slug), filtrer par cette catégorie
+        $matchedCategory = Category::whereRaw('LOWER(name) = ?', [$normalized])
+            ->orWhereRaw('LOWER(slug) = ?', [$normalized])
+            ->first();
+
+        if ($matchedCategory) {
+            $query->where('category_id', $matchedCategory->id);
+        } elseif ($q !== '') {
+            // Recherche textuelle dans les articles
+            if (DB::getDriverName() === 'mysql' && strlen($q) >= 2) {
+                $query->where(function ($builder) use ($q) {
+                    $builder->whereFullText(['title', 'excerpt'], $q)
+                        ->orWhere('meta_description', 'LIKE', '%' . addcslashes($q, '%_\\') . '%');
+                });
+            } else {
+                $query->where(function ($builder) use ($q) {
+                    $esc = addcslashes($q, '%_\\');
+                    $builder->where('title', 'LIKE', "%{$esc}%")
+                        ->orWhere('excerpt', 'LIKE', "%{$esc}%")
+                        ->orWhere('meta_description', 'LIKE', "%{$esc}%");
+                });
+            }
+        }
+
+        $articles = $query->orderByDesc('published_at')->paginate(12);
+
+        return [
+            'articles' => $articles->getCollection()->map(fn ($a) => $this->articleToArray($a))->all(),
+            'pagination' => $articles,
+            'search_term' => $q,
+            'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory) : null,
         ];
     }
 

@@ -1,9 +1,23 @@
 <?php
 $articles = $articles ?? [];
 $pagination = $pagination ?? null;
+$search_term = $search_term ?? '';
+$matched_category = $matched_category ?? null;
 ?>
 <div class="max-w-6xl mx-auto px-4 py-12">
-    <h1 class="font-medium text-[#004241] mb-10 text-3xl font-sans">Toutes les actualités</h1>
+    <h1 class="font-medium text-[#004241] mb-4 text-3xl font-sans">Recherche</h1>
+
+    <?php if ($search_term !== ''): ?>
+    <p class="text-[#004241]/80 mb-8 text-base">
+        <?php if ($matched_category): ?>
+        Articles dans la catégorie <strong><?= htmlspecialchars($matched_category['name']) ?></strong>
+        <?php else: ?>
+        Résultats pour «&nbsp;<strong><?= htmlspecialchars($search_term) ?></strong>&nbsp;»
+        <?php endif; ?>
+    </p>
+    <?php else: ?>
+    <p class="text-[#004241]/80 mb-8 text-base">Saisissez un mot-clé ou le nom d&apos;une catégorie pour rechercher.</p>
+    <?php endif; ?>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($articles as $idx => $art): ?>
@@ -31,19 +45,21 @@ $pagination = $pagination ?? null;
         <?php endforeach; ?>
     </div>
 
-    <?php if (empty($articles)): ?>
-    <p class="text-gray-500 text-center py-12">Aucun article pour le moment.</p>
+    <?php if ($search_term !== '' && empty($articles)): ?>
+    <p class="text-gray-500 text-center py-12">Aucun article trouvé pour cette recherche.</p>
+    <?php elseif ($search_term === '' && empty($articles)): ?>
+    <p class="text-gray-500 text-center py-12">Saisissez un terme pour lancer la recherche.</p>
     <?php endif; ?>
     <?php if ($pagination && $pagination->hasPages()): ?>
     <nav class="flex justify-center gap-2 mt-10">
         <?php if ($pagination->onFirstPage()): ?>
         <span class="px-4 py-2 rounded-full bg-gray-100 text-gray-500">Précédent</span>
         <?php else: ?>
-        <a href="<?= $pagination->previousPageUrl() ?>" class="px-4 py-2 rounded-full bg-[#004241] text-white hover:bg-[#003535] transition">Précédent</a>
+        <a href="<?= htmlspecialchars($pagination->withQueryString()->previousPageUrl()) ?>" class="px-4 py-2 rounded-full bg-[#004241] text-white hover:bg-[#003535] transition">Précédent</a>
         <?php endif; ?>
         <span class="px-4 py-2 text-[#004241]">Page <?= $pagination->currentPage() ?> sur <?= $pagination->lastPage() ?></span>
         <?php if ($pagination->hasMorePages()): ?>
-        <a href="<?= $pagination->nextPageUrl() ?>" class="px-4 py-2 rounded-full bg-[#004241] text-white hover:bg-[#003535] transition">Suivant</a>
+        <a href="<?= htmlspecialchars($pagination->withQueryString()->nextPageUrl()) ?>" class="px-4 py-2 rounded-full bg-[#004241] text-white hover:bg-[#003535] transition">Suivant</a>
         <?php else: ?>
         <span class="px-4 py-2 rounded-full bg-gray-100 text-gray-500">Suivant</span>
         <?php endif; ?>

@@ -5,6 +5,9 @@ $latest = $latest ?? [];
 $categories = $categories ?? [];
 $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
+$writer_cta_url = $writer_cta_url ?? $writer_signup_url;
+$writer_cta_label = $writer_cta_label ?? 'Rédigez un article';
+$writer_cta_description = $writer_cta_description ?? 'Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.';
 
 // Grille highlight (collègue) : 5 emplacements depuis $highlight (hot_news puis featured)
 $h0 = $highlight[0] ?? null;  // grande carte Top news
@@ -185,8 +188,8 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
 </style>
 <!-- Bandeau publicitaire header 728×90 : uniquement en version tablette (834px), masqué en mobile et desktop -->
-<div class="hidden md:block lg:hidden w-full" style="margin-bottom: 24px;">
-    <div class="rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm flex items-center justify-center mx-auto" style="width: 728px; max-width: 100%; height: 90px;">
+<div class="hidden md:block lg:hidden w-full mb-6">
+    <div class="rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm flex items-center justify-center mx-auto w-full max-w-[728px] h-[90px]">
         Publicité 728×90
     </div>
 </div>
@@ -265,9 +268,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     </a>
     <?php endif; ?>
 
-    <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune col-span-8 flex items-center rounded-[30px] overflow-hidden" style="min-height: 132px; padding: 24px; background: #FFF0D4;">
+    <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune col-span-8 flex items-center rounded-[30px] overflow-hidden" style="min-height: 132px; padding: 24px; background: #FFF0D4;">
         <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-        <p class="text-[#004241] font-medium leading-snug pr-16" style="font-size: 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+        <p class="text-[#004241] font-medium leading-snug pr-16" style="font-size: 18px;"><?= htmlspecialchars($writer_cta_description) ?></p>
     </a>
 </div>
 <!-- Grille articles - mobile 1 col, desktop lg 12 cols -->
@@ -308,9 +311,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <?php endif; ?>
 
             <!-- CTA en dessous de la colonne gauche (visible tablette uniquement) -->
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-full lg:hidden" style="height: 118px; background: #FFF0D4;">
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-full lg:hidden" style="height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+                <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;"><?= htmlspecialchars($writer_cta_description) ?></p>
             </a>
         </div>
 
@@ -364,9 +367,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             </a>
             <?php endif; ?>
 
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="hidden lg:flex xl:hidden home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex-col rounded-[30px] overflow-hidden w-full" style="min-height: 118px; background: #FFF0D4;">
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="hidden lg:flex xl:hidden home-highlight-secondary vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex-col rounded-[30px] overflow-hidden w-full" style="min-height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <p class="text-[#004241] font-medium leading-snug flex-1 z-10" style="padding: 24px 88px 24px 24px; font-size: 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+                <p class="text-[#004241] font-medium leading-snug flex-1 z-10" style="padding: 24px 88px 24px 24px; font-size: 18px;"><?= htmlspecialchars($writer_cta_description) ?></p>
             </a>
         </div>
 
@@ -376,9 +379,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <div class="flex-1 flex items-center justify-center">Espace publicitaire</div>
             </div>
             <!-- CTA desktop large -->
-            <a href="<?= htmlspecialchars($writer_signup_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-[301px]" style="height: 118px; background: #FFF0D4;">
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-[301px]" style="height: 118px; background: #FFF0D4;">
                 <span class="absolute top-auto right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-                <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;">Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.</p>
+                <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10" style="padding: 18px 18px 0 18px;"><?= htmlspecialchars($writer_cta_description) ?></p>
             </a>
         </div>
     </div>
