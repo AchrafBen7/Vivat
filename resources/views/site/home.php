@@ -474,7 +474,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager">
         <div class="absolute inset-0" style="background: rgba(0,0,0,0.3);"></div>
         <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-            <div class="rounded-[21px] flex flex-col vivat-glass w-full max-w-[300px]" style="gap: 6px;">
+            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[300px]" style="gap: 6px; min-width: min(100%, 220px);">
                 <span class="<?= $tagClass ?>" style="<?= $tagStyleBase ?> background: #EBF1EF; color: #004241;">Top news</span>
                 <h2 class="font-semibold text-white line-clamp-4" style="font-size: 24px; font-family: Figtree, sans-serif;"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
                 <?php if (!empty($h0['excerpt'])): ?>
@@ -503,7 +503,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
             <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-                <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
+                <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 6px; min-width: min(100%, 220px);">
                     <?php if (!empty($h3['category'])): ?>
                     <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
                     <?php endif; ?>
@@ -531,7 +531,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
         <div class="absolute flex items-end" style="top: 18px; right: 18px; bottom: 18px; left: 18px;">
-            <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
+            <div class="rounded-[21px] flex flex-col vivat-glass w-fit max-w-[60%]" style="gap: 6px; min-width: min(100%, 220px);">
                 <?php if (!empty($h1['category'])): ?>
                 <span class="<?= $tagClass ?> vivat-glass" style="<?= $tagStyleBase ?> color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
                 <?php endif; ?>
