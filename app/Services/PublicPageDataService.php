@@ -202,28 +202,36 @@ class PublicPageDataService
 
         $topNews = $data['top_news'] ?? $highlightCollection->first();
         $featuredCollection = EloquentCollection::make($data['featured'] ?? []);
-        $latestCollection = EloquentCollection::make($data['latest'] ?? []);
-        $latestCollection->load('category');
         $featuredCollection->load('category');
 
         $highlightIdsForLatest = $highlightCollection->pluck('id')->unique()->all();
-        $latestAsArray = $latestCollection->map(fn ($a) => $this->articleToArray($a))->all();
+        $latestLimit = (int) config('vivat.home_latest_count', 12);
+        $latestPaginator = Article::published()
+            ->forLocale($locale)
+            ->with('category')
+            ->whereNotIn('id', $highlightIdsForLatest)
+            ->orderByDesc('published_at')
+            ->paginate($latestLimit);
+
+        $latestAsArray = $latestPaginator->getCollection()
+            ->map(fn ($article) => $this->articleToArray($article))
+            ->all();
         $latestAsArray = $this->dedupeArticlesByIdAndExclude($latestAsArray, $highlightIdsForLatest);
         $latestAsArray = $this->dedupeArticlesBySlug($latestAsArray);
         $latestAsArray = $this->dedupeArticlesByTitle($latestAsArray);
-        $latestLimit = (int) config('vivat.home_latest_count', 12);
-        $latestAsArray = array_slice($latestAsArray, 0, $latestLimit);
         $latestAsArray = array_values(array_filter($latestAsArray, function ($row) use ($locale) {
             $lang = $row['language'] ?? 'fr';
 
             return $lang === $locale || ($lang === null && $locale === 'fr');
         }));
+        $latestPaginator->setCollection(collect($latestAsArray));
 
         return [
             'highlight' => $highlightArray,
             'top_news' => $topNews instanceof Article ? $this->articleToArray($topNews) : null,
             'featured' => $featuredCollection->map(fn ($a) => $this->articleToArray($a))->all(),
             'latest' => $latestAsArray,
+            'pagination' => $latestPaginator,
             'categories' => ($data['categories'] ?? collect())->map(fn ($c) => $this->categoryToArray($c))->all(),
         ];
     }
