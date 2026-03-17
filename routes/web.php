@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\ArticleController as WebArticleController;
 use App\Http\Controllers\Web\AuthController as WebAuthController;
 use App\Http\Controllers\Web\CategoryController as WebCategoryController;
+use App\Http\Controllers\Web\ContactController as WebContactController;
 use App\Http\Controllers\Web\ContributorController as WebContributorController;
 use App\Http\Controllers\Web\HomeController as WebHomeController;
 use App\Http\Controllers\Web\SearchController as WebSearchController;
@@ -21,6 +22,7 @@ Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login')
 Route::post('/login', [WebAuthController::class, 'login']);
 Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
 Route::get('/search', [WebSearchController::class, 'index'])->name('search');
+Route::get('/contact', [WebContactController::class, 'index'])->name('contact');
 
 Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->group(function () {
     Route::get('/dashboard', [WebContributorController::class, 'dashboard'])->name('contributor.dashboard');
