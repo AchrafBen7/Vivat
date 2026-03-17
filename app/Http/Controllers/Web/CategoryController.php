@@ -13,7 +13,8 @@ class CategoryController extends Controller
     {
         $locale = content_locale($request);
         $subCategorySlug = $request->input('sub_category');
-        $data = $pageData->getCategoryHubData($slug, $subCategorySlug, $locale);
+        $page = max(1, (int) $request->integer('page', 1));
+        $data = $pageData->getCategoryHubData($slug, $subCategorySlug, $locale, $page);
 
         $categorySlug = $data['category']['slug'] ?? $slug;
         $content = render_php_view('site.category_hub', $data);

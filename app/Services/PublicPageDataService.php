@@ -212,11 +212,10 @@ class PublicPageDataService
         $latestAsArray = $this->dedupeArticlesBySlug($latestAsArray);
         $latestAsArray = $this->dedupeArticlesByTitle($latestAsArray);
         $latestLimit = (int) config('vivat.home_latest_count', 12);
-        // Garder uniquement les N premiers (déjà triés du plus récent au moins récent)
         $latestAsArray = array_slice($latestAsArray, 0, $latestLimit);
-        // Garde-fou : ne jamais inclure un article dont la langue ne correspond pas (évite NL quand locale = fr)
         $latestAsArray = array_values(array_filter($latestAsArray, function ($row) use ($locale) {
             $lang = $row['language'] ?? 'fr';
+
             return $lang === $locale || ($lang === null && $locale === 'fr');
         }));
 
@@ -229,11 +228,11 @@ class PublicPageDataService
         ];
     }
 
-    public function getCategoryHubData(string $categorySlug, ?string $subCategorySlug = null, string $locale = 'fr'): array
+    public function getCategoryHubData(string $categorySlug, ?string $subCategorySlug = null, string $locale = 'fr', int $page = 1): array
     {
         $category = Category::where('slug', $categorySlug)->firstOrFail();
-        $cacheKey = 'vivat.hub.' . $category->slug . ($subCategorySlug ? '.' . $subCategorySlug : '') . '.' . $locale;
-        $closure = function () use ($category, $subCategorySlug, $locale) {
+        $cacheKey = 'vivat.hub.' . $category->slug . ($subCategorySlug ? '.' . $subCategorySlug : '') . '.' . $locale . '.page.' . $page;
+        $closure = function () use ($category, $subCategorySlug, $locale, $page) {
             // Sous-catégories = termes extraits de la description (ex. "Innovation, tech, numérique" → Innovation, tech, numérique)
             $subCategories = $category->getDescriptionSubCategories();
 
@@ -259,7 +258,9 @@ class PublicPageDataService
             }
 
             $totalPublished = (clone $query)->count();
-            $articles = (clone $query)->orderByDesc('published_at')->limit(24)->get()->unique('id')->values();
+            $articles = (clone $query)
+                ->orderByDesc('published_at')
+                ->paginate(24, ['*'], 'page', $page);
 
             return [
                 'category' => $category,
@@ -271,7 +272,8 @@ class PublicPageDataService
         };
         $data = config('vivat.disable_page_cache') ? $closure() : Cache::remember($cacheKey, 900, $closure);
 
-        $articlesCollection = EloquentCollection::make($data['articles'] ?? []);
+        $articlesPaginator = $data['articles'];
+        $articlesCollection = $articlesPaginator->getCollection();
         $articlesCollection->load('category');
 
         // sub_categories = termes extraits de la description (name + slug)
@@ -289,6 +291,7 @@ class PublicPageDataService
             'current_sub_category_slug' => $subCategorySlug,
             'current_sub_category_name' => $currentSubName,
             'sub_categories' => $subCategories,
+            'pagination' => $articlesPaginator->withQueryString(),
             'articles' => $articlesCollection->map(fn ($a) => $this->articleToArray($a))->all(),
         ];
     }

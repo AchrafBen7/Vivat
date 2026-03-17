@@ -6,6 +6,7 @@ $current_sub_category_slug = $current_sub_category_slug ?? null;
 $current_sub_category_name = $current_sub_category_name ?? null;
 $sub_categories = $sub_categories ?? [];
 $articles = $articles ?? [];
+$pagination = $pagination ?? null;
 $category_name = $category['name'] ?? 'Rubrique';
 $category_slug = $category['slug'] ?? '';
 $category_image_url = $category['image_url'] ?? null;
@@ -390,23 +391,31 @@ $restArticles = array_values($byId);
     <?php endif; ?>
 
     <?php
-    $perPage = 24;
-    $pageCount = max(1, (int) ceil(((int) $total_published) / $perPage));
+    $paginationView = $pagination ? $pagination->withQueryString() : null;
+    $pageWindowStart = $paginationView ? max(1, $paginationView->currentPage() - 2) : 1;
+    $pageWindowEnd = $paginationView ? min($paginationView->lastPage(), $paginationView->currentPage() + 2) : 1;
     ?>
-    <?php if ($pageCount > 1): ?>
-    <nav class="flex items-center justify-center gap-6 mt-9" aria-label="Pagination des articles de la rubrique">
-        <span class="inline-flex items-center justify-center rounded-[10px] bg-[#004241] text-white font-medium" style="width: 36px; height: 36px; font-size: 16px;">1</span>
-        <?php for ($page = 2; $page <= min($pageCount, 3); $page++): ?>
-        <span class="text-[#1F2937]" style="font-size: 16px;"><?= $page ?></span>
+    <?php if ($paginationView): ?>
+    <nav class="flex flex-wrap items-center justify-center gap-3 mt-9" aria-label="Pagination des articles de la rubrique">
+        <?php if ($paginationView->onFirstPage()): ?>
+        <span class="inline-flex h-12 min-w-12 items-center justify-center rounded-full px-5 text-sm font-medium text-[#004241]/35" style="background: #EBF1EF;">Précédent</span>
+        <?php else: ?>
+        <a href="<?= htmlspecialchars($paginationView->previousPageUrl()) ?>" class="inline-flex h-12 min-w-12 items-center justify-center rounded-full px-5 text-sm font-medium text-white transition hover:opacity-90" style="background: #004241;">Précédent</a>
+        <?php endif; ?>
+
+        <?php for ($page = $pageWindowStart; $page <= $pageWindowEnd; $page++): ?>
+        <?php $isActivePage = $page === $paginationView->currentPage(); ?>
+        <?php if ($isActivePage): ?>
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white" style="background: #004241;"><?= $page ?></span>
+        <?php else: ?>
+        <a href="<?= htmlspecialchars($paginationView->url($page)) ?>" class="inline-flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-[#004241] transition hover:bg-[#EBF1EF]" style="background: #FFF0D4;"><?= $page ?></a>
+        <?php endif; ?>
         <?php endfor; ?>
-        <?php if ($pageCount > 4): ?>
-        <span class="text-[#1F2937]" style="font-size: 16px;">...</span>
-        <?php endif; ?>
-        <?php if ($pageCount > 3): ?>
-        <span class="text-[#1F2937]" style="font-size: 16px;"><?= max(4, $pageCount - 1) ?></span>
-        <?php endif; ?>
-        <?php if ($pageCount > 4): ?>
-        <span class="text-[#1F2937]" style="font-size: 16px;"><?= $pageCount ?></span>
+
+        <?php if ($paginationView->hasMorePages()): ?>
+        <a href="<?= htmlspecialchars($paginationView->nextPageUrl()) ?>" class="inline-flex h-12 min-w-12 items-center justify-center rounded-full px-5 text-sm font-medium text-white transition hover:opacity-90" style="background: #004241;">Suivant</a>
+        <?php else: ?>
+        <span class="inline-flex h-12 min-w-12 items-center justify-center rounded-full px-5 text-sm font-medium text-[#004241]/35" style="background: #EBF1EF;">Suivant</span>
         <?php endif; ?>
     </nav>
     <?php endif; ?>
