@@ -140,6 +140,19 @@ $title_safe = htmlspecialchars($title);
             opacity: 1;
             transition: max-height 0.4s ease-in, opacity 0.25s ease;
         }
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .mobile-menu-panel {
+                left: 24px !important;
+                right: 24px !important;
+                width: auto !important;
+                max-width: none !important;
+                box-sizing: border-box;
+            }
+
+            .mobile-menu-categories {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
         @media (max-width: 833px) {
             .mobile-menu-panel {
                 left: 0;
@@ -207,7 +220,7 @@ $title_safe = htmlspecialchars($title);
 <body class="bg-white text-gray-900 antialiased font-sans">
     <!-- Navbar - Design System Figma -->
     <header class="bg-white">
-        <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 header-nav-wrap">
+        <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 header-nav-wrap">
             <div class="site-header-row flex items-center h-[88px] pt-[35px] pb-[35px]">
             <!-- Logo: 32px, #004241 ; tablet: margin 40px -->
             <h1 class="font-righteous text-[32px] font-normal flex-shrink-0 text-[#004241] tracking-[0.03em]"><a href="/" class="text-inherit no-underline hover:opacity-90">Vivat</a></h1>
@@ -270,7 +283,7 @@ $title_safe = htmlspecialchars($title);
                     <a href="/faq" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition">FAQ</a>
                 </nav>
                 <p class="font-semibold text-white text-base mt-5 mb-2 pt-4 border-t border-white/20">Rubriques</p>
-                <nav class="grid grid-cols-3 gap-x-3 gap-y-1" aria-label="Rubriques">
+                <nav class="mobile-menu-categories grid grid-cols-3 gap-x-3 gap-y-1" aria-label="Rubriques">
                     <?php foreach ($categories as $cat): ?>
                     <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline hover:bg-white/10 transition"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php endforeach; ?>
@@ -278,7 +291,7 @@ $title_safe = htmlspecialchars($title);
             </div>
         </div>
     </header>
-    <main class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
+    <main class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
         <?php if (session('success')): ?>
         <div class="mb-6 rounded-[20px] bg-[#004241] text-white px-6 py-4 flex items-center gap-3" role="alert">
             <svg class="w-6 h-6 flex-shrink-0 text-[#7DD3C1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -289,7 +302,7 @@ $title_safe = htmlspecialchars($title);
     </main>
     <?php if (empty($hide_cta_section)): ?>
     <!-- CTA contribution : juste au-dessus du footer, 24px de marge avant le footer -->
-    <section class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
+    <section class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
         <a href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 bg-[url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80')]">
             <span class="absolute inset-0 bg-black/30" aria-hidden="true"></span>
             <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
@@ -309,54 +322,58 @@ $title_safe = htmlspecialchars($title);
     </section>
     <?php endif; ?>
     <footer>
-        <!-- 2 carrés avec 24px d'espace entre eux -->
-        <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 mb-6 flex flex-col lg:flex-row gap-6 w-full">
-            <!-- Carré 1 : Newsletter (2/5 de l'espace) -->
-            <div class="flex-[2] min-w-0 flex flex-col justify-center items-center lg:items-start gap-5 rounded-[30px] p-8 shadow-sm text-center lg:text-left min-h-[200px] bg-[#EBF1EF]">
-                <div class="flex flex-col gap-1">
-                    <span class="font-semibold text-[#004241] text-base">Newsletter</span>
-                    <p class="text-gray-900 font-normal leading-snug text-base">Recevez une sélection d'articles chaque semaine.</p>
+        <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 mb-6 w-full">
+            <div class="rounded-[34px] bg-[#E7EFEC] p-6 md:p-8" style="box-shadow: 0 24px 64px rgba(0, 66, 65, 0.08);">
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                    <div class="flex flex-col justify-center rounded-[30px] bg-[#004241] p-6 md:p-8 text-white lg:col-span-7" style="gap: 20px; min-height: 100%;">
+                        <span class="inline-flex w-fit items-center justify-center rounded-full bg-white/18 px-[16px] py-[8px] text-sm font-medium text-white" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.14);">Newsletter</span>
+                        <div class="flex flex-col" style="gap: 10px;">
+                            <h2 class="max-w-[13ch] font-medium text-white" style="font-size: clamp(28px, 4vw, 46px); line-height: 0.98;">Les articles à ne pas rater, directement dans votre boîte mail.</h2>
+                            <p class="max-w-[44ch] text-white/78" style="font-size: 17px; line-height: 1.4;">Une sélection simple, claire, et utile pour suivre Vivat sans chercher partout.</p>
+                        </div>
+                        <form action="#" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+                            <input type="email" name="email" placeholder="you@example.com" class="h-12 rounded-full border-0 bg-white pl-5 pr-5 text-base text-gray-900 outline-none transition focus:ring-2 focus:ring-white/30">
+                            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0D4] px-8 font-semibold text-[#004241] transition hover:opacity-90">
+                                S'abonner
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="flex flex-col rounded-[30px] bg-white p-6 md:p-8 lg:col-span-5" style="gap: 18px;">
+                        <div class="grid grid-cols-2 gap-x-8 gap-y-6">
+                            <nav class="flex flex-col" style="gap: 14px;" aria-label="Découvrir">
+                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Découvrir</span>
+                                <ul class="m-0 flex list-none flex-col gap-3 p-0">
+                                    <li><a href="/" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">Accueil</a></li>
+                                    <li><a href="/a-propos" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">À propos</a></li>
+                                    <li><a href="/contact" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">Contact</a></li>
+                                    <li><a href="/faq" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">FAQ</a></li>
+                                </ul>
+                            </nav>
+                            <nav class="flex flex-col" style="gap: 14px;" aria-label="Légal">
+                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Légal</span>
+                                <ul class="m-0 flex list-none flex-col gap-3 p-0">
+                                    <li><a href="/mentions-legales" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">Mentions légales</a></li>
+                                    <li><a href="/politique-confidentialite" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">Confidentialité</a></li>
+                                    <li><a href="/politique-cookies" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]">Cookies</a></li>
+                                </ul>
+                            </nav>
+                            <nav class="col-span-2 flex flex-col" style="gap: 14px;" aria-label="Rubriques">
+                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Rubriques</span>
+                                <ul class="m-0 grid list-none grid-cols-2 gap-x-6 gap-y-3 p-0">
+                                    <?php foreach ($categories as $cat): ?>
+                                    <li><a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="text-base text-[#004241]/85 no-underline transition hover:text-[#004241]"><?= htmlspecialchars($cat['name']) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
-                <form action="#" method="post" class="flex flex-col sm:flex-row gap-3 flex-wrap justify-center lg:justify-start w-full max-w-md lg:max-w-none">
-                    <input type="email" name="email" placeholder="you@example.com" class="flex-1 min-w-[220px] h-12 pl-5 pr-5 rounded-full border-0 bg-white text-gray-900 placeholder:text-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#004241]/25 focus:shadow-md text-left text-base">
-                    <button type="submit" class="vivat-btn-teal-hover flex items-center justify-center h-12 px-8 rounded-full font-semibold whitespace-nowrap shadow-sm transition hover:shadow-md active:scale-[0.98] text-base">
-                        S'abonner
-                    </button>
-                </form>
+                <div class="mt-6 flex flex-col gap-3 border-t border-[#004241]/10 pt-5 text-sm text-[#004241]/60 md:flex-row md:items-center md:justify-between">
+                    <p class="m-0">© <?= date('Y') ?> Vivat. Tous droits réservés.</p>
+                    <a href="/contact" class="text-sm text-[#004241]/70 no-underline transition hover:text-[#004241]">Une question ? Contactez-nous</a>
+                </div>
             </div>
-            <!-- Carré 2 : Informations, Rubriques, Légal (3/5, 48px vertical, centré et équilibré) -->
-            <div class="flex-[3] min-w-0 flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-8 xl:gap-12 rounded-[30px] p-8 lg:p-10 bg-[#EBF1EF]">
-                <nav class="flex flex-col gap-2 text-left min-w-[120px] lg:min-w-0 lg:flex-1" aria-label="Informations">
-                    <h3 class="font-semibold text-gray-900 text-base">Informations</h3>
-                    <ul class="flex flex-col list-none p-0 m-0 gap-2">
-                        <li><a href="/" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Home</a></li>
-                        <li><a href="/a-propos" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">À propos</a></li>
-                        <li><a href="/contact" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Contact</a></li>
-                        <li><a href="/faq" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">FAQ</a></li>
-                    </ul>
-                </nav>
-                <nav class="flex flex-col gap-2 text-left min-w-[120px] lg:min-w-0 lg:flex-1" aria-label="Rubriques">
-                    <h3 class="font-semibold text-gray-900 text-base">Rubriques</h3>
-                    <ul class="flex flex-col list-none p-0 m-0 gap-2">
-                        <?php foreach ($categories as $cat): ?>
-                        <li><a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="text-gray-700 hover:text-[#004241] transition no-underline text-base"><?= htmlspecialchars($cat['name']) ?></a></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </nav>
-                <nav class="flex flex-col gap-2 text-left min-w-[160px] lg:min-w-0 lg:flex-1" aria-label="Légal">
-                    <h3 class="font-semibold text-gray-900 text-base">Légal</h3>
-                    <ul class="flex flex-col list-none p-0 m-0 gap-2">
-                        <li><a href="/mentions-legales" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Mentions légales</a></li>
-                        <li><a href="/politique-confidentialite" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Politique de confidentialité</a></li>
-                        <li><a href="/conditions-generales" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Conditions générales</a></li>
-                        <li><a href="/politique-cookies" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Politique de cookies</a></li>
-                        <li><a href="/accessibilite" class="text-gray-700 hover:text-[#004241] transition no-underline text-base">Accessibilité</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-        <div class="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 xl:px-20 pb-8 text-center text-gray-500 text-sm">
-            © <?= date('Y') ?> Vivat. Tous droits réservés.
         </div>
     </footer>
     <script>
