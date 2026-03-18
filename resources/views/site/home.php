@@ -406,15 +406,15 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
                 <?php if ($secondArt): ?>
                 <?php $artCatSlug = $secondArt['category']['slug'] ?? null; $artId = $secondArt['id'] ?? $secondArt['slug'] ?? null; $artFallback = vivat_category_fallback_image($artCatSlug, 254, 190, $artId, 'card-1'); $artImg = !empty($secondArt['cover_image_url']) ? $secondArt['cover_image_url'] : $artFallback; ?>
-                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full h-[419px] bg-[#EBF1EF] p-6 gap-[18px]">
-                    <div class="flex flex-col flex-1 min-h-0 gap-2">
+                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full h-[419px] bg-white shadow-[0_4px_24px_rgba(0,66,65,0.08)] p-[18px] gap-[18px]">
+                    <div class="flex flex-col flex-shrink-0 gap-2">
                         <?php if (!empty($secondArt['category'])): ?>
                         <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3 text-xl"><?= htmlspecialchars($secondArt['title']) ?></h3>
                         <p class="text-[#004241] font-light text-xs"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
                     </div>
-                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full h-[190px]">
+                    <div class="rounded-[21px] overflow-hidden flex-1 min-h-0 w-full">
                         <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($secondArt['title'] ?? 'Article') ?>" class="w-full h-full object-cover" loading="lazy">
                     </div>
                 </a>
@@ -490,15 +490,15 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
                 <?php $artRight = $restArticles[11] ?? null; if ($artRight): ?>
                 <?php $rightCatSlug = $artRight['category']['slug'] ?? null; $rightArtId = $artRight['id'] ?? $artRight['slug'] ?? null; $rightFallback = vivat_category_fallback_image($rightCatSlug, 254, 190, $rightArtId, 'right'); $artRightImg = !empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full h-[419px] bg-[#EBF1EF] p-6 gap-[18px]">
-                    <div class="flex flex-col flex-1 min-h-0 gap-2">
+                <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="flex flex-col rounded-[30px] overflow-hidden min-w-0 w-full h-[419px] bg-white shadow-[0_4px_24px_rgba(0,66,65,0.08)] p-[18px] gap-[18px]">
+                    <div class="flex flex-col flex-shrink-0 gap-2">
                         <?php if (!empty($artRight['category'])): ?>
                         <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['gris']['bg'] ?>; color: <?= $tagStyles['gris']['color'] ?>;"><?= htmlspecialchars($artRight['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-3 text-xl"><?= htmlspecialchars($artRight['title']) ?></h3>
                         <p class="text-[#004241] font-light text-xs"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
                     </div>
-                    <div class="rounded-[21px] overflow-hidden flex-shrink-0 w-full h-[190px]">
+                    <div class="rounded-[21px] overflow-hidden flex-1 min-h-0 w-full">
                         <img src="<?= htmlspecialchars($artRightImg) ?>" data-fallback-url="<?= htmlspecialchars($rightFallback) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="w-full h-full object-cover" loading="lazy">
                     </div>
                 </a>
