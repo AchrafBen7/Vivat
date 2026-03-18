@@ -35,14 +35,8 @@ $tagGlass = $tagClass . ' bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border
 // Classes Tailwind pour les boîtes glass (conteneur overlay sur images)
 $glassBox = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)] p-[18px]';
 
-// Tronque le titre à 9 mots max pour les cartes glass
-$truncateGlassTitle = function (?string $t): string {
-    $t = trim((string) $t);
-    if ($t === '') return '';
-    $w = preg_split('/\s+/u', $t, -1, PREG_SPLIT_NO_EMPTY);
-    if (count($w) <= 9) return $t;
-    return implode(' ', array_slice($w, 0, 9)) . ' …';
-};
+// Pas de troncature manuelle : line-clamp CSS gère l'overflow vertical,
+// et la boîte glass est en w-full pour maximiser la lisibilité du titre.
 
 $h0CatSlug = $h0['category']['slug'] ?? null;
 $h0ArtId   = $h0['id'] ?? $h0['slug'] ?? null;
@@ -79,9 +73,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager">
         <div class="absolute inset-0 bg-black/30"></div>
         <div class="absolute inset-[18px] flex items-end">
-            <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[300px] gap-1.5">
+            <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                 <span class="<?= $tagClass ?>" style="background: #EBF1EF; color: #004241;">Top news</span>
-                <h2 class="font-semibold text-white line-clamp-4 text-2xl"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
+                <h2 class="font-semibold text-white line-clamp-3 text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                 <?php if (!empty($h0['excerpt'])): ?>
                 <p class="text-white/90 line-clamp-3 text-sm"><?= htmlspecialchars($h0['excerpt']) ?></p>
                 <?php endif; ?>
@@ -107,11 +101,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
             <div class="absolute inset-[18px] flex items-end">
-                <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] gap-1.5 min-w-[min(100%,220px)]">
+                <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                     <?php if (!empty($h3['category'])): ?>
                     <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
                     <?php endif; ?>
-                    <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($truncateGlassTitle($h3['title'] ?? '')) ?></h3>
+                    <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
                     <p class="text-white/80 text-xs"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                 </div>
             </div>
@@ -134,11 +128,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
         <div class="absolute inset-[18px] flex items-end">
-            <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] gap-1.5 min-w-[min(100%,220px)]">
+            <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                 <?php if (!empty($h1['category'])): ?>
                 <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
                 <?php endif; ?>
-                <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($truncateGlassTitle($h1['title'] ?? '')) ?></h3>
+                <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
                 <p class="text-white/80 text-xs"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
             </div>
         </div>
@@ -161,9 +155,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager">
                 <div class="absolute inset-0 bg-black/30"></div>
                 <div class="absolute inset-[18px] flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full max-w-[300px] gap-1.5">
+                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                         <span class="<?= $tagClass ?>" style="background: #EBF1EF; color: #004241;">Top news</span>
-                        <h2 class="font-semibold text-white line-clamp-4 text-[32px] max-sm:text-2xl"><?= htmlspecialchars($truncateGlassTitle($h0['title'] ?? '')) ?></h2>
+                        <h2 class="font-semibold text-white line-clamp-3 text-[32px] max-sm:text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                         <?php if (!empty($h0['excerpt'])): ?>
                         <p class="text-white/90 line-clamp-3 text-sm"><?= htmlspecialchars($h0['excerpt']) ?></p>
                         <?php endif; ?>
@@ -191,11 +185,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute inset-[18px] flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] gap-1.5 min-w-[min(100%,220px)]">
+                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                         <?php if (!empty($h1['category'])): ?>
                         <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
                         <?php endif; ?>
-                        <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($truncateGlassTitle($h1['title'] ?? '')) ?></h3>
+                        <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
                         <p class="text-white/80 text-xs"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
@@ -217,11 +211,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute inset-[18px] flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] gap-1.5 min-w-[min(100%,220px)]">
+                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                         <?php if (!empty($h3['category'])): ?>
                         <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
                         <?php endif; ?>
-                        <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($truncateGlassTitle($h3['title'] ?? '')) ?></h3>
+                        <h3 class="font-semibold text-white line-clamp-3 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
                         <p class="text-white/80 text-xs"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
@@ -399,11 +393,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     <img src="<?= htmlspecialchars($f0Img) ?>" data-fallback-url="<?= htmlspecialchars($f0Fallback) ?>" alt="<?= htmlspecialchars($firstArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="absolute inset-[18px] flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] min-w-0 gap-1.5 min-w-[180px]">
+                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                             <?php if (!empty($firstArt['category'])): ?>
                             <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
                             <?php endif; ?>
-                            <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($truncateGlassTitle($firstArt['title'] ?? '')) ?></h3>
+                            <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($firstArt['title'] ?? '') ?></h3>
                             <p class="text-white/80 text-xs"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
@@ -432,11 +426,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="block rounded-[32px] overflow-hidden relative min-w-0 w-full h-60">
                 <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                 <div class="absolute inset-[18px] flex justify-end items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-[264px] max-w-[60%] gap-1.5 min-w-[min(100%,240px)]">
+                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                         <?php if (!empty($hotNewsArt['category'])): ?>
                         <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
                         <?php endif; ?>
-                        <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($truncateGlassTitle($hotNewsArt['title'] ?? '')) ?></h3>
+                        <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($hotNewsArt['title'] ?? '') ?></h3>
                         <p class="text-white/80 text-xs"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
@@ -462,11 +456,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="absolute inset-[18px] flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] min-w-0 gap-1.5 min-w-[180px]">
+                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                             <?php if (!empty($artLeft2['category'])): ?>
                             <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
                             <?php endif; ?>
-                            <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($truncateGlassTitle($artLeft2['title'] ?? '')) ?></h3>
+                            <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($artLeft2['title'] ?? '') ?></h3>
                             <p class="text-white/80 text-xs"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
@@ -516,11 +510,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="absolute inset-[18px] flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] min-w-0 gap-1.5 min-w-[180px]">
+                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                             <?php if (!empty($artForFullPhoto1['category'])): ?>
                             <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
                             <?php endif; ?>
-                            <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($truncateGlassTitle($artForFullPhoto1['title'] ?? '')) ?></h3>
+                            <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($artForFullPhoto1['title'] ?? '') ?></h3>
                             <p class="text-white/80 text-xs"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
@@ -534,11 +528,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div class="absolute inset-[18px] flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-fit max-w-[60%] gap-1.5 min-w-[min(100%,220px)]">
+                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
                         <?php if (!empty($artForFullPhoto2['category'])): ?>
                         <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
                         <?php endif; ?>
-                        <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($truncateGlassTitle($artForFullPhoto2['title'] ?? '')) ?></h3>
+                        <h3 class="font-medium text-white line-clamp-3 text-xl"><?= htmlspecialchars($artForFullPhoto2['title'] ?? '') ?></h3>
                         <p class="text-white/80 text-xs"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
