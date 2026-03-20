@@ -1,7 +1,7 @@
 <?php
 $activeTab = $activeTab ?? 'articles';
 ?>
-<aside class="flex-shrink-0 w-[249px] rounded-[30px] border border-gray-200 bg-white flex flex-col" style="min-height: 834px; padding: 54px 0 16px 0;">
+<aside class="flex-shrink-0 w-[249px] rounded-[30px] border border-[#DED8CE] bg-[#EBF1EF] flex flex-col" style="min-height: 975px; padding: 54px 0 16px 0;">
     <nav class="flex flex-col px-4" style="gap: 18px;">
         <a href="<?= url('/contributor/dashboard') ?>" class="flex items-center gap-2 py-2 px-3 rounded-xl h-12 transition <?= $activeTab === 'articles' ? 'bg-[#004241] text-white' : 'text-[#004241] hover:bg-gray-100' ?>" style="padding: 8px 8px 8px 18px;">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

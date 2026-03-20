@@ -96,8 +96,29 @@ class ContributorController extends Controller
 
     public function profile(Request $request): Response
     {
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'bio' => ['nullable', 'string', 'max:2000'],
+            ], [
+                'name.required' => 'Le nom complet est obligatoire.',
+            ]);
+
+            $request->user()->update([
+                'name' => $validated['name'],
+                'bio' => $validated['bio'] ?? null,
+            ]);
+
+            return redirect()->route('contributor.profile')->with('success', 'Profil mis à jour.');
+        }
+
+        $errors = $request->session()->get('errors');
+        $old = $request->old();
+
         return $this->renderContributorPage('profile', 'site.contributor.profile', [
             'user' => $request->user(),
+            'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
+            'old' => $old,
         ]);
     }
 }

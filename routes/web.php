@@ -29,7 +29,7 @@ Route::get('/faq', [WebFaqController::class, 'index'])->name('faq');
 Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->group(function () {
     Route::get('/dashboard', [WebContributorController::class, 'dashboard'])->name('contributor.dashboard');
     Route::match(['get', 'post'], '/new', [WebContributorController::class, 'newArticle'])->name('contributor.new');
-    Route::get('/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
+    Route::match(['get', 'post'], '/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
 });
 Route::get('/categories/{slug}', [WebCategoryController::class, 'hub'])->name('categories.hub');
 Route::get('/articles', [WebArticleController::class, 'index'])->name('articles.index');
