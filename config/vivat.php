@@ -35,6 +35,18 @@ return [
     'home_featured_count' => (int) env('VIVAT_HOME_FEATURED_COUNT', 4),
     'home_latest_count' => (int) env('VIVAT_HOME_LATEST_COUNT', 12),
     'home_categories_count' => (int) env('VIVAT_HOME_CATEGORIES_COUNT', 9),
+
+    /**
+     * Fichiers dans public/ : nom sans extension = clé (slug catégorie ou alias ci-dessous).
+     * Ex. public/finance.jpg, public/mode.mp4, chez-soi → chezsoi.jpg
+     *
+     * @var array<string, string>
+     */
+    'category_media_slug_map' => [
+        'chez-soi' => 'chezsoi',
+        'au-quotidien' => 'quotidien',
+    ],
+
     'writer_signup_url' => env('VIVAT_WRITER_SIGNUP_URL', '/register'),
     'writer_dashboard_url' => env('VIVAT_WRITER_DASHBOARD_URL', '/contributor/submissions'),
 ];

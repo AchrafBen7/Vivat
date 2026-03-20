@@ -56,6 +56,55 @@ if (! function_exists('vivat_category_fallback_image')) {
     }
 }
 
+if (! function_exists('vivat_category_public_media_url')) {
+    /**
+     * URL d’un média local (public/) pour une rubrique : même nom de fichier que le slug (ou alias config).
+     * Cherche dans l’ordre : mp4, webm, mov, jpg, jpeg, png, webp.
+     */
+    function vivat_category_public_media_url(?string $categorySlug): ?string
+    {
+        if ($categorySlug === null || $categorySlug === '') {
+            return null;
+        }
+
+        $map = config('vivat.category_media_slug_map', []);
+        $base = is_array($map) && isset($map[$categorySlug]) ? (string) $map[$categorySlug] : $categorySlug;
+
+        foreach (['mp4', 'webm', 'mov', 'jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            $relative = $base.'.'.$ext;
+            if (file_exists(public_path($relative))) {
+                return '/'.$relative;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('vivat_category_public_poster_url')) {
+    /**
+     * Image poster (jpg/png/webp) dans public/ pour une vidéo de rubrique, même base de nom que le slug.
+     */
+    function vivat_category_public_poster_url(?string $categorySlug): ?string
+    {
+        if ($categorySlug === null || $categorySlug === '') {
+            return null;
+        }
+
+        $map = config('vivat.category_media_slug_map', []);
+        $base = is_array($map) && isset($map[$categorySlug]) ? (string) $map[$categorySlug] : $categorySlug;
+
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            $relative = $base.'.'.$ext;
+            if (file_exists(public_path($relative))) {
+                return '/'.$relative;
+            }
+        }
+
+        return null;
+    }
+}
+
 if (! function_exists('get_layout_categories')) {
     /**
      * Catégories pour le menu (hamburger, footer). Même logique que la home.
