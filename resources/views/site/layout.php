@@ -52,6 +52,36 @@ $title_safe = htmlspecialchars($title);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        /* Espace FIXE 18px entre bordure carte et panel glass — toujours en haut, bas, gauche, droite */
+        .vivat-card-overlay {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            bottom: 18px;
+            left: 18px;
+            box-sizing: border-box;
+        }
+        /* Boîtes glass : 18px padding FIXE entre bordure glass et texte (haut, bas, gauche, droite) */
+        .vivat-glass {
+            background: rgba(190, 190, 190, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(230, 230, 230, 0.2);
+            padding-top: 18px;
+            padding-right: 18px;
+            padding-bottom: 18px;
+            padding-left: 18px;
+            box-sizing: border-box;
+        }
+        /* Tag pill : effet glass sans padding supplémentaire */
+        .vivat-glass-tag {
+            background: rgba(190, 190, 190, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(230, 230, 230, 0.2);
+        }
+    </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
 
@@ -281,3 +311,4 @@ $title_safe = htmlspecialchars($title);
     </script>
 </body>
 </html>
+ 

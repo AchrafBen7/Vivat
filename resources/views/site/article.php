@@ -189,8 +189,8 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
                 >
                     <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
-                    <div class="absolute left-[18px] right-[18px] bottom-[18px]">
-                        <div class="rounded-[21px] vivat-glass flex flex-col p-6 gap-2">
+                    <div class="vivat-card-overlay flex flex-col justify-end">
+                        <div class="rounded-[21px] vivat-glass flex flex-col w-full gap-2">
                             <span class="<?= $tagClass ?> bg-white/20 text-white"><?= htmlspecialchars($itemCategory) ?></span>
                             <h3 class="font-medium text-white leading-tight text-xl"><?= htmlspecialchars($item['title']) ?></h3>
                             <p class="text-white/80 text-xs"><?= htmlspecialchars($item['date']) ?> • <?= (int) $item['reading_time'] ?> min</p>
