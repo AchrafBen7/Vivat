@@ -81,6 +81,91 @@ $title_safe = htmlspecialchars($title);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(230, 230, 230, 0.2);
         }
+        /* Barre recherche header : pastille + loupe → s’étire au hover / focus / texte saisi */
+        #header-search-form {
+            display: none;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            flex-shrink: 0;
+            border-radius: 9999px;
+            background: #e5edeb;
+            overflow: hidden;
+            gap: 0;
+            padding: 0 0.125rem;
+            box-shadow: none;
+            transition:
+                width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
+                box-shadow 0.35s ease,
+                gap 0.35s ease,
+                padding 0.35s ease,
+                justify-content 0s linear 0s;
+        }
+        @media (min-width: 768px) {
+            #header-search-form {
+                display: flex;
+            }
+        }
+        #header-search-form:hover,
+        #header-search-form:focus-within,
+        #header-search-form.vivat-header-search--dirty {
+            width: min(100%, 15rem);
+            justify-content: flex-start;
+            gap: 0.375rem;
+            padding-left: 0.375rem;
+            padding-right: 0.75rem;
+            box-shadow: 0 4px 20px rgba(34, 110, 101, 0.14);
+        }
+        /* Loupe à gauche à l’ouverture ; ordre Tab = ordre DOM (champ puis bouton) */
+        #header-search-form input[name="q"] {
+            order: 2;
+            flex: 0 0 0;
+            width: 0;
+            min-width: 0;
+            overflow: hidden;
+            opacity: 0;
+            border: none;
+            background: transparent;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: #226e65;
+            outline: none;
+            transition: opacity 0.25s ease 0.06s, flex 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        #header-search-form input[name="q"]::placeholder {
+            color: rgba(34, 110, 101, 0.65);
+        }
+        #header-search-form:hover input[name="q"],
+        #header-search-form:focus-within input[name="q"],
+        #header-search-form.vivat-header-search--dirty input[name="q"] {
+            flex: 1 1 0%;
+            min-width: 0;
+            opacity: 1;
+        }
+        #header-search-form button[type="submit"] {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+            border: none;
+            border-radius: 9999px;
+            background: transparent;
+            color: #226e65;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            order: 1;
+        }
+        #header-search-form button[type="submit"]:hover {
+            background: rgba(0, 66, 65, 0.06);
+        }
+        #header-search-form button[type="submit"]:active {
+            transform: scale(0.94);
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
@@ -97,13 +182,28 @@ $title_safe = htmlspecialchars($title);
                 <div class="hidden md:block flex-shrink-0 flex-1 min-w-4"></div>
                 <div class="flex-1 md:flex-none md:flex-shrink-0"></div>
 
-                <!-- Barre de recherche -->
-                <form action="/search" method="get" class="hidden md:flex items-center flex-shrink-0 rounded-full h-12 overflow-hidden bg-[#E5EDEB] px-3 w-52">
-                    <input type="search" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="Rechercher…" class="flex-1 min-w-0 bg-transparent text-sm outline-none border-none text-[#226E65] placeholder:text-[#226E65]">
-                    <button type="submit" class="flex items-center justify-center flex-shrink-0 p-2 text-[#226E65]" aria-label="Rechercher">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <!-- Barre de recherche (pastille → s’allonge au survol / focus) -->
+                <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
+                    <input type="search" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="Rechercher…" autocomplete="off" aria-label="Mot-clé ou catégorie">
+                    <button type="submit" aria-label="Lancer la recherche">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
                 </form>
+                <script>
+                (function () {
+                    var form = document.getElementById('header-search-form');
+                    var input = form && form.querySelector('input[name="q"]');
+                    if (!form || !input) {
+                        return;
+                    }
+                    function syncDirty() {
+                        form.classList.toggle('vivat-header-search--dirty', input.value.trim() !== '');
+                    }
+                    input.addEventListener('input', syncDirty);
+                    input.addEventListener('change', syncDirty);
+                    syncDirty();
+                })();
+                </script>
 
                 <div class="w-[9px] flex-shrink-0"></div>
 
