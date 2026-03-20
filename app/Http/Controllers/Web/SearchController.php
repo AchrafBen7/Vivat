@@ -12,6 +12,9 @@ class SearchController extends Controller
     public function index(Request $request): Response
     {
         $locale = content_locale($request);
+        if (! $request->filled('lang')) {
+            $locale = 'fr';
+        }
         $q = trim((string) $request->get('q', ''));
 
         $data = app(PublicPageDataService::class)->getSearchData($locale, $q);

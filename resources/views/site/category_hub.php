@@ -34,6 +34,12 @@ foreach (array_values($articles) as $a) {
 }
 $restArticles = array_values($byId);
 ?>
+<style>
+    .vivat-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+</style>
 <div class="flex flex-col w-full">
     <!-- 1) Marge 24px sous la navbar déjà gérée par le main -->
 

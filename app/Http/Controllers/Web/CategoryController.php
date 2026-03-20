@@ -12,6 +12,9 @@ class CategoryController extends Controller
     public function hub(Request $request, string $slug, PublicPageDataService $pageData): Response
     {
         $locale = content_locale($request);
+        if (! $request->filled('lang')) {
+            $locale = 'fr';
+        }
         $subCategorySlug = $request->input('sub_category');
         $page = max(1, (int) $request->integer('page', 1));
         $data = $pageData->getCategoryHubData($slug, $subCategorySlug, $locale, $page);

@@ -251,6 +251,15 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     $numSlides = max(1, count($catChunks));
     $hasLoop = ($numSlides > 1);
     $totalSlides = $hasLoop ? $numSlides + 1 : $numSlides;
+    $isVideoMedia = function (?string $url): bool {
+        if (!$url) {
+            return false;
+        }
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+        $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+
+        return in_array($ext, ['mp4', 'webm', 'mov'], true);
+    };
     ?>
     <!-- Section Rubriques - Carrousel -->
     <section id="categories-section" class="relative w-full mt-[65px] overflow-hidden">
@@ -265,7 +274,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <div class="categories-carousel-slide flex-shrink-0 flex items-stretch gap-6 px-6" style="flex: 0 0 100%; box-sizing: border-box; min-width: 0;">
                     <?php if ($isFirstSlide): ?>
                     <a href="/" class="rounded-[30px] overflow-hidden relative block flex-[7] min-w-0 h-[524px]">
-                        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="Découvrez vos rubriques préférées" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                        <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
+                            <source src="/rubriques.mp4" type="video/mp4">
+                        </video>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         <div class="absolute inset-0 flex flex-col items-start justify-center p-8">
                             <h2 class="font-semibold text-white text-left max-w-[85%] text-5xl md:text-2xl lg:text-5xl">Découvrez vos rubriques préférées</h2>
@@ -278,7 +289,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <?php if ($cat1): ?>
                         <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px]">
                             <?php if (!empty($cat1['image_url'])): ?>
+                            <?php if ($isVideoMedia($cat1['image_url'])): ?>
+                            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata">
+                                <source src="<?= htmlspecialchars($cat1['image_url']) ?>" type="video/mp4">
+                            </video>
+                            <?php else: ?>
                             <img src="<?= htmlspecialchars($cat1['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat1['name']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                            <?php endif; ?>
                             <?php endif; ?>
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute inset-0 flex items-center justify-center p-[18px]">
@@ -289,7 +306,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <?php if ($cat2): ?>
                         <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px]">
                             <?php if (!empty($cat2['image_url'])): ?>
+                            <?php if ($isVideoMedia($cat2['image_url'])): ?>
+                            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata">
+                                <source src="<?= htmlspecialchars($cat2['image_url']) ?>" type="video/mp4">
+                            </video>
+                            <?php else: ?>
                             <img src="<?= htmlspecialchars($cat2['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat2['name']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                            <?php endif; ?>
                             <?php endif; ?>
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute inset-0 flex items-center justify-center p-[18px]">
@@ -302,7 +325,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     <?php if ($cat3): ?>
                     <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[524px] row-span-2">
                         <?php if (!empty($cat3['image_url'])): ?>
+                        <?php if ($isVideoMedia($cat3['image_url'])): ?>
+                        <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata">
+                            <source src="<?= htmlspecialchars($cat3['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php else: ?>
                         <img src="<?= htmlspecialchars($cat3['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat3['name']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                        <?php endif; ?>
                         <?php endif; ?>
                         <div class="absolute inset-0 bg-black/30"></div>
                         <div class="absolute inset-0 flex items-center justify-center p-[18px]">
@@ -316,7 +345,9 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <?php if ($hasLoop && count($catChunks) > 0): $c = $catChunks[0]; $c1 = $c[0] ?? null; $c2 = $c[1] ?? null; $c3 = $c[2] ?? null; ?>
                 <div class="categories-carousel-slide categories-carousel-clone flex-shrink-0 flex items-stretch gap-6 px-6" style="flex: 0 0 100%; box-sizing: border-box; min-width: 0;" aria-hidden="true">
                     <a href="/" class="rounded-[30px] overflow-hidden relative block flex-[7] min-w-0 h-[524px]">
-                        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="Découvrez vos rubriques préférées" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                        <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
+                            <source src="/rubriques.mp4" type="video/mp4">
+                        </video>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         <div class="absolute inset-0 flex flex-col items-start justify-center p-8">
                             <h2 class="font-semibold text-white text-left max-w-[85%] text-5xl md:text-2xl lg:text-5xl">Découvrez vos rubriques préférées</h2>
@@ -328,7 +359,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <?php if ($c1): ?>
                         <a href="/categories/<?= htmlspecialchars($c1['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px]">
                             <?php if (!empty($c1['image_url'])): ?>
+                            <?php if ($isVideoMedia($c1['image_url'])): ?>
+                            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata">
+                                <source src="<?= htmlspecialchars($c1['image_url']) ?>" type="video/mp4">
+                            </video>
+                            <?php else: ?>
                             <img src="<?= htmlspecialchars($c1['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($c1['name']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                            <?php endif; ?>
                             <?php endif; ?>
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute inset-0 flex items-center justify-center p-[18px]">
@@ -339,7 +376,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <?php if ($c2): ?>
                         <a href="/categories/<?= htmlspecialchars($c2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px]">
                             <?php if (!empty($c2['image_url'])): ?>
+                            <?php if ($isVideoMedia($c2['image_url'])): ?>
+                            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata">
+                                <source src="<?= htmlspecialchars($c2['image_url']) ?>" type="video/mp4">
+                            </video>
+                            <?php else: ?>
                             <img src="<?= htmlspecialchars($c2['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($c2['name']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                            <?php endif; ?>
                             <?php endif; ?>
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute inset-0 flex items-center justify-center p-[18px]">
@@ -351,7 +394,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <?php if ($c3): ?>
                         <a href="/categories/<?= htmlspecialchars($c3['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[524px] row-span-2">
                             <?php if (!empty($c3['image_url'])): ?>
+                            <?php if ($isVideoMedia($c3['image_url'])): ?>
+                            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata">
+                                <source src="<?= htmlspecialchars($c3['image_url']) ?>" type="video/mp4">
+                            </video>
+                            <?php else: ?>
                             <img src="<?= htmlspecialchars($c3['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($c3['name']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                            <?php endif; ?>
                             <?php endif; ?>
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute inset-0 flex items-center justify-center p-[18px]">
@@ -365,10 +414,10 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             </div>
         </div>
         <?php if ($numSlides > 1): ?>
-        <button type="button" id="categories-carousel-prev" class="absolute left-[36px] top-1/2 -translate-y-1/2 -translate-x-1/2 z-50 flex items-center justify-center rounded-full bg-[#004241] text-white w-[48px] h-[48px] shadow-[0_4px_20px_rgba(0,66,65,0.4)] border-2 border-white/30 hover:bg-[#003130] hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" aria-label="Rubriques précédentes">
+        <button type="button" id="categories-carousel-prev" class="absolute left-6 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center rounded-full bg-[#004241] text-white w-[48px] h-[48px] shadow-[0_4px_20px_rgba(0,66,65,0.4)] border-2 border-white/30 hover:bg-[#003130] hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" aria-label="Rubriques précédentes">
             <svg class="w-6 h-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
-        <button type="button" id="categories-carousel-next" class="absolute right-[36px] top-1/2 -translate-y-1/2 translate-x-1/2 z-50 flex items-center justify-center rounded-full bg-[#004241] text-white w-[48px] h-[48px] shadow-[0_4px_20px_rgba(0,66,65,0.4)] border-2 border-white/30 hover:bg-[#003130] hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" aria-label="Rubriques suivantes">
+        <button type="button" id="categories-carousel-next" class="absolute right-6 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center rounded-full bg-[#004241] text-white w-[48px] h-[48px] shadow-[0_4px_20px_rgba(0,66,65,0.4)] border-2 border-white/30 hover:bg-[#003130] hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" aria-label="Rubriques suivantes">
             <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <?php endif; ?>
