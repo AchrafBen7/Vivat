@@ -57,6 +57,8 @@ class ContributorController extends Controller
                 'cover_image_path' => $s->cover_image_path,
                 'excerpt' => $s->excerpt,
                 'category' => $s->category ? ['name' => $s->category->name] : null,
+                'preview_url' => route('contributor.articles.show', ['submission' => $s->slug]),
+                'delete_url' => route('contributor.articles.destroy', ['submission' => $s->slug]),
             ])
             ->all();
 
@@ -141,6 +143,76 @@ class ContributorController extends Controller
             'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
             'old' => $old,
         ]);
+    }
+
+    public function showSubmission(Request $request, Submission $submission): Response
+    {
+        abort_unless(
+            $request->user()
+                && ($request->user()->id === $submission->user_id || $request->user()->hasRole('admin')),
+            403
+        );
+
+        $submission->load('category');
+        $category = $submission->category;
+
+        $data = [
+            'article' => [
+                'id' => $submission->id,
+                'title' => $submission->title,
+                'slug' => $submission->slug,
+                'excerpt' => $submission->excerpt,
+                'content' => $submission->content,
+                'meta_title' => $submission->title,
+                'meta_description' => $submission->excerpt,
+                'reading_time' => $submission->reading_time,
+                'published_at' => $submission->created_at?->format('d/m/Y H:i'),
+                'published_at_display' => $submission->created_at?->locale('fr')->isoFormat('D MMMM YYYY'),
+                'published_at_iso' => $submission->created_at?->toIso8601String(),
+                'cover_image_url' => $submission->cover_image_path,
+                'cover_video_url' => null,
+                'category' => $category ? [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                ] : null,
+            ],
+        ];
+
+        $content = render_php_view('site.article', $data);
+        $html = render_php_view('site.layout', [
+            'content' => $content,
+            'content_locale' => content_locale($request),
+            'title' => $submission->title . ' — Preview Vivat',
+            'meta_description' => $submission->excerpt ?: 'Prévisualisation de votre article Vivat.',
+            'canonical_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
+            'og_image' => $submission->cover_image_path ? url($submission->cover_image_path) : null,
+            'og_article' => true,
+        ]);
+
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    public function destroySubmission(Request $request, Submission $submission): RedirectResponse
+    {
+        abort_unless(
+            $request->user()
+                && ($request->user()->id === $submission->user_id || $request->user()->hasRole('admin')),
+            403
+        );
+
+        if (is_string($submission->cover_image_path) && $submission->cover_image_path !== '') {
+            $coverPath = public_path(ltrim($submission->cover_image_path, '/'));
+
+            if (File::exists($coverPath)) {
+                File::delete($coverPath);
+            }
+        }
+
+        $submission->delete();
+
+        return redirect()
+            ->route('contributor.dashboard')
+            ->with('success', 'Article supprimé.');
     }
 
     public function profile(Request $request): Response

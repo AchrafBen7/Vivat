@@ -63,6 +63,21 @@ $metaLine = trim(implode(' • ', array_filter([
 $shareUrl = url('/articles/'.$slug);
 $shareTitle = $title;
 
+// Si le contenu est du texte brut saisi par un rédacteur, convertir les lignes vides en paragraphes.
+// On conserve le HTML existant pour ne pas casser les anciens articles déjà formatés.
+if (is_string($content) && trim($content) !== '' && ! preg_match('/<\s*\/?\s*[a-z][^>]*>/i', $content)) {
+    $paragraphs = preg_split("/(?:\r\n|\r|\n)\s*(?:\r\n|\r|\n)+/", trim($content)) ?: [];
+    $content = implode('', array_map(static function (string $paragraph): string {
+        $paragraph = trim($paragraph);
+
+        if ($paragraph === '') {
+            return '';
+        }
+
+        return '<p>' . nl2br(htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8')) . '</p>';
+    }, $paragraphs));
+}
+
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
 $adMidContent = '<div class="flex items-center justify-center p-12 gap-2 my-6"><div class="flex items-center justify-center rounded-[30px] text-white/90 w-full max-w-[970px] h-[250px] bg-[#686868]"><span class="text-sm">Espace publicitaire 970×250</span></div></div>';
 $paraCount = preg_match_all('/<\/p>\s*/i', $content);
