@@ -81,8 +81,21 @@ $title_safe = htmlspecialchars($title);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(230, 230, 230, 0.2);
         }
+        .vivat-article-image-zoom {
+            overflow: hidden;
+        }
+        .vivat-article-image-zoom img {
+            transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: center center;
+            will-change: transform;
+        }
+        .vivat-article-image-zoom:hover img {
+            transform: scale(1.045);
+        }
         /* Barre recherche header : pastille + loupe → s’étire au hover / focus / texte saisi */
         #header-search-form {
+            --vivat-search-ease: cubic-bezier(0.22, 1, 0.36, 1);
+            --vivat-search-dur: 0.52s;
             display: none;
             position: relative;
             align-items: center;
@@ -95,13 +108,10 @@ $title_safe = htmlspecialchars($title);
             overflow: hidden;
             gap: 0;
             padding: 0 0.125rem;
-            box-shadow: none;
             transition:
-                width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
-                box-shadow 0.35s ease,
-                gap 0.35s ease,
-                padding 0.35s ease,
-                justify-content 0s linear 0s;
+                width var(--vivat-search-dur) var(--vivat-search-ease),
+                gap var(--vivat-search-dur) var(--vivat-search-ease),
+                padding var(--vivat-search-dur) var(--vivat-search-ease);
         }
         @media (min-width: 768px) {
             #header-search-form {
@@ -116,14 +126,13 @@ $title_safe = htmlspecialchars($title);
             gap: 0.375rem;
             padding-left: 0.375rem;
             padding-right: 0.75rem;
-            box-shadow: 0 4px 20px rgba(34, 110, 101, 0.14);
         }
         /* Loupe à gauche à l’ouverture ; ordre Tab = ordre DOM (champ puis bouton) */
         #header-search-form input[name="q"] {
             order: 2;
-            flex: 0 0 0;
-            width: 0;
+            flex: 1 1 0%;
             min-width: 0;
+            max-width: 0;
             overflow: hidden;
             opacity: 0;
             border: none;
@@ -132,7 +141,9 @@ $title_safe = htmlspecialchars($title);
             line-height: 1.25rem;
             color: #226e65;
             outline: none;
-            transition: opacity 0.25s ease 0.06s, flex 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            transition:
+                max-width var(--vivat-search-dur) var(--vivat-search-ease),
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s;
         }
         #header-search-form input[name="q"]::placeholder {
             color: rgba(34, 110, 101, 0.65);
@@ -140,8 +151,7 @@ $title_safe = htmlspecialchars($title);
         #header-search-form:hover input[name="q"],
         #header-search-form:focus-within input[name="q"],
         #header-search-form.vivat-header-search--dirty input[name="q"] {
-            flex: 1 1 0%;
-            min-width: 0;
+            max-width: 12rem;
             opacity: 1;
         }
         #header-search-form button[type="submit"] {
@@ -170,17 +180,16 @@ $title_safe = htmlspecialchars($title);
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
 
-    <header class="bg-white">
+    <header class="bg-white border-b border-[#004241]/8">
         <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 relative z-50">
-            <div class="flex items-center h-[72px] md:h-[88px] py-[18px] md:py-[35px]">
+            <div class="flex items-center gap-2 md:gap-3 lg:gap-4 h-[72px] md:h-[88px] py-[16px] md:py-[24px]">
 
                 <!-- Logo -->
                 <h1 class="font-righteous text-[32px] font-normal flex-shrink-0 text-[#004241] tracking-[0.03em]">
                     <a href="/" class="text-inherit no-underline">Vivat</a>
                 </h1>
 
-                <div class="hidden md:block flex-shrink-0 flex-1 min-w-4"></div>
-                <div class="flex-1 md:flex-none md:flex-shrink-0"></div>
+                <div class="hidden md:block flex-1 min-w-[16px]"></div>
 
                 <!-- Barre de recherche (pastille → s’allonge au survol / focus) -->
                 <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
@@ -205,14 +214,10 @@ $title_safe = htmlspecialchars($title);
                 })();
                 </script>
 
-                <div class="w-[9px] flex-shrink-0"></div>
-
                 <!-- Bouton Contact -->
-                <a href="/contact" class="hidden md:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none w-[162px] py-3 px-5 bg-[#004241] text-white">
+                <a href="/contact" class="hidden md:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none min-w-[164px] px-5 bg-[#004241] text-white">
                     Contactez-nous
                 </a>
-
-                <div class="hidden md:block w-[19px] flex-shrink-0"></div>
 
                 <!-- Hamburger -->
                 <button type="button" id="hamburger-menu" class="flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-12 h-12 bg-transparent border-none cursor-pointer rounded-[30px]" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
@@ -246,24 +251,24 @@ $title_safe = htmlspecialchars($title);
                 </form>
                 <?php endif; ?>
 
-                <nav class="flex flex-col gap-1" aria-label="Navigation principale">
-                    <a href="/" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline">Home</a>
-                    <a href="/a-propos" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline">À propos</a>
-                    <a href="/contact" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline">Contact</a>
-                    <a href="/faq" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline">FAQ</a>
+                <nav class="flex flex-col gap-2" aria-label="Navigation principale">
+                    <a href="/" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">Home</a>
+                    <a href="/a-propos" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">À propos</a>
+                    <a href="/contact" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">Contact</a>
+                    <a href="/faq" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">FAQ</a>
                 </nav>
 
-                <p class="font-semibold text-white text-base mt-5 mb-2 pt-4 border-t border-white/20">Rubriques</p>
-                <nav class="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-1" aria-label="Rubriques">
+                <p class="font-semibold text-white text-base mt-6 mb-3 pt-5 border-t border-white/20">Rubriques</p>
+                <nav class="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2" aria-label="Rubriques">
                     <?php foreach ($categories as $cat): ?>
-                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="py-3 px-3 rounded-2xl text-white font-medium text-base no-underline"><?= htmlspecialchars($cat['name']) ?></a>
+                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="py-3 px-4 rounded-2xl text-white font-medium text-base no-underline"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php endforeach; ?>
                 </nav>
             </div>
         </div>
     </header>
 
-    <main class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
+    <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
         <?php if (session('success')): ?>
         <div class="mb-6 rounded-[20px] bg-[#004241] text-white px-6 py-4 flex items-center gap-3" role="alert">
             <svg class="w-6 h-6 flex-shrink-0 text-[#7DD3C1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
