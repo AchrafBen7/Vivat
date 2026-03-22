@@ -27,6 +27,9 @@ class User extends Authenticatable
         'interests',
         'avatar',
         'bio',
+        'instagram_url',
+        'twitter_url',
+        'website_url',
     ];
 
     /**

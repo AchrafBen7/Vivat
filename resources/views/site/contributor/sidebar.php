@@ -1,7 +1,7 @@
 <?php
 $activeTab = $activeTab ?? 'articles';
 ?>
-<aside class="flex-shrink-0 w-[249px] rounded-[30px] border border-[#DED8CE] bg-[#EBF1EF] flex flex-col" style="min-height: 975px; padding: 54px 0 16px 0;">
+<aside class="flex-shrink-0 w-[249px] h-[834px] rounded-[30px] border border-[#DED8CE] bg-[#EBF1EF] flex flex-col" style="padding: 40px 0 22px 0;">
     <nav class="flex flex-col px-4" style="gap: 18px;">
         <a href="<?= url('/contributor/dashboard') ?>" class="flex items-center gap-2 py-2 px-3 rounded-xl h-12 transition <?= $activeTab === 'articles' ? 'bg-[#004241] text-white' : 'text-[#004241] hover:bg-gray-100' ?>" style="padding: 8px 8px 8px 18px;">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -13,11 +13,11 @@ $activeTab = $activeTab ?? 'articles';
         </a>
         <a href="<?= url('/contributor/profile') ?>" class="flex items-center gap-2 py-2 px-3 rounded-xl h-12 transition <?= $activeTab === 'profile' ? 'bg-[#004241] text-white' : 'text-[#004241] hover:bg-gray-100' ?>" style="padding: 8px 8px 8px 18px;">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            <span class="font-medium text-base">Mon profil</span>
+            <span class="text-[16px] leading-5 font-normal">Mon profil</span>
         </a>
     </nav>
 
-    <div class="mt-auto px-4" style="gap: 8px; padding-bottom: 16px;">
+    <div class="mt-auto px-4" style="gap: 8px;">
         <a href="#" class="flex items-center gap-2 w-full rounded-xl text-[#004241] hover:bg-gray-100 transition text-sm" style="height: 32px; padding: 8px 18px;" title="Bientôt disponible">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             Modifier mot de passe

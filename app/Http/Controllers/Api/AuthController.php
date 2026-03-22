@@ -103,6 +103,9 @@ class AuthController extends Controller
             'interests' => ['sometimes', 'array'],
             'interests.*' => ['string', 'max:100'],
             'bio'       => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'instagram_url' => ['sometimes', 'nullable', 'url', 'max:255'],
+            'twitter_url' => ['sometimes', 'nullable', 'url', 'max:255'],
+            'website_url' => ['sometimes', 'nullable', 'url', 'max:255'],
         ]);
 
         $request->user()->update($validated);
@@ -127,6 +130,9 @@ class AuthController extends Controller
             'interests' => $user->interests,
             'avatar'    => $user->avatar,
             'bio'       => $user->bio,
+            'instagram_url' => $user->instagram_url,
+            'twitter_url' => $user->twitter_url,
+            'website_url' => $user->website_url,
             'roles'     => $user->getRoleNames(),
             'created_at' => $user->created_at?->toIso8601String(),
         ];

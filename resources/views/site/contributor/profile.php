@@ -6,6 +6,9 @@ $old = $old ?? [];
 $name = $old['name'] ?? ($user->name ?? '');
 $email = $user->email ?? '';
 $bio = $old['bio'] ?? ($user->bio ?? '');
+$instagramUrl = $old['instagram_url'] ?? ($user->instagram_url ?? '');
+$twitterUrl = $old['twitter_url'] ?? ($user->twitter_url ?? '');
+$websiteUrl = $old['website_url'] ?? ($user->website_url ?? '');
 $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
 $primaryRole = $roles instanceof \Illuminate\Support\Collection ? $roles->first() : null;
 $roleLabel = match ($primaryRole) {
@@ -50,7 +53,7 @@ $initials = $initials !== '' ? $initials : 'V';
         <h2 class="text-[18px] leading-7 font-medium text-[#1B4B3B]">Modifier mon profil</h2>
     </div>
 
-    <form action="<?= url('/contributor/profile') ?>" method="post" class="rounded-2xl border border-[#DED8CE66] bg-[#F8F6F2] p-5 flex flex-col gap-5">
+    <form action="<?= url('/contributor/profile') ?>" method="post" class="mt-[-16px] rounded-2xl border border-[#DED8CE66] bg-[#F8F6F2] p-5 flex flex-col gap-5">
         <?= csrf_field() ?>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -100,38 +103,53 @@ $initials = $initials !== '' ? $initials : 'V';
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="pt-[5px] flex flex-col gap-[9px]">
                 <label for="twitter" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Twitter</label>
-                <input
-                    type="text"
+                <div>
+                    <input
+                    type="url"
                     id="twitter"
-                    value=""
-                    placeholder="Bientot disponible"
-                    disabled
-                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241]/45 outline-none disabled:cursor-not-allowed"
-                >
+                    name="twitter_url"
+                    value="<?= htmlspecialchars($twitterUrl) ?>"
+                    placeholder="https://twitter.com/votre-profil"
+                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
+                    >
+                    <?php if (!empty($errors['twitter_url'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['twitter_url']) ? $errors['twitter_url'][0] : $errors['twitter_url']) ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="linkedin" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">LinkedIn</label>
-                <input
-                    type="text"
-                    id="linkedin"
-                    value=""
-                    placeholder="Bientot disponible"
-                    disabled
-                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241]/45 outline-none disabled:cursor-not-allowed"
-                >
+                <label for="instagram" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Instagram</label>
+                <div>
+                    <input
+                    type="url"
+                    id="instagram"
+                    name="instagram_url"
+                    value="<?= htmlspecialchars($instagramUrl) ?>"
+                    placeholder="https://instagram.com/votre-profil"
+                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
+                    >
+                    <?php if (!empty($errors['instagram_url'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['instagram_url']) ? $errors['instagram_url'][0] : $errors['instagram_url']) ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <div class="pt-[5px] flex flex-col gap-[9px]">
                 <label for="website" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Site web</label>
-                <input
-                    type="text"
+                <div>
+                    <input
+                    type="url"
                     id="website"
-                    value=""
-                    placeholder="Bientot disponible"
-                    disabled
-                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241]/45 outline-none disabled:cursor-not-allowed"
-                >
+                    name="website_url"
+                    value="<?= htmlspecialchars($websiteUrl) ?>"
+                    placeholder="https://votresite.be"
+                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
+                    >
+                    <?php if (!empty($errors['website_url'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['website_url']) ? $errors['website_url'][0] : $errors['website_url']) ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 

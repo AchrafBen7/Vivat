@@ -19,15 +19,18 @@ class Submission extends Model
         'excerpt',
         'content',
         'category_id',
+        'reading_time',
         'status',
         'reviewer_notes',
         'reviewed_by',
         'reviewed_at',
         'payment_id',
+        'cover_image_path',
     ];
 
     protected $casts = [
         'reviewed_at' => 'datetime',
+        'reading_time' => 'integer',
     ];
 
     /* ------------------------------------------------------------------ */

@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Submission;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class ContributorController extends Controller
 {
@@ -42,7 +45,17 @@ class ContributorController extends Controller
                 'title' => $s->title,
                 'slug' => $s->slug,
                 'status' => $s->status,
+                'status_label' => match ($s->status) {
+                    'draft' => 'Brouillon',
+                    'pending' => 'En attente',
+                    'approved' => 'Approuvé',
+                    'rejected' => 'Rejeté',
+                    default => ucfirst((string) $s->status),
+                },
                 'created_at' => $s->created_at?->format('d/m/Y'),
+                'reading_time' => $s->reading_time,
+                'cover_image_path' => $s->cover_image_path,
+                'excerpt' => $s->excerpt,
                 'category' => $s->category ? ['name' => $s->category->name] : null,
             ])
             ->all();
@@ -62,25 +75,61 @@ class ContributorController extends Controller
                 'content'     => ['required', 'string', 'min:100'],
                 'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
                 'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
                 'status'      => ['sometimes', 'in:draft,submitted'],
             ], [
                 'title.required' => 'Le titre est obligatoire.',
                 'content.required' => 'Le contenu est obligatoire.',
                 'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
+                'cover_image.image' => "L'image de couverture doit etre une image valide.",
+                'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
             ]);
 
             $status = $request->input('status') === 'submitted' ? 'pending' : 'draft';
+            $coverImagePath = $request->hasFile('cover_image')
+                ? $this->storeSubmissionCoverImage($request->file('cover_image'))
+                : null;
 
-            Submission::create([
+            $submission = Submission::create([
                 'user_id'     => $request->user()->id,
                 'title'       => $validated['title'],
                 'excerpt'     => $validated['excerpt'] ?? null,
                 'content'     => $validated['content'],
                 'category_id' => $validated['category_id'] ?? null,
+                'reading_time' => $validated['reading_time'] ?? 5,
                 'status'      => $status,
+                'cover_image_path' => $coverImagePath,
             ]);
 
-            return redirect()->route('contributor.dashboard')->with('success', $status === 'pending' ? 'Article soumis avec succès !' : 'Brouillon enregistré.');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'ok' => true,
+                    'submission_id' => $submission->id,
+                    'status' => $status,
+                    'redirect_url' => route('contributor.dashboard'),
+                    'notice' => $status === 'pending'
+                        ? [
+                            'title' => 'Article transmis',
+                            'message' => 'Votre article va être vérifié par notre équipe et sera publié automatiquement après acceptation.',
+                        ]
+                        : [
+                            'title' => 'Brouillon enregistré',
+                            'message' => 'Votre brouillon a été enregistré dans votre espace rédacteur.',
+                        ],
+                ]);
+            }
+
+            $redirect = redirect()->route('contributor.dashboard')
+                ->with('success', $status === 'pending' ? 'Article soumis avec succès !' : 'Brouillon enregistré.');
+
+            if ($status === 'pending') {
+                $redirect->with('submission_notice', [
+                    'title' => 'Article transmis',
+                    'message' => 'Votre article va être vérifié par notre équipe et sera publié automatiquement après acceptation.',
+                ]);
+            }
+
+            return $redirect;
         }
 
         $categories = Category::orderBy('name')->get(['id', 'name'])->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all();
@@ -100,13 +149,22 @@ class ContributorController extends Controller
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'bio' => ['nullable', 'string', 'max:2000'],
+                'instagram_url' => ['nullable', 'url', 'max:255'],
+                'twitter_url' => ['nullable', 'url', 'max:255'],
+                'website_url' => ['nullable', 'url', 'max:255'],
             ], [
                 'name.required' => 'Le nom complet est obligatoire.',
+                'instagram_url.url' => "Le lien Instagram doit etre une URL valide.",
+                'twitter_url.url' => "Le lien Twitter doit etre une URL valide.",
+                'website_url.url' => "Le site web doit etre une URL valide.",
             ]);
 
             $request->user()->update([
                 'name' => $validated['name'],
                 'bio' => $validated['bio'] ?? null,
+                'instagram_url' => $validated['instagram_url'] ?? null,
+                'twitter_url' => $validated['twitter_url'] ?? null,
+                'website_url' => $validated['website_url'] ?? null,
             ]);
 
             return redirect()->route('contributor.profile')->with('success', 'Profil mis à jour.');
@@ -120,5 +178,19 @@ class ContributorController extends Controller
             'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
             'old' => $old,
         ]);
+    }
+
+    private function storeSubmissionCoverImage(UploadedFile $file): string
+    {
+        $directory = public_path('uploads/submissions');
+
+        if (! File::exists($directory)) {
+            File::makeDirectory($directory, 0755, true);
+        }
+
+        $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
+        $file->move($directory, $filename);
+
+        return '/uploads/submissions/' . $filename;
     }
 }
