@@ -78,12 +78,34 @@ class PublicPageDataService
         }
 
         $articles = $query->orderByDesc('published_at')->paginate(12);
+        $currentArticles = $articles->getCollection();
+        $currentArticleIds = $currentArticles->pluck('id')->filter()->values()->all();
+        $referenceCategoryId = $matchedCategory?->id
+            ?? $currentArticles->firstWhere('category_id', '!=', null)?->category_id;
+
+        $relatedQuery = Article::published()
+            ->forLocale($locale)
+            ->with('category');
+
+        if (! empty($currentArticleIds)) {
+            $relatedQuery->whereNotIn('id', $currentArticleIds);
+        }
+
+        if ($referenceCategoryId) {
+            $relatedQuery->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$referenceCategoryId]);
+        }
+
+        $relatedArticles = $relatedQuery
+            ->orderByDesc('published_at')
+            ->limit(10)
+            ->get();
 
         return [
-            'articles' => $articles->getCollection()->map(fn ($a) => $this->articleToArray($a))->all(),
+            'articles' => $currentArticles->map(fn ($a) => $this->articleToArray($a))->all(),
             'pagination' => $articles,
             'search_term' => $q,
             'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory) : null,
+            'related_articles' => $relatedArticles->map(fn ($a) => $this->articleToArray($a))->all(),
         ];
     }
 

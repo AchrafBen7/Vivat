@@ -251,6 +251,24 @@ $title_safe = htmlspecialchars($title);
             font-size: 0.82rem;
             color: rgba(0, 66, 65, 0.62);
         }
+        .header-search-view-all {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.25rem;
+            padding: 0.9rem 1rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.46);
+            color: #004241;
+            font-size: 0.86rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.18s ease, transform 0.18s ease;
+        }
+        .header-search-view-all:hover,
+        .header-search-view-all.is-active {
+            background: rgba(255, 255, 255, 0.72);
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
@@ -303,10 +321,16 @@ $title_safe = htmlspecialchars($title);
 
                     function renderSuggestions(items, query) {
                         activeIndex = -1;
+                        var searchUrl = '/search?q=' + encodeURIComponent(query);
                         currentItems = items.slice();
 
                         if (!items.length) {
-                            suggestionBox.innerHTML = '<div class="header-search-suggestion-empty">Aucune suggestion pour "' + query.replace(/"/g, '&quot;') + '"</div>';
+                            suggestionBox.innerHTML = ''
+                                + '<div class="header-search-suggestion-empty">Aucune suggestion pour "' + query.replace(/"/g, '&quot;') + '"</div>'
+                                + '<a href="' + searchUrl + '" class="header-search-view-all" data-suggestion-index="0">Voir tous les articles</a>';
+                            currentItems = [{
+                                url: searchUrl
+                            }];
                             suggestionBox.classList.add('vivat-search-suggestions--open');
                             form.classList.add('vivat-search-suggestions-host');
                             input.setAttribute('aria-expanded', 'true');
@@ -325,14 +349,17 @@ $title_safe = htmlspecialchars($title);
                                 + '<span class="header-search-suggestion-meta">' + item.meta + '</span>'
                                 + '</span>'
                                 + '</a>';
-                        }).join('');
+                        }).join('') + '<a href="' + searchUrl + '" class="header-search-view-all" data-suggestion-index="' + items.length + '">Voir tous les articles</a>';
+                        currentItems.push({
+                            url: searchUrl
+                        });
                         suggestionBox.classList.add('vivat-search-suggestions--open');
                         form.classList.add('vivat-search-suggestions-host');
                         input.setAttribute('aria-expanded', 'true');
                     }
 
                     function setActiveSuggestion(nextIndex) {
-                        var links = suggestionBox.querySelectorAll('.header-search-suggestion');
+                        var links = suggestionBox.querySelectorAll('.header-search-suggestion, .header-search-view-all');
 
                         if (!links.length) {
                             activeIndex = -1;
