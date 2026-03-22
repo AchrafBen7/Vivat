@@ -8,7 +8,44 @@ $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
 $writer_cta_url = $writer_cta_url ?? $writer_signup_url;
 $writer_cta_label = $writer_cta_label ?? 'Rédigez un article';
-$writer_cta_description = $writer_cta_description ?? 'Vivat est aussi écrit par ses lecteurs. Partagez votre point de vue.';
+$writer_cta_description = $writer_cta_description ?? 'Écrivez sur Vivat. Votre voix compte.';
+$writerCtaLines = preg_split('/\.\s+/', trim($writer_cta_description), 2);
+
+/**
+ * CTA rédacteur — specs Figma : 301×114, gap 18px, typo 16px (text-base).
+ * Arrondi rounded-[30px] comme les cartes du hero. Ligne : texte | bouton (centrés verticalement).
+ */
+$writerCtaBanner = 'flex min-h-[114px] h-auto w-full flex-row items-center justify-between gap-[18px] overflow-hidden rounded-[30px] bg-[#FDF2D9] px-4 py-3 sm:h-[114px] sm:px-5 md:px-6';
+$writerCtaBannerSidebar = $writerCtaBanner . ' w-[301px] max-w-full shrink-0';
+$writerCtaText = 'min-w-0 flex-1 text-left font-semibold leading-snug text-[#003D2B] text-base';
+$writerCtaIconBtn = 'inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#003D2B] text-[#FDF2D9] shadow-sm transition-transform hover:scale-105';
+
+// —— Design tokens & blocs Tailwind réutilisables (Vivat)
+$cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
+$glassBox = 'rounded-[21px] flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1.5 box-border p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
+$glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
+$articleImageZoom = 'group min-h-[112px] min-w-[128px] overflow-hidden';
+$articleImageZoomImg = 'transition-transform duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.045]';
+
+$cardGreenSurface = 'bg-[linear-gradient(160deg,#0a5551_0%,#004241_58%,#033736_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]';
+$cardYellowSurface = 'bg-[linear-gradient(160deg,#fff5e1_0%,#ffefd1_60%,#ffe7b7_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]';
+$overlayImagePhoto = 'absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.18)_44%,rgba(0,0,0,0.56)_100%)]';
+$overlayImageSoft = 'absolute inset-0 bg-gradient-to-t from-black/30 to-transparent';
+$overlayRubriqueHero = 'pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/30 to-transparent';
+
+$cardArrowIcon = 'pointer-events-none absolute right-[18px] top-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100';
+$cardArrowOnGreen = $cardArrowIcon . ' bg-[#FFF0D4] text-[#004241]';
+$cardArrowOnYellow = $cardArrowIcon . ' bg-[#004241] text-white';
+
+$carouselSlideWidth = 'flex-[0_0_100%] box-border min-w-0';
+$carouselNavBtn = 'absolute top-1/2 z-[60] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#004241] text-white shadow-none transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2';
+
+$rubriqueTileSm = 'group relative block h-[200px] w-full min-h-0 flex-shrink-0 overflow-hidden rounded-[30px] bg-black/20 lg:h-[250px]';
+$rubriqueTileTall = 'group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]';
+$rubriqueDim = 'absolute inset-0 z-[1] bg-black/30 pointer-events-none';
+$rubriqueHoverTint = 'pointer-events-none absolute inset-0 z-[1] bg-[#004241]/50 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100';
+$rubriqueTitleWrap = 'pointer-events-none absolute inset-0 z-[2] flex items-center justify-center p-4 md:p-[18px]';
+$rubriqueTitle = 'text-center text-base font-semibold leading-snug text-white lg:text-xl';
 
 // Grille highlight : 5 emplacements depuis $highlight
 $h0 = $highlight[0] ?? null;
@@ -18,26 +55,17 @@ $h3 = $highlight[3] ?? null;
 $h4 = $highlight[4] ?? null;
 $catChunks = array_chunk($categories, 3);
 
-// Styles des tags par type de card (couleurs de fond et texte)
-$tagStyles = [
-    'vert'  => ['bg' => '#527E7E', 'color' => '#fff'],
-    'jaune' => ['bg' => '#004241', 'color' => '#fff'],
-    'glass' => ['bg' => '#787879', 'color' => '#fff'],
-    'gris'  => ['bg' => '#ffffff', 'color' => '#004241'],
-];
-
-// Classes Tailwind pour les tags pill
+// Tags pill & variantes (couleurs en utilitaires Tailwind)
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
-
-// Classes Tailwind pour les tags glass (fond semi-transparent + blur, sans padding supplémentaire)
-$tagGlass = $tagClass . ' bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
-
-// Classes Tailwind pour les boîtes glass (conteneur overlay sur images) — 18px padding
-$glassBox = 'vivat-glass bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
-$textCardBase = 'group relative overflow-hidden rounded-[30px] p-6 no-underline transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.01]';
-$textCardMeta = 'mt-auto flex items-center justify-between gap-4 pt-5 text-xs font-medium tracking-[0.01em]';
-$greenCardSurface = 'background: linear-gradient(160deg, #0a5551 0%, #004241 58%, #033736 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);';
-$yellowCardSurface = 'background: linear-gradient(160deg, #fff5e1 0%, #ffefd1 60%, #ffe7b7 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);';
+$tagCategoryTw = [
+    'vert' => 'bg-[#527E7E] text-white',
+    'jaune' => 'bg-[#004241] text-white',
+];
+$tagTopNews = 'bg-[#EBF1EF] text-[#004241]';
+$tagGlass = $tagClass . ' ' . $glassTagTailwind;
+$tagGlassOnImage = $tagGlass . ' text-white';
+/** Ligne méta (date • durée) sous les titres sur images glass */
+$articleMetaOnImage = 'text-white/80 text-xs';
 
 $h0CatSlug = $h0['category']['slug'] ?? null;
 $h0ArtId   = $h0['id'] ?? $h0['slug'] ?? null;
@@ -67,33 +95,33 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     </div>
 </div>
 
-<!-- Grille tablette dédiée (visible md uniquement) -->
-<div class="hidden md:grid lg:hidden grid-cols-8 w-full gap-6">
+<!-- Grille tablette dédiée (visible md uniquement) — items-stretch + h-full évite le « trou » sous h0 quand la colonne droite est plus haute -->
+<div class="hidden md:grid lg:hidden grid-cols-8 items-stretch gap-6 [grid-auto-rows:minmax(0,auto)]">
     <?php if ($h0): ?>
-    <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-article-image-zoom col-span-5 block rounded-[30px] overflow-hidden relative w-full h-[420px]">
-        <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager">
+    <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-5 block min-h-[420px] h-full w-full overflow-hidden rounded-[30px]">
+        <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager">
         <div class="absolute inset-0 bg-black/30"></div>
-        <div class="vivat-card-overlay flex items-end">
-            <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
-                <span class="<?= $tagClass ?>" style="background: #EBF1EF; color: #004241;">Top news</span>
+        <div class="<?= $cardOverlay ?> flex items-end">
+            <div class="<?= $glassBox ?> w-full">
+                <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
                 <h2 class="font-semibold text-white line-clamp-6 text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                 <?php if (!empty($h0['excerpt'])): ?>
                 <p class="text-white/90 line-clamp-5 text-sm"><?= htmlspecialchars($h0['excerpt']) ?></p>
                 <?php endif; ?>
-                <p class="text-white/80 text-xs"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
+                <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
             </div>
         </div>
     </a>
     <?php endif; ?>
 
-    <div class="col-span-3 flex flex-col gap-6">
+    <div class="col-span-3 flex h-full min-h-0 min-w-0 flex-col gap-4 self-stretch">
         <?php if ($h2): ?>
-        <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative block rounded-[30px] overflow-hidden border border-[#004241]/20 flex flex-col justify-end w-full p-6 gap-2" style="<?= $greenCardSurface ?>">
-            <span class="pointer-events-none absolute top-[18px] right-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#004241] text-white opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
-                <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 7h8v8"/></svg>
+        <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex min-h-[200px] w-full flex-1 flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-[#004241]/20 p-6 <?= $cardGreenSurface ?>">
+            <span class="<?= $cardArrowOnGreen ?>">
+                <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
             </span>
             <?php if (!empty($h2['category'])): ?>
-            <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($h2['category']['name']) ?></span>
+            <span class="<?= $tagClass ?> <?= $tagCategoryTw['vert'] ?>"><?= htmlspecialchars($h2['category']['name']) ?></span>
             <?php endif; ?>
             <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h2['title']) ?></h3>
             <p class="text-white/70 text-xs"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
@@ -101,16 +129,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         <?php endif; ?>
 
         <?php if ($h3): ?>
-        <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-article-image-zoom block rounded-[30px] overflow-hidden relative w-full h-[200px]">
-            <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-            <div class="vivat-card-overlay flex items-end">
-                <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+        <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block min-h-[200px] w-full flex-1 overflow-hidden rounded-[30px]">
+            <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+            <div class="<?= $overlayImageSoft ?>"></div>
+            <div class="<?= $cardOverlay ?> flex items-end">
+                <div class="<?= $glassBox ?> w-full">
                     <?php if (!empty($h3['category'])): ?>
-                    <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
+                    <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h3['category']['name']) ?></span>
                     <?php endif; ?>
                     <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
-                    <p class="text-white/80 text-xs"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
+                    <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                 </div>
             </div>
         </a>
@@ -118,12 +146,12 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     </div>
 
     <?php if ($h4): ?>
-    <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="group relative col-span-5 block rounded-[30px] overflow-hidden border border-gray-200/50 flex flex-col justify-end p-6 gap-2" style="<?= $yellowCardSurface ?>">
-        <span class="pointer-events-none absolute top-[18px] right-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#004241] text-white opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
-            <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 7h8v8"/></svg>
+    <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="group relative col-span-5 flex min-h-[280px] h-full w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-gray-200/50 p-6 <?= $cardYellowSurface ?>">
+        <span class="<?= $cardArrowOnYellow ?>">
+            <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
         </span>
         <?php if (!empty($h4['category'])): ?>
-        <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($h4['category']['name']) ?></span>
+        <span class="<?= $tagClass ?> <?= $tagCategoryTw['jaune'] ?>"><?= htmlspecialchars($h4['category']['name']) ?></span>
         <?php endif; ?>
         <h3 class="font-semibold text-[#004241] line-clamp-2 text-xl"><?= htmlspecialchars($h4['title']) ?></h3>
         <p class="text-[#004241]/70 text-xs"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
@@ -131,23 +159,33 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     <?php endif; ?>
 
     <?php if ($h1): ?>
-    <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-article-image-zoom col-span-3 block rounded-[30px] overflow-hidden relative w-full h-[200px]">
-        <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-        <div class="vivat-card-overlay flex items-end">
-            <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+    <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-3 block min-h-[280px] h-full w-full overflow-hidden rounded-[30px]">
+        <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+        <div class="<?= $overlayImageSoft ?>"></div>
+        <div class="<?= $cardOverlay ?> flex items-end">
+            <div class="<?= $glassBox ?> w-full">
                 <?php if (!empty($h1['category'])): ?>
-                <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
+                <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h1['category']['name']) ?></span>
                 <?php endif; ?>
                 <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
-                <p class="text-white/80 text-xs"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
+                <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
             </div>
         </div>
     </a>
     <?php endif; ?>
 
-    <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="col-span-8 flex items-center rounded-[30px] overflow-hidden bg-[#FFF0D4] min-h-[132px] p-6">
-        <p class="text-[#004241] font-medium leading-snug pr-16 text-lg"><?= htmlspecialchars($writer_cta_description) ?></p>
+    <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="col-span-8 <?= $writerCtaBanner ?>">
+        <p class="<?= $writerCtaText ?>">
+            <?php if (count($writerCtaLines) === 2): ?>
+            <?= htmlspecialchars($writerCtaLines[0]) ?>.<br>
+            <?= htmlspecialchars($writerCtaLines[1]) ?>
+            <?php else: ?>
+            <?= htmlspecialchars($writer_cta_description) ?>
+            <?php endif; ?>
+        </p>
+        <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </span>
     </a>
 </div>
 
@@ -156,31 +194,31 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     <div class="grid grid-cols-1 md:hidden lg:grid lg:grid-cols-12 lg:gap-6 lg:items-stretch">
 
         <!-- Colonne gauche: Top news + Standard 2 | lg: enfants directement sur la grille ; xl: colonne empilée -->
-        <div class="flex flex-col gap-6 lg:contents xl:col-span-5 xl:flex xl:flex-col xl:gap-6">
+        <div class="flex flex-col gap-4 lg:contents xl:col-span-5 xl:flex xl:flex-col xl:gap-6">
             <?php if ($h0): ?>
-            <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="vivat-article-image-zoom block h-[438px] w-full overflow-hidden rounded-[30px] relative lg:col-span-5 lg:row-start-1 lg:max-w-none">
-                <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager">
+            <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="<?= $articleImageZoom ?> block h-[438px] w-full overflow-hidden rounded-[30px] relative lg:col-span-5 lg:row-start-1 lg:max-w-none">
+                <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager">
                 <div class="absolute inset-0 bg-black/30"></div>
-                <div class="vivat-card-overlay flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
-                        <span class="<?= $tagClass ?>" style="background: #EBF1EF; color: #004241;">Top news</span>
+                <div class="<?= $cardOverlay ?> flex items-end">
+                    <div class="<?= $glassBox ?> w-full">
+                        <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
                         <h2 class="font-semibold text-white line-clamp-6 text-[32px] max-sm:text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                         <?php if (!empty($h0['excerpt'])): ?>
                         <p class="text-white/90 line-clamp-5 text-sm"><?= htmlspecialchars($h0['excerpt']) ?></p>
                         <?php endif; ?>
-                        <p class="text-white/80 text-xs"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
             <?php endif; ?>
 
             <?php if ($h4): ?>
-            <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-gray-200/50 p-6 lg:col-span-5 lg:row-start-2 lg:max-w-none" style="<?= $yellowCardSurface ?>">
-                <span class="pointer-events-none absolute top-[18px] right-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#004241] text-white opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
-                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 7h8v8"/></svg>
+            <a href="/articles/<?= htmlspecialchars($h4['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-gray-200/50 p-6 lg:col-span-5 lg:row-start-2 lg:max-w-none <?= $cardYellowSurface ?>">
+                <span class="<?= $cardArrowOnYellow ?>">
+                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
                 <?php if (!empty($h4['category'])): ?>
-                <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($h4['category']['name']) ?></span>
+                <span class="<?= $tagClass ?> <?= $tagCategoryTw['jaune'] ?>"><?= htmlspecialchars($h4['category']['name']) ?></span>
                 <?php endif; ?>
                 <h3 class="font-semibold text-[#004241] line-clamp-2 text-xl"><?= htmlspecialchars($h4['title']) ?></h3>
                 <p class="text-[#004241]/70 text-xs"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
@@ -189,31 +227,31 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         </div>
 
         <!-- Colonne droite: lg = bloc aligné avec h0 (h1+h2 flex) puis h3 ; xl 4 cols -->
-        <div class="flex flex-col gap-6 lg:col-span-7 lg:row-span-2 lg:min-h-0 lg:self-stretch xl:col-span-4 xl:row-auto xl:row-span-1">
-            <div class="flex flex-col gap-6 lg:flex-1 lg:min-h-0 lg:basis-0">
+        <div class="flex flex-col gap-4 lg:col-span-7 lg:row-span-2 lg:min-h-0 lg:gap-6 lg:self-stretch xl:col-span-4 xl:row-auto xl:row-span-1">
+            <div class="flex flex-col gap-4 lg:flex-1 lg:min-h-0 lg:basis-0 lg:gap-6">
             <?php if ($h1): ?>
-            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="vivat-article-image-zoom relative block h-[237px] w-full min-h-[160px] overflow-hidden rounded-[30px] lg:flex-1 lg:h-auto lg:min-h-0 lg:max-w-none">
-                <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                <div class="vivat-card-overlay flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[300px] w-full min-h-[200px] overflow-hidden rounded-[30px] lg:flex-1 lg:h-auto lg:min-h-0 lg:max-w-none">
+                <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $overlayImageSoft ?>"></div>
+                <div class="<?= $cardOverlay ?> flex items-end">
+                    <div class="<?= $glassBox ?> w-full">
                         <?php if (!empty($h1['category'])): ?>
-                        <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h1['category']['name']) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h1['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
-                        <p class="text-white/80 text-xs"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
             <?php endif; ?>
 
             <?php if ($h2): ?>
-            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex h-[221px] w-full min-h-[150px] flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-[#004241]/20 p-6 lg:flex-1 lg:h-auto lg:min-h-0 lg:max-w-none" style="<?= $greenCardSurface ?>">
-                <span class="pointer-events-none absolute top-[18px] right-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#004241] text-white opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
-                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 7h8v8"/></svg>
+            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex h-[300px] w-full min-h-[200px] flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-[#004241]/20 p-6 lg:flex-1 lg:h-auto lg:min-h-0 lg:max-w-none <?= $cardGreenSurface ?>">
+                <span class="<?= $cardArrowOnGreen ?>">
+                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
                 <?php if (!empty($h2['category'])): ?>
-                <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['vert']['bg'] ?>; color: <?= $tagStyles['vert']['color'] ?>;"><?= htmlspecialchars($h2['category']['name']) ?></span>
+                <span class="<?= $tagClass ?> <?= $tagCategoryTw['vert'] ?>"><?= htmlspecialchars($h2['category']['name']) ?></span>
                 <?php endif; ?>
                 <h3 class="font-semibold text-white line-clamp-2 text-xl"><?= htmlspecialchars($h2['title']) ?></h3>
                 <p class="text-white/70 text-xs"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
@@ -222,16 +260,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             </div>
 
             <?php if ($h3): ?>
-            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="vivat-article-image-zoom relative block h-[237px] w-full shrink-0 overflow-hidden rounded-[30px] lg:h-[280px] lg:max-w-none">
-                <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                <div class="vivat-card-overlay flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[300px] w-full shrink-0 overflow-hidden rounded-[30px] lg:h-[280px] lg:max-w-none">
+                <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $overlayImageSoft ?>"></div>
+                <div class="<?= $cardOverlay ?> flex items-end">
+                    <div class="<?= $glassBox ?> w-full">
                         <?php if (!empty($h3['category'])): ?>
-                        <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($h3['category']['name']) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h3['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
-                        <p class="text-white/80 text-xs"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -239,8 +277,18 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         </div>
 
         <!-- CTA rédacteur : pleine largeur sous le bloc hero (lg seulement) -->
-        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="hidden lg:flex xl:hidden lg:col-span-12 lg:row-start-3 flex-col rounded-[30px] overflow-hidden w-full bg-[#FFF0D4] min-h-[118px] p-6">
-            <p class="text-[#004241] font-medium leading-snug flex-1 z-10 text-lg"><?= htmlspecialchars($writer_cta_description) ?></p>
+        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBanner ?> hidden w-full lg:col-span-12 lg:row-start-3 lg:flex xl:hidden">
+            <p class="<?= $writerCtaText ?>">
+                <?php if (count($writerCtaLines) === 2): ?>
+                <?= htmlspecialchars($writerCtaLines[0]) ?>.<br>
+                <?= htmlspecialchars($writerCtaLines[1]) ?>
+                <?php else: ?>
+                <?= htmlspecialchars($writer_cta_description) ?>
+                <?php endif; ?>
+            </p>
+            <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </span>
         </a>
 
         <!-- Colonne pub + CTA : visible xl+ seulement -->
@@ -248,14 +296,34 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm w-full xl:max-w-[300px] h-[600px] items-center justify-center">
                 Espace publicitaire
             </div>
-            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="relative flex flex-col rounded-[30px] overflow-hidden flex-shrink-0 w-[301px] h-[118px] bg-[#FFF0D4] p-[18px]">
-                <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10"><?= htmlspecialchars($writer_cta_description) ?></p>
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBannerSidebar ?> relative">
+                <p class="<?= $writerCtaText ?>">
+                    <?php if (count($writerCtaLines) === 2): ?>
+                    <?= htmlspecialchars($writerCtaLines[0]) ?>.<br>
+                    <?= htmlspecialchars($writerCtaLines[1]) ?>
+                    <?php else: ?>
+                    <?= htmlspecialchars($writer_cta_description) ?>
+                    <?php endif; ?>
+                </p>
+                <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </span>
             </a>
         </div>
 
         <!-- CTA rédacteur mobile uniquement -->
-        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="lg:hidden relative flex flex-col rounded-[30px] overflow-hidden w-full bg-[#FFF0D4] min-h-[118px] p-[18px]">
-            <p class="text-[#004241] font-medium text-sm leading-snug flex-1 z-10"><?= htmlspecialchars($writer_cta_description) ?></p>
+        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBanner ?> relative w-full lg:hidden">
+            <p class="<?= $writerCtaText ?>">
+                <?php if (count($writerCtaLines) === 2): ?>
+                <?= htmlspecialchars($writerCtaLines[0]) ?>.<br>
+                <?= htmlspecialchars($writerCtaLines[1]) ?>
+                <?php else: ?>
+                <?= htmlspecialchars($writer_cta_description) ?>
+                <?php endif; ?>
+            </p>
+            <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </span>
         </a>
     </div>
 
@@ -289,24 +357,24 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     $cat3 = $chunk[2] ?? null;
                     $isFirstSlide = ($slideIdx === 0);
                 ?>
-                <div class="categories-carousel-slide flex-shrink-0 flex items-stretch gap-6 px-6 [contain:layout]" style="flex: 0 0 100%; box-sizing: border-box; min-width: 0;">
+                <div class="categories-carousel-slide flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>">
                     <?php if ($isFirstSlide): ?>
-                    <a href="/" class="rounded-[30px] overflow-hidden relative block flex-[7] min-w-0 h-[524px]">
-                        <video class="absolute inset-0 z-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
+                    <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[300px] md:h-[420px] lg:h-[524px]">
+                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
                             <source src="/rubriques.mp4" type="video/mp4">
                         </video>
-                        <div class="absolute inset-0 z-[1] bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
-                        <div class="absolute inset-0 z-[2] flex flex-col items-start justify-center p-8 pointer-events-none">
-                            <h2 class="font-semibold text-white text-left max-w-[85%] text-5xl md:text-2xl lg:text-5xl">Découvrez vos rubriques préférées</h2>
-                            <p class="text-white/95 mt-2 text-left max-w-[85%] text-2xl md:text-base lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                        <div class="<?= $overlayRubriqueHero ?>"></div>
+                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-end md:pb-8 md:pt-6 lg:p-8 lg:justify-center lg:pb-8">
+                            <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl">Découvrez vos rubriques préférées</h2>
+                            <p class="mt-2 max-w-[90%] text-left text-lg text-white/95 sm:text-xl md:mt-2 md:max-w-[92%] md:text-base lg:max-w-[85%] lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
                     <?php endif; ?>
-                    <div class="flex-[5] min-w-0 grid gap-6" style="grid-template-columns: 1fr 1fr; grid-template-rows: 250px 250px; gap: 24px;">
-                        <div class="flex flex-col row-span-2" style="gap: 24px;">
+                    <div class="grid min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] md:gap-5 lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
+                        <div class="row-span-2 flex min-h-0 flex-col gap-4 md:gap-5 lg:gap-6">
                         <?php if ($cat1): ?>
                         <?php $cat1Poster = vivat_category_public_poster_url($cat1['slug'] ?? null); ?>
-                        <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px] bg-black/20">
+                        <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($cat1['image_url'])): ?>
                             <?php if ($isVideoMedia($cat1['image_url'])): ?>
                             <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $cat1Poster ? ' poster="' . htmlspecialchars($cat1Poster) . '"' : '' ?>>
@@ -316,15 +384,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                             <img src="<?= htmlspecialchars($cat1['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat1['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
                             <?php endif; ?>
                             <?php endif; ?>
-                            <div class="absolute inset-0 z-[1] bg-black/30 pointer-events-none"></div>
-                            <div class="absolute inset-0 z-[2] flex items-center justify-center p-[18px] pointer-events-none">
-                                <span class="text-white font-semibold text-center text-xl"><?= htmlspecialchars($cat1['name']) ?></span>
+                            <div class="<?= $rubriqueDim ?>"></div>
+                            <div class="<?= $rubriqueHoverTint ?>"></div>
+                            <div class="<?= $rubriqueTitleWrap ?>">
+                                <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($cat1['name']) ?></span>
                             </div>
                         </a>
                         <?php endif; ?>
                         <?php if ($cat2): ?>
                         <?php $cat2Poster = vivat_category_public_poster_url($cat2['slug'] ?? null); ?>
-                        <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px] bg-black/20">
+                        <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($cat2['image_url'])): ?>
                             <?php if ($isVideoMedia($cat2['image_url'])): ?>
                             <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $cat2Poster ? ' poster="' . htmlspecialchars($cat2Poster) . '"' : '' ?>>
@@ -334,9 +403,10 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                             <img src="<?= htmlspecialchars($cat2['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat2['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
                             <?php endif; ?>
                             <?php endif; ?>
-                            <div class="absolute inset-0 z-[1] bg-black/30 pointer-events-none"></div>
-                            <div class="absolute inset-0 z-[2] flex items-center justify-center p-[18px] pointer-events-none">
-                                <span class="text-white font-semibold text-center text-xl"><?= htmlspecialchars($cat2['name']) ?></span>
+                            <div class="<?= $rubriqueDim ?>"></div>
+                            <div class="<?= $rubriqueHoverTint ?>"></div>
+                            <div class="<?= $rubriqueTitleWrap ?>">
+                                <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($cat2['name']) ?></span>
                             </div>
                         </a>
                         <?php endif; ?>
@@ -344,7 +414,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
                     <?php if ($cat3): ?>
                     <?php $cat3Poster = vivat_category_public_poster_url($cat3['slug'] ?? null); ?>
-                    <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[524px] row-span-2 bg-black/20">
+                    <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]">
                         <?php if (!empty($cat3['image_url'])): ?>
                         <?php if ($isVideoMedia($cat3['image_url'])): ?>
                         <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $cat3Poster ? ' poster="' . htmlspecialchars($cat3Poster) . '"' : '' ?>>
@@ -354,9 +424,10 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <img src="<?= htmlspecialchars($cat3['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($cat3['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
                         <?php endif; ?>
                         <?php endif; ?>
-                        <div class="absolute inset-0 z-[1] bg-black/30 pointer-events-none"></div>
-                        <div class="absolute inset-0 z-[2] flex items-center justify-center p-[18px] pointer-events-none">
-                            <span class="text-white font-semibold text-center text-xl"><?= htmlspecialchars($cat3['name']) ?></span>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($cat3['name']) ?></span>
                         </div>
                     </a>
                     <?php endif; ?>
@@ -364,22 +435,22 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 </div>
                 <?php endforeach; ?>
                 <?php if ($hasLoop && count($catChunks) > 0): $c = $catChunks[0]; $c1 = $c[0] ?? null; $c2 = $c[1] ?? null; $c3 = $c[2] ?? null; ?>
-                <div class="categories-carousel-slide categories-carousel-clone flex-shrink-0 flex items-stretch gap-6 px-6 [contain:layout]" style="flex: 0 0 100%; box-sizing: border-box; min-width: 0;" aria-hidden="true">
-                    <a href="/" class="rounded-[30px] overflow-hidden relative block flex-[7] min-w-0 h-[524px]">
-                        <video class="absolute inset-0 z-0 w-full h-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
+                <div class="categories-carousel-slide categories-carousel-clone flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>" aria-hidden="true">
+                    <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[300px] md:h-[420px] lg:h-[524px]">
+                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
                             <source src="/rubriques.mp4" type="video/mp4">
                         </video>
-                        <div class="absolute inset-0 z-[1] bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
-                        <div class="absolute inset-0 z-[2] flex flex-col items-start justify-center p-8 pointer-events-none">
-                            <h2 class="font-semibold text-white text-left max-w-[85%] text-5xl md:text-2xl lg:text-5xl">Découvrez vos rubriques préférées</h2>
-                            <p class="text-white/95 mt-2 text-left max-w-[85%] text-2xl md:text-base lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                        <div class="<?= $overlayRubriqueHero ?>"></div>
+                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-end md:pb-8 md:pt-6 lg:p-8 lg:justify-center lg:pb-8">
+                            <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl">Découvrez vos rubriques préférées</h2>
+                            <p class="mt-2 max-w-[90%] text-left text-lg text-white/95 sm:text-xl md:mt-2 md:max-w-[92%] md:text-base lg:max-w-[85%] lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
-                    <div class="flex-[5] min-w-0 grid gap-6" style="grid-template-columns: 1fr 1fr; grid-template-rows: 250px 250px; gap: 24px;">
-                        <div class="flex flex-col row-span-2" style="gap: 24px;">
+                    <div class="grid min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] md:gap-5 lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
+                        <div class="row-span-2 flex min-h-0 flex-col gap-4 md:gap-5 lg:gap-6">
                         <?php if ($c1): ?>
                         <?php $c1Poster = vivat_category_public_poster_url($c1['slug'] ?? null); ?>
-                        <a href="/categories/<?= htmlspecialchars($c1['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px] bg-black/20">
+                        <a href="/categories/<?= htmlspecialchars($c1['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($c1['image_url'])): ?>
                             <?php if ($isVideoMedia($c1['image_url'])): ?>
                             <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $c1Poster ? ' poster="' . htmlspecialchars($c1Poster) . '"' : '' ?>>
@@ -389,15 +460,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                             <img src="<?= htmlspecialchars($c1['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($c1['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
                             <?php endif; ?>
                             <?php endif; ?>
-                            <div class="absolute inset-0 z-[1] bg-black/30 pointer-events-none"></div>
-                            <div class="absolute inset-0 z-[2] flex items-center justify-center p-[18px] pointer-events-none">
-                                <span class="text-white font-semibold text-center text-xl"><?= htmlspecialchars($c1['name']) ?></span>
+                            <div class="<?= $rubriqueDim ?>"></div>
+                            <div class="<?= $rubriqueHoverTint ?>"></div>
+                            <div class="<?= $rubriqueTitleWrap ?>">
+                                <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($c1['name']) ?></span>
                             </div>
                         </a>
                         <?php endif; ?>
                         <?php if ($c2): ?>
                         <?php $c2Poster = vivat_category_public_poster_url($c2['slug'] ?? null); ?>
-                        <a href="/categories/<?= htmlspecialchars($c2['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full flex-shrink-0 h-[250px] bg-black/20">
+                        <a href="/categories/<?= htmlspecialchars($c2['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($c2['image_url'])): ?>
                             <?php if ($isVideoMedia($c2['image_url'])): ?>
                             <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $c2Poster ? ' poster="' . htmlspecialchars($c2Poster) . '"' : '' ?>>
@@ -407,16 +479,17 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                             <img src="<?= htmlspecialchars($c2['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($c2['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
                             <?php endif; ?>
                             <?php endif; ?>
-                            <div class="absolute inset-0 z-[1] bg-black/30 pointer-events-none"></div>
-                            <div class="absolute inset-0 z-[2] flex items-center justify-center p-[18px] pointer-events-none">
-                                <span class="text-white font-semibold text-center text-xl"><?= htmlspecialchars($c2['name']) ?></span>
+                            <div class="<?= $rubriqueDim ?>"></div>
+                            <div class="<?= $rubriqueHoverTint ?>"></div>
+                            <div class="<?= $rubriqueTitleWrap ?>">
+                                <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($c2['name']) ?></span>
                             </div>
                         </a>
                         <?php endif; ?>
                         </div>
                         <?php if ($c3): ?>
                         <?php $c3Poster = vivat_category_public_poster_url($c3['slug'] ?? null); ?>
-                        <a href="/categories/<?= htmlspecialchars($c3['slug']) ?>" class="block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[524px] row-span-2 bg-black/20">
+                        <a href="/categories/<?= htmlspecialchars($c3['slug']) ?>" class="group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]">
                             <?php if (!empty($c3['image_url'])): ?>
                             <?php if ($isVideoMedia($c3['image_url'])): ?>
                             <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $c3Poster ? ' poster="' . htmlspecialchars($c3Poster) . '"' : '' ?>>
@@ -426,9 +499,10 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                             <img src="<?= htmlspecialchars($c3['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($c3['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
                             <?php endif; ?>
                             <?php endif; ?>
-                            <div class="absolute inset-0 z-[1] bg-black/30 pointer-events-none"></div>
-                            <div class="absolute inset-0 z-[2] flex items-center justify-center p-[18px] pointer-events-none">
-                                <span class="text-white font-semibold text-center text-xl"><?= htmlspecialchars($c3['name']) ?></span>
+                            <div class="<?= $rubriqueDim ?>"></div>
+                            <div class="<?= $rubriqueHoverTint ?>"></div>
+                            <div class="<?= $rubriqueTitleWrap ?>">
+                                <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($c3['name']) ?></span>
                             </div>
                         </a>
                         <?php endif; ?>
@@ -438,11 +512,11 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             </div>
         </div>
         <?php if ($numSlides > 1): ?>
-        <button type="button" id="categories-carousel-prev" class="absolute left-0 top-1/2 z-[60] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#004241] text-white shadow-[0_4px_20px_rgba(0,66,65,0.4)] transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" aria-label="Rubriques précédentes">
-            <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        <button type="button" id="categories-carousel-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="Rubriques précédentes">
+            <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
-        <button type="button" id="categories-carousel-next" class="absolute right-0 top-1/2 z-[60] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#004241] text-white shadow-[0_4px_20px_rgba(0,66,65,0.4)] transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2" aria-label="Rubriques suivantes">
-            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        <button type="button" id="categories-carousel-next" class="<?= $carouselNavBtn ?> right-0" aria-label="Rubriques suivantes">
+            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <?php endif; ?>
     </section>
@@ -654,8 +728,8 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
     ?>
 
     <?php if (count($restArticles) > 0): ?>
-    <section class="grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 w-full min-w-0 mt-4 gap-6">
-        <h2 class="font-medium text-[#004241] mb-6 md:col-span-8 lg:col-span-12 text-[32px]">Dernières actualités</h2>
+    <section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-6 md:grid-cols-8 md:mt-16 lg:grid-cols-12">
+        <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
 
         <!-- Colonne gauche | md 4 cols, lg 6 cols -->
         <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full gap-6">
@@ -666,16 +740,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 ?>
                 <?php if ($firstArt): ?>
                 <?php $f0CatSlug = $firstArt['category']['slug'] ?? null; $f0ArtId = $firstArt['id'] ?? $firstArt['slug'] ?? null; $f0Fallback = vivat_category_fallback_image($f0CatSlug, 302, 419, $f0ArtId, 'card-0'); $f0Img = !empty($firstArt['cover_image_url']) ? $firstArt['cover_image_url'] : $f0Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($firstArt['slug']) ?>" class="vivat-article-image-zoom block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($f0Img) ?>" data-fallback-url="<?= htmlspecialchars($f0Fallback) ?>" alt="<?= htmlspecialchars($firstArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                    <div class="vivat-card-overlay flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+                <a href="/articles/<?= htmlspecialchars($firstArt['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
+                    <img src="<?= htmlspecialchars($f0Img) ?>" data-fallback-url="<?= htmlspecialchars($f0Fallback) ?>" alt="<?= htmlspecialchars($firstArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                    <div class="<?= $overlayImageSoft ?>"></div>
+                    <div class="<?= $cardOverlay ?> flex items-end z-10">
+                        <div class="<?= $glassBox ?> w-full">
                             <?php if (!empty($firstArt['category'])): ?>
-                            <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($firstArt['title'] ?? '') ?></h3>
-                            <p class="text-white/80 text-xs"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
+                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
                 </a>
@@ -683,16 +757,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
                 <?php if ($secondArt): ?>
                 <?php $artCatSlug = $secondArt['category']['slug'] ?? null; $artId = $secondArt['id'] ?? $secondArt['slug'] ?? null; $artFallback = vivat_category_fallback_image($artCatSlug, 254, 190, $artId, 'card-1'); $artImg = !empty($secondArt['cover_image_url']) ? $secondArt['cover_image_url'] : $artFallback; ?>
-                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="vivat-article-image-zoom block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($secondArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.18)_44%,rgba(0,0,0,0.56)_100%)]"></div>
-                    <div class="vivat-card-overlay flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
+                    <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($secondArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                    <div class="<?= $overlayImagePhoto ?>"></div>
+                    <div class="<?= $cardOverlay ?> flex items-end z-10">
+                        <div class="<?= $glassBox ?> w-full">
                             <?php if (!empty($secondArt['category'])): ?>
-                            <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($secondArt['title'] ?? '') ?></h3>
-                            <p class="text-white/80 text-xs"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
+                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
                 </a>
@@ -701,15 +775,15 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
             <?php $hotNewsArt = $restArticles[2] ?? null; if ($hotNewsArt): ?>
             <?php $hotCatSlug = $hotNewsArt['category']['slug'] ?? null; $hotArtId = $hotNewsArt['id'] ?? $hotNewsArt['slug'] ?? null; $hotFallback = vivat_category_fallback_image($hotCatSlug, 626, 240, $hotArtId, 'hot'); $hotNewsImg = !empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : $hotFallback; ?>
-            <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="vivat-article-image-zoom block rounded-[32px] overflow-hidden relative min-w-0 w-full h-60">
-                <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="vivat-card-overlay flex justify-end items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+            <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[32px] overflow-hidden relative min-w-0 w-full h-60">
+                <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $cardOverlay ?> flex justify-end items-end">
+                    <div class="<?= $glassBox ?> w-full">
                         <?php if (!empty($hotNewsArt['category'])): ?>
-                        <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($hotNewsArt['title'] ?? '') ?></h3>
-                        <p class="text-white/80 text-xs"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -717,13 +791,13 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
                 <?php $artLeft = $restArticles[10] ?? null; if ($artLeft): ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="group relative flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full h-[419px] p-6 gap-[18px]" style="<?= $yellowCardSurface ?>">
-                    <span class="pointer-events-none absolute top-[18px] right-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#004241] text-white opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
-                        <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 7h8v8"/></svg>
+                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="group relative flex flex-col justify-end overflow-hidden rounded-[30px] min-w-0 w-full h-[419px] gap-[18px] p-6 <?= $cardYellowSurface ?>">
+                    <span class="<?= $cardArrowOnYellow ?>">
+                        <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                     </span>
                     <div class="flex flex-col min-h-0 gap-2">
                         <?php if (!empty($artLeft['category'])): ?>
-                        <span class="<?= $tagClass ?>" style="background: <?= $tagStyles['jaune']['bg'] ?>; color: <?= $tagStyles['jaune']['color'] ?>;"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
+                        <span class="<?= $tagClass ?> <?= $tagCategoryTw['jaune'] ?>"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-[#004241] line-clamp-5 text-xl"><?= htmlspecialchars($artLeft['title']) ?></h3>
                         <p class="text-[#004241] font-light text-xs"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
@@ -733,16 +807,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
                 <?php $artLeft2 = $restArticles[6] ?? null; if ($artLeft2): ?>
                 <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null; $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null; $left2Fallback = vivat_category_fallback_image($left2CatSlug, 302, 419, $left2ArtId, 'left2'); $artLeft2Img = !empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="vivat-article-image-zoom block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                    <div class="vivat-card-overlay flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
+                    <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                    <div class="<?= $overlayImageSoft ?>"></div>
+                    <div class="<?= $cardOverlay ?> flex items-end z-10">
+                        <div class="<?= $glassBox ?> w-full">
                             <?php if (!empty($artLeft2['category'])): ?>
-                            <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artLeft2['title'] ?? '') ?></h3>
-                            <p class="text-white/80 text-xs"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
+                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
                 </a>
@@ -752,19 +826,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
         <!-- Colonne droite | md 4 cols, lg 6 cols -->
         <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full gap-6">
-            <?php
-            $stdColors = ['#004241', '#FFEFD1'];
-            foreach (array_slice($restArticles, 3, 2) as $i => $art):
-                $bg = $stdColors[$i % 2];
-                $isDark = ($bg === '#004241');
+            <?php foreach (array_slice($restArticles, 3, 2) as $i => $art):
+                $isDark = ($i % 2 === 0);
             ?>
-            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="group relative flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full h-[198px] p-6 gap-2 border border-white/10" style="<?= $isDark ? $greenCardSurface : $yellowCardSurface ?>">
-                <span class="pointer-events-none absolute top-[18px] right-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#004241] text-white opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
-                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 7h8v8"/></svg>
+            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="group relative flex min-w-0 w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-white/10 p-6 h-[198px] <?= $isDark ? $cardGreenSurface : $cardYellowSurface ?>">
+                <span class="<?= $isDark ? $cardArrowOnGreen : $cardArrowOnYellow ?>">
+                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
                 <?php if (!empty($art['category'])): ?>
                 <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
-                <span class="<?= $tagClass ?>" style="background: <?= $tagStyles[$tagVariant]['bg'] ?>; color: <?= $tagStyles[$tagVariant]['color'] ?>;"><?= htmlspecialchars($art['category']['name']) ?></span>
+                <span class="<?= $tagClass ?> <?= $tagCategoryTw[$tagVariant] ?>"><?= htmlspecialchars($art['category']['name']) ?></span>
                 <?php endif; ?>
                 <h3 class="font-medium line-clamp-2 text-xl <?= $isDark ? 'text-white' : 'text-[#004241]' ?>"><?= htmlspecialchars($art['title']) ?></h3>
                 <p class="text-xs <?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
@@ -774,16 +845,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
                 <?php $artRight = $restArticles[11] ?? null; if ($artRight): ?>
                 <?php $rightCatSlug = $artRight['category']['slug'] ?? null; $rightArtId = $artRight['id'] ?? $artRight['slug'] ?? null; $rightFallback = vivat_category_fallback_image($rightCatSlug, 254, 190, $rightArtId, 'right'); $artRightImg = !empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="vivat-article-image-zoom block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($artRightImg) ?>" data-fallback-url="<?= htmlspecialchars($rightFallback) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.18)_44%,rgba(0,0,0,0.56)_100%)]"></div>
-                    <div class="vivat-card-overlay flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+                <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
+                    <img src="<?= htmlspecialchars($artRightImg) ?>" data-fallback-url="<?= htmlspecialchars($rightFallback) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                    <div class="<?= $overlayImagePhoto ?>"></div>
+                    <div class="<?= $cardOverlay ?> flex items-end z-10">
+                        <div class="<?= $glassBox ?> w-full">
                             <?php if (!empty($artRight['category'])): ?>
-                            <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artRight['category']['name']) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artRight['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artRight['title'] ?? '') ?></h3>
-                            <p class="text-white/80 text-xs"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
+                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
                 </a>
@@ -791,16 +862,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
                 <?php if ($artForFullPhoto1): ?>
                 <?php $full1CatSlug = $artForFullPhoto1['category']['slug'] ?? null; $full1ArtId = $artForFullPhoto1['id'] ?? $artForFullPhoto1['slug'] ?? null; $full1Fallback = vivat_category_fallback_image($full1CatSlug, 302, 419, $full1ArtId, 'full1'); $fullPhoto1Img = !empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : $full1Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="vivat-article-image-zoom block rounded-[25px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                    <div class="vivat-card-overlay flex items-end z-10">
-                        <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+                <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[25px] overflow-hidden relative min-w-0 w-full h-[419px]">
+                    <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                    <div class="<?= $overlayImageSoft ?>"></div>
+                    <div class="<?= $cardOverlay ?> flex items-end z-10">
+                        <div class="<?= $glassBox ?> w-full">
                             <?php if (!empty($artForFullPhoto1['category'])): ?>
-                            <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
                             <?php endif; ?>
                             <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artForFullPhoto1['title'] ?? '') ?></h3>
-                            <p class="text-white/80 text-xs"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
+                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
                         </div>
                     </div>
                 </a>
@@ -809,16 +880,16 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
 
             <?php if ($artForFullPhoto2): ?>
             <?php $full2CatSlug = $artForFullPhoto2['category']['slug'] ?? null; $full2ArtId = $artForFullPhoto2['id'] ?? $artForFullPhoto2['slug'] ?? null; $full2Fallback = vivat_category_fallback_image($full2CatSlug, 629, 235, $full2ArtId, 'full2'); $fullPhoto2Img = !empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : $full2Fallback; ?>
-            <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="vivat-article-image-zoom block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[235px]">
-                <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                <div class="vivat-card-overlay flex items-end">
-                    <div class="rounded-[21px] flex flex-col <?= $glassBox ?> w-full gap-1.5">
+            <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[235px]">
+                <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $overlayImageSoft ?>"></div>
+                <div class="<?= $cardOverlay ?> flex items-end">
+                    <div class="<?= $glassBox ?> w-full">
                         <?php if (!empty($artForFullPhoto2['category'])): ?>
-                        <span class="<?= $tagGlass ?>" style="color: #fff;"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
                         <?php endif; ?>
                         <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artForFullPhoto2['title'] ?? '') ?></h3>
-                        <p class="text-white/80 text-xs"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
@@ -829,7 +900,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
         <div class="flex justify-center md:col-span-8 lg:col-span-12">
             <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 h-12 w-[226px] bg-[#004241] px-[18px]">
                 Autres actualités
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
         </div>
     </section>

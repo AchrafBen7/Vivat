@@ -52,131 +52,6 @@ $title_safe = htmlspecialchars($title);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
-    <style>
-        /* Espace FIXE 18px entre bordure carte et panel glass — toujours en haut, bas, gauche, droite */
-        .vivat-card-overlay {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            bottom: 18px;
-            left: 18px;
-            box-sizing: border-box;
-        }
-        /* Boîtes glass : 18px padding FIXE entre bordure glass et texte (haut, bas, gauche, droite) */
-        .vivat-glass {
-            background: rgba(190, 190, 190, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(230, 230, 230, 0.2);
-            padding-top: 18px;
-            padding-right: 18px;
-            padding-bottom: 18px;
-            padding-left: 18px;
-            box-sizing: border-box;
-        }
-        /* Tag pill : effet glass sans padding supplémentaire */
-        .vivat-glass-tag {
-            background: rgba(190, 190, 190, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(230, 230, 230, 0.2);
-        }
-        .vivat-article-image-zoom {
-            overflow: hidden;
-        }
-        .vivat-article-image-zoom img {
-            transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
-            transform-origin: center center;
-            will-change: transform;
-        }
-        .vivat-article-image-zoom:hover img {
-            transform: scale(1.045);
-        }
-        /* Barre recherche header : pastille + loupe → s’étire au hover / focus / texte saisi */
-        #header-search-form {
-            --vivat-search-ease: cubic-bezier(0.22, 1, 0.36, 1);
-            --vivat-search-dur: 0.52s;
-            display: none;
-            position: relative;
-            align-items: center;
-            justify-content: center;
-            width: 3rem;
-            height: 3rem;
-            flex-shrink: 0;
-            border-radius: 9999px;
-            background: #e5edeb;
-            overflow: hidden;
-            gap: 0;
-            padding: 0 0.125rem;
-            transition:
-                width var(--vivat-search-dur) var(--vivat-search-ease),
-                gap var(--vivat-search-dur) var(--vivat-search-ease),
-                padding var(--vivat-search-dur) var(--vivat-search-ease);
-        }
-        @media (min-width: 768px) {
-            #header-search-form {
-                display: flex;
-            }
-        }
-        #header-search-form:hover,
-        #header-search-form:focus-within,
-        #header-search-form.vivat-header-search--dirty {
-            width: min(100%, 15rem);
-            justify-content: flex-start;
-            gap: 0.375rem;
-            padding-left: 0.375rem;
-            padding-right: 0.75rem;
-        }
-        /* Loupe à gauche à l’ouverture ; ordre Tab = ordre DOM (champ puis bouton) */
-        #header-search-form input[name="q"] {
-            order: 2;
-            flex: 1 1 0%;
-            min-width: 0;
-            max-width: 0;
-            overflow: hidden;
-            opacity: 0;
-            border: none;
-            background: transparent;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            color: #226e65;
-            outline: none;
-            transition:
-                max-width var(--vivat-search-dur) var(--vivat-search-ease),
-                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s;
-        }
-        #header-search-form input[name="q"]::placeholder {
-            color: rgba(34, 110, 101, 0.65);
-        }
-        #header-search-form:hover input[name="q"],
-        #header-search-form:focus-within input[name="q"],
-        #header-search-form.vivat-header-search--dirty input[name="q"] {
-            max-width: 12rem;
-            opacity: 1;
-        }
-        #header-search-form button[type="submit"] {
-            display: flex;
-            flex-shrink: 0;
-            align-items: center;
-            justify-content: center;
-            width: 2.5rem;
-            height: 2.5rem;
-            padding: 0;
-            border: none;
-            border-radius: 9999px;
-            background: transparent;
-            color: #226e65;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            order: 1;
-        }
-        #header-search-form button[type="submit"]:hover {
-            background: rgba(0, 66, 65, 0.06);
-        }
-        #header-search-form button[type="submit"]:active {
-            transform: scale(0.94);
-        }
-    </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
 
@@ -191,12 +66,12 @@ $title_safe = htmlspecialchars($title);
 
                 <div class="hidden md:block flex-1 min-w-[16px]"></div>
 
-                <!-- Barre de recherche (pastille → s’allonge au survol / focus) -->
-                <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
-                    <input type="search" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="Rechercher…" autocomplete="off" aria-label="Mot-clé ou catégorie">
-                    <button type="submit" aria-label="Lancer la recherche">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <!-- Barre de recherche (pastille → s’allonge au survol / focus / data-dirty) -->
+                <form action="/search" method="get" id="header-search-form" role="search" aria-label="Recherche sur le site" <?= request()->filled('q') ? 'data-dirty' : '' ?> class="group relative hidden h-12 w-12 shrink-0 items-center justify-center gap-0 overflow-hidden rounded-full bg-[#e5edeb] px-0.5 py-0 transition-[width,gap,padding] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:w-[min(100%,15rem)] hover:justify-start hover:gap-1.5 hover:pl-1.5 hover:pr-3 focus-within:w-[min(100%,15rem)] focus-within:justify-start focus-within:gap-1.5 focus-within:pl-1.5 focus-within:pr-3 data-[dirty]:w-[min(100%,15rem)] data-[dirty]:justify-start data-[dirty]:gap-1.5 data-[dirty]:pl-1.5 data-[dirty]:pr-3 md:flex">
+                    <button type="submit" class="order-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-[#226e65] transition-colors hover:bg-[#004241]/[0.06] active:scale-[0.94]" aria-label="Lancer la recherche">
+                        <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
+                    <input type="search" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="Rechercher…" autocomplete="off" aria-label="Mot-clé ou catégorie" class="order-2 min-w-0 flex-1 border-0 bg-transparent text-sm leading-5 text-[#226e65] outline-none placeholder:text-[#226e65]/65 max-w-0 opacity-0 transition-[max-width,opacity] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:max-w-[12rem] group-hover:opacity-100 group-focus-within:max-w-[12rem] group-focus-within:opacity-100 group-data-[dirty]:max-w-[12rem] group-data-[dirty]:opacity-100">
                 </form>
                 <script>
                 (function () {
@@ -206,7 +81,11 @@ $title_safe = htmlspecialchars($title);
                         return;
                     }
                     function syncDirty() {
-                        form.classList.toggle('vivat-header-search--dirty', input.value.trim() !== '');
+                        if (input.value.trim() !== '') {
+                            form.setAttribute('data-dirty', '');
+                        } else {
+                            form.removeAttribute('data-dirty');
+                        }
                     }
                     input.addEventListener('input', syncDirty);
                     input.addEventListener('change', syncDirty);
@@ -219,18 +98,21 @@ $title_safe = htmlspecialchars($title);
                     Contactez-nous
                 </a>
 
-                <!-- Hamburger -->
-                <button type="button" id="hamburger-menu" class="flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-12 h-12 bg-transparent border-none cursor-pointer rounded-[30px]" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
-                    <span class="block rounded-full w-7 h-[3px] bg-[#004241]"></span>
-                    <span class="block rounded-full w-7 h-[3px] bg-[#004241]"></span>
-                    <span class="block rounded-full w-7 h-[3px] bg-[#004241]"></span>
+                <!-- Hamburger : épaisseur type stroke 1 (1px) ; croix = même centre de rotation -->
+                <button type="button" id="hamburger-menu" class="group relative flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-[30px] border-none bg-transparent" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
+                    <span class="relative block h-[15px] w-7 shrink-0" aria-hidden="true">
+                        <span class="absolute left-0 top-0 h-px w-full origin-center rounded-full bg-[#004241] transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-[aria-expanded=true]:top-1/2 group-[aria-expanded=true]:-translate-y-1/2 group-[aria-expanded=true]:rotate-45"></span>
+                        <span class="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 rounded-full bg-[#004241] transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-[aria-expanded=true]:opacity-0 group-[aria-expanded=true]:scale-x-0"></span>
+                        <span class="absolute left-0 top-[14px] h-px w-full origin-center rounded-full bg-[#004241] transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-[aria-expanded=true]:top-1/2 group-[aria-expanded=true]:-translate-y-1/2 group-[aria-expanded=true]:-rotate-45"></span>
+                    </span>
                 </button>
             </div>
 
-            <!-- Panneau menu -->
+            <!-- Panneau menu (data-open : JS) -->
             <div id="mobile-menu-panel"
-                 class="hidden absolute top-full left-0 right-0 md:left-6 md:right-6 lg:left-auto lg:right-20 lg:w-[min(100%,715px)] rounded-[30px] p-6 tablet:p-8 bg-[#004241] backdrop-blur-[18px] border border-[rgba(230,230,230,0.18)] shadow-[0_10px_40px_rgba(0,66,65,0.15)] overflow-hidden z-50"
-                 role="dialog" aria-label="Menu de navigation">
+                 data-open="false"
+                 class="absolute top-full left-0 right-0 z-50 mt-2 origin-top rounded-[30px] border border-[rgba(230,230,230,0.18)] bg-[#004241] p-6 shadow-[0_10px_40px_rgba(0,66,65,0.15)] backdrop-blur-[18px] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] tablet:p-8 md:left-6 md:right-6 lg:left-auto lg:right-20 lg:mt-2 lg:w-[min(100%,715px)] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=false]:[clip-path:inset(0_0_100%_0)] data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(85vh,900px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100 data-[open=true]:[clip-path:inset(0_0_0_0)]"
+                 role="dialog" aria-label="Menu de navigation" aria-modal="true">
 
                 <?php if (auth()->check()): ?>
                 <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="block rounded-2xl bg-white/15 border border-white/20 p-4 mb-4">
@@ -242,7 +124,7 @@ $title_safe = htmlspecialchars($title);
                             <p class="font-semibold text-white text-base truncate"><?= htmlspecialchars(auth()->user()->name ?? 'Mon compte') ?></p>
                             <p class="text-white/80 text-sm"><?= auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Mon profil' ?></p>
                         </div>
-                        <svg class="w-5 h-5 text-white/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-5 h-5 text-white/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </a>
                 <form action="<?= url('/logout') ?>" method="post" class="mb-4">
@@ -271,7 +153,7 @@ $title_safe = htmlspecialchars($title);
     <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
         <?php if (session('success')): ?>
         <div class="mb-6 rounded-[20px] bg-[#004241] text-white px-6 py-4 flex items-center gap-3" role="alert">
-            <svg class="w-6 h-6 flex-shrink-0 text-[#7DD3C1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg class="w-6 h-6 flex-shrink-0 text-[#7DD3C1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <p class="font-medium"><?= htmlspecialchars(session('success')) ?></p>
         </div>
         <?php endif; ?>
@@ -365,12 +247,21 @@ $title_safe = htmlspecialchars($title);
         function initHamburgerMenu() {
             var btn = document.getElementById('hamburger-menu');
             var panel = document.getElementById('mobile-menu-panel');
-            if (!btn || !panel) return;
-            btn.addEventListener('click', function() {
-                panel.classList.toggle('hidden');
-                var isOpen = !panel.classList.contains('hidden');
+            if (!btn || !panel) {
+                return;
+            }
+            function setOpen(isOpen) {
+                panel.setAttribute('data-open', isOpen ? 'true' : 'false');
                 btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 btn.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
+            }
+            btn.addEventListener('click', function () {
+                setOpen(panel.getAttribute('data-open') !== 'true');
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && panel.getAttribute('data-open') === 'true') {
+                    setOpen(false);
+                }
             });
         }
 

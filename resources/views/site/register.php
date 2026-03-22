@@ -13,7 +13,7 @@ $unsplash_img = 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=
         <div class="relative w-full lg:w-[628px] flex-shrink-0 rounded-[30px] overflow-hidden" style="height: 850px; min-height: 400px;">
             <img src="<?= htmlspecialchars($unsplash_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">
             <a href="/" class="absolute flex items-center justify-center gap-2.5 rounded-full text-[#004241] font-normal text-base leading-none hover:opacity-90 transition" style="top: 24px; left: 24px; width: 115px; height: 43px; padding: 12px 18px; background: #F3E8CC;">
-                <svg class="w-5 h-5 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="w-5 h-5 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 Retour
             </a>
         </div>

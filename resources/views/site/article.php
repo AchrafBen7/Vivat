@@ -87,7 +87,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
         <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
         <div class="absolute inset-0 flex flex-col p-8 top-0 left-0">
             <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center gap-2.5 self-start rounded-full font-normal transition hover:opacity-90 w-[127px] h-12 py-3 px-[18px] bg-[#EBF1EF] border border-white/10 font-sans text-xl leading-none text-[#004241] mb-[85px]">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 19l-7-7 7-7"/></svg>
                 <span>Retour</span>
             </a>
             <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
@@ -211,7 +211,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
             aria-label="Article précédent"
         >
             <svg class="w-7 h-7 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
         <button
@@ -221,7 +221,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
             aria-label="Article suivant"
         >
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
         <script>
