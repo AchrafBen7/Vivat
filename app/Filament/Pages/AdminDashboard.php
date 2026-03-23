@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Submissions\SubmissionResource;
 use Filament\Actions\Action;
 use Filament\Pages\Dashboard;
@@ -19,6 +20,11 @@ class AdminDashboard extends Dashboard
                 ->icon(Heroicon::OutlinedInboxStack)
                 ->color('primary')
                 ->url(SubmissionResource::getUrl('index')),
+            Action::make('publishedArticles')
+                ->label('Gérer les articles')
+                ->icon(Heroicon::OutlinedNewspaper)
+                ->color('gray')
+                ->url(ArticleResource::getUrl('index')),
         ];
     }
 

@@ -56,7 +56,7 @@ if (! function_exists('vivat_category_fallback_image')) {
         $w = max(1, $width);
         $h = max(1, $height);
 
-        return $baseUrl.'?auto=compress&cs=tinysrgb&w='.$w.'&h='.$h.'&fit=crop';
+        return $baseUrl.'?auto=compress&cs=tinysrgb&fm=jpg&q=80&dpr=2&w='.$w.'&h='.$h.'&fit=crop';
     }
 }
 

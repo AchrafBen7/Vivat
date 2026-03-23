@@ -66,6 +66,7 @@ $tagCategoryTw = [
 $tagTopNews = 'bg-[#FFF1B9] text-[#004241]';
 $tagGlass = $tagClass.' '.$glassTagTailwind;
 $tagGlassOnImage = $tagGlass.' text-white';
+$tagAutoImage = $tagClass.' bg-[rgba(255,255,255,0.16)] backdrop-blur-[15px] border border-[rgba(255,255,255,0.22)] text-white';
 /** Ligne méta (date • durée) sous les titres sur images glass */
 $articleMetaOnImage = 'text-white/80 text-xs';
 
@@ -761,6 +762,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                     <div class="<?= $overlayImageSoft ?>"></div>
                     <div class="<?= $cardOverlay ?> flex items-end z-10">
                         <div class="<?= $glassBox ?> w-full">
+                            <?php if (! empty($firstArt['uses_auto_image'])) { ?>
+                            <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                            <?php } ?>
                             <?php if (! empty($firstArt['category'])) { ?>
                             <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
                             <?php } ?>
@@ -781,6 +785,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                     <div class="<?= $overlayImagePhoto ?>"></div>
                     <div class="<?= $cardOverlay ?> flex items-end z-10">
                         <div class="<?= $glassBox ?> w-full">
+                            <?php if (! empty($secondArt['uses_auto_image'])) { ?>
+                            <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                            <?php } ?>
                             <?php if (! empty($secondArt['category'])) { ?>
                             <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
                             <?php } ?>
@@ -802,6 +809,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                 <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $cardOverlay ?> flex justify-end items-end">
                     <div class="<?= $glassBox ?> w-full">
+                        <?php if (! empty($hotNewsArt['uses_auto_image'])) { ?>
+                        <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                        <?php } ?>
                         <?php if (! empty($hotNewsArt['category'])) { ?>
                         <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
                         <?php } ?>
@@ -815,17 +825,25 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
                 <?php $artLeft = $restArticles[10] ?? null;
         if ($artLeft) { ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="group relative flex flex-col justify-end overflow-hidden rounded-[30px] min-w-0 w-full h-[419px] gap-[18px] p-6 <?= $cardYellowSurface ?>">
-                    <span class="<?= $cardArrowOnYellow ?>">
-                        <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
-                    </span>
-                    <div class="flex flex-col min-h-0 gap-2">
-                        <?php if (! empty($artLeft['category'])) { ?>
-                        <span class="<?= $tagClass ?> <?= $tagCategoryTw['jaune'] ?>"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
-                        <?php } ?>
-                        <h3 class="font-medium text-[#004241] line-clamp-5 text-xl"><?= htmlspecialchars($artLeft['title']) ?></h3>
-                        <p class="text-[#004241] font-light text-xs"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
+                <?php $leftCatSlug = $artLeft['category']['slug'] ?? null;
+                    $leftArtId = $artLeft['id'] ?? $artLeft['slug'] ?? null;
+                    $leftFallback = vivat_category_fallback_image($leftCatSlug, 302, 419, $leftArtId, 'left0');
+                    $artLeftImg = ! empty($artLeft['cover_image_url']) ? $artLeft['cover_image_url'] : $leftFallback; ?>
+                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
+                    <img src="<?= htmlspecialchars($artLeftImg) ?>" data-fallback-url="<?= htmlspecialchars($leftFallback) ?>" alt="<?= htmlspecialchars($artLeft['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                    <div class="<?= $overlayImageSoft ?>"></div>
+                    <div class="<?= $cardOverlay ?> flex items-end z-10">
+                        <div class="<?= $glassBox ?> w-full">
+                            <?php if (! empty($artLeft['uses_auto_image'])) { ?>
+                            <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                            <?php } ?>
+                            <?php if (! empty($artLeft['category'])) { ?>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
+                            <?php } ?>
+                            <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artLeft['title']) ?></h3>
+                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
                         </div>
+                    </div>
                 </a>
                 <?php } ?>
 
@@ -840,6 +858,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                     <div class="<?= $overlayImageSoft ?>"></div>
                     <div class="<?= $cardOverlay ?> flex items-end z-10">
                         <div class="<?= $glassBox ?> w-full">
+                            <?php if (! empty($artLeft2['uses_auto_image'])) { ?>
+                            <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                            <?php } ?>
                             <?php if (! empty($artLeft2['category'])) { ?>
                             <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
                             <?php } ?>
@@ -856,17 +877,26 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
         <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full gap-6">
             <?php foreach (array_slice($restArticles, 3, 2) as $i => $art) {
                 $isDark = ($i % 2 === 0);
+                $tileCatSlug = $art['category']['slug'] ?? null;
+                $tileArtId = $art['id'] ?? $art['slug'] ?? null;
+                $tileFallback = vivat_category_fallback_image($tileCatSlug, 626, 198, $tileArtId, 'tile-'.$i);
+                $tileImg = ! empty($art['cover_image_url']) ? $art['cover_image_url'] : $tileFallback;
                 ?>
-            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="group relative flex min-w-0 w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] p-6 h-[198px] <?= $isDark ? $cardGreenSurface : $cardYellowSurface ?>">
-                <span class="<?= $isDark ? $cardArrowOnGreen : $cardArrowOnYellow ?>">
-                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
-                </span>
-                <?php if (! empty($art['category'])) { ?>
-                <?php $tagVariant = $isDark ? 'vert' : 'jaune'; ?>
-                <span class="<?= $tagClass ?> <?= $tagCategoryTw[$tagVariant] ?>"><?= htmlspecialchars($art['category']['name']) ?></span>
-                <?php } ?>
-                <h3 class="font-medium line-clamp-2 text-xl <?= $isDark ? 'text-white' : 'text-[#004241]' ?>"><?= htmlspecialchars($art['title']) ?></h3>
-                <p class="text-xs <?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[198px]">
+                <img src="<?= htmlspecialchars($tileImg) ?>" data-fallback-url="<?= htmlspecialchars($tileFallback) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $isDark ? $overlayImagePhoto : $overlayImageSoft ?>"></div>
+                <div class="<?= $cardOverlay ?> flex items-end z-10">
+                    <div class="<?= $glassBox ?> w-full">
+                        <?php if (! empty($art['uses_auto_image'])) { ?>
+                        <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                        <?php } ?>
+                        <?php if (! empty($art['category'])) { ?>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($art['category']['name']) ?></span>
+                        <?php } ?>
+                        <h3 class="font-medium text-white line-clamp-2 text-xl"><?= htmlspecialchars($art['title']) ?></h3>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </div>
             </a>
             <?php } ?>
 
@@ -882,6 +912,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                     <div class="<?= $overlayImagePhoto ?>"></div>
                     <div class="<?= $cardOverlay ?> flex items-end z-10">
                         <div class="<?= $glassBox ?> w-full">
+                            <?php if (! empty($artRight['uses_auto_image'])) { ?>
+                            <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                            <?php } ?>
                             <?php if (! empty($artRight['category'])) { ?>
                             <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artRight['category']['name']) ?></span>
                             <?php } ?>
@@ -902,6 +935,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                     <div class="<?= $overlayImageSoft ?>"></div>
                     <div class="<?= $cardOverlay ?> flex items-end z-10">
                         <div class="<?= $glassBox ?> w-full">
+                            <?php if (! empty($artForFullPhoto1['uses_auto_image'])) { ?>
+                            <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                            <?php } ?>
                             <?php if (! empty($artForFullPhoto1['category'])) { ?>
                             <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
                             <?php } ?>
@@ -923,6 +959,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
                     <div class="<?= $glassBox ?> w-full">
+                        <?php if (! empty($artForFullPhoto2['uses_auto_image'])) { ?>
+                        <span class="<?= $tagAutoImage ?>">Image auto HD</span>
+                        <?php } ?>
                         <?php if (! empty($artForFullPhoto2['category'])) { ?>
                         <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
                         <?php } ?>

@@ -91,12 +91,6 @@ $statusStyles = [
                 </span>
             </div>
 
-            <div class="absolute left-5 top-[74px] z-10">
-                <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex items-center justify-center rounded-full border border-white/15 bg-[rgba(32,42,38,0.78)] px-4 py-[10px] text-xs font-semibold text-white transition hover:bg-[rgba(255,255,255,0.18)]" onclick="event.stopPropagation();">
-                    Modifier
-                </a>
-            </div>
-
             <div class="absolute inset-x-0 bottom-0 p-5">
                 <div class="overflow-hidden rounded-[21px] border border-[rgba(230,230,230,0.20)] bg-[rgba(52,62,58,0.72)] p-[20px]">
                     <?php if (! empty($sub['category']['name'])) { ?>

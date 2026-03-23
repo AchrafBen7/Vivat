@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -51,7 +52,12 @@ class ViewSubmission extends ViewRecord
 
                     $this->record->refresh();
                 })
-                ->successNotificationTitle('Informations de revue mises a jour.'),
+                ->successNotification(
+                    fn () => Notification::make()
+                        ->success()
+                        ->title('Revue mise à jour')
+                        ->body('Les informations de relecture ont bien été enregistrées.')
+                ),
             Action::make('approve')
                 ->label('Approuver et publier')
                 ->icon(Heroicon::OutlinedCheckCircle)
@@ -99,7 +105,12 @@ class ViewSubmission extends ViewRecord
 
                     $this->record->refresh();
                 })
-                ->successNotificationTitle('Soumission approuvée et article publié.'),
+                ->successNotification(
+                    fn () => Notification::make()
+                        ->success()
+                        ->title('Article publié')
+                        ->body('La soumission a été approuvée et l’article est maintenant visible sur le site.')
+                ),
             Action::make('reject')
                 ->label('Rejeter')
                 ->icon(Heroicon::OutlinedXCircle)
@@ -133,7 +144,12 @@ class ViewSubmission extends ViewRecord
 
                     $this->record->refresh();
                 })
-                ->successNotificationTitle('Soumission rejetée.'),
+                ->successNotification(
+                    fn () => Notification::make()
+                        ->success()
+                        ->title('Soumission rejetée')
+                        ->body('Le retour éditorial a bien été enregistré. Le rédacteur peut corriger puis renvoyer sa soumission.')
+                ),
         ];
     }
 }

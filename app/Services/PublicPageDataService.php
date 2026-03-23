@@ -470,6 +470,7 @@ class PublicPageDataService
                 )
                 : $cover,
             'cover_video_url' => $a->cover_video_url,
+            'uses_auto_image' => $useFallback,
             'article_type' => $a->article_type,
             'language' => $a->language ?? 'fr',
             'category' => $category,

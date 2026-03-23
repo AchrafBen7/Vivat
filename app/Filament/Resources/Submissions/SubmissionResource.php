@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -25,6 +26,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class SubmissionResource extends Resource
 {
@@ -141,21 +143,41 @@ class SubmissionResource extends Resource
             ->columns([
                 ImageColumn::make('cover_image_url')
                     ->label('')
-                    ->circular(),
+                    ->square()
+                    ->size(86)
+                    ->defaultImageUrl(url('/technologie.jpg'))
+                    ->extraImgAttributes([
+                        'class' => 'rounded-2xl object-cover shadow-sm',
+                    ]),
                 TextColumn::make('title')
-                    ->label('Titre')
+                    ->label('Soumission')
                     ->searchable()
                     ->wrap()
-                    ->weight(FontWeight::SemiBold),
-                TextColumn::make('user.name')
-                    ->label('Auteur')
-                    ->searchable(),
-                TextColumn::make('category.name')
-                    ->label('Catégorie')
-                    ->toggleable(),
+                    ->weight(FontWeight::SemiBold)
+                    ->lineClamp(2)
+                    ->description(function (Submission $record): HtmlString {
+                        $author = e($record->user?->name ?? 'Auteur inconnu');
+                        $category = e($record->category?->name ?? 'Sans catégorie');
+                        $readingTime = (int) ($record->reading_time ?: 5);
+                        $createdAt = e($record->created_at?->format('d/m/Y à H:i') ?? 'Date inconnue');
+                        $excerpt = e((string) str($record->excerpt ?: $record->content ?: 'Aucun extrait disponible.')
+                            ->stripTags()
+                            ->squish()
+                            ->limit(130));
+
+                        return new HtmlString(
+                            '<div class="mt-1 space-y-1 text-xs text-gray-500">'
+                            . '<div><span class="font-medium text-gray-700">' . $author . '</span> · ' . $category . ' · ' . $readingTime . ' min</div>'
+                            . '<div>' . $createdAt . '</div>'
+                            . '<div class="text-gray-600">' . $excerpt . '</div>'
+                            . '</div>'
+                        );
+                    })
+                    ->html(),
                 TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft' => 'Brouillon',
                         'pending' => 'En attente',
@@ -168,15 +190,30 @@ class SubmissionResource extends Resource
                         'approved' => 'success',
                         'rejected' => 'danger',
                         default => 'gray',
+                    })
+                    ->icon(fn (string $state): Heroicon => match ($state) {
+                        'pending' => Heroicon::OutlinedClock,
+                        'approved' => Heroicon::OutlinedCheckCircle,
+                        'rejected' => Heroicon::OutlinedXCircle,
+                        default => Heroicon::OutlinedDocumentText,
+                    })
+                    ->description(function (Submission $record): ?string {
+                        if (! $record->reviewed_at && ! $record->reviewer) {
+                            return null;
+                        }
+
+                        $parts = [];
+
+                        if ($record->reviewer?->name) {
+                            $parts[] = 'Par ' . $record->reviewer->name;
+                        }
+
+                        if ($record->reviewed_at) {
+                            $parts[] = $record->reviewed_at->format('d/m/Y H:i');
+                        }
+
+                        return implode(' · ', $parts);
                     }),
-                TextColumn::make('reading_time')
-                    ->label('Lecture')
-                    ->formatStateUsing(fn ($state): string => ($state ?: 5) . ' min')
-                    ->alignCenter(),
-                TextColumn::make('created_at')
-                    ->label('Soumise le')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -188,6 +225,8 @@ class SubmissionResource extends Resource
                     ])
                     ->default('pending'),
             ])
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(10)
             ->recordActions([
                 ViewAction::make()
                     ->label('Aperçu')
@@ -231,7 +270,12 @@ class SubmissionResource extends Resource
                             reviewer: auth()->user(),
                         );
                     })
-                    ->successNotificationTitle('Soumission approuvée et article publié.'),
+                    ->successNotification(
+                        fn (Submission $record) => Notification::make()
+                            ->success()
+                            ->title('Article publié')
+                            ->body('La soumission "' . $record->title . '" a été approuvée et est maintenant visible sur le site.')
+                    ),
                 TableAction::make('reject')
                     ->label('Rejeter')
                     ->icon(Heroicon::OutlinedXCircle)
@@ -251,7 +295,12 @@ class SubmissionResource extends Resource
                             reviewer: auth()->user(),
                         );
                     })
-                    ->successNotificationTitle('Soumission rejetée.'),
+                    ->successNotification(
+                        fn (Submission $record) => Notification::make()
+                            ->success()
+                            ->title('Soumission rejetée')
+                            ->body('Le retour éditorial a été enregistré pour "' . $record->title . '". Le rédacteur peut maintenant corriger puis renvoyer son article.')
+                    ),
             ])
             ->defaultSort('created_at', 'desc');
     }

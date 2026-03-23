@@ -397,7 +397,7 @@ class ContributorController extends Controller
             ->with('success', 'Article supprimé.');
     }
 
-    public function profile(Request $request): Response
+    public function profile(Request $request): Response|RedirectResponse
     {
         if ($request->isMethod('post')) {
             $validated = $request->validate([
