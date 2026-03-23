@@ -17,10 +17,10 @@ $rubriquesHeroPosterUrl = vivat_cloudinary_video_poster_url($rubriquesHeroVideoU
  * CTA rédacteur — specs Figma : 301×114, gap 18px, typo 16px (text-base).
  * Arrondi rounded-[30px] comme les cartes du hero. Ligne : texte | bouton (centrés verticalement).
  */
-$writerCtaBanner = 'group relative flex min-h-[114px] h-auto w-full flex-row items-start justify-between gap-[18px] overflow-hidden rounded-[30px] bg-[#FDF2D9] p-[18px]';
+$writerCtaBanner = 'group relative flex min-h-[114px] h-auto w-full flex-row items-start justify-between gap-[18px] overflow-hidden rounded-[30px] bg-[#EBF1EF] p-[18px]';
 $writerCtaBannerSidebar = $writerCtaBanner.' w-[301px] max-w-full shrink-0';
 $writerCtaText = 'min-w-0 flex-1 pr-16 text-left font-semibold leading-snug text-[#004241] text-base';
-$writerCtaIconBtn = 'absolute bottom-[18px] right-[18px] inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#004241] text-[#FDF2D9] shadow-sm opacity-0 translate-y-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100 group-hover:translate-y-0';
+$writerCtaIconBtn = 'absolute bottom-[18px] right-[18px] inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#004241] text-[#EBF1EF] shadow-sm opacity-0 translate-y-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100 group-hover:translate-y-0';
 
 // —— Design tokens & blocs Tailwind réutilisables (Vivat)
 $cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
@@ -29,14 +29,14 @@ $glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border bord
 $articleImageZoom = 'group min-h-[112px] min-w-[128px] overflow-hidden';
 $articleImageZoomImg = 'transition-transform duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.045]';
 
-$cardGreenSurface = 'bg-[#004241]';
-$cardYellowSurface = 'bg-[#FFF0B6]';
+$cardGreenSurface = 'bg-[#004241] transition-colors duration-200 hover:bg-[#003130]';
+$cardYellowSurface = 'bg-[#FFF0B6] transition-colors duration-200 hover:bg-[#FBE9A3]';
 $overlayImagePhoto = 'absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.18)_44%,rgba(0,0,0,0.56)_100%)]';
 $overlayImageSoft = 'absolute inset-0 bg-gradient-to-t from-black/30 to-transparent';
-$overlayRubriqueHero = 'pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/30 to-transparent';
+$overlayRubriqueHero = 'pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 to-black/20';
 
 $cardArrowIcon = 'pointer-events-none absolute right-[18px] top-[18px] inline-flex h-12 w-12 items-center justify-center rounded-full opacity-0 translate-x-2 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100';
-$cardArrowOnGreen = $cardArrowIcon.' bg-[#FFF0D4] text-[#004241]';
+$cardArrowOnGreen = $cardArrowIcon.' bg-[#527E7E] text-white';
 $cardArrowOnYellow = $cardArrowIcon.' bg-[#004241] text-white';
 
 $carouselSlideWidth = 'flex-[0_0_100%] box-border min-w-0';
@@ -63,7 +63,7 @@ $tagCategoryTw = [
     'vert' => 'bg-[#527E7E] text-white',
     'jaune' => 'bg-[#004241] text-white',
 ];
-$tagTopNews = 'bg-[#EBF1EF] text-[#004241]';
+$tagTopNews = 'bg-[#FFF1B9] text-[#004241]';
 $tagGlass = $tagClass.' '.$glassTagTailwind;
 $tagGlassOnImage = $tagGlass.' text-white';
 /** Ligne méta (date • durée) sous les titres sur images glass */
@@ -186,7 +186,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
             <?php } ?>
         </p>
             <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </span>
     </a>
 </div>
@@ -228,11 +228,10 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
             <?php } ?>
         </div>
 
-        <!-- Colonne droite: lg = bloc aligné avec h0 (h1+h2 flex) puis h3 ; xl 4 cols -->
-        <div class="flex flex-col gap-4 lg:col-span-7 lg:row-span-2 lg:min-h-0 lg:gap-6 lg:self-stretch xl:col-span-4 xl:row-auto xl:row-span-1">
-            <div class="flex flex-col gap-4 lg:flex-1 lg:min-h-0 lg:basis-0 lg:gap-6">
+        <!-- Colonne droite: 3 cartes équivalentes (h1, h2, h3) — grille 3 lignes égales, gap 24px -->
+        <div class="flex flex-col gap-6 lg:col-span-7 lg:row-span-2 lg:grid lg:grid-rows-3 lg:min-h-0 lg:self-stretch xl:col-span-4 xl:row-auto xl:row-span-1">
             <?php if ($h1) { ?>
-            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[300px] w-full min-h-[200px] overflow-hidden rounded-[30px] lg:flex-1 lg:h-auto lg:min-h-0 lg:max-w-none">
+            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[200px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full lg:min-h-0">
                 <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
@@ -248,7 +247,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
             <?php } ?>
 
             <?php if ($h2) { ?>
-            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex h-[300px] w-full min-h-[200px] flex-col justify-end gap-2 overflow-hidden rounded-[30px] p-6 lg:flex-1 lg:h-auto lg:min-h-0 lg:max-w-none <?= $cardGreenSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex h-[200px] w-full min-h-0 flex-col justify-end gap-2 overflow-hidden rounded-[30px] p-6 lg:h-full <?= $cardGreenSurface ?>">
                 <span class="<?= $cardArrowOnGreen ?>">
                     <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
@@ -259,10 +258,9 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                 <p class="text-white/70 text-xs"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php } ?>
-            </div>
 
             <?php if ($h3) { ?>
-            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[300px] w-full shrink-0 overflow-hidden rounded-[30px] lg:h-[280px] lg:max-w-none">
+            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[200px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full">
                 <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
@@ -289,7 +287,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                 <?php } ?>
             </p>
             <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </span>
         </a>
 
@@ -308,7 +306,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                     <?php } ?>
                 </p>
                 <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </span>
             </a>
         </div>
@@ -324,13 +322,13 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                 <?php } ?>
             </p>
             <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </span>
         </a>
     </div>
 
     <!-- Bannière pub -->
-    <div class="flex rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm overflow-hidden items-center justify-center w-full max-w-[970px] h-[250px] mt-[65px]">
+    <div class="flex rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm overflow-hidden items-center justify-center w-[970px] max-w-full h-[250px] mt-[65px] mx-auto">
         Espace publicitaire (bannière)
     </div>
 
@@ -354,9 +352,9 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         <div id="categories-carousel-viewport" class="overflow-hidden w-full min-w-0">
             <div id="categories-carousel-track" class="flex transition-transform duration-[1100ms] ease-out will-change-transform">
                 <?php foreach ($catChunks as $slideIdx => $chunk) {
-                    $cat1 = $chunk[0] ?? null;
-                    $cat2 = $chunk[1] ?? null;
-                    $cat3 = $chunk[2] ?? null;
+                        $cat1 = $chunk[0] ?? null;
+                        $cat2 = $chunk[1] ?? null;
+                        $cat3 = $chunk[2] ?? null;
                     $isFirstSlide = ($slideIdx === 0);
                     ?>
                 <div class="categories-carousel-slide flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>">
@@ -519,10 +517,10 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         </div>
         <?php if ($numSlides > 1) { ?>
         <button type="button" id="categories-carousel-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="Rubriques précédentes">
-            <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <button type="button" id="categories-carousel-next" class="<?= $carouselNavBtn ?> right-0" aria-label="Rubriques suivantes">
-            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <?php } ?>
     </section>
@@ -851,7 +849,7 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
                         </div>
                     </a>
                 <?php } ?>
-            </div>
+                </div>
             </div>
 
         <!-- Colonne droite | md 4 cols, lg 6 cols -->
@@ -938,9 +936,9 @@ if ($artForFullPhoto2 !== null && $artForFullPhoto1 !== null && ($artForFullPhot
 
         <!-- Bouton Autres actualités -->
         <div class="flex justify-center md:col-span-8 lg:col-span-12">
-            <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 h-12 w-[226px] bg-[#004241] px-[18px]">
+            <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 h-12 w-[226px] bg-[#004241] px-[18px] transition-colors duration-200 hover:bg-[#003130]">
                 Autres actualités
-                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
         </div>
     </section>

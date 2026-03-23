@@ -595,7 +595,7 @@ $title_safe = htmlspecialchars($title);
 
     <?php if (empty($hide_cta_section)) { ?>
     <section class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
-        <a href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 bg-[url('https://res.cloudinary.com/dfcy6isdu/image/upload/v1774267903/redacteur_hujpx2.jpg')]">
+        <a href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 bg-[url('https://images.pexels.com/photos/34950/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1200&h=380&fit=crop')]">
             <span class="absolute inset-0 bg-black/30" aria-hidden="true"></span>
             <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
                 <span class="text-white font-semibold text-xl lg:text-2xl leading-tight">
@@ -606,7 +606,7 @@ $title_safe = htmlspecialchars($title);
                     Vivat est ouvert aux nouvelles voix
                     <?php } ?>
                 </span>
-                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap bg-[#FFEFD1] text-[#004241] text-base">
+                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap bg-[#FFEFD1] text-[#004241] text-base transition-colors duration-200 hover:bg-[#EDE4A8]">
                     <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Accéder au bureau' : 'Rédigez un article' ?>
                 </span>
             </span>
@@ -623,12 +623,12 @@ $title_safe = htmlspecialchars($title);
                     <div class="flex flex-col justify-center rounded-[30px] bg-[#004241] p-6 md:p-8 text-white lg:col-span-7 gap-5">
                         <span class="inline-flex w-fit items-center justify-center rounded-full bg-white/[0.18] px-4 py-2 text-sm font-medium text-white backdrop-blur-[10px] border border-white/[0.14]">Newsletter</span>
                         <div class="flex flex-col gap-[10px]">
-                            <h2 class="max-w-[13ch] font-medium text-white text-[clamp(28px,4vw,46px)] leading-[0.98]">Les articles à ne pas rater, directement dans votre boîte mail.</h2>
+                            <h2 class="max-w-[13ch] font-medium text-white text-3xl sm:text-4xl md:text-2xl lg:text-5xl leading-[0.98]">Les articles à ne pas rater, directement dans votre boîte mail.</h2>
                             <p class="max-w-[44ch] text-white/[0.78] text-[17px] leading-[1.4]">Une sélection simple, claire, et utile pour suivre Vivat sans chercher partout.</p>
                         </div>
                         <form action="#" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
                             <input type="email" name="email" placeholder="you@example.com" class="h-12 rounded-full border-0 bg-white pl-5 pr-5 text-base text-gray-900 outline-none focus:ring-2 focus:ring-white/30">
-                            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0D4] px-8 font-semibold text-[#004241]">
+                            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0B6] px-8 font-semibold text-[#004241] transition-colors duration-200 hover:bg-[#FBE9A3]">
                                 S'abonner
                             </button>
                         </form>
