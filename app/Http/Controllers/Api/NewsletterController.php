@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\NewsletterSubscriber;
+use App\Services\NewsletterSubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class NewsletterController extends Controller
 {
+    public function __construct(
+        private readonly NewsletterSubscriptionService $newsletterSubscriptionService,
+    ) {}
+
     /**
      * POST /api/newsletter/subscribe
      */
@@ -17,51 +22,15 @@ class NewsletterController extends Controller
         $validated = $request->validate([
             'email'     => ['required', 'email', 'max:255'],
             'name'      => ['nullable', 'string', 'max:255'],
-            'interests' => ['required', 'array', 'min:3'],
+            'interests' => ['nullable', 'array'],
             'interests.*' => ['string', 'max:100'],
         ]);
 
-        $existing = NewsletterSubscriber::where('email', $validated['email'])->first();
-
-        if ($existing) {
-            if ($existing->unsubscribed_at) {
-                // Re-subscribe
-                $existing->update([
-                    'interests'       => $validated['interests'],
-                    'name'            => $validated['name'] ?? $existing->name,
-                    'unsubscribed_at' => null,
-                    'confirmed'       => false,
-                    'confirm_token'   => \Illuminate\Support\Str::random(64),
-                ]);
-
-                // TODO: send confirmation email
-                return response()->json([
-                    'message' => 'Réinscription enregistrée. Un email de confirmation va vous être envoyé.',
-                ]);
-            }
-
-            // Update interests
-            $existing->update([
-                'interests' => $validated['interests'],
-                'name'      => $validated['name'] ?? $existing->name,
-            ]);
-
-            return response()->json([
-                'message' => 'Préférences newsletter mises à jour.',
-            ]);
-        }
-
-        $subscriber = NewsletterSubscriber::create([
-            'email'     => $validated['email'],
-            'name'      => $validated['name'] ?? null,
-            'interests' => $validated['interests'],
-        ]);
-
-        // TODO: send confirmation email with $subscriber->confirm_token
+        $result = $this->newsletterSubscriptionService->subscribe($validated);
 
         return response()->json([
-            'message' => 'Inscription enregistrée. Un email de confirmation va vous être envoyé.',
-        ], 201);
+            'message' => $result['message'],
+        ], $result['status'] === 'created' ? 201 : 200);
     }
 
     /**
@@ -73,15 +42,12 @@ class NewsletterController extends Controller
             'token' => ['required', 'string', 'size:64'],
         ]);
 
-        $subscriber = NewsletterSubscriber::where('unsubscribe_token', $validated['token'])->first();
+        $result = $this->newsletterSubscriptionService->unsubscribe($validated['token']);
 
-        if (! $subscriber) {
-            return response()->json(['message' => 'Token invalide.'], 404);
-        }
-
-        $subscriber->unsubscribe();
-
-        return response()->json(['message' => 'Désabonnement effectué.']);
+        return response()->json(
+            ['message' => $result['message']],
+            $result['status'] === 'unsubscribed' ? 200 : 404
+        );
     }
 
     /**
@@ -89,21 +55,12 @@ class NewsletterController extends Controller
      */
     public function confirm(Request $request): JsonResponse
     {
-        $token = $request->input('token');
+        $result = $this->newsletterSubscriptionService->confirm($request->input('token'));
 
-        if (! $token) {
-            return response()->json(['message' => 'Token requis.'], 422);
-        }
-
-        $subscriber = NewsletterSubscriber::where('confirm_token', $token)->first();
-
-        if (! $subscriber) {
-            return response()->json(['message' => 'Token invalide ou déjà utilisé.'], 404);
-        }
-
-        $subscriber->confirm();
-
-        return response()->json(['message' => 'Abonnement confirmé. Bienvenue !']);
+        return response()->json(
+            ['message' => $result['message']],
+            $result['status'] === 'confirmed' ? 200 : ($result['status'] === 'missing_token' ? 422 : 404)
+        );
     }
 
     /**

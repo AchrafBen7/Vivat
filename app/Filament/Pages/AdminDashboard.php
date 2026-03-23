@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Resources\Articles\ArticleResource;
+use App\Filament\Resources\NewsletterSubscribers\NewsletterSubscriberResource;
 use App\Filament\Resources\Submissions\SubmissionResource;
 use Filament\Actions\Action;
 use Filament\Pages\Dashboard;
@@ -25,6 +26,11 @@ class AdminDashboard extends Dashboard
                 ->icon(Heroicon::OutlinedNewspaper)
                 ->color('gray')
                 ->url(ArticleResource::getUrl('index')),
+            Action::make('newsletterSubscribers')
+                ->label('Voir la newsletter')
+                ->icon(Heroicon::OutlinedEnvelope)
+                ->color('gray')
+                ->url(NewsletterSubscriberResource::getUrl('index')),
         ];
     }
 

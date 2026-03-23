@@ -78,9 +78,9 @@ Route::prefix('public')->group(function () {
 // ║  NEWSLETTER (public)                                                ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 Route::prefix('newsletter')->group(function () {
-    Route::post('subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
-    Route::post('unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
-    Route::get('confirm', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
+    Route::post('subscribe', [NewsletterController::class, 'subscribe'])->name('api.newsletter.subscribe');
+    Route::post('unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('api.newsletter.unsubscribe');
+    Route::get('confirm', [NewsletterController::class, 'confirm'])->name('api.newsletter.confirm');
 });
 
 // ╔══════════════════════════════════════════════════════════════════════╗

@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\ContactController as WebContactController;
 use App\Http\Controllers\Web\ContributorController as WebContributorController;
 use App\Http\Controllers\Web\FaqController as WebFaqController;
 use App\Http\Controllers\Web\HomeController as WebHomeController;
+use App\Http\Controllers\Web\NewsletterController as WebNewsletterController;
 use App\Http\Controllers\Web\SearchController as WebSearchController;
 use App\Http\Controllers\Api\PaymentController as ApiPaymentController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,9 @@ Route::get('/search/suggestions', [WebSearchController::class, 'suggestions'])->
 Route::get('/search', [WebSearchController::class, 'index'])->name('search');
 Route::get('/contact', [WebContactController::class, 'index'])->name('contact');
 Route::get('/faq', [WebFaqController::class, 'index'])->name('faq');
+Route::post('/newsletter/subscribe', [WebNewsletterController::class, 'subscribe'])->name('newsletter.subscribe.web');
+Route::get('/newsletter/confirm', [WebNewsletterController::class, 'confirm'])->name('newsletter.confirm');
+Route::get('/newsletter/unsubscribe', [WebNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->group(function () {
     Route::get('/dashboard', [WebContributorController::class, 'dashboard'])->name('contributor.dashboard');

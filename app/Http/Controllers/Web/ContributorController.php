@@ -108,7 +108,9 @@ class ContributorController extends Controller
                 'reviewer_name' => $s->reviewer?->name,
                 'category' => $s->category ? ['name' => $s->category->name] : null,
                 'preview_url' => route('contributor.articles.show', ['submission' => $s->slug]),
-                'edit_url' => route('contributor.articles.edit', ['submission' => $s->slug]),
+                'edit_url' => $s->status === 'approved'
+                    ? null
+                    : route('contributor.articles.edit', ['submission' => $s->slug]),
                 'delete_url' => route('contributor.articles.destroy', ['submission' => $s->slug]),
             ])
             ->all();
@@ -127,7 +129,11 @@ class ContributorController extends Controller
             403
         );
 
-        abort_if($submission->status === 'approved', 403);
+        if ($submission->status === 'approved') {
+            return redirect()
+                ->route('contributor.dashboard')
+                ->with('info', 'Cet article a deja ete approuve et ne peut plus etre modifie.');
+        }
 
         if ($request->isMethod('post')) {
             $validated = $request->validate([

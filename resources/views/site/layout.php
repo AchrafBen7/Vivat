@@ -590,6 +590,12 @@ $title_safe = htmlspecialchars($title);
             <p class="font-medium"><?= htmlspecialchars(session('success')) ?></p>
         </div>
         <?php } ?>
+        <?php if (session('error')) { ?>
+        <div class="mb-6 rounded-[20px] bg-[#AE422E] text-white px-6 py-4 flex items-center gap-3" role="alert">
+            <svg class="w-6 h-6 flex-shrink-0 text-[#FFD2C9]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A2 2 0 004.53 20h14.94a2 2 0 001.74-3l-7.5-13a2 2 0 00-3.42 0z"/></svg>
+            <p class="font-medium"><?= htmlspecialchars(session('error')) ?></p>
+        </div>
+        <?php } ?>
         <?= $content ?? '' ?>
     </main>
 
@@ -627,8 +633,9 @@ $title_safe = htmlspecialchars($title);
                             <h2 class="max-w-[13ch] font-medium text-white text-3xl sm:text-4xl md:text-2xl lg:text-5xl leading-[0.98]">Les articles à ne pas rater, directement dans votre boîte mail.</h2>
                             <p class="max-w-[44ch] text-white/[0.78] text-[17px] leading-[1.4]">Une sélection simple, claire, et utile pour suivre Vivat sans chercher partout.</p>
                         </div>
-                        <form action="#" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
-                            <input type="email" name="email" placeholder="you@example.com" class="h-12 rounded-full border-0 bg-white pl-5 pr-5 text-base text-gray-900 outline-none focus:ring-2 focus:ring-white/30">
+                        <form action="<?= htmlspecialchars(route('newsletter.subscribe.web')) ?>" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+                            <?= csrf_field() ?>
+                            <input type="email" name="email" placeholder="you@example.com" class="h-12 rounded-full border-0 bg-white pl-5 pr-5 text-base text-gray-900 outline-none focus:ring-2 focus:ring-white/30" required>
                             <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0B6] px-8 font-semibold text-[#004241] transition-colors duration-200 hover:bg-[#FBE9A3]">
                                 S'abonner
                             </button>
