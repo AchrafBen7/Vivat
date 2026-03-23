@@ -71,6 +71,6 @@ return [
         'au-quotidien' => 'quotidien',
     ],
 
-    'writer_signup_url' => env('VIVAT_WRITER_SIGNUP_URL', '/register'),
+    'writer_signup_url' => env('VIVAT_WRITER_SIGNUP_URL', '/devenir-redacteur'),
     'writer_dashboard_url' => env('VIVAT_WRITER_DASHBOARD_URL', '/contributor/submissions'),
 ];

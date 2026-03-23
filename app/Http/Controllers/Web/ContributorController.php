@@ -73,6 +73,7 @@ class ContributorController extends Controller
             'title' => 'Espace rédacteur — Vivat',
             'meta_description' => 'Espace rédacteur Vivat. Gérez vos soumissions et rédigez des articles.',
             'hide_cta_section' => true,
+            'hide_footer' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -369,6 +370,7 @@ class ContributorController extends Controller
                 ? (str_starts_with($submission->cover_image_url, '/') ? url($submission->cover_image_url) : $submission->cover_image_url)
                 : null,
             'og_article' => true,
+            'hide_footer' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

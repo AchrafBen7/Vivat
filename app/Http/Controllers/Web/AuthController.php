@@ -13,6 +13,26 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
+    public function showBecomeContributor(Request $request): Response
+    {
+        $priceCents = (int) config('services.stripe.publication_price', 1500);
+        $priceEur = (int) round($priceCents / 100);
+
+        $content = render_php_view('site.become_contributor', [
+            'publication_price_eur' => $priceEur,
+        ]);
+        $html = render_php_view('site.layout', [
+            'content' => $content,
+            'content_locale' => content_locale($request),
+            'title' => 'Devenir rédacteur — Vivat',
+            'meta_description' => 'Rédigez et publiez vos articles sur Vivat. Découvrez la participation à la publication et les avantages de devenir contributeur.',
+            'hide_cta_section' => true,
+            'hide_footer' => true,
+        ]);
+
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
     public function showRegisterForm(Request $request): Response
     {
         $errors = $request->session()->get('errors');

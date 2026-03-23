@@ -18,11 +18,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::get('/', WebHomeController::class)->name('home');
+Route::get('/devenir-redacteur', [WebAuthController::class, 'showBecomeContributor'])->name('become.contributor');
 Route::get('/register', [WebAuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [WebAuthController::class, 'register']);
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login']);
 Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
+Route::get('/logout', [WebAuthController::class, 'logout'])->name('logout.get');
 Route::get('/search/suggestions', [WebSearchController::class, 'suggestions'])->name('search.suggestions');
 Route::get('/search', [WebSearchController::class, 'index'])->name('search');
 Route::get('/contact', [WebContactController::class, 'index'])->name('contact');

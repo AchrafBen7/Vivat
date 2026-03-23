@@ -1,52 +1,54 @@
 <?php
 $submissions = $submissions ?? [];
-$cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
-$glassBox = 'rounded-[21px] flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1.5 box-border p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
-$tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
-$tagGlassOnImage = $tagClass . ' bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)] text-white';
-$articleMetaOnImage = 'text-white/80 text-xs';
-
 $statusStyles = [
     'draft' => [
         'label' => 'Brouillon',
-        'pill' => 'background: #F3E8CC; color: #7A5A14; border: 1px solid rgba(122,90,20,0.18);',
+        'bg' => 'bg-[#F3E8CC]',
+        'text' => 'text-[#7A5A14]',
         'dot' => '#C69214',
     ],
     'pending' => [
         'label' => 'En attente',
-        'pill' => 'background: rgba(0,66,65,0.10); color: #006664; border: 1px solid rgba(0,66,65,0.16);',
+        'bg' => 'bg-[#004241]/10',
+        'text' => 'text-[#006664]',
         'dot' => '#006664',
     ],
     'approved' => [
         'label' => 'Approuvé',
-        'pill' => 'background: rgba(82,126,126,0.14); color: #2D5C5C; border: 1px solid rgba(82,126,126,0.18);',
+        'bg' => 'bg-[#527E7E]/15',
+        'text' => 'text-[#2D5C5C]',
         'dot' => '#527E7E',
     ],
     'rejected' => [
         'label' => 'Rejeté',
-        'pill' => 'background: rgba(174,66,46,0.10); color: #AE422E; border: 1px solid rgba(174,66,46,0.16);',
+        'bg' => 'bg-[#AE422E]/10',
+        'text' => 'text-[#AE422E]',
         'dot' => '#AE422E',
     ],
 ];
 ?>
-<h1 class="font-medium text-[#006664] text-2xl mb-2">Mes articles</h1>
-<p class="text-[#006664]/80 mb-8">Vos soumissions et brouillons</p>
-<?php if (! empty($submissions)) { ?>
-<div class="mb-6 flex justify-end">
-    <a href="<?= url('/contributor/new') ?>" class="inline-flex items-center justify-center rounded-full bg-[#006664] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#003535]">
-        Créer un nouvel article
-    </a>
-</div>
-<?php } ?>
+<div class="space-y-6">
+    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="font-semibold text-[#004241] text-2xl">Mes articles</h1>
+            <p class="text-[#004241]/70 text-sm mt-0.5">Vos soumissions et brouillons</p>
+        </div>
+        <?php if (! empty($submissions)) { ?>
+        <a href="<?= url('/contributor/new') ?>" class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#003130] shrink-0">
+            Créer un nouvel article
+        </a>
+        <?php } ?>
+    </div>
 
-<div>
     <?php if (empty($submissions)) { ?>
-    <p class="text-[#006664]/70">Vous n'avez pas encore soumis d'article.</p>
-    <a href="<?= url('/contributor/new') ?>" class="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-[#006664] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
-        Rédiger votre premier article
-    </a>
+    <div class="rounded-[24px] border border-[#004241]/12 bg-[#EBF1EF]/50 p-8 text-center">
+        <p class="text-[#004241]/75">Vous n'avez pas encore soumis d'article.</p>
+        <a href="<?= url('/contributor/new') ?>" class="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#003130]">
+            Rédiger votre premier article
+        </a>
+    </div>
     <?php } else { ?>
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+    <div class="grid grid-cols-1 gap-6">
         <?php foreach ($submissions as $sub) { ?>
         <?php
         $status = $sub['status'] ?? 'draft';
@@ -58,105 +60,114 @@ $statusStyles = [
         $coverSrc = $cover ?: $fallbackImage;
         $deleteUrl = $sub['delete_url'] ?? '#';
         $editUrl = $sub['edit_url'] ?? '#';
+        $previewUrl = $sub['preview_url'] ?? '#';
         $hasReviewerNote = ! empty($sub['reviewer_notes']);
         ?>
-        <div class="flex flex-col gap-3">
-        <article
-            class="group relative h-[380px] overflow-hidden rounded-[30px] border border-[#006664]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
-            onclick="window.location.href='<?= htmlspecialchars($sub['preview_url'] ?? '#', ENT_QUOTES) ?>'"
-        >
-            <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($sub['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.015]">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-
-            <div class="absolute left-5 top-5 z-10 flex items-center gap-3">
-                <button
-                    type="button"
-                    class="js-delete-submission inline-flex items-center justify-center rounded-full bg-[rgba(174,66,46,0.92)] px-4 py-[7px] text-xs font-medium text-white shadow-[0_10px_24px_rgba(0,0,0,0.14)] transition hover:bg-[rgba(152,38,38,0.96)]"
-                    data-delete-url="<?= htmlspecialchars($deleteUrl) ?>"
-                    data-article-title="<?= htmlspecialchars($sub['title']) ?>"
-                    aria-label="Supprimer cet article"
-                >
-                    Supprimer
-                </button>
-
-                <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex items-center rounded-full px-3 py-[7px] text-xs font-medium text-white shadow-[0_8px_20px_rgba(0,0,0,0.16)] transition hover:opacity-90" style="<?= htmlspecialchars($statusStyle['pill']) ?> color: #FFFFFF;" onclick="event.stopPropagation();">
-                    Modifier
+        <div class="group flex flex-col overflow-hidden rounded-[24px] border border-[#004241]/10 bg-white shadow-[0_4px_20px_rgba(0,66,65,0.06)] transition-shadow hover:shadow-[0_8px_32px_rgba(0,66,65,0.1)]">
+            <div class="flex flex-col sm:flex-row min-h-0 gap-4 p-4">
+                <!-- Image -->
+                <a href="<?= htmlspecialchars($previewUrl) ?>" class="relative block aspect-[4/3] w-full sm:w-[200px] sm:min-w-[200px] sm:aspect-[4/3] shrink-0 overflow-hidden rounded-[16px] bg-[#1E2D25]">
+                    <img src="<?= htmlspecialchars($coverSrc) ?>" alt="" class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
                 </a>
-            </div>
 
-            <div class="absolute right-5 top-5">
-                <span class="inline-flex items-center gap-2 rounded-full px-3 py-[7px] text-xs font-medium" style="<?= htmlspecialchars($statusStyle['pill']) ?>">
-                    <span class="h-2.5 w-2.5 rounded-full" style="background: <?= htmlspecialchars($statusStyle['dot']) ?>"></span>
-                    <?= htmlspecialchars($sub['status_label'] ?? $statusStyle['label']) ?>
-                </span>
-            </div>
+                <!-- Contenu -->
+                <div class="flex flex-1 flex-col gap-3 min-w-0 py-1">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2 min-w-0">
+                            <?php if (! empty($sub['category']['name'])) { ?>
+                            <span class="rounded-full bg-[#EBF1EF] px-3 py-1 text-xs font-medium text-[#004241]">
+                                <?= htmlspecialchars($sub['category']['name']) ?>
+                            </span>
+                            <?php } ?>
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium <?= $statusStyle['bg'] ?> <?= $statusStyle['text'] ?>">
+                                <span class="h-2 w-2 rounded-full shrink-0" style="background: <?= htmlspecialchars($statusStyle['dot']) ?>"></span>
+                                <?= htmlspecialchars($sub['status_label'] ?? $statusStyle['label']) ?>
+                            </span>
+                        </div>
+                    </div>
 
-            <div class="absolute inset-x-0 bottom-0 p-5">
-                <div class="overflow-hidden rounded-[21px] border border-[rgba(230,230,230,0.20)] bg-[rgba(52,62,58,0.72)] p-[20px]">
-                    <?php if (! empty($sub['category']['name'])) { ?>
-                    <span class="inline-flex items-center justify-center rounded-full border border-[rgba(230,230,230,0.25)] bg-[rgba(190,190,190,0.10)] px-4 py-[9px] text-sm font-medium text-white">
-                        <?= htmlspecialchars($sub['category']['name']) ?>
-                    </span>
-                    <?php } ?>
-                    <h2 class="mt-4 text-[22px] font-semibold leading-[1.35] text-white line-clamp-3"><?= htmlspecialchars($sub['title']) ?></h2>
-                    <div class="mt-3 flex items-center gap-3 text-sm !text-white/80">
-                        <span class="!text-white/80"><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
+                    <a href="<?= htmlspecialchars($previewUrl) ?>" class="font-semibold text-[#004241] text-lg leading-snug line-clamp-2 hover:text-[#003130] transition-colors">
+                        <?= htmlspecialchars($sub['title']) ?>
+                    </a>
+
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#004241]/60">
+                        <span><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
                         <?php if (! empty($sub['reading_time'])) { ?>
-                        <span class="!text-white/70">•</span>
-                        <span class="!text-white/80"><?= (int) $sub['reading_time'] ?> min</span>
+                        <span>•</span>
+                        <span><?= (int) $sub['reading_time'] ?> min</span>
                         <?php } ?>
                     </div>
+
                     <?php if (! empty($sub['excerpt'])) { ?>
-                    <p class="mt-3 line-clamp-2 text-sm leading-6" style="color: rgba(255, 255, 255, 0.78);">
+                    <p class="text-sm text-[#004241]/70 line-clamp-2 leading-relaxed">
                         <?= htmlspecialchars($sub['excerpt']) ?>
                     </p>
                     <?php } ?>
+
+                    <!-- Actions -->
+                    <div class="mt-auto pt-2 flex flex-wrap items-center gap-2">
+                        <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex h-9 items-center gap-2 rounded-full bg-[#004241] px-4 text-sm font-medium text-white transition-colors hover:bg-[#003130]">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                            Modifier
+                        </a>
+                        <a href="<?= htmlspecialchars($previewUrl) ?>" class="inline-flex h-9 items-center gap-2 rounded-full border border-[#004241]/20 px-4 text-sm font-medium text-[#004241] transition-colors hover:bg-[#EBF1EF]">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Voir
+                        </a>
+                        <button
+                            type="button"
+                            class="js-delete-submission inline-flex h-9 items-center gap-2 rounded-full border border-[#AE422E]/30 px-4 text-sm font-medium text-[#AE422E] transition-colors hover:bg-[#AE422E]/5"
+                            data-delete-url="<?= htmlspecialchars($deleteUrl) ?>"
+                            data-article-title="<?= htmlspecialchars($sub['title']) ?>"
+                            aria-label="Supprimer cet article"
+                        >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                            Supprimer
+                        </button>
+                    </div>
                 </div>
             </div>
-        </article>
-        <?php if ($hasReviewerNote) { ?>
-        <div class="rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#006664] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
-            <div class="flex items-center gap-2 text-sm font-semibold">
-                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#006664] text-white">i</span>
-                <span>Note de relecture</span>
+
+            <?php if ($hasReviewerNote) { ?>
+            <div class="border-t border-[#004241]/8 bg-[#F4F8F7] px-5 py-4">
+                <div class="flex items-center gap-2 text-sm font-semibold text-[#004241]">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#004241]/15 text-[#004241]">i</span>
+                    Note de relecture
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-[#004241]/80"><?= nl2br(htmlspecialchars($sub['reviewer_notes'])) ?></p>
+                <?php if (! empty($sub['reviewer_name']) || ! empty($sub['reviewed_at'])) { ?>
+                <p class="mt-2 text-xs font-medium uppercase tracking-wider text-[#004241]/50">
+                    <?= htmlspecialchars(trim(($sub['reviewer_name'] ?? '').(! empty($sub['reviewed_at']) ? ' • '.$sub['reviewed_at'] : ''))) ?>
+                </p>
+                <?php } ?>
             </div>
-            <p class="mt-3 text-sm leading-6 text-[#006664]/84"><?= nl2br(htmlspecialchars($sub['reviewer_notes'])) ?></p>
-            <?php if (! empty($sub['reviewer_name']) || ! empty($sub['reviewed_at'])) { ?>
-            <p class="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#006664]/52">
-                <?= htmlspecialchars(trim(($sub['reviewer_name'] ?? '').(! empty($sub['reviewed_at']) ? ' • '.$sub['reviewed_at'] : ''))) ?>
-            </p>
             <?php } ?>
-        </div>
-        <?php } ?>
         </div>
         <?php } ?>
     </div>
     <?php } ?>
 </div>
 
-<div id="delete-submission-modal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-[#006664]/35 px-4">
-    <div class="w-full max-w-md rounded-[28px] border border-[#DED8CE] bg-[#F8F6F2] p-6 shadow-[0_24px_60px_rgba(0,66,65,0.18)]">
+<div id="delete-submission-modal" class="fixed inset-0 z-[140] hidden flex items-center justify-center bg-[#004241]/25 px-4">
+    <div class="w-full max-w-md rounded-[24px] border border-[#DED8CE] bg-white p-6 shadow-[0_24px_60px_rgba(0,66,65,0.18)]">
         <div class="flex items-start justify-between gap-4">
-            <div>
-                <h2 class="text-[22px] font-semibold leading-7 text-[#1B4B3B]">Supprimer l'article ?</h2>
-                <p class="mt-3 text-sm leading-6 text-[#006664]/80">
-                    Cette action supprimera définitivement <span id="delete-submission-title" class="font-semibold text-[#006664]"></span>.
+            <div class="min-w-0">
+                <h2 class="text-xl font-semibold text-[#004241]">Supprimer l'article ?</h2>
+                <p class="mt-2 text-sm leading-6 text-[#004241]/80">
+                    Cette action supprimera définitivement <span id="delete-submission-title" class="font-semibold text-[#004241]"></span>.
                 </p>
             </div>
-            <button type="button" id="delete-submission-cancel-top" class="flex h-9 w-9 items-center justify-center rounded-full text-[#006664]/70 transition hover:bg-[#EBF1EF] hover:text-[#006664]" aria-label="Fermer la fenêtre">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+            <button type="button" id="delete-submission-cancel-top" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#004241]/60 transition hover:bg-[#EBF1EF] hover:text-[#004241]" aria-label="Fermer">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-
         <form id="delete-submission-form" method="post" class="mt-6 flex justify-end gap-3">
             <?= csrf_field() ?>
             <?= method_field('DELETE') ?>
-            <button type="button" id="delete-submission-cancel" class="inline-flex h-11 items-center justify-center rounded-full border border-[#006664]/12 bg-white px-5 text-sm font-semibold text-[#006664] transition hover:bg-[#EBF1EF]">
+            <button type="button" id="delete-submission-cancel" class="inline-flex h-10 items-center justify-center rounded-full border border-[#004241]/15 bg-white px-4 text-sm font-semibold text-[#004241] transition hover:bg-[#EBF1EF]">
                 Annuler
             </button>
-            <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[#AE422E] px-5 text-sm font-semibold text-white transition hover:bg-[#963524]">
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-full bg-[#AE422E] px-4 text-sm font-semibold text-white transition hover:bg-[#963524]">
                 Supprimer
             </button>
         </form>
@@ -167,43 +178,36 @@ $statusStyles = [
 (() => {
     const modal = document.getElementById('delete-submission-modal');
     const form = document.getElementById('delete-submission-form');
-    const title = document.getElementById('delete-submission-title');
-    const cancelButton = document.getElementById('delete-submission-cancel');
-    const cancelTopButton = document.getElementById('delete-submission-cancel-top');
+    const titleEl = document.getElementById('delete-submission-title');
+    const cancelBtn = document.getElementById('delete-submission-cancel');
+    const cancelTopBtn = document.getElementById('delete-submission-cancel-top');
     const triggers = document.querySelectorAll('.js-delete-submission');
 
-    if (!modal || !form || !title || !triggers.length) {
-        return;
-    }
+    if (!modal || !form || !titleEl || !triggers.length) return;
 
     function closeModal() {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         form.removeAttribute('action');
-        title.textContent = '';
+        titleEl.textContent = '';
     }
 
     function openModal(deleteUrl, articleTitle) {
         form.setAttribute('action', deleteUrl);
-        title.textContent = articleTitle ? '"' + articleTitle + '"' : 'cet article';
+        titleEl.textContent = articleTitle ? '"' + articleTitle + '"' : 'cet article';
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
-    triggers.forEach((trigger) => {
-        trigger.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            openModal(trigger.dataset.deleteUrl || '', trigger.dataset.articleTitle || '');
+    triggers.forEach((t) => {
+        t.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openModal(t.dataset.deleteUrl || '', t.dataset.articleTitle || '');
         });
     });
-
-    cancelButton?.addEventListener('click', closeModal);
-    cancelTopButton?.addEventListener('click', closeModal);
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            closeModal();
-        }
-    });
+    cancelBtn?.addEventListener('click', closeModal);
+    cancelTopBtn?.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 })();
 </script>

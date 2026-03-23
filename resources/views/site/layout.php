@@ -301,7 +301,7 @@ $title_safe = htmlspecialchars($title);
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
 
-    <header class="bg-[#FAFCFB] border-b border-[#004241]/6">
+    <header class="bg-white border-b border-[#004241]/6">
         <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 relative z-50">
             <div class="flex items-center gap-2 md:gap-3 h-[72px] md:h-[88px] py-[16px] md:py-[24px]">
 
@@ -614,6 +614,7 @@ $title_safe = htmlspecialchars($title);
     </section>
     <?php } ?>
 
+    <?php if (empty($hide_footer)) { ?>
     <footer>
         <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 mb-6 w-full">
             <div class="rounded-[34px] bg-[#E7EFEC] p-6 md:p-8 shadow-[0_24px_64px_rgba(0,66,65,0.08)]">
@@ -673,6 +674,7 @@ $title_safe = htmlspecialchars($title);
             </div>
         </div>
     </footer>
+    <?php } ?>
 
     <script>
     (function() {
