@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\RssItemController;
 use App\Http\Controllers\Api\SeedHomeArticlesController;
 use App\Http\Controllers\Api\SourceController;
 use App\Http\Controllers\Api\StatsController;
+use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubCategoryController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,6 +82,11 @@ Route::prefix('newsletter')->group(function () {
     Route::post('unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
     Route::get('confirm', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
 });
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║  STRIPE WEBHOOK (public)                                            ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+Route::post('stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
 
 // ╔══════════════════════════════════════════════════════════════════════╗
 // ║  CONTRIBUTOR — auth:sanctum + role:contributor|admin                 ║

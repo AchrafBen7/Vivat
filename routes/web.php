@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\ContributorController as WebContributorController;
 use App\Http\Controllers\Web\FaqController as WebFaqController;
 use App\Http\Controllers\Web\HomeController as WebHomeController;
 use App\Http\Controllers\Web\SearchController as WebSearchController;
+use App\Http\Controllers\Api\PaymentController as ApiPaymentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,7 +31,10 @@ Route::get('/faq', [WebFaqController::class, 'index'])->name('faq');
 Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->group(function () {
     Route::get('/dashboard', [WebContributorController::class, 'dashboard'])->name('contributor.dashboard');
     Route::match(['get', 'post'], '/new', [WebContributorController::class, 'newArticle'])->name('contributor.new');
+    Route::post('/payments/create-intent', [ApiPaymentController::class, 'createIntent'])->name('contributor.web-payments.create-intent');
+    Route::post('/payments/confirm', [ApiPaymentController::class, 'confirm'])->name('contributor.web-payments.confirm');
     Route::get('/articles/{submission:slug}', [WebContributorController::class, 'showSubmission'])->name('contributor.articles.show');
+    Route::match(['get', 'post'], '/articles/{submission:slug}/edit', [WebContributorController::class, 'editSubmission'])->name('contributor.articles.edit');
     Route::delete('/articles/{submission:slug}', [WebContributorController::class, 'destroySubmission'])->name('contributor.articles.destroy');
     Route::match(['get', 'post'], '/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
 });

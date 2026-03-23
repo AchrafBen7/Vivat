@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Payment;
 use App\Models\Submission;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\RedirectResponse;
@@ -14,6 +15,47 @@ use Illuminate\Support\Str;
 
 class ContributorController extends Controller
 {
+    private function publicationPrice(): int
+    {
+        return (int) config('services.stripe.publication_price', 1500);
+    }
+
+    private function hasPaidPublication(Submission $submission): bool
+    {
+        return Payment::query()
+            ->where('submission_id', $submission->id)
+            ->where('status', 'paid')
+            ->exists();
+    }
+
+    private function paymentRequiredPayload(Submission $submission): array
+    {
+        return [
+            'ok' => true,
+            'submission_id' => $submission->id,
+            'status' => 'draft',
+            'requires_payment' => true,
+            'redirect_url' => route('contributor.dashboard'),
+            'notice' => [
+                'title' => 'Paiement requis',
+                'message' => 'Votre article est enregistre comme brouillon. Finalisez maintenant le paiement pour l’envoyer en validation.',
+            ],
+        ];
+    }
+
+    private function submissionAcceptedPayload(string $redirectUrl): array
+    {
+        return [
+            'ok' => true,
+            'status' => 'pending',
+            'redirect_url' => $redirectUrl,
+            'notice' => [
+                'title' => 'Article transmis',
+                'message' => 'Votre article va etre verifie par notre equipe et sera publie automatiquement apres acceptation.',
+            ],
+        ];
+    }
+
     private function renderContributorPage(string $activeTab, string $contentView, array $data = []): Response
     {
         $content = render_php_view($contentView, $data);
@@ -36,7 +78,7 @@ class ContributorController extends Controller
     {
         $user = $request->user();
         $submissions = Submission::where('user_id', $user->id)
-            ->with('category')
+            ->with(['category', 'reviewer'])
             ->orderByDesc('created_at')
             ->limit(20)
             ->get()
@@ -56,8 +98,12 @@ class ContributorController extends Controller
                 'reading_time' => $s->reading_time,
                 'cover_image_path' => $s->cover_image_path,
                 'excerpt' => $s->excerpt,
+                'reviewer_notes' => $s->reviewer_notes,
+                'reviewed_at' => $s->reviewed_at?->format('d/m/Y H:i'),
+                'reviewer_name' => $s->reviewer?->name,
                 'category' => $s->category ? ['name' => $s->category->name] : null,
                 'preview_url' => route('contributor.articles.show', ['submission' => $s->slug]),
+                'edit_url' => route('contributor.articles.edit', ['submission' => $s->slug]),
                 'delete_url' => route('contributor.articles.destroy', ['submission' => $s->slug]),
             ])
             ->all();
@@ -65,6 +111,116 @@ class ContributorController extends Controller
         return $this->renderContributorPage('articles', 'site.contributor.articles', [
             'user' => $user,
             'submissions' => $submissions,
+        ]);
+    }
+
+    public function editSubmission(Request $request, Submission $submission): Response|RedirectResponse
+    {
+        abort_unless(
+            $request->user()
+                && ($request->user()->id === $submission->user_id || $request->user()->hasRole('admin')),
+            403
+        );
+
+        abort_if($submission->status === 'approved', 403);
+
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'title' => ['required', 'string', 'max:255'],
+                'excerpt' => ['nullable', 'string', 'max:500'],
+                'content' => ['required', 'string', 'min:100'],
+                'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'status' => ['sometimes', 'in:draft,submitted'],
+            ], [
+                'title.required' => 'Le titre est obligatoire.',
+                'content.required' => 'Le contenu est obligatoire.',
+                'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
+                'cover_image.image' => "L'image de couverture doit etre une image valide.",
+                'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
+            ]);
+
+            $shouldSubmit = $request->input('status') === 'submitted';
+            $status = $shouldSubmit && $this->hasPaidPublication($submission) ? 'pending' : 'draft';
+            $coverImagePath = $submission->cover_image_path;
+
+            if ($request->hasFile('cover_image')) {
+                if (is_string($submission->cover_image_path) && $submission->cover_image_path !== '') {
+                    $existingCoverPath = public_path(ltrim($submission->cover_image_path, '/'));
+
+                    if (File::exists($existingCoverPath)) {
+                        File::delete($existingCoverPath);
+                    }
+                }
+
+                $coverImagePath = $this->storeSubmissionCoverImage($request->file('cover_image'));
+            }
+
+            $submission->update([
+                'title' => $validated['title'],
+                'excerpt' => $validated['excerpt'] ?? null,
+                'content' => $validated['content'],
+                'category_id' => $validated['category_id'] ?? null,
+                'reading_time' => $validated['reading_time'] ?? 5,
+                'status' => $status,
+                'cover_image_path' => $coverImagePath,
+                'reviewer_notes' => $status === 'pending' ? null : $submission->reviewer_notes,
+                'reviewed_by' => $status === 'pending' ? null : $submission->reviewed_by,
+                'reviewed_at' => $status === 'pending' ? null : $submission->reviewed_at,
+            ]);
+
+            if ($shouldSubmit && $status !== 'pending') {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json($this->paymentRequiredPayload($submission));
+                }
+
+                return redirect()
+                    ->route('contributor.articles.edit', ['submission' => $submission->slug])
+                    ->with('info', 'Le paiement Stripe est requis avant envoi en validation.');
+            }
+
+            if ($shouldSubmit && ($request->expectsJson() || $request->ajax())) {
+                return response()->json($this->submissionAcceptedPayload(route('contributor.dashboard')));
+            }
+
+            return redirect()
+                ->route('contributor.dashboard')
+                ->with('success', $status === 'pending'
+                    ? 'Article mis à jour et renvoyé en validation.'
+                    : 'Brouillon mis à jour.');
+        }
+
+        $submission->loadMissing('reviewer');
+        $categories = Category::orderBy('name')->get(['id', 'name'])->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all();
+        $errors = $request->session()->get('errors');
+
+        return $this->renderContributorPage('new', 'site.contributor.new', [
+            'categories' => $categories,
+            'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
+            'old' => [
+                'title' => old('title', $submission->title),
+                'excerpt' => old('excerpt', $submission->excerpt),
+                'content' => old('content', $submission->content),
+                'category_id' => old('category_id', $submission->category_id),
+                'reading_time' => old('reading_time', $submission->reading_time ?: 5),
+            ],
+            'submission' => [
+                'id' => $submission->id,
+                'title' => $submission->title,
+                'status' => $submission->status,
+                'is_paid' => $this->hasPaidPublication($submission),
+                'reviewer_notes' => $submission->reviewer_notes,
+                'reviewed_at' => $submission->reviewed_at?->format('d/m/Y H:i'),
+                'reviewer_name' => $submission->reviewer?->name,
+                'cover_image_path' => $submission->cover_image_path,
+            ],
+            'form_action' => route('contributor.articles.edit', ['submission' => $submission->slug]),
+            'is_editing' => true,
+            'stripe_key' => (string) config('services.stripe.key'),
+            'publication_price' => $this->publicationPrice(),
+            'payment_create_url' => route('contributor.web-payments.create-intent'),
+            'payment_confirm_url' => route('contributor.web-payments.confirm'),
         ]);
     }
 
@@ -87,7 +243,8 @@ class ContributorController extends Controller
                 'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
             ]);
 
-            $status = $request->input('status') === 'submitted' ? 'pending' : 'draft';
+            $shouldSubmit = $request->input('status') === 'submitted';
+            $status = 'draft';
             $coverImagePath = $request->hasFile('cover_image')
                 ? $this->storeSubmissionCoverImage($request->file('cover_image'))
                 : null;
@@ -102,6 +259,16 @@ class ContributorController extends Controller
                 'status'      => $status,
                 'cover_image_path' => $coverImagePath,
             ]);
+
+            if ($shouldSubmit) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json($this->paymentRequiredPayload($submission));
+                }
+
+                return redirect()
+                    ->route('contributor.articles.edit', ['submission' => $submission->slug])
+                    ->with('info', 'Le paiement Stripe est requis avant envoi en validation.');
+            }
 
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -142,6 +309,13 @@ class ContributorController extends Controller
             'categories' => $categories,
             'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
             'old' => $old,
+            'submission' => null,
+            'form_action' => url('/contributor/new'),
+            'is_editing' => false,
+            'stripe_key' => (string) config('services.stripe.key'),
+            'publication_price' => $this->publicationPrice(),
+            'payment_create_url' => route('contributor.web-payments.create-intent'),
+            'payment_confirm_url' => route('contributor.web-payments.confirm'),
         ]);
     }
 

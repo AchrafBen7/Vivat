@@ -50,7 +50,10 @@ $statusStyles = [
             : ($status === 'approved' ? '/chezsoi.jpg' : ($status === 'rejected' ? '/sante.jpg' : '/finance.jpg'));
         $coverSrc = $cover ?: $fallbackImage;
         $deleteUrl = $sub['delete_url'] ?? '#';
+        $editUrl = $sub['edit_url'] ?? '#';
+        $hasReviewerNote = !empty($sub['reviewer_notes']);
         ?>
+        <div class="flex flex-col gap-3">
         <a href="<?= htmlspecialchars($sub['preview_url'] ?? '#') ?>" class="group relative block h-[380px] overflow-hidden rounded-[30px] border border-[#004241]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1">
             <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($sub['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.03]">
             <div class="absolute inset-0 bg-gradient-to-t from-[#001F1F]/74 via-[#002F2F]/18 to-transparent"></div>
@@ -72,6 +75,12 @@ $statusStyles = [
                     <span class="h-2.5 w-2.5 rounded-full" style="background: <?= htmlspecialchars($statusStyle['dot']) ?>"></span>
                     <?= htmlspecialchars($sub['status_label'] ?? $statusStyle['label']) ?>
                 </span>
+            </div>
+
+            <div class="absolute left-5 top-[74px] z-10">
+                <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex items-center justify-center rounded-full border border-white/15 bg-[rgba(32,42,38,0.78)] px-4 py-[10px] text-xs font-semibold text-white transition hover:bg-[rgba(255,255,255,0.18)]" onclick="event.stopPropagation();">
+                    Modifier
+                </a>
             </div>
 
             <div class="absolute inset-x-0 bottom-0 p-5">
@@ -97,6 +106,21 @@ $statusStyles = [
                 </div>
             </div>
         </a>
+        <?php if ($hasReviewerNote): ?>
+        <div class="rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
+            <div class="flex items-center gap-2 text-sm font-semibold">
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
+                <span>Note de relecture</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-[#004241]/84"><?= nl2br(htmlspecialchars($sub['reviewer_notes'])) ?></p>
+            <?php if (!empty($sub['reviewer_name']) || !empty($sub['reviewed_at'])): ?>
+            <p class="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#004241]/52">
+                <?= htmlspecialchars(trim(($sub['reviewer_name'] ?? '') . (!empty($sub['reviewed_at']) ? ' • ' . $sub['reviewed_at'] : ''))) ?>
+            </p>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+        </div>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>

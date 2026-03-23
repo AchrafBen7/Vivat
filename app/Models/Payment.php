@@ -63,6 +63,11 @@ class Payment extends Model
         return $this->update(['status' => 'paid']);
     }
 
+    public function markFailed(): bool
+    {
+        return $this->update(['status' => 'failed']);
+    }
+
     public function markRefunded(string $refundId, ?string $reason = null): bool
     {
         return $this->update([

@@ -82,23 +82,23 @@ class Submission extends Model
     /*  Actions                                                           */
     /* ------------------------------------------------------------------ */
 
-    public function approve(?string $reviewerId = null, ?string $notes = null): bool
+    public function approve(?string $reviewerId = null, ?string $notes = null, mixed $reviewedAt = null): bool
     {
         return $this->update([
             'status'         => 'approved',
             'reviewed_by'    => $reviewerId,
             'reviewer_notes' => $notes,
-            'reviewed_at'    => now(),
+            'reviewed_at'    => $reviewedAt ?: now(),
         ]);
     }
 
-    public function reject(?string $reviewerId = null, ?string $notes = null): bool
+    public function reject(?string $reviewerId = null, ?string $notes = null, mixed $reviewedAt = null): bool
     {
         return $this->update([
             'status'         => 'rejected',
             'reviewed_by'    => $reviewerId,
             'reviewer_notes' => $notes,
-            'reviewed_at'    => now(),
+            'reviewed_at'    => $reviewedAt ?: now(),
         ]);
     }
 }
