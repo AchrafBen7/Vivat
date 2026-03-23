@@ -15,7 +15,7 @@ $relatedCategorySlug = $category['slug'] ?? null;
 $relatedBaseId = $article['id'] ?? $slug ?? 'article';
 $catSlug = ($category ?? [])['slug'] ?? null;
 $coverFallback = vivat_category_fallback_image($catSlug, 1282, 444, $relatedBaseId, 'cover');
-$coverSrc = !empty($cover_image_url) ? $cover_image_url : $coverFallback;
+$coverSrc = ! empty($cover_image_url) ? $cover_image_url : $coverFallback;
 $backHref = $relatedCategorySlug ? '/categories/'.htmlspecialchars($relatedCategorySlug) : '/';
 $relatedItems = [
     [
@@ -58,7 +58,7 @@ $alsoCarouselItems = array_merge(
 $tagClass = 'vivat-tag';
 $metaLine = trim(implode(' • ', array_filter([
     $published_at_display,
-    $reading_time ? (int) $reading_time . ' min' : null,
+    $reading_time ? (int) $reading_time.' min' : null,
 ])));
 $shareUrl = url('/articles/'.$slug);
 $shareTitle = $title;
@@ -74,7 +74,7 @@ if (is_string($content) && trim($content) !== '' && ! preg_match('/<\s*\/?\s*[a-
             return '';
         }
 
-        return '<p>' . nl2br(htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8')) . '</p>';
+        return '<p>'.nl2br(htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8')).'</p>';
     }, $paragraphs));
 }
 
@@ -85,7 +85,8 @@ $insertAfterPara = $paraCount >= 2 ? (int) floor($paraCount / 2) : 1;
 $count = 0;
 $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidContent, $insertAfterPara, &$count) {
     $count++;
-    return $count === $insertAfterPara ? $m[1] . $adMidContent : $m[1];
+
+    return $count === $insertAfterPara ? $m[1].$adMidContent : $m[1];
 }, $content);
 ?>
 <div class="w-full max-w-[1400px] mx-auto">
@@ -106,11 +107,11 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
                 <span>Retour</span>
             </a>
             <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
-            <?php if ($metaLine): ?>
+            <?php if ($metaLine) { ?>
             <p class="text-white font-light leading-none text-xl opacity-95 font-sans">
                 <time datetime="<?= htmlspecialchars($published_at_iso ?? '') ?>"><?= htmlspecialchars($metaLine) ?></time>
             </p>
-            <?php endif; ?>
+            <?php } ?>
         </div>
     </div>
 </div>
@@ -118,9 +119,9 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
 <!-- Grid : texte article + partage vertical à droite (aligné avec le hero) -->
 <div class="w-full max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_auto] lg:gap-[130px]">
     <article class="min-w-0 max-w-3xl mx-auto">
-    <?php if ($excerpt): ?>
+    <?php if ($excerpt) { ?>
     <p class="text-xl text-gray-600 mb-8"><?= nl2br(htmlspecialchars($excerpt)) ?></p>
-    <?php endif; ?>
+    <?php } ?>
     <div class="prose prose-lg prose-gray max-w-none">
         <?= $content ?>
     </div>
@@ -141,7 +142,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
             <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= rawurlencode($shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-[#004241] hover:opacity-80 transition w-[22px] h-[22px]" aria-label="Partager sur LinkedIn">
                 <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             </a>
-            <a href="https://wa.me/?text=<?= rawurlencode($shareTitle . ' ' . $shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-[#004241] hover:opacity-80 transition w-[22px] h-[22px]" aria-label="Partager sur WhatsApp">
+            <a href="https://wa.me/?text=<?= rawurlencode($shareTitle.' '.$shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-[#004241] hover:opacity-80 transition w-[22px] h-[22px]" aria-label="Partager sur WhatsApp">
                 <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </a>
         </div>
@@ -164,7 +165,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
             <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= rawurlencode($shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-[#004241] hover:opacity-80 transition w-[22px] h-[22px]" aria-label="Partager sur LinkedIn">
                 <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             </a>
-            <a href="https://wa.me/?text=<?= rawurlencode($shareTitle . ' ' . $shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-[#004241] hover:opacity-80 transition w-[22px] h-[22px]" aria-label="Partager sur WhatsApp">
+            <a href="https://wa.me/?text=<?= rawurlencode($shareTitle.' '.$shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-[#004241] hover:opacity-80 transition w-[22px] h-[22px]" aria-label="Partager sur WhatsApp">
                 <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </a>
         </div>
@@ -180,11 +181,11 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
             class="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]"
         >
             <div id="also-carousel-rail" class="flex gap-6 w-max pr-6">
-                <?php for ($copy = 0; $copy < 3; $copy++): ?>
-                <?php foreach ($alsoCarouselItems as $idx => $item): ?>
+                <?php for ($copy = 0; $copy < 3; $copy++) { ?>
+                <?php foreach ($alsoCarouselItems as $idx => $item) { ?>
                 <?php $isAd = ($item['type'] ?? 'article') === 'ad'; ?>
                 <?php $isMiddleSequence = $copy === 1; ?>
-                <?php if ($isAd): ?>
+                <?php if ($isAd) { ?>
                 <aside
                     class="hidden lg:flex flex-shrink-0 rounded-[30px] items-center justify-center text-center text-white/90 bg-[#4B4B4B] w-[380px] h-[380px]"
                     <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>
@@ -194,7 +195,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
                         <span class="text-lg">380×380</span>
                     </div>
                 </aside>
-                <?php else: ?>
+                <?php } else { ?>
                 <?php $itemCategory = $item['category'] ?? 'À la une'; ?>
                 <a
                     href="#"
@@ -212,31 +213,31 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
                         </div>
                     </div>
                 </a>
-                <?php endif; ?>
-                <?php endforeach; ?>
-                <?php endfor; ?>
+                <?php } ?>
+                <?php } ?>
+                <?php } ?>
             </div>
         </div>
 
-        <?php if (count($relatedItems) > 1): ?>
+        <?php if (count($relatedItems) > 1) { ?>
         <button
             type="button"
             id="also-carousel-prev"
-            class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition -left-[29px] w-[58px] h-[58px] bg-[#F2E8D2]"
+            class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition -left-[24px] w-12 h-12 bg-[#F2E8D2]"
             aria-label="Article précédent"
         >
-            <svg class="w-7 h-7 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            <svg class="w-6 h-6 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
         <button
             type="button"
             id="also-carousel-next"
-            class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition -right-[29px] w-[58px] h-[58px] bg-[#F2E8D2]"
+            class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition -right-[24px] w-12 h-12 bg-[#F2E8D2]"
             aria-label="Article suivant"
         >
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
         <script>
@@ -358,6 +359,6 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
             }, 0);
         })();
         </script>
-        <?php endif; ?>
+        <?php } ?>
     </div>
 </section>

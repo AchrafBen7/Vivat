@@ -14,8 +14,8 @@ $statusStyles = [
     ],
     'pending' => [
         'label' => 'En attente',
-        'pill' => 'background: rgba(0,66,65,0.84); color: #FFFFFF; box-shadow: 0 8px 20px rgba(0,0,0,0.16);',
-        'dot' => '#9EE5D9',
+        'pill' => 'background: rgba(0,66,65,0.10); color: #006664; border: 1px solid rgba(0,66,65,0.16);',
+        'dot' => '#006664',
     ],
     'approved' => [
         'label' => 'Approuvé',
@@ -29,25 +29,25 @@ $statusStyles = [
     ],
 ];
 ?>
-<h1 class="font-medium text-[#004241] text-2xl mb-2">Mes articles</h1>
-<p class="text-[#004241]/80 mb-8">Vos soumissions et brouillons</p>
-<?php if (!empty($submissions)): ?>
+<h1 class="font-medium text-[#006664] text-2xl mb-2">Mes articles</h1>
+<p class="text-[#006664]/80 mb-8">Vos soumissions et brouillons</p>
+<?php if (! empty($submissions)) { ?>
 <div class="mb-6 flex justify-end">
-    <a href="<?= url('/contributor/new') ?>" class="inline-flex items-center justify-center rounded-full bg-[#004241] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#003535]">
+    <a href="<?= url('/contributor/new') ?>" class="inline-flex items-center justify-center rounded-full bg-[#006664] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#003535]">
         Créer un nouvel article
     </a>
 </div>
-<?php endif; ?>
+<?php } ?>
 
 <div>
-    <?php if (empty($submissions)): ?>
-    <p class="text-[#004241]/70">Vous n'avez pas encore soumis d'article.</p>
-    <a href="<?= url('/contributor/new') ?>" class="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
+    <?php if (empty($submissions)) { ?>
+    <p class="text-[#006664]/70">Vous n'avez pas encore soumis d'article.</p>
+    <a href="<?= url('/contributor/new') ?>" class="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-[#006664] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
         Rédiger votre premier article
     </a>
-    <?php else: ?>
+    <?php } else { ?>
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <?php foreach ($submissions as $sub): ?>
+        <?php foreach ($submissions as $sub) { ?>
         <?php
         $status = $sub['status'] ?? 'draft';
         $statusStyle = $statusStyles[$status] ?? $statusStyles['draft'];
@@ -58,11 +58,11 @@ $statusStyles = [
         $coverSrc = $cover ?: $fallbackImage;
         $deleteUrl = $sub['delete_url'] ?? '#';
         $editUrl = $sub['edit_url'] ?? '#';
-        $hasReviewerNote = !empty($sub['reviewer_notes']);
+        $hasReviewerNote = ! empty($sub['reviewer_notes']);
         ?>
         <div class="flex flex-col gap-3">
         <article
-            class="group relative block h-[380px] overflow-hidden rounded-[32px] border border-[#004241]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+            class="group relative h-[380px] overflow-hidden rounded-[30px] border border-[#006664]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
             onclick="window.location.href='<?= htmlspecialchars($sub['preview_url'] ?? '#', ENT_QUOTES) ?>'"
         >
             <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($sub['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.015]">
@@ -91,59 +91,65 @@ $statusStyles = [
                 </span>
             </div>
 
-            <div class="<?= $cardOverlay ?> flex items-end">
-                <div class="<?= $glassBox ?> w-full [transform:translateZ(0)] [backface-visibility:hidden]">
-                    <?php if (!empty($sub['category']['name'])): ?>
-                    <span class="<?= $tagGlassOnImage ?>">
+            <div class="absolute left-5 top-[74px] z-10">
+                <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex items-center justify-center rounded-full border border-white/15 bg-[rgba(32,42,38,0.78)] px-4 py-[10px] text-xs font-semibold text-white transition hover:bg-[rgba(255,255,255,0.18)]" onclick="event.stopPropagation();">
+                    Modifier
+                </a>
+            </div>
+
+            <div class="absolute inset-x-0 bottom-0 p-5">
+                <div class="overflow-hidden rounded-[21px] border border-[rgba(230,230,230,0.20)] bg-[rgba(52,62,58,0.72)] p-[20px]">
+                    <?php if (! empty($sub['category']['name'])) { ?>
+                    <span class="inline-flex items-center justify-center rounded-full border border-[rgba(230,230,230,0.25)] bg-[rgba(190,190,190,0.10)] px-4 py-[9px] text-sm font-medium text-white">
                         <?= htmlspecialchars($sub['category']['name']) ?>
                     </span>
-                    <?php endif; ?>
-                    <h2 class="text-[22px] font-medium leading-[1.35] text-white line-clamp-5"><?= htmlspecialchars($sub['title']) ?></h2>
-                    <?php if (!empty($sub['excerpt'])): ?>
-                    <p class="line-clamp-2 text-sm leading-6 text-white/90">
+                    <?php } ?>
+                    <h2 class="mt-4 text-[22px] font-semibold leading-[1.35] text-white line-clamp-3"><?= htmlspecialchars($sub['title']) ?></h2>
+                    <div class="mt-3 flex items-center gap-3 text-sm !text-white/80">
+                        <span class="!text-white/80"><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
+                        <?php if (! empty($sub['reading_time'])) { ?>
+                        <span class="!text-white/70">•</span>
+                        <span class="!text-white/80"><?= (int) $sub['reading_time'] ?> min</span>
+                        <?php } ?>
+                    </div>
+                    <?php if (! empty($sub['excerpt'])) { ?>
+                    <p class="mt-3 line-clamp-2 text-sm leading-6" style="color: rgba(255, 255, 255, 0.78);">
                         <?= htmlspecialchars($sub['excerpt']) ?>
                     </p>
-                    <?php endif; ?>
-                    <div class="flex items-center gap-3 <?= $articleMetaOnImage ?>">
-                        <span><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
-                        <?php if (!empty($sub['reading_time'])): ?>
-                        <span>•</span>
-                        <span><?= (int) $sub['reading_time'] ?> min</span>
-                        <?php endif; ?>
-                    </div>
+                    <?php } ?>
                 </div>
             </div>
         </article>
-        <?php if ($hasReviewerNote): ?>
-        <div class="rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
+        <?php if ($hasReviewerNote) { ?>
+        <div class="rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#006664] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
             <div class="flex items-center gap-2 text-sm font-semibold">
-                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#006664] text-white">i</span>
                 <span>Note de relecture</span>
             </div>
-            <p class="mt-3 text-sm leading-6 text-[#004241]/84"><?= nl2br(htmlspecialchars($sub['reviewer_notes'])) ?></p>
-            <?php if (!empty($sub['reviewer_name']) || !empty($sub['reviewed_at'])): ?>
-            <p class="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#004241]/52">
-                <?= htmlspecialchars(trim(($sub['reviewer_name'] ?? '') . (!empty($sub['reviewed_at']) ? ' • ' . $sub['reviewed_at'] : ''))) ?>
+            <p class="mt-3 text-sm leading-6 text-[#006664]/84"><?= nl2br(htmlspecialchars($sub['reviewer_notes'])) ?></p>
+            <?php if (! empty($sub['reviewer_name']) || ! empty($sub['reviewed_at'])) { ?>
+            <p class="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#006664]/52">
+                <?= htmlspecialchars(trim(($sub['reviewer_name'] ?? '').(! empty($sub['reviewed_at']) ? ' • '.$sub['reviewed_at'] : ''))) ?>
             </p>
-            <?php endif; ?>
+            <?php } ?>
         </div>
-        <?php endif; ?>
+        <?php } ?>
         </div>
-        <?php endforeach; ?>
+        <?php } ?>
     </div>
-    <?php endif; ?>
+    <?php } ?>
 </div>
 
-<div id="delete-submission-modal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-[#004241]/35 px-4">
+<div id="delete-submission-modal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-[#006664]/35 px-4">
     <div class="w-full max-w-md rounded-[28px] border border-[#DED8CE] bg-[#F8F6F2] p-6 shadow-[0_24px_60px_rgba(0,66,65,0.18)]">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h2 class="text-[22px] font-semibold leading-7 text-[#1B4B3B]">Supprimer l'article ?</h2>
-                <p class="mt-3 text-sm leading-6 text-[#004241]/80">
-                    Cette action supprimera définitivement <span id="delete-submission-title" class="font-semibold text-[#004241]"></span>.
+                <p class="mt-3 text-sm leading-6 text-[#006664]/80">
+                    Cette action supprimera définitivement <span id="delete-submission-title" class="font-semibold text-[#006664]"></span>.
                 </p>
             </div>
-            <button type="button" id="delete-submission-cancel-top" class="flex h-9 w-9 items-center justify-center rounded-full text-[#004241]/70 transition hover:bg-[#EBF1EF] hover:text-[#004241]" aria-label="Fermer la fenêtre">
+            <button type="button" id="delete-submission-cancel-top" class="flex h-9 w-9 items-center justify-center rounded-full text-[#006664]/70 transition hover:bg-[#EBF1EF] hover:text-[#006664]" aria-label="Fermer la fenêtre">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -153,7 +159,7 @@ $statusStyles = [
         <form id="delete-submission-form" method="post" class="mt-6 flex justify-end gap-3">
             <?= csrf_field() ?>
             <?= method_field('DELETE') ?>
-            <button type="button" id="delete-submission-cancel" class="inline-flex h-11 items-center justify-center rounded-full border border-[#004241]/12 bg-white px-5 text-sm font-semibold text-[#004241] transition hover:bg-[#EBF1EF]">
+            <button type="button" id="delete-submission-cancel" class="inline-flex h-11 items-center justify-center rounded-full border border-[#006664]/12 bg-white px-5 text-sm font-semibold text-[#006664] transition hover:bg-[#EBF1EF]">
                 Annuler
             </button>
             <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[#AE422E] px-5 text-sm font-semibold text-white transition hover:bg-[#963524]">

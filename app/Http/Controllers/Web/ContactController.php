@@ -22,6 +22,7 @@ class ContactController extends Controller
             'title' => 'Contact — Vivat',
             'meta_description' => 'Contactez la rédaction Vivat, partagez une question, une suggestion ou une demande de partenariat.',
             'canonical_url' => url('/contact'),
+            'hide_cta_section' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

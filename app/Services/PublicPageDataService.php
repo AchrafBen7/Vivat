@@ -47,9 +47,11 @@ class PublicPageDataService
         if ($normalized === '') {
             return [
                 'articles' => [],
-                'pagination' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12),
+                'pagination' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
                 'search_term' => $q,
                 'matched_category' => null,
+                'search_mosaic_padded' => false,
+                'continue_reading_articles' => [],
             ];
         }
 
@@ -65,7 +67,7 @@ class PublicPageDataService
             if (DB::getDriverName() === 'mysql' && strlen($q) >= 2) {
                 $query->where(function ($builder) use ($q) {
                     $builder->whereFullText(['title', 'excerpt'], $q)
-                        ->orWhere('meta_description', 'LIKE', '%' . addcslashes($q, '%_\\') . '%');
+                        ->orWhere('meta_description', 'LIKE', '%'.addcslashes($q, '%_\\').'%');
                 });
             } else {
                 $query->where(function ($builder) use ($q) {
@@ -77,41 +79,81 @@ class PublicPageDataService
             }
         }
 
-        $articles = $query->orderByDesc('published_at')->paginate(12);
+        $articles = $query->orderByDesc('published_at')->paginate(10);
         $currentArticles = $articles->getCollection();
-        $currentArticleIds = $currentArticles->pluck('id')->filter()->values()->all();
-        $referenceCategoryId = $matchedCategory?->id
-            ?? $currentArticles->firstWhere('category_id', '!=', null)?->category_id;
 
-        $relatedQuery = Article::published()
+        /** @var array<int, array<string, mixed>> $pageHits */
+        $pageHits = $currentArticles->map(fn ($a) => $this->articleToArray($a))->values()->all();
+
+        /** Mosaïque 10 cartes (ordre séquentiel) : compléter si la page en contient moins de 10. */
+        $mosaicTarget = 10;
+        $mosaicArticles = $this->padSearchMosaicArticles($locale, $pageHits, $mosaicTarget);
+        $mosaicPadded = count($pageHits) > 0 && count($mosaicArticles) > count($pageHits);
+
+        /** @var array<int, string> $excludeIds */
+        $excludeIds = collect($mosaicArticles)->pluck('id')->filter()->unique()->values()->all();
+
+        /** @var array<int, array<string, mixed>> $continueReadingArticles */
+        $continueReadingArticles = Article::published()
             ->forLocale($locale)
-            ->with('category');
-
-        if (! empty($currentArticleIds)) {
-            $relatedQuery->whereNotIn('id', $currentArticleIds);
-        }
-
-        if ($referenceCategoryId) {
-            $relatedQuery->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$referenceCategoryId]);
-        }
-
-        $relatedArticles = $relatedQuery
+            ->with('category')
+            ->when($excludeIds !== [], fn ($query) => $query->whereNotIn('id', $excludeIds))
             ->orderByDesc('published_at')
-            ->limit(10)
-            ->get();
+            ->limit(20)
+            ->get()
+            ->map(fn (Article $a) => $this->articleToArray($a))
+            ->values()
+            ->all();
 
         return [
-            'articles' => $currentArticles->map(fn ($a) => $this->articleToArray($a))->all(),
+            'articles' => $mosaicArticles,
             'pagination' => $articles,
             'search_term' => $q,
             'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory) : null,
-            'related_articles' => $relatedArticles->map(fn ($a) => $this->articleToArray($a))->all(),
+            'search_mosaic_padded' => $mosaicPadded,
+            'continue_reading_articles' => $continueReadingArticles,
         ];
+    }
+
+    /**
+     * Complète la liste d’articles (page courante) jusqu’à $target pour remplir la mosaïque recherche (10 cartes).
+     *
+     * @param  array<int, array<string, mixed>>  $pageHits
+     * @return array<int, array<string, mixed>>
+     */
+    private function padSearchMosaicArticles(string $locale, array $pageHits, int $target): array
+    {
+        if ($pageHits === [] || count($pageHits) >= $target) {
+            return $pageHits;
+        }
+
+        $existingIds = collect($pageHits)->pluck('id')->filter()->unique()->values()->all();
+        $needed = $target - count($pageHits);
+
+        $referenceCategoryId = $pageHits[0]['category']['id'] ?? null;
+
+        $fillQuery = Article::published()
+            ->forLocale($locale)
+            ->with('category')
+            ->whereNotIn('id', $existingIds);
+
+        if ($referenceCategoryId) {
+            $fillQuery->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$referenceCategoryId]);
+        }
+
+        $fill = $fillQuery
+            ->orderByDesc('published_at')
+            ->limit($needed)
+            ->get()
+            ->map(fn (Article $a) => $this->articleToArray($a))
+            ->all();
+
+        return array_merge($pageHits, $fill);
     }
 
     public function getHomeData(string $locale = 'fr'): array
     {
-        $cacheKey = 'vivat.home.' . $locale;
+        $cacheKey = 'vivat.home.'.$locale;
         $cacheTtl = (int) config('vivat.home_cache_ttl', 300);
         $closure = function () use ($locale) {
             $highlightSize = 5;
@@ -261,7 +303,7 @@ class PublicPageDataService
     public function getCategoryHubData(string $categorySlug, ?string $subCategorySlug = null, string $locale = 'fr', int $page = 1): array
     {
         $category = Category::where('slug', $categorySlug)->firstOrFail();
-        $cacheKey = 'vivat.hub.' . $category->slug . ($subCategorySlug ? '.' . $subCategorySlug : '') . '.' . $locale . '.page.' . $page;
+        $cacheKey = 'vivat.hub.'.$category->slug.($subCategorySlug ? '.'.$subCategorySlug : '').'.'.$locale.'.page.'.$page;
         $closure = function () use ($category, $subCategorySlug, $locale, $page) {
             // Sous-catégories = termes extraits de la description (ex. "Innovation, tech, numérique" → Innovation, tech, numérique)
             $subCategories = $category->getDescriptionSubCategories();
@@ -276,7 +318,7 @@ class PublicPageDataService
                 if ($term) {
                     $searchTerm = $term['name'];
                     $query->where(function ($q) use ($searchTerm) {
-                        $like = '%' . addcslashes($searchTerm, '%_\\') . '%';
+                        $like = '%'.addcslashes($searchTerm, '%_\\').'%';
                         $q->where('title', 'like', $like)
                             ->orWhere('content', 'like', $like)
                             ->orWhere('excerpt', 'like', $like)
@@ -345,6 +387,7 @@ class PublicPageDataService
             $seen[$id] = true;
             $out[] = $row;
         }
+
         return array_values($out);
     }
 
@@ -366,6 +409,7 @@ class PublicPageDataService
             $seenSlug[$slug] = true;
             $out[] = $row;
         }
+
         return array_values($out);
     }
 
@@ -388,6 +432,7 @@ class PublicPageDataService
             $seenTitle[$key] = true;
             $out[] = $row;
         }
+
         return array_values($out);
     }
 
