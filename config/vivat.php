@@ -8,6 +8,10 @@ return [
      * Images Pexels de repli par catégorie (articles sans photo).
      * On stocke des URLs complètes pour garder la main sur les visuels.
      */
+    /**
+     * Images Pexels de repli — chaque URL ne doit jamais être réutilisée sur une même page.
+     * Pool élargi pour garantir l'unicité.
+     */
     'pexels_fallback_urls' => [
         'default' => [
             'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
@@ -16,6 +20,15 @@ return [
             'https://images.pexels.com/photos/210243/pexels-photo-210243.jpeg',
             'https://images.pexels.com/photos/34950/pexels-photo.jpg',
             'https://images.pexels.com/photos/572897/pexels-photo-572897.jpeg',
+            'https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg',
+            'https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg',
+            'https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg',
+            'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg',
+            'https://images.pexels.com/photos/2253879/pexels-photo-2253879.jpeg',
+            'https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg',
+            'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg',
+            'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg',
+            'https://images.pexels.com/photos/386009/pexels-photo-386009.jpeg',
         ],
         'energie' => [
             'https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg',

@@ -38,21 +38,30 @@ if (! function_exists('vivat_category_fallback_image')) {
      */
     function vivat_category_fallback_image(?string $categorySlug, int $width = 800, int $height = 600, ?string $articleIdentifier = null, ?string $contextSeed = null): string
     {
-        $key = $categorySlug !== null && $categorySlug !== '' ? strtolower(trim($categorySlug)) : 'default';
+        static $usedBaseUrls = [];
         $map = config('vivat.pexels_fallback_urls', []);
-        $defaultUrls = $map['default'] ?? ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
-        $urls = $map[$key] ?? $defaultUrls;
-
-        if (! is_array($urls) || empty($urls)) {
-            $urls = is_array($defaultUrls) && ! empty($defaultUrls)
-                ? $defaultUrls
-                : ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
+        $allUrls = [];
+        foreach ($map as $categoryUrls) {
+            if (is_array($categoryUrls)) {
+                foreach ($categoryUrls as $u) {
+                    $base = preg_replace('#\?.*$#', '', (string) $u);
+                    if ($base !== '' && ! in_array($base, $allUrls, true)) {
+                        $allUrls[] = $base;
+                    }
+                }
+            }
         }
-
-        // Un seed par article (+ contexte) pour varier l’image entre articles
-        $seed = (string) ($articleIdentifier ?? '') . ($contextSeed !== null && $contextSeed !== '' ? '-' . $contextSeed : '');
-        $index = $seed !== '' ? abs(crc32($seed)) % count($urls) : 0;
-        $baseUrl = $urls[$index];
+        if (empty($allUrls)) {
+            $allUrls = ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
+        }
+        $available = array_values(array_diff($allUrls, $usedBaseUrls));
+        if (empty($available)) {
+            $usedBaseUrls = [];
+            $available = $allUrls;
+        }
+        $seed = (string) ($articleIdentifier ?? '') . ($contextSeed ? '-' . $contextSeed : '');
+        $baseUrl = $available[abs(crc32($seed)) % count($available)];
+        $usedBaseUrls[] = $baseUrl;
         $w = max(1, $width);
         $h = max(1, $height);
 
