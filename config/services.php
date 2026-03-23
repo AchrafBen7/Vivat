@@ -48,4 +48,12 @@ return [
         'publication_price' => (int) env('STRIPE_PUBLICATION_PRICE', 1500), // 15.00 EUR in cents
     ],
 
+    'cloudinary' => [
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+        'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
+        'submission_folder' => env('CLOUDINARY_SUBMISSION_FOLDER', 'vivat/submissions'),
+    ],
+
 ];

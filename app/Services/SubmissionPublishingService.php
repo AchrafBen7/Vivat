@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
 
 class SubmissionPublishingService
 {
+    public function __construct(
+        private readonly SubmissionImageStorageService $submissionImageStorage,
+    ) {}
+
     public function approveAndPublish(Submission $submission, array $data, ?User $reviewer = null): Article
     {
         return DB::transaction(function () use ($submission, $data, $reviewer): Article {
@@ -25,6 +29,11 @@ class SubmissionPublishingService
             $reviewerId = $data['reviewed_by'] ?? $reviewer?->id;
             $reviewedAt = $data['reviewed_at'] ?? now();
             $language = $this->resolveLanguage($submission);
+            $coverImageUrl = $this->submissionImageStorage->migrateLocalImageUrl($submission->cover_image_url);
+
+            if ($coverImageUrl !== $submission->cover_image_url) {
+                $submission->update(['cover_image_url' => $coverImageUrl]);
+            }
 
             $article = Article::create([
                 'title' => $submission->title,
@@ -37,7 +46,7 @@ class SubmissionPublishingService
                 'reading_time' => $submission->reading_time ?: 5,
                 'status' => 'published',
                 'article_type' => $articleType,
-                'cover_image_url' => $submission->cover_image_path,
+                'cover_image_url' => $coverImageUrl,
                 'quality_score' => 100,
                 'published_at' => now(),
                 'language' => $language,

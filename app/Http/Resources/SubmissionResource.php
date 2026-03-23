@@ -23,7 +23,7 @@ class SubmissionResource extends JsonResource
             ),
             'category_id'     => $this->category_id,
             'reading_time'    => $this->reading_time,
-            'cover_image_path' => $this->cover_image_path,
+            'cover_image_url'  => $this->cover_image_url,
             'status'          => $this->status,
             'reviewer_notes'  => $this->reviewer_notes,
             'reviewed_at'     => $this->reviewed_at?->toIso8601String(),

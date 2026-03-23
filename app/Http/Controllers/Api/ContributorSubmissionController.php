@@ -5,15 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SubmissionResource;
 use App\Models\Submission;
-use Illuminate\Http\UploadedFile;
+use App\Services\SubmissionImageStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 class ContributorSubmissionController extends Controller
 {
+    public function __construct(
+        private readonly SubmissionImageStorageService $submissionImageStorage,
+    ) {}
+
     /**
      * GET /api/contributor/submissions — historique des soumissions du contributeur
      */
@@ -64,8 +66,8 @@ class ContributorSubmissionController extends Controller
             'category_id' => $validated['category_id'] ?? null,
             'reading_time' => $validated['reading_time'] ?? 5,
             'status'      => ! empty($validated['submit']) ? 'pending' : 'draft',
-            'cover_image_path' => $request->hasFile('cover_image')
-                ? $this->storeSubmissionCoverImage($request->file('cover_image'))
+            'cover_image_url' => $request->hasFile('cover_image')
+                ? $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'))
                 : null,
         ]);
 
@@ -104,7 +106,9 @@ class ContributorSubmissionController extends Controller
         $data = collect($validated)->except('submit')->toArray();
 
         if ($request->hasFile('cover_image')) {
-            $data['cover_image_path'] = $this->storeSubmissionCoverImage($request->file('cover_image'));
+            $data['cover_image_url'] = $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'));
+        } elseif (is_string($submission->cover_image_url) && $submission->cover_image_url !== '') {
+            $data['cover_image_url'] = $this->submissionImageStorage->migrateLocalImageUrl($submission->cover_image_url);
         }
 
         if (! empty($validated['submit'])) {
@@ -135,19 +139,5 @@ class ContributorSubmissionController extends Controller
         $submission->delete();
 
         return response()->json(null, 204);
-    }
-
-    private function storeSubmissionCoverImage(UploadedFile $file): string
-    {
-        $directory = public_path('uploads/submissions');
-
-        if (! File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-
-        $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
-        $file->move($directory, $filename);
-
-        return '/uploads/submissions/' . $filename;
     }
 }

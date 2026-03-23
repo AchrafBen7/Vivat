@@ -1,5 +1,10 @@
 <?php
 $submissions = $submissions ?? [];
+$cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
+$glassBox = 'rounded-[21px] flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1.5 box-border p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
+$tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
+$tagGlassOnImage = $tagClass . ' bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)] text-white';
+$articleMetaOnImage = 'text-white/80 text-xs';
 
 $statusStyles = [
     'draft' => [
@@ -9,8 +14,8 @@ $statusStyles = [
     ],
     'pending' => [
         'label' => 'En attente',
-        'pill' => 'background: rgba(0,66,65,0.10); color: #004241; border: 1px solid rgba(0,66,65,0.16);',
-        'dot' => '#004241',
+        'pill' => 'background: rgba(0,66,65,0.84); color: #FFFFFF; box-shadow: 0 8px 20px rgba(0,0,0,0.16);',
+        'dot' => '#9EE5D9',
     ],
     'approved' => [
         'label' => 'Approuvé',
@@ -46,7 +51,7 @@ $statusStyles = [
         <?php
         $status = $sub['status'] ?? 'draft';
         $statusStyle = $statusStyles[$status] ?? $statusStyles['draft'];
-        $cover = $sub['cover_image_path'] ?? null;
+        $cover = $sub['cover_image_url'] ?? null;
         $fallbackImage = $status === 'pending'
             ? '/quotidien.jpg'
             : ($status === 'approved' ? '/chezsoi.jpg' : ($status === 'rejected' ? '/sante.jpg' : '/finance.jpg'));
@@ -57,23 +62,27 @@ $statusStyles = [
         ?>
         <div class="flex flex-col gap-3">
         <article
-            class="group relative h-[380px] overflow-hidden rounded-[30px] border border-[#004241]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+            class="group relative block h-[380px] overflow-hidden rounded-[32px] border border-[#004241]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
             onclick="window.location.href='<?= htmlspecialchars($sub['preview_url'] ?? '#', ENT_QUOTES) ?>'"
         >
-            <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($sub['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.03]">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#001F1F]/74 via-[#002F2F]/18 to-transparent"></div>
+            <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($sub['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.015]">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
 
-            <button
-                type="button"
-                class="js-delete-submission absolute left-5 top-5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[rgba(32,42,38,0.78)] text-white transition hover:bg-[rgba(152,38,38,0.88)]"
-                data-delete-url="<?= htmlspecialchars($deleteUrl) ?>"
-                data-article-title="<?= htmlspecialchars($sub['title']) ?>"
-                aria-label="Supprimer cet article"
-            >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 7h12M9 7V5.8c0-.66.54-1.2 1.2-1.2h3.6c.66 0 1.2.54 1.2 1.2V7m-7 0l.55 10.08A2 2 0 0010.55 19h2.9a2 2 0 001.99-1.92L16 7M10 11.25v4.5m4-4.5v4.5"/>
-                </svg>
-            </button>
+            <div class="absolute left-5 top-5 z-10 flex items-center gap-3">
+                <button
+                    type="button"
+                    class="js-delete-submission inline-flex items-center justify-center rounded-full bg-[rgba(174,66,46,0.92)] px-4 py-[7px] text-xs font-medium text-white shadow-[0_10px_24px_rgba(0,0,0,0.14)] transition hover:bg-[rgba(152,38,38,0.96)]"
+                    data-delete-url="<?= htmlspecialchars($deleteUrl) ?>"
+                    data-article-title="<?= htmlspecialchars($sub['title']) ?>"
+                    aria-label="Supprimer cet article"
+                >
+                    Supprimer
+                </button>
+
+                <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex items-center rounded-full px-3 py-[7px] text-xs font-medium text-white shadow-[0_8px_20px_rgba(0,0,0,0.16)] transition hover:opacity-90" style="<?= htmlspecialchars($statusStyle['pill']) ?> color: #FFFFFF;" onclick="event.stopPropagation();">
+                    Modifier
+                </a>
+            </div>
 
             <div class="absolute right-5 top-5">
                 <span class="inline-flex items-center gap-2 rounded-full px-3 py-[7px] text-xs font-medium" style="<?= htmlspecialchars($statusStyle['pill']) ?>">
@@ -82,32 +91,26 @@ $statusStyles = [
                 </span>
             </div>
 
-            <div class="absolute left-5 top-[74px] z-10">
-                <a href="<?= htmlspecialchars($editUrl) ?>" class="inline-flex items-center justify-center rounded-full border border-white/15 bg-[rgba(32,42,38,0.78)] px-4 py-[10px] text-xs font-semibold text-white transition hover:bg-[rgba(255,255,255,0.18)]" onclick="event.stopPropagation();">
-                    Modifier
-                </a>
-            </div>
-
-            <div class="absolute inset-x-0 bottom-0 p-5">
-                <div class="overflow-hidden rounded-[21px] border border-[rgba(230,230,230,0.20)] bg-[rgba(52,62,58,0.72)] p-[20px]">
+            <div class="<?= $cardOverlay ?> flex items-end">
+                <div class="<?= $glassBox ?> w-full [transform:translateZ(0)] [backface-visibility:hidden]">
                     <?php if (!empty($sub['category']['name'])): ?>
-                    <span class="inline-flex items-center justify-center rounded-full border border-[rgba(230,230,230,0.25)] bg-[rgba(190,190,190,0.10)] px-4 py-[9px] text-sm font-medium text-white">
+                    <span class="<?= $tagGlassOnImage ?>">
                         <?= htmlspecialchars($sub['category']['name']) ?>
                     </span>
                     <?php endif; ?>
-                    <h2 class="mt-4 text-[22px] font-semibold leading-[1.35] text-white line-clamp-3"><?= htmlspecialchars($sub['title']) ?></h2>
-                    <div class="mt-3 flex items-center gap-3 text-sm !text-white/80">
-                        <span class="!text-white/80"><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
-                        <?php if (!empty($sub['reading_time'])): ?>
-                        <span class="!text-white/70">•</span>
-                        <span class="!text-white/80"><?= (int) $sub['reading_time'] ?> min</span>
-                        <?php endif; ?>
-                    </div>
+                    <h2 class="text-[22px] font-medium leading-[1.35] text-white line-clamp-5"><?= htmlspecialchars($sub['title']) ?></h2>
                     <?php if (!empty($sub['excerpt'])): ?>
-                    <p class="mt-3 line-clamp-2 text-sm leading-6" style="color: rgba(255, 255, 255, 0.78);">
+                    <p class="line-clamp-2 text-sm leading-6 text-white/90">
                         <?= htmlspecialchars($sub['excerpt']) ?>
                     </p>
                     <?php endif; ?>
+                    <div class="flex items-center gap-3 <?= $articleMetaOnImage ?>">
+                        <span><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
+                        <?php if (!empty($sub['reading_time'])): ?>
+                        <span>•</span>
+                        <span><?= (int) $sub['reading_time'] ?> min</span>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </article>

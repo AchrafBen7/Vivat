@@ -75,7 +75,7 @@ $uploadMaxBytes = (function (string $value): int {
             >
             <div id="cover-image-empty-state">
                 <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span class="text-[#004241]/70 text-sm"><?= $isEditing && !empty($submission['cover_image_path']) ? 'Cliquez pour remplacer l’image' : 'Cliquez pour ajouter une image' ?></span>
+                <span class="text-[#004241]/70 text-sm"><?= $isEditing && !empty($submission['cover_image_url']) ? 'Cliquez pour remplacer l’image' : 'Cliquez pour ajouter une image' ?></span>
                 <span class="block text-gray-400 text-xs mt-1">JPG, PNG - max 5 Mo</span>
                 <span class="block text-gray-400 text-xs mt-1">Limite PHP locale actuelle: <?= htmlspecialchars($uploadMaxRaw) ?></span>
             </div>
@@ -176,14 +176,14 @@ $uploadMaxBytes = (function (string $value): int {
     </div>
 </div>
 
-<div id="stripe-payment-overlay" class="fixed inset-0 z-[130] hidden items-center justify-center bg-[#004241]/35 px-4">
-    <div class="w-full max-w-xl rounded-[28px] border border-[#DED8CE] bg-[#F8F6F2] p-6 shadow-[0_24px_60px_rgba(0,66,65,0.18)]">
+<div id="stripe-payment-overlay" class="fixed inset-0 z-[130] hidden overflow-y-auto bg-[#004241]/35 px-4 py-6 md:items-center md:justify-center">
+    <div class="mx-auto w-full max-w-xl rounded-[28px] border border-[#DED8CE] bg-white p-6 shadow-[0_24px_60px_rgba(0,66,65,0.18)] md:my-0">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#004241]/48">Paiement de publication</p>
-                <h2 class="mt-2 text-[24px] font-semibold leading-8 text-[#1B4B3B]">Finalisez l’envoi de votre article</h2>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#004241]/48">Validation éditoriale</p>
+                <h2 class="mt-2 text-[24px] font-semibold leading-8 text-[#1B4B3B]">Votre article est prêt à être soumis</h2>
                 <p class="mt-2 text-sm leading-6 text-[#004241]/80">
-                    Votre article a ete enregistre en brouillon. Reglez maintenant <span id="stripe-payment-price-label" class="font-semibold text-[#004241]"><?= htmlspecialchars($publicationPriceLabel) ?></span> pour l’envoyer en validation editoriale.
+                    Votre brouillon est bien enregistré. Réglez maintenant <span id="stripe-payment-price-label" class="font-semibold text-[#004241]"><?= htmlspecialchars($publicationPriceLabel) ?></span> pour l’envoyer à notre équipe éditoriale et passer à l’étape de validation.
                 </p>
             </div>
             <button type="button" id="stripe-payment-close" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#DED8CE] text-[#004241] transition hover:bg-white" aria-label="Fermer le paiement">
@@ -199,13 +199,13 @@ $uploadMaxBytes = (function (string $value): int {
         </div>
 
         <div class="mt-6 flex items-center justify-between gap-4">
-            <p class="text-xs leading-5 text-[#004241]/58">Le paiement valide l’envoi de votre article. En cas de refus editorial, l’equipe peut ensuite traiter un remboursement.</p>
+            <p class="text-xs leading-5 text-[#004241]/58">Une fois le paiement confirmé, votre article part en relecture. Si la soumission n’est pas retenue, l’équipe pourra ensuite gérer un remboursement.</p>
             <div class="flex gap-3">
                 <button type="button" id="stripe-payment-cancel" class="h-11 rounded-full border border-[#DED8CE] bg-white px-5 text-sm font-medium text-[#004241] transition hover:bg-[#F1F6F5]">
                     Plus tard
                 </button>
                 <button type="button" id="stripe-payment-submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-[#F8F6F2] transition hover:bg-[#003535] disabled:cursor-not-allowed disabled:opacity-60">
-                    Payer et envoyer
+                    Payer
                 </button>
             </div>
         </div>
@@ -369,6 +369,7 @@ $uploadMaxBytes = (function (string $value): int {
     function closePaymentOverlay() {
         paymentOverlay.classList.add('hidden');
         paymentOverlay.classList.remove('flex');
+        document.body.style.overflow = '';
         resetPaymentElement();
         setButtonsDisabled(false);
     }
@@ -376,6 +377,7 @@ $uploadMaxBytes = (function (string $value): int {
     function openPaymentOverlay() {
         paymentOverlay.classList.remove('hidden');
         paymentOverlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
         paymentError.textContent = '';
         paymentError.classList.add('hidden');
         paymentSubmitButton.disabled = false;
@@ -403,7 +405,7 @@ $uploadMaxBytes = (function (string $value): int {
             throw new Error('La clé Stripe publishable est absente.');
         }
 
-        showOverlayProgress('Préparation du paiement...', `Votre brouillon est enregistre. Nous preparons maintenant le reglement de ${publicationPriceLabel}.`);
+        showOverlayProgress('Préparation de votre soumission...', `Votre brouillon est enregistré. Nous préparons maintenant le paiement de ${publicationPriceLabel} pour l’envoyer en validation éditoriale.`);
 
         const response = await fetch(paymentCreateUrl, {
             method: 'POST',
@@ -476,7 +478,8 @@ $uploadMaxBytes = (function (string $value): int {
 
         paymentOverlay.classList.add('hidden');
         paymentOverlay.classList.remove('flex');
-        showOverlayProgress('Paiement confirme...', 'Votre paiement est valide. Nous finalisons maintenant l’envoi de l’article en validation.');
+        document.body.style.overflow = '';
+        showOverlayProgress('Paiement validé...', 'Votre règlement a bien été accepté. Nous transmettons maintenant votre article à l’équipe éditoriale.');
 
         const response = await fetch(paymentConfirmUrl, {
             method: 'POST',

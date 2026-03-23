@@ -6,15 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Payment;
 use App\Models\Submission;
-use Illuminate\Http\UploadedFile;
+use App\Services\SubmissionImageStorageService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 class ContributorController extends Controller
 {
+    public function __construct(
+        private readonly SubmissionImageStorageService $submissionImageStorage,
+    ) {}
+
     private function publicationPrice(): int
     {
         return (int) config('services.stripe.publication_price', 1500);
@@ -96,7 +100,7 @@ class ContributorController extends Controller
                 },
                 'created_at' => $s->created_at?->format('d/m/Y'),
                 'reading_time' => $s->reading_time,
-                'cover_image_path' => $s->cover_image_path,
+                'cover_image_url' => $s->cover_image_url,
                 'excerpt' => $s->excerpt,
                 'reviewer_notes' => $s->reviewer_notes,
                 'reviewed_at' => $s->reviewed_at?->format('d/m/Y H:i'),
@@ -114,7 +118,7 @@ class ContributorController extends Controller
         ]);
     }
 
-    public function editSubmission(Request $request, Submission $submission): Response|RedirectResponse
+    public function editSubmission(Request $request, Submission $submission): Response|RedirectResponse|JsonResponse
     {
         abort_unless(
             $request->user()
@@ -143,18 +147,20 @@ class ContributorController extends Controller
 
             $shouldSubmit = $request->input('status') === 'submitted';
             $status = $shouldSubmit && $this->hasPaidPublication($submission) ? 'pending' : 'draft';
-            $coverImagePath = $submission->cover_image_path;
+            $coverImageUrl = $submission->cover_image_url;
 
             if ($request->hasFile('cover_image')) {
-                if (is_string($submission->cover_image_path) && $submission->cover_image_path !== '') {
-                    $existingCoverPath = public_path(ltrim($submission->cover_image_path, '/'));
+                if (is_string($submission->cover_image_url) && str_starts_with($submission->cover_image_url, '/uploads/submissions/')) {
+                    $existingCoverPath = public_path(ltrim($submission->cover_image_url, '/'));
 
                     if (File::exists($existingCoverPath)) {
                         File::delete($existingCoverPath);
                     }
                 }
 
-                $coverImagePath = $this->storeSubmissionCoverImage($request->file('cover_image'));
+                $coverImageUrl = $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'));
+            } elseif (is_string($coverImageUrl) && $coverImageUrl !== '') {
+                $coverImageUrl = $this->submissionImageStorage->migrateLocalImageUrl($coverImageUrl);
             }
 
             $submission->update([
@@ -164,7 +170,7 @@ class ContributorController extends Controller
                 'category_id' => $validated['category_id'] ?? null,
                 'reading_time' => $validated['reading_time'] ?? 5,
                 'status' => $status,
-                'cover_image_path' => $coverImagePath,
+                'cover_image_url' => $coverImageUrl,
                 'reviewer_notes' => $status === 'pending' ? null : $submission->reviewer_notes,
                 'reviewed_by' => $status === 'pending' ? null : $submission->reviewed_by,
                 'reviewed_at' => $status === 'pending' ? null : $submission->reviewed_at,
@@ -213,7 +219,7 @@ class ContributorController extends Controller
                 'reviewer_notes' => $submission->reviewer_notes,
                 'reviewed_at' => $submission->reviewed_at?->format('d/m/Y H:i'),
                 'reviewer_name' => $submission->reviewer?->name,
-                'cover_image_path' => $submission->cover_image_path,
+                'cover_image_url' => $submission->cover_image_url,
             ],
             'form_action' => route('contributor.articles.edit', ['submission' => $submission->slug]),
             'is_editing' => true,
@@ -224,7 +230,7 @@ class ContributorController extends Controller
         ]);
     }
 
-    public function newArticle(Request $request): Response|RedirectResponse
+    public function newArticle(Request $request): Response|RedirectResponse|JsonResponse
     {
         if ($request->isMethod('post')) {
             $validated = $request->validate([
@@ -245,8 +251,8 @@ class ContributorController extends Controller
 
             $shouldSubmit = $request->input('status') === 'submitted';
             $status = 'draft';
-            $coverImagePath = $request->hasFile('cover_image')
-                ? $this->storeSubmissionCoverImage($request->file('cover_image'))
+            $coverImageUrl = $request->hasFile('cover_image')
+                ? $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'))
                 : null;
 
             $submission = Submission::create([
@@ -257,7 +263,7 @@ class ContributorController extends Controller
                 'category_id' => $validated['category_id'] ?? null,
                 'reading_time' => $validated['reading_time'] ?? 5,
                 'status'      => $status,
-                'cover_image_path' => $coverImagePath,
+                'cover_image_url' => $coverImageUrl,
             ]);
 
             if ($shouldSubmit) {
@@ -343,7 +349,7 @@ class ContributorController extends Controller
                 'published_at' => $submission->created_at?->format('d/m/Y H:i'),
                 'published_at_display' => $submission->created_at?->locale('fr')->isoFormat('D MMMM YYYY'),
                 'published_at_iso' => $submission->created_at?->toIso8601String(),
-                'cover_image_url' => $submission->cover_image_path,
+                'cover_image_url' => $submission->cover_image_url,
                 'cover_video_url' => null,
                 'category' => $category ? [
                     'name' => $category->name,
@@ -359,7 +365,9 @@ class ContributorController extends Controller
             'title' => $submission->title . ' — Preview Vivat',
             'meta_description' => $submission->excerpt ?: 'Prévisualisation de votre article Vivat.',
             'canonical_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
-            'og_image' => $submission->cover_image_path ? url($submission->cover_image_path) : null,
+            'og_image' => $submission->cover_image_url
+                ? (str_starts_with($submission->cover_image_url, '/') ? url($submission->cover_image_url) : $submission->cover_image_url)
+                : null,
             'og_article' => true,
         ]);
 
@@ -374,8 +382,8 @@ class ContributorController extends Controller
             403
         );
 
-        if (is_string($submission->cover_image_path) && $submission->cover_image_path !== '') {
-            $coverPath = public_path(ltrim($submission->cover_image_path, '/'));
+        if (is_string($submission->cover_image_url) && str_starts_with($submission->cover_image_url, '/uploads/submissions/')) {
+            $coverPath = public_path(ltrim($submission->cover_image_url, '/'));
 
             if (File::exists($coverPath)) {
                 File::delete($coverPath);
@@ -426,17 +434,4 @@ class ContributorController extends Controller
         ]);
     }
 
-    private function storeSubmissionCoverImage(UploadedFile $file): string
-    {
-        $directory = public_path('uploads/submissions');
-
-        if (! File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-
-        $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
-        $file->move($directory, $filename);
-
-        return '/uploads/submissions/' . $filename;
-    }
 }

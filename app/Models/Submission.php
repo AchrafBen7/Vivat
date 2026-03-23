@@ -25,7 +25,7 @@ class Submission extends Model
         'reviewed_by',
         'reviewed_at',
         'payment_id',
-        'cover_image_path',
+        'cover_image_url',
     ];
 
     protected $casts = [
@@ -100,5 +100,15 @@ class Submission extends Model
             'reviewer_notes' => $notes,
             'reviewed_at'    => $reviewedAt ?: now(),
         ]);
+    }
+
+    public function getCoverImagePathAttribute(): ?string
+    {
+        return $this->attributes['cover_image_url'] ?? null;
+    }
+
+    public function setCoverImagePathAttribute(?string $value): void
+    {
+        $this->attributes['cover_image_url'] = $value;
     }
 }

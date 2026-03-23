@@ -96,7 +96,7 @@ class SubmissionResource extends Resource
                     ]),
                 Section::make('Couverture')
                     ->schema([
-                        ImageEntry::make('cover_image_path')
+                        ImageEntry::make('cover_image_url')
                             ->label('')
                             ->height(260),
                     ])
@@ -139,7 +139,7 @@ class SubmissionResource extends Resource
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'category', 'reviewer'])->orderByRaw("FIELD(status, 'pending', 'draft', 'approved', 'rejected')")->orderByDesc('created_at'))
             ->columns([
-                ImageColumn::make('cover_image_path')
+                ImageColumn::make('cover_image_url')
                     ->label('')
                     ->circular(),
                 TextColumn::make('title')
