@@ -433,12 +433,14 @@ class PublicPageDataService
 
     private function categoryToArray(Category $c): array
     {
-        // Médias rubrique : uniquement public/ (fichier par slug) ou URL DB locale (/chemin, pas de lien externe).
+        // Médias rubrique : accepte un chemin local public/ ou une URL externe explicite (Cloudinary, CDN, etc.).
         $fromDb = $c->image_url;
         $trimmed = is_string($fromDb) ? trim($fromDb) : '';
         $public = vivat_category_public_media_url($c->slug);
         $imageUrl = null;
         if ($trimmed !== '' && str_starts_with($trimmed, '/') && ! str_starts_with($trimmed, '//')) {
+            $imageUrl = $trimmed;
+        } elseif ($trimmed !== '' && filter_var($trimmed, FILTER_VALIDATE_URL)) {
             $imageUrl = $trimmed;
         } elseif ($public !== null && $public !== '') {
             $imageUrl = $public;

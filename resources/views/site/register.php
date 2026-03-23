@@ -4,14 +4,14 @@ $old = $old ?? [];
 $last_name = $old['last_name'] ?? '';
 $first_name = $old['first_name'] ?? '';
 $email = $old['email'] ?? '';
-// Image Unsplash paysage côtier (variante aléatoire via seed)
-$unsplash_img = 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=1000&fit=crop&q=80';
+// Image Pexels paysage côtier
+$hero_img = 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=800&h=1000&fit=crop';
 ?>
 <div class="pt-6 pb-12">
     <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch justify-center max-w-[1320px] mx-auto">
-        <!-- Colonne gauche : image Unsplash + bouton Retour -->
+        <!-- Colonne gauche : image + bouton Retour -->
         <div class="relative w-full lg:w-[628px] flex-shrink-0 rounded-[30px] overflow-hidden" style="height: 850px; min-height: 400px;">
-            <img src="<?= htmlspecialchars($unsplash_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">
+            <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">
             <a href="/" class="absolute flex items-center justify-center gap-2.5 rounded-full text-[#004241] font-normal text-base leading-none hover:opacity-90 transition" style="top: 24px; left: 24px; width: 115px; height: 43px; padding: 12px 18px; background: #F3E8CC;">
                 <svg class="w-5 h-5 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 Retour

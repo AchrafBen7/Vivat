@@ -2,13 +2,13 @@
 $errors = $errors ?? [];
 $old = $old ?? [];
 $email = $old['email'] ?? '';
-$unsplash_img = 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=400&fit=crop&q=80';
+$hero_img = 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop';
 ?>
 <div class="pt-6 pb-12 px-4">
     <div class="max-w-[756px] mx-auto flex flex-col gap-[29px]">
         <!-- Carré image en haut -->
         <div class="relative w-full rounded-[30px] overflow-hidden" style="height: 190px;">
-            <img src="<?= htmlspecialchars($unsplash_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">
+            <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">
             <a href="/" class="absolute flex items-center justify-center gap-2.5 rounded-full text-[#004241] font-normal text-base leading-none hover:opacity-90 transition" style="top: 24px; left: 24px; padding: 12px 18px; background: #F3E8CC;">
                 <svg class="w-5 h-5 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 Retour

@@ -26,11 +26,13 @@ $statusStyles = [
 ?>
 <h1 class="font-medium text-[#004241] text-2xl mb-2">Mes articles</h1>
 <p class="text-[#004241]/80 mb-8">Vos soumissions et brouillons</p>
+<?php if (!empty($submissions)): ?>
 <div class="mb-6 flex justify-end">
     <a href="<?= url('/contributor/new') ?>" class="inline-flex items-center justify-center rounded-full bg-[#004241] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#003535]">
         Créer un nouvel article
     </a>
 </div>
+<?php endif; ?>
 
 <div>
     <?php if (empty($submissions)): ?>

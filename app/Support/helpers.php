@@ -39,20 +39,24 @@ if (! function_exists('vivat_category_fallback_image')) {
     function vivat_category_fallback_image(?string $categorySlug, int $width = 800, int $height = 600, ?string $articleIdentifier = null, ?string $contextSeed = null): string
     {
         $key = $categorySlug !== null && $categorySlug !== '' ? strtolower(trim($categorySlug)) : 'default';
-        $map = config('vivat.unsplash_fallback_by_category', []);
-        $defaultIds = config('vivat.unsplash_fallback_ids', ['1524758631624-e2822e304c36']);
-        $ids = $map[$key] ?? $map['default'] ?? $defaultIds;
-        if (! is_array($ids) || empty($ids)) {
-            $ids = is_array($defaultIds) && ! empty($defaultIds) ? $defaultIds : ['1524758631624-e2822e304c36'];
+        $map = config('vivat.pexels_fallback_urls', []);
+        $defaultUrls = $map['default'] ?? ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
+        $urls = $map[$key] ?? $defaultUrls;
+
+        if (! is_array($urls) || empty($urls)) {
+            $urls = is_array($defaultUrls) && ! empty($defaultUrls)
+                ? $defaultUrls
+                : ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
         }
+
         // Un seed par article (+ contexte) pour varier l’image entre articles
         $seed = (string) ($articleIdentifier ?? '') . ($contextSeed !== null && $contextSeed !== '' ? '-' . $contextSeed : '');
-        $index = $seed !== '' ? abs(crc32($seed)) % count($ids) : 0;
-        $photoId = $ids[$index];
+        $index = $seed !== '' ? abs(crc32($seed)) % count($urls) : 0;
+        $baseUrl = $urls[$index];
         $w = max(1, $width);
         $h = max(1, $height);
 
-        return 'https://images.unsplash.com/photo-'.$photoId.'?w='.$w.'&h='.$h.'&fit=crop&q=80';
+        return $baseUrl.'?auto=compress&cs=tinysrgb&w='.$w.'&h='.$h.'&fit=crop';
     }
 }
 
@@ -102,6 +106,38 @@ if (! function_exists('vivat_category_public_poster_url')) {
         }
 
         return null;
+    }
+}
+
+if (! function_exists('vivat_cloudinary_video_poster_url')) {
+    /**
+     * Génère un poster JPG depuis une URL vidéo Cloudinary.
+     * Ex.: /video/upload/v123/foo.mp4 => /video/upload/so_0/v123/foo.jpg
+     */
+    function vivat_cloudinary_video_poster_url(?string $videoUrl): ?string
+    {
+        if (! is_string($videoUrl) || trim($videoUrl) === '') {
+            return null;
+        }
+
+        $trimmed = trim($videoUrl);
+
+        if (! str_contains($trimmed, 'res.cloudinary.com/') || ! str_contains($trimmed, '/video/upload/')) {
+            return null;
+        }
+
+        $posterUrl = preg_replace(
+            '#/video/upload/#',
+            '/video/upload/so_0/',
+            $trimmed,
+            1
+        );
+
+        if (! is_string($posterUrl)) {
+            return null;
+        }
+
+        return preg_replace('#\.(mp4|webm|mov)(\?.*)?$#i', '.jpg$2', $posterUrl) ?: null;
     }
 }
 

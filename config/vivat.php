@@ -5,30 +5,54 @@ return [
     'disable_page_cache' => true,
 
     /**
-     * Images Unsplash de repli par catégorie (articles sans photo).
-     * 20 IDs vérifiés (images.unsplash.com) — plus de variété entre les articles.
-     * Format : https://images.unsplash.com/photo-{id}?w=800&h=600&fit=crop&q=80
+     * Images Pexels de repli par catégorie (articles sans photo).
+     * On stocke des URLs complètes pour garder la main sur les visuels.
      */
-    'unsplash_fallback_ids' => [
-        '1524758631624-e2822e304c36', '1502672260266-1c1ef2d93688', '1517694712202-14dd9538aa97',
-        '1513694203232-719a280e022f', '1506929562872-bb421503ef21', '1470071459604-3b5ec3a7fe05',
-        '1518495973542-4542c06a5843', '1472396961693-142e6e269027', '1433086966358-54859d0ed716',
-        '1518173946687-a4c8892bbd9f', '1469474968028-56623f02e42e', '1472214103451-9374bd1c798e',
-        '1529419412599-7bb870e11810', '1421789665209-c9b2a435e3dc', '1505142468610-359e7d316be0',
-        '1513836279014-a89f7a76ae86', '1426604966848-d7adac402bff', '1501854140801-50d01698950b',
-        '1509316975850-ff9c5deb0cd9', '1441974231531-c6227db76b6e',
-    ],
-    'unsplash_fallback_by_category' => [
-        'energie' => null,
-        'sante' => null,
-        'technologie' => null,
-        'finance' => null,
-        'mode' => null,
-        'famille' => null,
-        'voyage' => null,
-        'chez-soi' => null,
-        'au-quotidien' => null,
-        'default' => null,
+    'pexels_fallback_urls' => [
+        'default' => [
+            'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+            'https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg',
+            'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg',
+            'https://images.pexels.com/photos/210243/pexels-photo-210243.jpeg',
+            'https://images.pexels.com/photos/34950/pexels-photo.jpg',
+            'https://images.pexels.com/photos/572897/pexels-photo-572897.jpeg',
+        ],
+        'energie' => [
+            'https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg',
+            'https://images.pexels.com/photos/885350/pexels-photo-885350.jpeg',
+        ],
+        'sante' => [
+            'https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg',
+            'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg',
+        ],
+        'technologie' => [
+            'https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg',
+            'https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg',
+        ],
+        'finance' => [
+            'https://images.pexels.com/photos/4386370/pexels-photo-4386370.jpeg',
+            'https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg',
+        ],
+        'mode' => [
+            'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg',
+            'https://images.pexels.com/photos/7679720/pexels-photo-7679720.jpeg',
+        ],
+        'famille' => [
+            'https://images.pexels.com/photos/2253879/pexels-photo-2253879.jpeg',
+            'https://images.pexels.com/photos/1257110/pexels-photo-1257110.jpeg',
+        ],
+        'voyage' => [
+            'https://images.pexels.com/photos/3155666/pexels-photo-3155666.jpeg',
+            'https://images.pexels.com/photos/386009/pexels-photo-386009.jpeg',
+        ],
+        'chez-soi' => [
+            'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg',
+            'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg',
+        ],
+        'au-quotidien' => [
+            'https://images.pexels.com/photos/3768916/pexels-photo-3768916.jpeg',
+            'https://images.pexels.com/photos/4050291/pexels-photo-4050291.jpeg',
+        ],
     ],
 
     'home_cache_ttl' => (int) env('VIVAT_HOME_CACHE_TTL', 1800), // 30 min par défaut

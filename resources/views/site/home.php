@@ -10,6 +10,8 @@ $writer_cta_url = $writer_cta_url ?? $writer_signup_url;
 $writer_cta_label = $writer_cta_label ?? 'Rédigez un article';
 $writer_cta_description = $writer_cta_description ?? 'Écrivez sur Vivat. Votre voix compte.';
 $writerCtaLines = preg_split('/\.\s+/', trim($writer_cta_description), 2);
+$rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dfcy6isdu/video/upload/v1774257142/rubriques_h5dyvo.mp4';
+$rubriquesHeroPosterUrl = vivat_cloudinary_video_poster_url($rubriquesHeroVideoUrl) ?? '/technologie.jpg';
 
 /**
  * CTA rédacteur — specs Figma : 301×114, gap 18px, typo 16px (text-base).
@@ -360,8 +362,8 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <div class="categories-carousel-slide flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>">
                     <?php if ($isFirstSlide): ?>
                     <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[300px] md:h-[420px] lg:h-[524px]">
-                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
-                            <source src="/rubriques.mp4" type="video/mp4">
+                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
+                            <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-end md:pb-8 md:pt-6 lg:p-8 lg:justify-center lg:pb-8">
@@ -373,7 +375,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     <div class="grid min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] md:gap-5 lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
                         <div class="row-span-2 flex min-h-0 flex-col gap-4 md:gap-5 lg:gap-6">
                         <?php if ($cat1): ?>
-                        <?php $cat1Poster = vivat_category_public_poster_url($cat1['slug'] ?? null); ?>
+                        <?php $cat1Poster = vivat_cloudinary_video_poster_url($cat1['image_url'] ?? null) ?? vivat_category_public_poster_url($cat1['slug'] ?? null); ?>
                         <a href="/categories/<?= htmlspecialchars($cat1['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($cat1['image_url'])): ?>
                             <?php if ($isVideoMedia($cat1['image_url'])): ?>
@@ -392,7 +394,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         </a>
                         <?php endif; ?>
                         <?php if ($cat2): ?>
-                        <?php $cat2Poster = vivat_category_public_poster_url($cat2['slug'] ?? null); ?>
+                        <?php $cat2Poster = vivat_cloudinary_video_poster_url($cat2['image_url'] ?? null) ?? vivat_category_public_poster_url($cat2['slug'] ?? null); ?>
                         <a href="/categories/<?= htmlspecialchars($cat2['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($cat2['image_url'])): ?>
                             <?php if ($isVideoMedia($cat2['image_url'])): ?>
@@ -413,7 +415,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     </div>
 
                     <?php if ($cat3): ?>
-                    <?php $cat3Poster = vivat_category_public_poster_url($cat3['slug'] ?? null); ?>
+                    <?php $cat3Poster = vivat_cloudinary_video_poster_url($cat3['image_url'] ?? null) ?? vivat_category_public_poster_url($cat3['slug'] ?? null); ?>
                     <a href="/categories/<?= htmlspecialchars($cat3['slug']) ?>" class="group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]">
                         <?php if (!empty($cat3['image_url'])): ?>
                         <?php if ($isVideoMedia($cat3['image_url'])): ?>
@@ -437,8 +439,8 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                 <?php if ($hasLoop && count($catChunks) > 0): $c = $catChunks[0]; $c1 = $c[0] ?? null; $c2 = $c[1] ?? null; $c3 = $c[2] ?? null; ?>
                 <div class="categories-carousel-slide categories-carousel-clone flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>" aria-hidden="true">
                     <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[300px] md:h-[420px] lg:h-[524px]">
-                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="/technologie.jpg">
-                            <source src="/rubriques.mp4" type="video/mp4">
+                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
+                            <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-end md:pb-8 md:pt-6 lg:p-8 lg:justify-center lg:pb-8">
@@ -449,7 +451,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                     <div class="grid min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] md:gap-5 lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
                         <div class="row-span-2 flex min-h-0 flex-col gap-4 md:gap-5 lg:gap-6">
                         <?php if ($c1): ?>
-                        <?php $c1Poster = vivat_category_public_poster_url($c1['slug'] ?? null); ?>
+                        <?php $c1Poster = vivat_cloudinary_video_poster_url($c1['image_url'] ?? null) ?? vivat_category_public_poster_url($c1['slug'] ?? null); ?>
                         <a href="/categories/<?= htmlspecialchars($c1['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($c1['image_url'])): ?>
                             <?php if ($isVideoMedia($c1['image_url'])): ?>
@@ -468,7 +470,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         </a>
                         <?php endif; ?>
                         <?php if ($c2): ?>
-                        <?php $c2Poster = vivat_category_public_poster_url($c2['slug'] ?? null); ?>
+                        <?php $c2Poster = vivat_cloudinary_video_poster_url($c2['image_url'] ?? null) ?? vivat_category_public_poster_url($c2['slug'] ?? null); ?>
                         <a href="/categories/<?= htmlspecialchars($c2['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (!empty($c2['image_url'])): ?>
                             <?php if ($isVideoMedia($c2['image_url'])): ?>
@@ -488,7 +490,7 @@ $h4Img = (!empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback)
                         <?php endif; ?>
                         </div>
                         <?php if ($c3): ?>
-                        <?php $c3Poster = vivat_category_public_poster_url($c3['slug'] ?? null); ?>
+                        <?php $c3Poster = vivat_cloudinary_video_poster_url($c3['image_url'] ?? null) ?? vivat_category_public_poster_url($c3['slug'] ?? null); ?>
                         <a href="/categories/<?= htmlspecialchars($c3['slug']) ?>" class="group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]">
                             <?php if (!empty($c3['image_url'])): ?>
                             <?php if ($isVideoMedia($c3['image_url'])): ?>

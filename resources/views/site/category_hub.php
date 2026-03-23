@@ -68,7 +68,7 @@ $restArticles = array_values($byId);
     <div class="rounded-[30px] overflow-hidden relative w-full max-w-[1280px] mx-auto h-[443px] mb-6">
         <?php
         // Image hero stable (même URL toujours) pour que la grande photo ne change pas au changement de filtre ou rechargement
-        $heroImg = 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1280';
+        $heroImg = 'https://images.pexels.com/photos/34950/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1280&h=443&fit=crop';
         ?>
         <img src="<?= htmlspecialchars($heroImg) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
