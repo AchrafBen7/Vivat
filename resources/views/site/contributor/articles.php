@@ -54,7 +54,10 @@ $statusStyles = [
         $hasReviewerNote = !empty($sub['reviewer_notes']);
         ?>
         <div class="flex flex-col gap-3">
-        <a href="<?= htmlspecialchars($sub['preview_url'] ?? '#') ?>" class="group relative block h-[380px] overflow-hidden rounded-[30px] border border-[#004241]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1">
+        <article
+            class="group relative h-[380px] overflow-hidden rounded-[30px] border border-[#004241]/10 bg-[#1E2D25] shadow-[0_18px_40px_rgba(0,66,65,0.08)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+            onclick="window.location.href='<?= htmlspecialchars($sub['preview_url'] ?? '#', ENT_QUOTES) ?>'"
+        >
             <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($sub['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.03]">
             <div class="absolute inset-0 bg-gradient-to-t from-[#001F1F]/74 via-[#002F2F]/18 to-transparent"></div>
 
@@ -91,21 +94,21 @@ $statusStyles = [
                     </span>
                     <?php endif; ?>
                     <h2 class="mt-4 text-[22px] font-semibold leading-[1.35] text-white line-clamp-3"><?= htmlspecialchars($sub['title']) ?></h2>
-                    <div class="mt-3 flex items-center gap-3 text-sm text-white/80">
-                        <span><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
+                    <div class="mt-3 flex items-center gap-3 text-sm !text-white/80">
+                        <span class="!text-white/80"><?= htmlspecialchars($sub['created_at'] ?? '') ?></span>
                         <?php if (!empty($sub['reading_time'])): ?>
-                        <span>•</span>
-                        <span><?= (int) $sub['reading_time'] ?> min</span>
+                        <span class="!text-white/70">•</span>
+                        <span class="!text-white/80"><?= (int) $sub['reading_time'] ?> min</span>
                         <?php endif; ?>
                     </div>
                     <?php if (!empty($sub['excerpt'])): ?>
-                    <p class="mt-3 line-clamp-2 text-sm leading-6 text-white/78">
+                    <p class="mt-3 line-clamp-2 text-sm leading-6" style="color: rgba(255, 255, 255, 0.78);">
                         <?= htmlspecialchars($sub['excerpt']) ?>
                     </p>
                     <?php endif; ?>
                 </div>
             </div>
-        </a>
+        </article>
         <?php if ($hasReviewerNote): ?>
         <div class="rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
             <div class="flex items-center gap-2 text-sm font-semibold">

@@ -100,7 +100,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/')->with('success', 'Connexion réussie.');
+            $user = $request->user();
+
+            if ($user?->hasRole('admin')) {
+                return redirect()->to('/admin')->with('success', 'Connexion réussie.');
+            }
+
+            if ($user?->hasRole('contributor')) {
+                return redirect()->route('contributor.dashboard')->with('success', 'Connexion réussie.');
+            }
+
+            return redirect('/')->with('success', 'Connexion réussie.');
         }
 
         return back()->withErrors([
