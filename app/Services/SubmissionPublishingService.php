@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 
 class SubmissionPublishingService
 {
+    private const META_MAX_LENGTH = 190;
+
     public function __construct(
         private readonly SubmissionImageStorageService $submissionImageStorage,
     ) {}
@@ -35,13 +37,18 @@ class SubmissionPublishingService
                 $submission->update(['cover_image_url' => $coverImageUrl]);
             }
 
+            $metaTitle = $this->sanitizeMetaText($submission->title);
+            $metaDescription = $this->sanitizeMetaText(
+                $submission->excerpt ?: Str::limit(strip_tags($submission->content), 180, '...')
+            );
+
             $article = Article::create([
                 'title' => $submission->title,
                 'slug' => $this->generateUniqueSlug($submission->title),
                 'excerpt' => $submission->excerpt,
                 'content' => $submission->content,
-                'meta_title' => $submission->title,
-                'meta_description' => $submission->excerpt,
+                'meta_title' => $metaTitle,
+                'meta_description' => $metaDescription,
                 'category_id' => $categoryId,
                 'reading_time' => $submission->reading_time ?: 5,
                 'status' => 'published',
@@ -94,5 +101,20 @@ class SubmissionPublishingService
         }
 
         return $slug;
+    }
+
+    private function sanitizeMetaText(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $normalized = trim(preg_replace('/\s+/u', ' ', strip_tags($value)) ?? '');
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        return Str::limit($normalized, self::META_MAX_LENGTH, '...');
     }
 }
