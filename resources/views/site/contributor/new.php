@@ -59,6 +59,7 @@ $uploadMaxBytes = (function (string $value): int {
     data-payment-create-url="<?= htmlspecialchars($paymentCreateUrl) ?>"
     data-payment-confirm-url="<?= htmlspecialchars($paymentConfirmUrl) ?>"
     data-publication-price-label="<?= htmlspecialchars($publicationPriceLabel) ?>"
+    data-is-editing="<?= $isEditing ? '1' : '0' ?>"
 >
     <?= csrf_field() ?>
 
@@ -134,7 +135,9 @@ $uploadMaxBytes = (function (string $value): int {
     </div>
 
     <div class="flex items-center justify-between pt-4">
-        <span class="text-sm text-[#004241]/60"><?= $isEditing ? 'Après correction, renvoyez votre article pour une nouvelle validation.' : 'Brouillon sauvegardé automatiquement' ?></span>
+        <span id="draft-autosave-status" class="text-sm text-[#004241]/60">
+            <?= $isEditing ? 'Après correction, renvoyez votre article pour une nouvelle validation.' : 'Brouillon sauvegardé automatiquement' ?>
+        </span>
         <div class="flex gap-3">
             <button type="submit" name="status" value="draft" class="h-12 px-6 rounded-full border border-gray-300 bg-white text-[#004241] font-medium hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <?= $isEditing ? 'Enregistrer' : 'Brouillon' ?>
@@ -241,8 +244,9 @@ $uploadMaxBytes = (function (string $value): int {
     const paymentSubmitButton = document.getElementById('stripe-payment-submit');
     const paymentError = document.getElementById('stripe-payment-error');
     const paymentElementHost = document.getElementById('stripe-payment-element');
+    const autosaveStatus = document.getElementById('draft-autosave-status');
 
-    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !paymentOverlay || !paymentCloseButton || !paymentCancelButton || !paymentSubmitButton || !paymentError || !paymentElementHost) {
+    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !paymentOverlay || !paymentCloseButton || !paymentCancelButton || !paymentSubmitButton || !paymentError || !paymentElementHost || !autosaveStatus) {
         return;
     }
 
@@ -258,6 +262,141 @@ $uploadMaxBytes = (function (string $value): int {
     let elements = null;
     let paymentElement = null;
     let currentPaymentId = null;
+    let autosaveTimeout = null;
+    let autosaveDirty = false;
+    let autosaveInFlight = false;
+    let autosaveQueued = false;
+    let autosaveLastFingerprint = null;
+    let isPublishing = false;
+
+    function setAutosaveStatus(message, tone = 'neutral') {
+        autosaveStatus.textContent = message;
+        autosaveStatus.className = 'text-sm';
+
+        if (tone === 'success') {
+            autosaveStatus.classList.add('text-[#006664]');
+            return;
+        }
+
+        if (tone === 'error') {
+            autosaveStatus.classList.add('text-[#AE422E]');
+            return;
+        }
+
+        autosaveStatus.classList.add('text-[#004241]/60');
+    }
+
+    function buildAutosaveFingerprint() {
+        const title = form.querySelector('#title')?.value || '';
+        const excerpt = form.querySelector('#excerpt')?.value || '';
+        const content = form.querySelector('#content')?.value || '';
+        const category = form.querySelector('#category_id')?.value || '';
+        const readingTime = form.querySelector('#reading_time')?.value || '';
+        const file = input.files && input.files[0] ? `${input.files[0].name}:${input.files[0].size}:${input.files[0].lastModified}` : '';
+
+        return [title, excerpt, content, category, readingTime, file].join('|~|');
+    }
+
+    function updateDraftRoute(data) {
+        if (!data || !data.edit_url) {
+            return;
+        }
+
+        if (form.action !== data.edit_url) {
+            form.action = data.edit_url;
+            if (window.location.pathname === '/contributor/new') {
+                window.history.replaceState({}, '', data.edit_url);
+            }
+        }
+    }
+
+    async function autosaveDraft({ immediate = false } = {}) {
+        if (isPublishing) {
+            return;
+        }
+
+        const fingerprint = buildAutosaveFingerprint();
+        const hasMeaningfulContent = form.querySelector('#title')?.value.trim()
+            || form.querySelector('#excerpt')?.value.trim()
+            || form.querySelector('#content')?.value.trim()
+            || form.querySelector('#category_id')?.value
+            || form.querySelector('#reading_time')?.value
+            || (input.files && input.files[0]);
+
+        if (!hasMeaningfulContent) {
+            return;
+        }
+
+        if (!immediate && fingerprint === autosaveLastFingerprint) {
+            autosaveDirty = false;
+            return;
+        }
+
+        if (autosaveInFlight) {
+            autosaveQueued = true;
+            return;
+        }
+
+        autosaveInFlight = true;
+        autosaveDirty = false;
+        setAutosaveStatus('Sauvegarde du brouillon…');
+
+        const formData = new FormData(form);
+        formData.set('status', 'draft');
+        formData.set('autosave', '1');
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Autosave': '1',
+                },
+                credentials: 'same-origin',
+                body: formData,
+            });
+
+            const data = await readJsonResponse(response);
+
+            if (!response.ok) {
+                throw new Error(normalizeMessage(data.message, 'Impossible de sauvegarder votre brouillon.'));
+            }
+
+            autosaveLastFingerprint = buildAutosaveFingerprint();
+            updateDraftRoute(data);
+            setAutosaveStatus(`Brouillon sauvegardé à ${data.saved_at || new Date().toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })}`, 'success');
+        } catch (error) {
+            autosaveDirty = true;
+            setAutosaveStatus(normalizeMessage(error.message, 'La sauvegarde automatique a échoué.'), 'error');
+        } finally {
+            autosaveInFlight = false;
+
+            if (autosaveQueued) {
+                autosaveQueued = false;
+                autosaveDraft({ immediate: true });
+            }
+        }
+    }
+
+    function scheduleAutosave(delay = 1200) {
+        if (isPublishing) {
+            return;
+        }
+
+        autosaveDirty = true;
+        setAutosaveStatus('Modifications non enregistrées…');
+
+        if (autosaveTimeout) {
+            window.clearTimeout(autosaveTimeout);
+        }
+
+        autosaveTimeout = window.setTimeout(() => {
+            autosaveTimeout = null;
+            autosaveDraft();
+        }, delay);
+    }
 
     function formatBytes(bytes) {
         if (bytes < 1024) return `${bytes} octets`;
@@ -372,6 +511,8 @@ $uploadMaxBytes = (function (string $value): int {
         document.body.style.overflow = '';
         resetPaymentElement();
         setButtonsDisabled(false);
+        isPublishing = false;
+        setAutosaveStatus('Brouillon sauvegardé automatiquement');
     }
 
     function openPaymentOverlay() {
@@ -564,6 +705,24 @@ $uploadMaxBytes = (function (string $value): int {
         errorEl.textContent = '';
         errorEl.classList.add('hidden');
         setButtonsDisabled(false);
+        scheduleAutosave(250);
+    });
+
+    ['title', 'excerpt', 'content', 'category_id', 'reading_time'].forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+
+        if (!field) {
+            return;
+        }
+
+        field.addEventListener('input', () => scheduleAutosave());
+        field.addEventListener('change', () => scheduleAutosave());
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden' && autosaveDirty && !autosaveInFlight && !isPublishing) {
+            autosaveDraft({ immediate: true });
+        }
     });
 
     form.addEventListener('submit', (event) => {
@@ -575,8 +734,10 @@ $uploadMaxBytes = (function (string $value): int {
         }
 
         event.preventDefault();
+        isPublishing = true;
 
         if (submitButtons.some((button) => button.disabled)) {
+            isPublishing = false;
             return;
         }
 
@@ -622,6 +783,7 @@ $uploadMaxBytes = (function (string $value): int {
             .catch((error) => {
                 setButtonsDisabled(false);
                 setOverlayError(normalizeMessage(error.message, 'Une erreur est survenue pendant la preparation de votre article.'));
+                isPublishing = false;
             });
     });
 })();

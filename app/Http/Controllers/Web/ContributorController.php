@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class ContributorController extends Controller
 {
@@ -56,6 +57,46 @@ class ContributorController extends Controller
             'notice' => [
                 'title' => 'Article transmis',
                 'message' => 'Votre article va etre verifie par notre equipe et sera publie automatiquement apres acceptation.',
+            ],
+        ];
+    }
+
+    private function isAutosaveRequest(Request $request): bool
+    {
+        return $request->boolean('autosave') || $request->header('X-Autosave') === '1';
+    }
+
+    private function generateUniqueSubmissionSlug(string $title, ?string $ignoreId = null): string
+    {
+        $base = Str::slug(trim($title)) ?: 'brouillon';
+        $slug = $base;
+        $suffix = 2;
+
+        while (Submission::query()
+            ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = $base . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $slug;
+    }
+
+    private function autosavePayload(Submission $submission): array
+    {
+        return [
+            'ok' => true,
+            'submission_id' => $submission->id,
+            'status' => 'draft',
+            'title' => $submission->title,
+            'slug' => $submission->slug,
+            'edit_url' => route('contributor.articles.edit', ['submission' => $submission->slug]),
+            'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
+            'saved_at' => now()->format('H:i'),
+            'notice' => [
+                'title' => 'Brouillon sauvegardé',
+                'message' => 'Votre dernière version a bien été enregistrée.',
             ],
         ];
     }
@@ -136,23 +177,37 @@ class ContributorController extends Controller
         }
 
         if ($request->isMethod('post')) {
-            $validated = $request->validate([
-                'title' => ['required', 'string', 'max:255'],
-                'excerpt' => ['nullable', 'string', 'max:500'],
-                'content' => ['required', 'string', 'min:100'],
-                'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
-                'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
-                'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'status' => ['sometimes', 'in:draft,submitted'],
-            ], [
-                'title.required' => 'Le titre est obligatoire.',
-                'content.required' => 'Le contenu est obligatoire.',
-                'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
-                'cover_image.image' => "L'image de couverture doit etre une image valide.",
-                'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
-            ]);
+            $isAutosave = $this->isAutosaveRequest($request);
+            $validated = $request->validate(
+                $isAutosave
+                    ? [
+                        'title' => ['nullable', 'string', 'max:255'],
+                        'excerpt' => ['nullable', 'string', 'max:500'],
+                        'content' => ['nullable', 'string'],
+                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                        'status' => ['sometimes', 'in:draft,submitted'],
+                    ]
+                    : [
+                        'title' => ['required', 'string', 'max:255'],
+                        'excerpt' => ['nullable', 'string', 'max:500'],
+                        'content' => ['required', 'string', 'min:100'],
+                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                        'status' => ['sometimes', 'in:draft,submitted'],
+                    ],
+                [
+                    'title.required' => 'Le titre est obligatoire.',
+                    'content.required' => 'Le contenu est obligatoire.',
+                    'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
+                    'cover_image.image' => "L'image de couverture doit etre une image valide.",
+                    'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
+                ]
+            );
 
-            $shouldSubmit = $request->input('status') === 'submitted';
+            $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
             $status = $shouldSubmit && $this->hasPaidPublication($submission) ? 'pending' : 'draft';
             $coverImageUrl = $submission->cover_image_url;
 
@@ -170,10 +225,24 @@ class ContributorController extends Controller
                 $coverImageUrl = $this->submissionImageStorage->migrateLocalImageUrl($coverImageUrl);
             }
 
+            $nextTitle = array_key_exists('title', $validated)
+                ? trim((string) ($validated['title'] ?? ''))
+                : $submission->title;
+            $nextTitle = $nextTitle !== '' ? $nextTitle : $submission->title;
+            $nextContent = array_key_exists('content', $validated)
+                ? (string) ($validated['content'] ?? '')
+                : $submission->content;
+            $nextSlug = $submission->slug;
+
+            if ($nextTitle !== '' && $nextTitle !== $submission->title) {
+                $nextSlug = $this->generateUniqueSubmissionSlug($nextTitle, $submission->id);
+            }
+
             $submission->update([
-                'title' => $validated['title'],
+                'title' => $nextTitle,
+                'slug' => $nextSlug,
                 'excerpt' => $validated['excerpt'] ?? null,
-                'content' => $validated['content'],
+                'content' => $nextContent,
                 'category_id' => $validated['category_id'] ?? null,
                 'reading_time' => $validated['reading_time'] ?? 5,
                 'status' => $status,
@@ -182,6 +251,10 @@ class ContributorController extends Controller
                 'reviewed_by' => $status === 'pending' ? null : $submission->reviewed_by,
                 'reviewed_at' => $status === 'pending' ? null : $submission->reviewed_at,
             ]);
+
+            if ($isAutosave) {
+                return response()->json($this->autosavePayload($submission->fresh(['category', 'reviewer'])));
+            }
 
             if ($shouldSubmit && $status !== 'pending') {
                 if ($request->expectsJson() || $request->ajax()) {
@@ -240,38 +313,59 @@ class ContributorController extends Controller
     public function newArticle(Request $request): Response|RedirectResponse|JsonResponse
     {
         if ($request->isMethod('post')) {
-            $validated = $request->validate([
-                'title'       => ['required', 'string', 'max:255'],
-                'excerpt'     => ['nullable', 'string', 'max:500'],
-                'content'     => ['required', 'string', 'min:100'],
-                'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
-                'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
-                'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'status'      => ['sometimes', 'in:draft,submitted'],
-            ], [
-                'title.required' => 'Le titre est obligatoire.',
-                'content.required' => 'Le contenu est obligatoire.',
-                'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
-                'cover_image.image' => "L'image de couverture doit etre une image valide.",
-                'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
-            ]);
+            $isAutosave = $this->isAutosaveRequest($request);
+            $validated = $request->validate(
+                $isAutosave
+                    ? [
+                        'title' => ['nullable', 'string', 'max:255'],
+                        'excerpt' => ['nullable', 'string', 'max:500'],
+                        'content' => ['nullable', 'string'],
+                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                        'status' => ['sometimes', 'in:draft,submitted'],
+                    ]
+                    : [
+                        'title'       => ['required', 'string', 'max:255'],
+                        'excerpt'     => ['nullable', 'string', 'max:500'],
+                        'content'     => ['required', 'string', 'min:100'],
+                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                        'status'      => ['sometimes', 'in:draft,submitted'],
+                    ],
+                [
+                    'title.required' => 'Le titre est obligatoire.',
+                    'content.required' => 'Le contenu est obligatoire.',
+                    'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
+                    'cover_image.image' => "L'image de couverture doit etre une image valide.",
+                    'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
+                ]
+            );
 
-            $shouldSubmit = $request->input('status') === 'submitted';
+            $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
             $status = 'draft';
             $coverImageUrl = $request->hasFile('cover_image')
                 ? $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'))
                 : null;
+            $nextTitle = trim((string) ($validated['title'] ?? ''));
+            $nextContent = (string) ($validated['content'] ?? '');
+            $safeTitle = $nextTitle !== '' ? $nextTitle : 'Brouillon ' . now()->format('d/m H:i');
 
             $submission = Submission::create([
                 'user_id'     => $request->user()->id,
-                'title'       => $validated['title'],
+                'title'       => $safeTitle,
                 'excerpt'     => $validated['excerpt'] ?? null,
-                'content'     => $validated['content'],
+                'content'     => $nextContent,
                 'category_id' => $validated['category_id'] ?? null,
                 'reading_time' => $validated['reading_time'] ?? 5,
                 'status'      => $status,
                 'cover_image_url' => $coverImageUrl,
             ]);
+
+            if ($isAutosave) {
+                return response()->json($this->autosavePayload($submission));
+            }
 
             if ($shouldSubmit) {
                 if ($request->expectsJson() || $request->ajax()) {
