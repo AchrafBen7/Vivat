@@ -110,7 +110,7 @@ $title_safe = htmlspecialchars($title);
         #header-search-form:hover,
         #header-search-form:focus-within,
         #header-search-form.vivat-header-search--dirty {
-            width: min(100%, 15rem);
+            width: min(calc(100vw - 2.5rem), 22rem);
             justify-content: flex-start;
             gap: 0.375rem;
             padding-left: 0.375rem;
@@ -204,8 +204,8 @@ $title_safe = htmlspecialchars($title);
             right: 0;
             display: none;
             flex-direction: column;
-            gap: 0.125rem;
-            padding: 0.65rem 0.5rem 0.5rem;
+            gap: 0.375rem;
+            padding: 0.85rem 0.75rem 0.75rem;
             border-radius: 0 0 1.75rem 1.75rem;
             background: #EBF1EF;
             border: 1px solid rgba(0, 66, 65, 0.08);
@@ -225,77 +225,23 @@ $title_safe = htmlspecialchars($title);
         #header-search-form.vivat-search-suggestions-host.vivat-header-search--dirty {
             border-radius: 1.75rem 1.75rem 0 0;
         }
-        .header-search-suggestion {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 0.875rem;
-            border-radius: 1rem;
-            color: #004241;
-            text-decoration: none;
-            transition: background-color 0.18s ease;
-        }
-        .header-search-suggestion:hover,
-        .header-search-suggestion.is-active {
-            background: rgba(255, 255, 255, 0.6);
-        }
-        .header-search-suggestion-thumb {
-            width: 3rem;
-            height: 3rem;
-            flex-shrink: 0;
-            border-radius: 1rem;
-            overflow: hidden;
-            background: #E8F0ED;
-        }
-        .header-search-suggestion-thumb img {
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .header-search-suggestion-copy {
-            display: flex;
-            min-width: 0;
-            flex: 1 1 auto;
-            flex-direction: column;
-            gap: 0.125rem;
-        }
         .header-search-suggestion-label {
-            font-size: 0.92rem;
-            line-height: 1.25rem;
-            font-weight: 600;
+            display: -webkit-box;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            text-wrap: balance;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
         }
-        .header-search-suggestion-meta {
-            font-size: 0.75rem;
-            line-height: 1rem;
-            color: rgba(0, 66, 65, 0.66);
-        }
-        .header-search-suggestion-empty {
-            padding: 0.875rem;
-            border-radius: 1rem;
-            font-size: 0.82rem;
-            color: rgba(0, 66, 65, 0.62);
-        }
-        .header-search-view-all {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 0.25rem;
-            padding: 0.9rem 1rem;
-            border-radius: 1rem;
-            background: rgba(255, 255, 255, 0.46);
-            color: #004241;
-            font-size: 0.86rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background-color 0.18s ease, transform 0.18s ease;
-        }
-        .header-search-view-all:hover,
+        .header-search-suggestion.is-active,
         .header-search-view-all.is-active {
             background: rgba(255, 255, 255, 0.72);
+        }
+        @media (min-width: 1024px) {
+            #header-search-form:hover,
+            #header-search-form:focus-within,
+            #header-search-form.vivat-header-search--dirty {
+                width: min(calc(100vw - 6rem), 24rem);
+            }
         }
     </style>
 </head>
@@ -360,8 +306,8 @@ $title_safe = htmlspecialchars($title);
 
                         if (!items.length) {
                             suggestionBox.innerHTML = ''
-                                + '<div class="header-search-suggestion-empty">Aucune suggestion pour "' + query.replace(/"/g, '&quot;') + '"</div>'
-                                + '<a href="' + searchUrl + '" class="header-search-view-all" data-suggestion-index="0">Voir tous les articles</a>';
+                                + '<div class="rounded-[1.25rem] px-4 py-4 text-[0.95rem] leading-[1.4rem] text-[#004241]/65">Aucune suggestion pour "' + query.replace(/"/g, '&quot;') + '"</div>'
+                                + '<a href="' + searchUrl + '" class="header-search-view-all mt-1.5 flex items-center justify-center rounded-[1.25rem] bg-white/50 px-5 py-[1.1rem] text-center text-[0.95rem] font-semibold text-[#004241] no-underline transition-colors duration-200 hover:bg-white/75" data-suggestion-index="0">Voir tous les articles</a>';
                             currentItems = [{
                                 url: searchUrl
                             }];
@@ -373,17 +319,17 @@ $title_safe = htmlspecialchars($title);
 
                         suggestionBox.innerHTML = items.map(function(item, index) {
                             var thumb = item.thumbnail_url
-                                ? '<span class="header-search-suggestion-thumb"><img src="' + item.thumbnail_url + '" alt="" loading="lazy"></span>'
+                                ? '<span class="h-[4.25rem] w-[4.25rem] shrink-0 overflow-hidden rounded-2xl bg-[#E8F0ED]"><img src="' + item.thumbnail_url + '" alt="" loading="lazy" class="block h-full w-full object-cover"></span>'
                                 : '';
                             return ''
-                                + '<a href="' + item.url + '" class="header-search-suggestion" role="option" data-suggestion-index="' + index + '">'
+                                + '<a href="' + item.url + '" class="header-search-suggestion flex items-start gap-4 rounded-[1.25rem] px-4 py-4 text-[#004241] no-underline transition-colors duration-200 hover:bg-white/60" role="option" data-suggestion-index="' + index + '">'
                                 + thumb
-                                + '<span class="header-search-suggestion-copy">'
-                                + '<span class="header-search-suggestion-label">' + item.label + '</span>'
-                                + '<span class="header-search-suggestion-meta">' + item.meta + '</span>'
+                                + '<span class="flex min-w-0 flex-1 flex-col gap-1 pt-0.5">'
+                                + '<span class="header-search-suggestion-label text-[1.1rem] font-semibold leading-[1.3rem]">' + item.label + '</span>'
+                                + '<span class="text-[0.95rem] leading-[1.2rem] text-[#004241]/65">' + item.meta + '</span>'
                                 + '</span>'
                                 + '</a>';
-                        }).join('') + '<a href="' + searchUrl + '" class="header-search-view-all" data-suggestion-index="' + items.length + '">Voir tous les articles</a>';
+                        }).join('') + '<a href="' + searchUrl + '" class="header-search-view-all mt-1.5 flex items-center justify-center rounded-[1.25rem] bg-white/50 px-5 py-[1.1rem] text-center text-[0.95rem] font-semibold text-[#004241] no-underline transition-colors duration-200 hover:bg-white/75" data-suggestion-index="' + items.length + '">Voir tous les articles</a>';
                         currentItems.push({
                             url: searchUrl
                         });
@@ -583,7 +529,7 @@ $title_safe = htmlspecialchars($title);
          class="fixed inset-0 z-40 bg-black/20 opacity-0 pointer-events-none transition-opacity duration-300 ease-out data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto"
          aria-hidden="true"></div>
 
-    <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 pb-8 overflow-x-hidden">
+    <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 <?= ! empty($trim_main_bottom) ? 'pb-0' : 'pb-8' ?> overflow-x-hidden">
         <?php if (session('success')) { ?>
         <div class="mb-6 rounded-[20px] bg-[#004241] text-white px-6 py-4 flex items-center gap-3" role="alert">
             <svg class="w-6 h-6 flex-shrink-0 text-[#7DD3C1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -612,7 +558,7 @@ $title_safe = htmlspecialchars($title);
                     Vivat est ouvert aux nouvelles voix
                     <?php } ?>
                 </span>
-                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap bg-[#FFEFD1] text-[#004241] text-base transition-colors duration-200 hover:bg-[#EDE4A8]">
+                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap bg-[#FFF0B6] text-[#004241] text-base transition-colors duration-200 hover:bg-[#FBE9A3]">
                     <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Accéder au bureau' : 'Rédigez un article' ?>
                 </span>
             </span>

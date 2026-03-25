@@ -1,52 +1,185 @@
 <?php
-$articles = $articles ?? [];
+$articles = array_values($articles ?? []);
 $pagination = $pagination ?? null;
+
+$totalArticles = $pagination ? (int) $pagination->total() : count($articles);
+$currentPage = $pagination ? (int) $pagination->currentPage() : 1;
+$lastPage = $pagination ? (int) $pagination->lastPage() : 1;
+
+$gridArticles = $articles;
+$paginationView = $pagination ? $pagination->withQueryString() : null;
+
+$tagBase = 'inline-flex w-fit items-center justify-center rounded-full px-3 py-1.5 text-[12px] font-medium tracking-[0.02em]';
+$tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
+$glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
+$cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
+$glassBox = 'rounded-[21px] flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1.5 box-border p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
+$articleImageZoom = 'group min-h-[112px] min-w-[128px] overflow-hidden';
+$articleImageZoomImg = 'transition-transform duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.045]';
+$overlayImageSoft = 'absolute inset-0 bg-gradient-to-t from-black/30 to-transparent';
+$tagGlassOnImage = $tagClass.' '.$glassTagTailwind.' text-white';
+$articleMetaOnImage = 'text-white/80 text-xs';
+$tagDark = $tagBase.' bg-[#004241] text-white';
+$tagSoft = $tagBase.' bg-[#DCE8E4] text-[#004241]';
+
+$resolveImage = static function (array $article, int $width, int $height, string $slot): array {
+    $categorySlug = $article['category']['slug'] ?? null;
+    $articleId = $article['id'] ?? $article['slug'] ?? null;
+    $fallback = vivat_category_fallback_image($categorySlug, $width, $height, $articleId, $slot);
+    $coverUrl = $article['cover_image_url'] ?? null;
+    $src = ! empty($coverUrl) ? $coverUrl : $fallback;
+
+    return [$src, $fallback];
+};
 ?>
-<div class="max-w-6xl mx-auto px-4 py-12">
-    <h1 class="font-medium text-[#004241] mb-10 text-3xl font-sans">Toutes les actualités</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php foreach ($articles as $idx => $art): ?>
-        <?php
-        $catSlug = $art['category']['slug'] ?? null;
-        $artId = $art['id'] ?? $art['slug'] ?? null;
-        $fallbackImg = vivat_category_fallback_image($catSlug, 400, 160, $artId, 'list-' . $idx);
-        $coverUrl = $art['cover_image_url'] ?? null;
-        $imgSrc = !empty($coverUrl) ? $coverUrl : $fallbackImg;
-        $isCardNoImage = empty($coverUrl);
-        ?>
-        <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="block rounded-[30px] overflow-hidden border border-gray-200/40 p-6 flex flex-col relative <?= $isCardNoImage ? 'vivat-card-no-image group ' : '' ?>bg-[#EBF1EF] hover:bg-[#E5ECEA] transition" style="min-height: 300px;">
-            <?php if ($isCardNoImage): ?>
-            <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241]/10 text-[#004241]" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
-            <?php endif; ?>
-            <?php if (!empty($art['category'])): ?>
-            <span class="text-xs font-medium text-[#004241]/80"><?= htmlspecialchars($art['category']['name']) ?></span>
-            <?php endif; ?>
-            <h2 class="font-medium text-[#004241] line-clamp-3 mt-2 flex-1 text-lg"><?= htmlspecialchars($art['title']) ?></h2>
-            <p class="text-[#004241] font-light mt-2 text-xs"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
-            <div class="rounded-[21px] overflow-hidden mt-4 flex-shrink-0">
-                <img src="<?= htmlspecialchars($imgSrc) ?>" data-fallback-url="<?= htmlspecialchars($fallbackImg) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="w-full h-40 object-cover" loading="lazy">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col px-[18px] pb-16 md:px-8 lg:px-10 xl:px-20">
+    <section class="relative overflow-hidden rounded-[36px] bg-[linear-gradient(135deg,#F6FAF8_0%,#E7F0ED_52%,#D9E7E2_100%)] px-6 py-8 md:px-10 md:py-10">
+        <div class="pointer-events-none absolute -right-12 top-0 h-40 w-40 rounded-full bg-white/55 blur-3xl"></div>
+        <div class="pointer-events-none absolute bottom-[-56px] left-[-24px] h-40 w-40 rounded-full bg-[#BFD4CE]/60 blur-3xl"></div>
+
+        <div class="relative">
+            <div class="max-w-4xl">
+                <span class="inline-flex items-center rounded-full border border-[#004241]/10 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#004241]/65">
+                    Flux editorial
+                </span>
+                <h1 class="mt-5 max-w-4xl text-[2.5rem] font-semibold leading-[1.02] text-[#004241] sm:text-[3.15rem]">
+                    Toutes les actualités
+                </h1>
+                <p class="mt-4 max-w-3xl text-base leading-7 text-[#004241]/76 md:text-lg">
+                    Parcourez l’ensemble du flux Vivat dans une mise en page pensée pour scanner vite, repérer les sujets qui comptent et entrer dans les articles sans friction.
+                </p>
+
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <span class="inline-flex items-center rounded-full bg-[#004241] px-4 py-2 text-sm font-medium text-white">
+                        <?= $totalArticles ?> article<?= $totalArticles > 1 ? 's' : '' ?>
+                    </span>
+                    <span class="inline-flex items-center rounded-full bg-white/75 px-4 py-2 text-sm font-medium text-[#004241]">
+                        Page <?= $currentPage ?> sur <?= $lastPage ?>
+                    </span>
+                </div>
             </div>
-        </a>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    </section>
 
-    <?php if (empty($articles)): ?>
-    <p class="text-gray-500 text-center py-12">Aucun article pour le moment.</p>
-    <?php endif; ?>
-    <?php if ($pagination && $pagination->hasPages()): ?>
-    <nav class="flex justify-center gap-2 mt-10">
-        <?php if ($pagination->onFirstPage()): ?>
-        <span class="px-4 py-2 rounded-full bg-gray-100 text-gray-500">Précédent</span>
-        <?php else: ?>
-        <a href="<?= $pagination->previousPageUrl() ?>" class="px-4 py-2 rounded-full bg-[#004241] text-white hover:bg-[#003535] transition">Précédent</a>
-        <?php endif; ?>
-        <span class="px-4 py-2 text-[#004241]">Page <?= $pagination->currentPage() ?> sur <?= $pagination->lastPage() ?></span>
-        <?php if ($pagination->hasMorePages()): ?>
-        <a href="<?= $pagination->nextPageUrl() ?>" class="px-4 py-2 rounded-full bg-[#004241] text-white hover:bg-[#003535] transition">Suivant</a>
-        <?php else: ?>
-        <span class="px-4 py-2 rounded-full bg-gray-100 text-gray-500">Suivant</span>
-        <?php endif; ?>
+    <?php if ($gridArticles !== []) { ?>
+    <section class="mt-8">
+        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <?php foreach ($gridArticles as $index => $article) { ?>
+            <?php
+            [$imageSrc, $imageFallback] = $resolveImage($article, 640, 420, 'articles-grid-'.$index);
+            $variantPattern = [0, 1, 1, 0, 1, 0];
+            $variant = $variantPattern[$index % count($variantPattern)];
+            ?>
+
+            <?php if ($variant === 0) { ?>
+            <a
+                href="/articles/<?= htmlspecialchars($article['slug']) ?>"
+                class="<?= $articleImageZoom ?> relative min-h-[390px] overflow-hidden rounded-[30px] shadow-[0_18px_40px_rgba(0,66,65,0.08)]"
+            >
+                <img
+                    src="<?= htmlspecialchars($imageSrc) ?>"
+                    data-fallback-url="<?= htmlspecialchars($imageFallback) ?>"
+                    alt="<?= htmlspecialchars($article['title'] ?? 'Article') ?>"
+                    class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>"
+                    loading="lazy"
+                >
+                <div class="<?= $overlayImageSoft ?>"></div>
+                <div class="<?= $cardOverlay ?> flex items-end">
+                    <div class="<?= $glassBox ?> w-full">
+                        <?php if (! empty($article['category'])) { ?>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($article['category']['name']) ?></span>
+                        <?php } ?>
+                        <h3 class="font-semibold text-white line-clamp-5 text-lg">
+                            <?= htmlspecialchars($article['title'] ?? '') ?>
+                        </h3>
+                        <p class="<?= $articleMetaOnImage ?>">
+                            <?= htmlspecialchars($article['published_at'] ?? '') ?> • <?= (int) ($article['reading_time'] ?? 0) ?> min
+                        </p>
+                    </div>
+                </div>
+            </a>
+            <?php } elseif ($variant === 1) { ?>
+            <a
+                href="/articles/<?= htmlspecialchars($article['slug']) ?>"
+                class="group flex min-h-[390px] flex-col overflow-hidden rounded-[30px] border border-[#D8E3DF] bg-white p-6 shadow-[0_18px_40px_rgba(0,66,65,0.05)] transition-transform duration-300 hover:-translate-y-1"
+            >
+                <div class="flex min-h-0 flex-1 flex-col">
+                    <?php if (! empty($article['category'])) { ?>
+                    <span class="<?= $tagDark ?>"><?= htmlspecialchars($article['category']['name']) ?></span>
+                    <?php } ?>
+                    <h3 class="mt-4 text-[1.5rem] font-semibold leading-[1.16] text-[#004241]">
+                        <?= htmlspecialchars($article['title'] ?? '') ?>
+                    </h3>
+                    <?php if (! empty($article['excerpt'])) { ?>
+                    <p class="mt-3 line-clamp-3 text-sm leading-6 text-[#004241]/72">
+                        <?= htmlspecialchars($article['excerpt']) ?>
+                    </p>
+                    <?php } ?>
+                    <p class="mt-5 text-sm text-[#004241]/68">
+                        <?= htmlspecialchars($article['published_at'] ?? '') ?> • <?= (int) ($article['reading_time'] ?? 0) ?> min
+                    </p>
+                </div>
+
+                <div class="relative mt-6 h-[190px] overflow-hidden rounded-[24px] bg-[#F6FAF8]">
+                    <img
+                        src="<?= htmlspecialchars($imageSrc) ?>"
+                        data-fallback-url="<?= htmlspecialchars($imageFallback) ?>"
+                        alt="<?= htmlspecialchars($article['title'] ?? 'Article') ?>"
+                        class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                        loading="lazy"
+                    >
+                </div>
+            </a>
+            <?php } ?>
+            <?php } ?>
+        </div>
+    </section>
+    <?php } ?>
+
+    <?php if ($articles === []) { ?>
+    <section class="mt-8 rounded-[34px] border border-[#D6E1DD] bg-[linear-gradient(135deg,#F8FBFA_0%,#EEF5F2_100%)] px-6 py-12 text-center md:px-10">
+        <span class="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#004241] shadow-sm">
+            Flux vide
+        </span>
+        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]">Aucune actualite pour le moment</h2>
+        <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#004241]/70 md:text-base">
+            Les prochaines publications apparaitront ici. Revenez un peu plus tard pour decouvrir les nouveaux contenus Vivat.
+        </p>
+    </section>
+    <?php } ?>
+
+    <?php if ($paginationView && $paginationView->hasPages()) { ?>
+    <nav class="mt-10 flex flex-wrap items-center justify-center gap-3" aria-label="Pagination des actualités">
+        <?php if ($paginationView->onFirstPage()) { ?>
+        <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#EBF1EF] px-5 text-sm font-medium text-[#004241]/40">
+            Précédent
+        </span>
+        <?php } else { ?>
+        <a
+            href="<?= htmlspecialchars($paginationView->previousPageUrl()) ?>"
+            class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-medium text-white transition hover:opacity-90"
+        >
+            Précédent
+        </a>
+        <?php } ?>
+
+        <span class="text-sm font-medium text-[#004241]/80">
+            Page <?= $paginationView->currentPage() ?> sur <?= $paginationView->lastPage() ?>
+        </span>
+
+        <?php if ($paginationView->hasMorePages()) { ?>
+        <a
+            href="<?= htmlspecialchars($paginationView->nextPageUrl()) ?>"
+            class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-medium text-white transition hover:opacity-90"
+        >
+            Suivant
+        </a>
+        <?php } else { ?>
+        <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#EBF1EF] px-5 text-sm font-medium text-[#004241]/40">
+            Suivant
+        </span>
+        <?php } ?>
     </nav>
-    <?php endif; ?>
+    <?php } ?>
 </div>

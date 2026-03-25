@@ -300,31 +300,52 @@ class PublicPageDataService
         ];
     }
 
-    public function getCategoryHubData(string $categorySlug, ?string $subCategorySlug = null, string $locale = 'fr', int $page = 1): array
+    public function getCategoryHubData(string $categorySlug, array $subCategorySlugs = [], string $locale = 'fr', int $page = 1): array
     {
         $category = Category::where('slug', $categorySlug)->firstOrFail();
-        $cacheKey = 'vivat.hub.'.$category->slug.($subCategorySlug ? '.'.$subCategorySlug : '').'.'.$locale.'.page.'.$page;
-        $closure = function () use ($category, $subCategorySlug, $locale, $page) {
+        $normalizedSubCategorySlugs = array_values(array_unique(array_filter(
+            array_map(static fn (mixed $slug): string => trim((string) $slug), $subCategorySlugs),
+            static fn (string $slug): bool => $slug !== ''
+        )));
+        $cacheKey = 'vivat.hub.'.$category->slug.($normalizedSubCategorySlugs !== [] ? '.'.implode('-', $normalizedSubCategorySlugs) : '').'.'.$locale.'.page.'.$page;
+        $closure = function () use ($category, $normalizedSubCategorySlugs, $locale, $page) {
             // Sous-catégories = termes extraits de la description (ex. "Innovation, tech, numérique" → Innovation, tech, numérique)
             $subCategories = $category->getDescriptionSubCategories();
+            $availableSubCategorySlugs = collect($subCategories)
+                ->pluck('slug')
+                ->filter(static fn (mixed $slug): bool => is_string($slug) && trim($slug) !== '')
+                ->values()
+                ->all();
+            $activeSubCategorySlugs = array_values(array_filter(
+                $normalizedSubCategorySlugs,
+                static fn (string $slug): bool => in_array($slug, $availableSubCategorySlugs, true)
+            ));
 
             $query = Article::published()
                 ->forLocale($locale)
                 ->where('category_id', $category->id)
                 ->with(['category', 'subCategory']);
 
-            if ($subCategorySlug) {
-                $term = collect($subCategories)->firstWhere('slug', $subCategorySlug);
-                if ($term) {
-                    $searchTerm = $term['name'];
-                    $query->where(function ($q) use ($searchTerm) {
-                        $like = '%'.addcslashes($searchTerm, '%_\\').'%';
-                        $q->where('title', 'like', $like)
-                            ->orWhere('content', 'like', $like)
-                            ->orWhere('excerpt', 'like', $like)
-                            ->orWhere('meta_title', 'like', $like)
-                            ->orWhere('meta_description', 'like', $like)
-                            ->orWhere('keywords', 'like', $like);
+            if ($activeSubCategorySlugs !== []) {
+                $selectedTerms = collect($subCategories)
+                    ->whereIn('slug', $activeSubCategorySlugs)
+                    ->pluck('name')
+                    ->filter(static fn (mixed $name): bool => is_string($name) && trim($name) !== '')
+                    ->values();
+
+                if ($selectedTerms->isNotEmpty()) {
+                    $query->where(function ($q) use ($selectedTerms) {
+                        foreach ($selectedTerms as $searchTerm) {
+                            $like = '%'.addcslashes($searchTerm, '%_\\').'%';
+                            $q->orWhere(function ($termQuery) use ($like) {
+                                $termQuery->where('title', 'like', $like)
+                                    ->orWhere('content', 'like', $like)
+                                    ->orWhere('excerpt', 'like', $like)
+                                    ->orWhere('meta_title', 'like', $like)
+                                    ->orWhere('meta_description', 'like', $like)
+                                    ->orWhere('keywords', 'like', $like);
+                            });
+                        }
                     });
                 }
             }
@@ -338,6 +359,7 @@ class PublicPageDataService
                 'category' => $category,
                 'description' => $category->description,
                 'total_published' => $totalPublished,
+                'active_sub_category_slugs' => $activeSubCategorySlugs,
                 'sub_categories' => $subCategories,
                 'articles' => $articles,
             ];
@@ -350,18 +372,22 @@ class PublicPageDataService
 
         // sub_categories = termes extraits de la description (name + slug)
         $subCategories = $data['sub_categories'] ?? [];
-        $currentSubName = null;
-        if ($subCategorySlug) {
-            $match = collect($subCategories)->firstWhere('slug', $subCategorySlug);
-            $currentSubName = $match['name'] ?? null;
-        }
+        $activeSubCategorySlugs = $data['active_sub_category_slugs'] ?? [];
+        $currentSubNames = collect($subCategories)
+            ->whereIn('slug', $activeSubCategorySlugs)
+            ->pluck('name')
+            ->filter(static fn (mixed $name): bool => is_string($name) && trim($name) !== '')
+            ->values()
+            ->all();
 
         return [
             'category' => $this->categoryToArray($data['category']),
             'description' => $data['description'],
             'total_published' => $data['total_published'],
-            'current_sub_category_slug' => $subCategorySlug,
-            'current_sub_category_name' => $currentSubName,
+            'current_sub_category_slug' => $activeSubCategorySlugs[0] ?? null,
+            'current_sub_category_name' => count($currentSubNames) === 1 ? $currentSubNames[0] : null,
+            'current_sub_category_slugs' => $activeSubCategorySlugs,
+            'current_sub_category_names' => $currentSubNames,
             'sub_categories' => $subCategories,
             'pagination' => $articlesPaginator->withQueryString(),
             'articles' => $articlesCollection->map(fn ($a) => $this->articleToArray($a))->all(),

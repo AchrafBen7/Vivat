@@ -47,6 +47,8 @@ class AuthController extends Controller
             'title' => 'Créer votre compte — Vivat',
             'meta_description' => 'Inscrivez-vous sur Vivat pour devenir rédacteur contributeur et publier vos articles.',
             'hide_cta_section' => true,
+            'hide_footer' => true,
+            'trim_main_bottom' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

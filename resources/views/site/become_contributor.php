@@ -8,7 +8,7 @@ $advantages = [
     ['title' => 'Simplicité', 'desc' => 'Rédigez, enregistrez en brouillon, puis soumettez quand vous êtes prêt.'],
 ];
 ?>
-<div class="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+<div class="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pb-8 lg:pb-12">
     <!-- Hero + CTA principal -->
     <div class="relative w-full rounded-[30px] overflow-hidden mb-8" style="height: 320px; min-height: 280px;">
         <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">

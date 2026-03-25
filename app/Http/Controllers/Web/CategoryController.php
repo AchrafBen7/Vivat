@@ -15,9 +15,14 @@ class CategoryController extends Controller
         if (! $request->filled('lang')) {
             $locale = 'fr';
         }
-        $subCategorySlug = $request->input('sub_category');
+        $subCategoryInput = $request->input('sub_category', []);
+        $subCategorySlugs = is_array($subCategoryInput) ? $subCategoryInput : [$subCategoryInput];
+        $subCategorySlugs = array_values(array_unique(array_filter(
+            array_map(static fn (mixed $slug): string => trim((string) $slug), $subCategorySlugs),
+            static fn (string $slug): bool => $slug !== ''
+        )));
         $page = max(1, (int) $request->integer('page', 1));
-        $data = $pageData->getCategoryHubData($slug, $subCategorySlug, $locale, $page);
+        $data = $pageData->getCategoryHubData($slug, $subCategorySlugs, $locale, $page);
 
         $categorySlug = $data['category']['slug'] ?? $slug;
         $content = render_php_view('site.category_hub', $data);
