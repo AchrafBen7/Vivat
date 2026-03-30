@@ -92,6 +92,7 @@ $inputClass = 'h-10 w-full rounded-xl border border-gray-300 bg-white px-4 text-
                     <div class="grid gap-4 md:grid-cols-2">
                         <div>
                             <input type="password" name="password" id="password" placeholder="Mot de passe" required class="<?= $inputClass ?>">
+                            <p class="mt-2 text-xs text-[#004241]/62">Utilisez au moins 8 caractères pour un mot de passe plus sûr.</p>
                             <?php if (! empty($errors['password'])) { ?>
                             <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
                             <?php } ?>

@@ -31,16 +31,19 @@ class ViewSubmission extends ViewRecord
                         ->options(fn (): array => User::query()->role('admin')->orderBy('name')->pluck('name', 'id')->all())
                         ->default(fn (): ?string => $this->record->reviewed_by ?: auth()->id())
                         ->searchable()
+                        ->helperText('Sélectionnez la personne qui a relu ou validé cette soumission.')
                         ->required(),
                     DateTimePicker::make('reviewed_at')
                         ->label('Relue le')
                         ->seconds(false)
                         ->default(fn () => $this->record->reviewed_at ?: now())
+                        ->helperText('Indiquez la date réelle de relecture si nécessaire.')
                         ->required(),
                     Textarea::make('reviewer_notes')
                         ->label('Note admin')
                         ->rows(5)
                         ->default(fn (): ?string => $this->record->reviewer_notes)
+                        ->helperText('Ajoutez un retour utile pour le suivi éditorial.')
                         ->maxLength(2000),
                 ])
                 ->action(function (array $data): void {
@@ -69,6 +72,7 @@ class ViewSubmission extends ViewRecord
                         ->options(fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all())
                         ->default(fn (): ?string => $this->record->category_id)
                         ->searchable()
+                        ->helperText('Choisissez la rubrique dans laquelle l’article apparaîtra.')
                         ->required(),
                     Select::make('article_type')
                         ->label("Type d'article")
@@ -78,22 +82,26 @@ class ViewSubmission extends ViewRecord
                             'long_form' => 'Long form',
                         ])
                         ->default('standard')
+                        ->helperText('Ce choix influence le style et la mise en avant sur la home.')
                         ->required(),
                     Select::make('reviewed_by')
                         ->label('Relue par')
                         ->options(fn (): array => User::query()->role('admin')->orderBy('name')->pluck('name', 'id')->all())
                         ->default(fn (): ?string => $this->record->reviewed_by ?: auth()->id())
                         ->searchable()
+                        ->helperText('Sélectionnez l’admin responsable de la décision.')
                         ->required(),
                     DateTimePicker::make('reviewed_at')
                         ->label('Relue le')
                         ->seconds(false)
                         ->default(fn () => $this->record->reviewed_at ?: now())
+                        ->helperText('Vous pouvez ajuster la date si la validation a eu lieu plus tôt.')
                         ->required(),
                     Textarea::make('reviewer_notes')
                         ->label('Note admin')
                         ->rows(4)
                         ->default(fn (): ?string => $this->record->reviewer_notes)
+                        ->helperText('Optionnel. Ajoutez un contexte éditorial ou un retour à garder dans l’historique.')
                         ->maxLength(2000),
                 ])
                 ->action(function (array $data): void {
@@ -122,17 +130,20 @@ class ViewSubmission extends ViewRecord
                         ->options(fn (): array => User::query()->role('admin')->orderBy('name')->pluck('name', 'id')->all())
                         ->default(fn (): ?string => $this->record->reviewed_by ?: auth()->id())
                         ->searchable()
+                        ->helperText('Sélectionnez l’admin qui envoie ce retour.')
                         ->required(),
                     DateTimePicker::make('reviewed_at')
                         ->label('Relue le')
                         ->seconds(false)
                         ->default(fn () => $this->record->reviewed_at ?: now())
+                        ->helperText('Ajustez la date si besoin.')
                         ->required(),
                     Textarea::make('reviewer_notes')
                         ->label('Note admin / motif du rejet')
                         ->rows(4)
                         ->required()
                         ->default(fn (): ?string => $this->record->reviewer_notes)
+                        ->helperText('Expliquez clairement au rédacteur ce qui doit être corrigé avant un nouvel envoi.')
                         ->maxLength(2000),
                 ])
                 ->action(function (array $data): void {

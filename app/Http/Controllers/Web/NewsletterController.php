@@ -17,11 +17,15 @@ class NewsletterController extends Controller
     public function subscribe(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'email' => ['required', 'email', 'max:255'],
+            'newsletter_email' => ['required', 'email', 'max:255'],
+        ], [
+            'newsletter_email.required' => "L'adresse email est obligatoire.",
+            'newsletter_email.email' => "Veuillez entrer une adresse email valide.",
+            'newsletter_email.max' => "L'adresse email est trop longue.",
         ]);
 
         $result = $this->newsletterSubscriptionService->subscribe([
-            'email' => $validated['email'],
+            'email' => $validated['newsletter_email'],
         ]);
 
         return back()->with('success', $result['message']);

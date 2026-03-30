@@ -8,6 +8,10 @@ $og_image = $og_image ?? null;
 $og_article = $og_article ?? false;
 $meta_description_safe = htmlspecialchars($meta_description);
 $title_safe = htmlspecialchars($title);
+$sessionErrors = session()->get('errors');
+$sessionErrorMessages = $sessionErrors ? $sessionErrors->getBag('default')->getMessages() : [];
+$newsletterEmailError = $sessionErrorMessages['newsletter_email'][0] ?? null;
+$newsletterOldEmail = old('newsletter_email', '');
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($content_locale) ?>" class="scroll-smooth">
@@ -581,7 +585,19 @@ $title_safe = htmlspecialchars($title);
                         </div>
                         <form action="<?= htmlspecialchars(route('newsletter.subscribe.web')) ?>" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
                             <?= csrf_field() ?>
-                            <input type="email" name="email" placeholder="you@example.com" class="h-12 rounded-full border-0 bg-white pl-5 pr-5 text-base text-gray-900 outline-none focus:ring-2 focus:ring-white/30" required>
+                            <div class="flex flex-col gap-2">
+                                <input
+                                    type="email"
+                                    name="newsletter_email"
+                                    value="<?= htmlspecialchars($newsletterOldEmail) ?>"
+                                    placeholder="you@example.com"
+                                    class="h-12 rounded-full border-0 bg-white pl-5 pr-5 text-base text-gray-900 outline-none focus:ring-2 focus:ring-white/30 <?= $newsletterEmailError ? 'ring-2 ring-[#FFD2C9]' : '' ?>"
+                                    required
+                                >
+                                <?php if ($newsletterEmailError) { ?>
+                                <p class="pl-4 text-sm text-[#FFD2C9]"><?= htmlspecialchars($newsletterEmailError) ?></p>
+                                <?php } ?>
+                            </div>
                             <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0B6] px-8 font-semibold text-[#004241] transition-colors duration-200 hover:bg-[#FBE9A3]">
                                 S'abonner
                             </button>

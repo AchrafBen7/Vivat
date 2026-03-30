@@ -67,6 +67,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         value="<?= htmlspecialchars($name) ?>"
                         class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
+                    <p class="mt-2 text-xs text-[#004241]/60">C’est le nom affiché publiquement avec vos articles.</p>
                     <?php if (!empty($errors['name'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['name']) ? $errors['name'][0] : $errors['name']) ?></p>
                     <?php endif; ?>
@@ -94,6 +95,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     rows="3"
                     class="min-h-20 w-full rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 pt-2 pb-[30px] text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                 ><?= htmlspecialchars($bio) ?></textarea>
+                <p class="mt-2 text-xs text-[#004241]/60">Présentez-vous en quelques lignes. Cette bio peut apparaître dans votre espace auteur.</p>
                 <?php if (!empty($errors['bio'])): ?>
                 <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['bio']) ? $errors['bio'][0] : $errors['bio']) ?></p>
                 <?php endif; ?>
@@ -112,6 +114,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://twitter.com/votre-profil"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
+                    <p class="mt-2 text-xs text-[#004241]/60">Ajoutez un lien complet si vous souhaitez le partager.</p>
                     <?php if (!empty($errors['twitter_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['twitter_url']) ? $errors['twitter_url'][0] : $errors['twitter_url']) ?></p>
                     <?php endif; ?>
@@ -129,6 +132,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://instagram.com/votre-profil"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
+                    <p class="mt-2 text-xs text-[#004241]/60">Ajoutez un lien complet si vous souhaitez le partager.</p>
                     <?php if (!empty($errors['instagram_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['instagram_url']) ? $errors['instagram_url'][0] : $errors['instagram_url']) ?></p>
                     <?php endif; ?>
@@ -146,6 +150,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://votresite.be"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
+                    <p class="mt-2 text-xs text-[#004241]/60">Utilisez l’adresse complète de votre site ou portfolio.</p>
                     <?php if (!empty($errors['website_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['website_url']) ? $errors['website_url'][0] : $errors['website_url']) ?></p>
                     <?php endif; ?>

@@ -111,11 +111,17 @@ $uploadMaxBytes = (function (string $value): int {
                 <option value="<?= htmlspecialchars($cat['id']) ?>" <?= ($old['category_id'] ?? '') === $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
                 <?php endforeach; ?>
             </select>
+            <?php if (!empty($errors['category_id'])): ?>
+            <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['category_id']) ? $errors['category_id'][0] : $errors['category_id']) ?></p>
+            <?php endif; ?>
         </div>
         <div>
             <label for="reading_time" class="block font-medium text-[#004241] mb-2">Temps</label>
             <input type="number" name="reading_time" id="reading_time" value="<?= htmlspecialchars($old['reading_time'] ?? '5') ?>" placeholder="5 min" min="1" max="120"
                 class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-24">
+            <?php if (!empty($errors['reading_time'])): ?>
+            <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['reading_time']) ? $errors['reading_time'][0] : $errors['reading_time']) ?></p>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -123,6 +129,9 @@ $uploadMaxBytes = (function (string $value): int {
         <label for="excerpt" class="block font-medium text-[#004241] mb-2">Extrait / Chapô</label>
         <textarea name="excerpt" id="excerpt" rows="3" placeholder="Commencez à écrire votre article ici..."
             class="w-full max-w-2xl pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
+        <?php if (!empty($errors['excerpt'])): ?>
+        <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['excerpt']) ? $errors['excerpt'][0] : $errors['excerpt']) ?></p>
+        <?php endif; ?>
     </div>
 
     <div>
@@ -231,6 +240,7 @@ $uploadMaxBytes = (function (string $value): int {
     const errorEl = document.getElementById('cover-image-client-error');
     const submitButtons = Array.from(document.querySelectorAll('button[type="submit"]'));
     const publishButton = form ? form.querySelector('button[name="status"][value="submitted"]') : null;
+    const draftButton = form ? form.querySelector('button[name="status"][value="draft"]') : null;
     const overlay = document.getElementById('publish-feedback-overlay');
     const overlayTitle = document.getElementById('publish-feedback-title');
     const overlayMessage = document.getElementById('publish-feedback-message');
@@ -246,7 +256,7 @@ $uploadMaxBytes = (function (string $value): int {
     const paymentElementHost = document.getElementById('stripe-payment-element');
     const autosaveStatus = document.getElementById('draft-autosave-status');
 
-    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !paymentOverlay || !paymentCloseButton || !paymentCancelButton || !paymentSubmitButton || !paymentError || !paymentElementHost || !autosaveStatus) {
+    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !draftButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !paymentOverlay || !paymentCloseButton || !paymentCancelButton || !paymentSubmitButton || !paymentError || !paymentElementHost || !autosaveStatus) {
         return;
     }
 
@@ -473,6 +483,25 @@ $uploadMaxBytes = (function (string $value): int {
         }
 
         return cleaned;
+    }
+
+    function extractErrorMessage(data, fallback) {
+        if (data && typeof data === 'object') {
+            if (data.errors && typeof data.errors === 'object') {
+                const firstField = Object.keys(data.errors)[0];
+                const firstValue = firstField ? data.errors[firstField] : null;
+
+                if (Array.isArray(firstValue) && firstValue[0]) {
+                    return normalizeMessage(firstValue[0], fallback);
+                }
+            }
+
+            if (typeof data.message === 'string' && data.message.trim() !== '') {
+                return normalizeMessage(data.message, fallback);
+            }
+        }
+
+        return fallback;
     }
 
     function resetPreview() {
@@ -728,24 +757,29 @@ $uploadMaxBytes = (function (string $value): int {
     form.addEventListener('submit', (event) => {
         const submitter = event.submitter;
         const isPublishAction = submitter && submitter.name === 'status' && submitter.value === 'submitted';
+        const isDraftAction = submitter && submitter.name === 'status' && submitter.value === 'draft';
 
-        if (!isPublishAction) {
+        if (!isPublishAction && !isDraftAction) {
             return;
         }
 
         event.preventDefault();
-        isPublishing = true;
 
         if (submitButtons.some((button) => button.disabled)) {
-            isPublishing = false;
             return;
         }
 
+        isPublishing = isPublishAction;
         setButtonsDisabled(true);
-        showOverlayProgress('Enregistrement du brouillon...', 'Nous sauvegardons votre article avant de lancer le paiement.');
+        showOverlayProgress(
+            isPublishAction ? 'Enregistrement du brouillon...' : 'Enregistrement du brouillon...',
+            isPublishAction
+                ? 'Nous sauvegardons votre article avant de lancer le paiement.'
+                : 'Nous enregistrons votre brouillon pour que vous puissiez le reprendre à tout moment.'
+        );
 
         const formData = new FormData(form);
-        formData.set('status', 'submitted');
+        formData.set('status', isPublishAction ? 'submitted' : 'draft');
 
         fetch(form.action, {
             method: 'POST',
@@ -761,7 +795,7 @@ $uploadMaxBytes = (function (string $value): int {
                 const data = await readJsonResponse(response);
 
                 if (!response.ok) {
-                    throw new Error(normalizeMessage(data.message, 'Impossible de sauvegarder votre article.'));
+                    throw new Error(extractErrorMessage(data, 'Impossible de sauvegarder votre article.'));
                 }
 
                 if (data.requires_payment) {
@@ -773,10 +807,19 @@ $uploadMaxBytes = (function (string $value): int {
                     return;
                 }
 
+                if (isDraftAction) {
+                    updateDraftRoute(data);
+                }
+
                 setButtonsDisabled(false);
                 setOverlaySuccess(
-                    data.notice && data.notice.title ? data.notice.title : 'Article transmis',
-                    normalizeMessage(data.notice && data.notice.message ? data.notice.message : '', 'Votre article a ete envoye en validation.'),
+                    data.notice && data.notice.title ? data.notice.title : (isDraftAction ? 'Brouillon enregistré' : 'Article transmis'),
+                    normalizeMessage(
+                        data.notice && data.notice.message ? data.notice.message : '',
+                        isDraftAction
+                            ? 'Votre brouillon a bien été enregistré. Vous pourrez le reprendre plus tard.'
+                            : 'Votre article a ete envoye en validation.'
+                    ),
                     data.redirect_url || null
                 );
             })

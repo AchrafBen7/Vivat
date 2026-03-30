@@ -64,9 +64,12 @@ class AuthController extends Controller
             'terms_accepted'  => ['required', 'accepted'],
         ], [
             'first_name.required' => 'Le prénom est obligatoire.',
+            'first_name.max' => 'Le prénom ne peut pas dépasser 255 caractères.',
             'last_name.required' => 'Le nom est obligatoire.',
+            'last_name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
             'email.required' => "L'email est obligatoire.",
             'email.email' => "L'email n'est pas valide.",
+            'email.max' => "L'email ne peut pas dépasser 255 caractères.",
             'email.unique' => 'Cet email est déjà utilisé.',
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
@@ -118,6 +121,7 @@ class AuthController extends Controller
             'password' => ['required'],
         ], [
             'email.required' => "L'email est obligatoire.",
+            'email.email' => "L'email n'est pas valide.",
             'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 

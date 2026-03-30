@@ -62,6 +62,7 @@ $metaLine = trim(implode(' • ', array_filter([
 ])));
 $shareUrl = url('/articles/'.$slug);
 $shareTitle = $title;
+$isPreview = (bool) ($article['is_preview'] ?? false);
 
 // Si le contenu est du texte brut saisi par un rédacteur, convertir les lignes vides en paragraphes.
 // On conserve le HTML existant pour ne pas casser les anciens articles déjà formatés.
@@ -90,6 +91,15 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
 }, $content);
 ?>
 <div class="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+    <?php if ($isPreview) { ?>
+    <div class="mb-6 flex items-center justify-center">
+        <div class="inline-flex items-center gap-3 rounded-full border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-3 text-sm font-medium text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
+            <span>Ceci est un aperçu de votre article. Il n’est pas encore affiché publiquement comme version finale.</span>
+        </div>
+    </div>
+    <?php } ?>
+
     <!-- Bannière pub 728×90 -->
     <div class="flex items-center justify-center rounded-[30px] overflow-hidden mb-6 pr-12 pb-12 pl-12">
         <div class="flex items-center justify-center text-[#686868] border-2 border-dashed border-[#686868]/40 rounded-[30px] w-full max-w-[728px] h-[90px] gap-2">

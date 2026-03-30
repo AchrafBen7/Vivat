@@ -101,6 +101,65 @@ class ContributorController extends Controller
         ];
     }
 
+    private function contributorSubmissionRules(bool $isAutosave, bool $isSubmitting): array
+    {
+        if ($isAutosave) {
+            return [
+                'title' => ['nullable', 'string', 'max:255'],
+                'excerpt' => ['nullable', 'string', 'max:500'],
+                'content' => ['nullable', 'string'],
+                'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'status' => ['sometimes', 'in:draft,submitted'],
+            ];
+        }
+
+        if ($isSubmitting) {
+            return [
+                'title' => ['required', 'string', 'min:12', 'max:255'],
+                'excerpt' => ['required', 'string', 'min:30', 'max:500'],
+                'content' => ['required', 'string', 'min:300'],
+                'category_id' => ['required', 'uuid', 'exists:categories,id'],
+                'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+                'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'status' => ['sometimes', 'in:draft,submitted'],
+            ];
+        }
+
+        return [
+            'title' => ['required', 'string', 'min:8', 'max:255'],
+            'excerpt' => ['nullable', 'string', 'min:20', 'max:500'],
+            'content' => ['required', 'string', 'min:80'],
+            'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+            'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
+            'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'status' => ['sometimes', 'in:draft,submitted'],
+        ];
+    }
+
+    private function contributorSubmissionMessages(): array
+    {
+        return [
+            'title.required' => 'Le titre est obligatoire.',
+            'title.min' => 'Le titre doit contenir au moins 8 caractères.',
+            'title.max' => 'Le titre ne peut pas dépasser 255 caractères.',
+            'excerpt.required' => "L'extrait est obligatoire avant d'envoyer l'article.",
+            'excerpt.min' => "L'extrait doit contenir au moins 20 caractères.",
+            'excerpt.max' => "L'extrait ne peut pas dépasser 500 caractères.",
+            'content.required' => 'Le contenu est obligatoire.',
+            'content.min' => 'Le contenu est trop court pour être envoyé tel quel.',
+            'category_id.required' => 'Veuillez choisir une rubrique pour votre article.',
+            'category_id.exists' => 'La rubrique sélectionnée est invalide.',
+            'reading_time.integer' => 'Le temps de lecture doit être un nombre entier.',
+            'reading_time.min' => 'Le temps de lecture doit être d’au moins 1 minute.',
+            'reading_time.max' => 'Le temps de lecture ne peut pas dépasser 120 minutes.',
+            'cover_image.image' => "L'image de couverture doit être une image valide.",
+            'cover_image.mimes' => "L'image de couverture doit être au format JPG ou PNG.",
+            'cover_image.max' => "L'image de couverture ne peut pas dépasser 5 Mo.",
+        ];
+    }
+
     private function renderContributorPage(string $activeTab, string $contentView, array $data = []): Response
     {
         $content = render_php_view($contentView, $data);
@@ -178,36 +237,12 @@ class ContributorController extends Controller
 
         if ($request->isMethod('post')) {
             $isAutosave = $this->isAutosaveRequest($request);
+            $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
             $validated = $request->validate(
-                $isAutosave
-                    ? [
-                        'title' => ['nullable', 'string', 'max:255'],
-                        'excerpt' => ['nullable', 'string', 'max:500'],
-                        'content' => ['nullable', 'string'],
-                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
-                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
-                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                        'status' => ['sometimes', 'in:draft,submitted'],
-                    ]
-                    : [
-                        'title' => ['required', 'string', 'max:255'],
-                        'excerpt' => ['nullable', 'string', 'max:500'],
-                        'content' => ['required', 'string', 'min:100'],
-                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
-                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
-                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                        'status' => ['sometimes', 'in:draft,submitted'],
-                    ],
-                [
-                    'title.required' => 'Le titre est obligatoire.',
-                    'content.required' => 'Le contenu est obligatoire.',
-                    'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
-                    'cover_image.image' => "L'image de couverture doit etre une image valide.",
-                    'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
-                ]
+                $this->contributorSubmissionRules($isAutosave, $shouldSubmit),
+                $this->contributorSubmissionMessages()
             );
 
-            $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
             $status = $shouldSubmit && $this->hasPaidPublication($submission) ? 'pending' : 'draft';
             $coverImageUrl = $submission->cover_image_url;
 
@@ -314,36 +349,12 @@ class ContributorController extends Controller
     {
         if ($request->isMethod('post')) {
             $isAutosave = $this->isAutosaveRequest($request);
+            $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
             $validated = $request->validate(
-                $isAutosave
-                    ? [
-                        'title' => ['nullable', 'string', 'max:255'],
-                        'excerpt' => ['nullable', 'string', 'max:500'],
-                        'content' => ['nullable', 'string'],
-                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
-                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
-                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                        'status' => ['sometimes', 'in:draft,submitted'],
-                    ]
-                    : [
-                        'title'       => ['required', 'string', 'max:255'],
-                        'excerpt'     => ['nullable', 'string', 'max:500'],
-                        'content'     => ['required', 'string', 'min:100'],
-                        'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
-                        'reading_time' => ['nullable', 'integer', 'min:1', 'max:120'],
-                        'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                        'status'      => ['sometimes', 'in:draft,submitted'],
-                    ],
-                [
-                    'title.required' => 'Le titre est obligatoire.',
-                    'content.required' => 'Le contenu est obligatoire.',
-                    'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
-                    'cover_image.image' => "L'image de couverture doit etre une image valide.",
-                    'cover_image.max' => "L'image de couverture ne peut pas depasser 5 Mo.",
-                ]
+                $this->contributorSubmissionRules($isAutosave, $shouldSubmit),
+                $this->contributorSubmissionMessages()
             );
 
-            $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
             $status = 'draft';
             $coverImageUrl = $request->hasFile('cover_image')
                 ? $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'))
@@ -452,6 +463,7 @@ class ContributorController extends Controller
                 'published_at_iso' => $submission->created_at?->toIso8601String(),
                 'cover_image_url' => $submission->cover_image_url,
                 'cover_video_url' => null,
+                'is_preview' => true,
                 'category' => $category ? [
                     'name' => $category->name,
                     'slug' => $category->slug,
@@ -510,9 +522,14 @@ class ContributorController extends Controller
                 'website_url' => ['nullable', 'url', 'max:255'],
             ], [
                 'name.required' => 'Le nom complet est obligatoire.',
+                'name.max' => 'Le nom complet ne peut pas dépasser 255 caractères.',
+                'bio.max' => 'La biographie ne peut pas dépasser 2000 caractères.',
                 'instagram_url.url' => "Le lien Instagram doit etre une URL valide.",
+                'instagram_url.max' => "Le lien Instagram est trop long.",
                 'twitter_url.url' => "Le lien Twitter doit etre une URL valide.",
+                'twitter_url.max' => "Le lien Twitter est trop long.",
                 'website_url.url' => "Le site web doit etre une URL valide.",
+                'website_url.max' => "Le site web est trop long.",
             ]);
 
             $request->user()->update([

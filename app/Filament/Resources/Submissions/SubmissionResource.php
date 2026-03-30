@@ -248,6 +248,7 @@ class SubmissionResource extends Resource
                             ->options(fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all())
                             ->default(fn (Submission $record): ?string => $record->category_id)
                             ->searchable()
+                            ->helperText('Choisissez la rubrique dans laquelle l’article sera publié.')
                             ->required(),
                         Select::make('article_type')
                             ->label("Type d'article")
@@ -257,10 +258,12 @@ class SubmissionResource extends Resource
                                 'long_form' => 'Long form',
                             ])
                             ->default('standard')
+                            ->helperText('Ce choix influence la mise en avant visuelle de l’article sur le site.')
                             ->required(),
                         Textarea::make('notes')
                             ->label('Notes admin')
                             ->rows(4)
+                            ->helperText('Optionnel. Ce message peut servir de contexte éditorial ou de suivi interne.')
                             ->maxLength(2000),
                     ])
                     ->action(function (Submission $record, array $data): void {
@@ -285,6 +288,7 @@ class SubmissionResource extends Resource
                         Textarea::make('notes')
                             ->label('Motif du rejet')
                             ->rows(4)
+                            ->helperText('Expliquez clairement ce qui doit être corrigé avant un nouvel envoi.')
                             ->required()
                             ->maxLength(2000),
                     ])
