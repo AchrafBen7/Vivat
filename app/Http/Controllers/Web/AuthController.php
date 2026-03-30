@@ -104,6 +104,8 @@ class AuthController extends Controller
             'title' => 'Connexion — Vivat',
             'meta_description' => 'Connectez-vous à votre compte contributeur Vivat.',
             'hide_cta_section' => true,
+            'hide_footer' => true,
+            'trim_main_bottom' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

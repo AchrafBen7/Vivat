@@ -31,6 +31,9 @@ $articleImageZoomImg = 'transition-transform duration-[650ms] ease-[cubic-bezier
 
 $cardGreenSurface = 'bg-[#004241] transition-colors duration-200 hover:bg-[#003130]';
 $cardYellowSurface = 'bg-[#FFF0B6] transition-colors duration-200 hover:bg-[#FBE9A3]';
+$cardSoftSurface = 'bg-[#EBF1EF] transition-colors duration-200 hover:bg-[#DEE7E4]';
+$cardWhiteSurface = 'border border-[#D6E1DD] bg-white transition-colors duration-200 hover:bg-[#F7FAF9]';
+$cardGradientSurface = 'bg-[linear-gradient(135deg,#004241_0%,#185B58_58%,#4C807C_100%)]';
 $overlayImagePhoto = 'absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.18)_44%,rgba(0,0,0,0.56)_100%)]';
 $overlayImageSoft = 'absolute inset-0 bg-gradient-to-t from-black/30 to-transparent';
 $overlayRubriqueHero = 'pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 to-black/20';
@@ -69,6 +72,12 @@ $tagGlass = $tagClass.' '.$glassTagTailwind;
 $tagGlassOnImage = $tagGlass.' text-white';
 $tagOnYellowCard = 'bg-[#004241] text-white';
 $tagOnGreenCard = 'bg-[#527E7E] text-white';
+$tagOnSoftCard = 'bg-white text-[#004241]';
+$tagOnWhiteCard = 'bg-[#EBF1EF] text-[#004241]';
+$heroColorCardTitleWide = 'font-semibold leading-tight text-2xl';
+$heroColorCardTitleCompact = 'font-semibold leading-tight text-xl';
+$heroColorCardExcerptOnLight = 'line-clamp-2 text-sm text-[#004241]/72';
+$heroColorCardExcerptOnDark = 'line-clamp-2 text-sm text-white/75';
 /** Ligne méta (date • durée) sous les titres sur images glass */
 $articleMetaOnImage = 'text-white/80 text-xs';
 $resolveCategoryTagTw = static function (?array $category) use ($tagCategoryTw): string {
@@ -137,7 +146,10 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
             <?php if (! empty($h2['category'])) { ?>
             <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($h2['category']['name']) ?></span>
             <?php } ?>
-            <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h2['title']) ?></h3>
+            <h3 class="<?= $heroColorCardTitleCompact ?> text-white line-clamp-3"><?= htmlspecialchars($h2['title']) ?></h3>
+            <?php if (! empty($h2['excerpt'])) { ?>
+            <p class="<?= $heroColorCardExcerptOnDark ?>"><?= htmlspecialchars($h2['excerpt']) ?></p>
+            <?php } ?>
             <p class="text-white/70 text-xs"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
         </a>
         <?php } ?>
@@ -167,7 +179,10 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         <?php if (! empty($h4['category'])) { ?>
         <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($h4['category']['name']) ?></span>
         <?php } ?>
-        <h3 class="font-semibold text-[#004241] line-clamp-2 text-xl"><?= htmlspecialchars($h4['title']) ?></h3>
+        <h3 class="<?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-3"><?= htmlspecialchars($h4['title']) ?></h3>
+        <?php if (! empty($h4['excerpt'])) { ?>
+        <p class="<?= $heroColorCardExcerptOnLight ?>"><?= htmlspecialchars($h4['excerpt']) ?></p>
+        <?php } ?>
         <p class="text-[#004241]/70 text-xs"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
     </a>
     <?php } ?>
@@ -234,7 +249,10 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                 <?php if (! empty($h4['category'])) { ?>
                 <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($h4['category']['name']) ?></span>
                 <?php } ?>
-                <h3 class="font-semibold text-[#004241] line-clamp-2 text-xl"><?= htmlspecialchars($h4['title']) ?></h3>
+                <h3 class="<?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-3"><?= htmlspecialchars($h4['title']) ?></h3>
+                <?php if (! empty($h4['excerpt'])) { ?>
+                <p class="<?= $heroColorCardExcerptOnLight ?>"><?= htmlspecialchars($h4['excerpt']) ?></p>
+                <?php } ?>
                 <p class="text-[#004241]/70 text-xs"><?= htmlspecialchars($h4['published_at'] ?? '') ?> • <?= (int) ($h4['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php } ?>
@@ -266,7 +284,10 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                 <?php if (! empty($h2['category'])) { ?>
                 <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($h2['category']['name']) ?></span>
                 <?php } ?>
-                <h3 class="font-semibold text-white line-clamp-2 text-xl"><?= htmlspecialchars($h2['title']) ?></h3>
+                <h3 class="<?= $heroColorCardTitleCompact ?> text-white line-clamp-3"><?= htmlspecialchars($h2['title']) ?></h3>
+                <?php if (! empty($h2['excerpt'])) { ?>
+                <p class="<?= $heroColorCardExcerptOnDark ?>"><?= htmlspecialchars($h2['excerpt']) ?></p>
+                <?php } ?>
                 <p class="text-white/70 text-xs"><?= htmlspecialchars($h2['published_at'] ?? '') ?> • <?= (int) ($h2['reading_time'] ?? 0) ?> min</p>
             </a>
             <?php } ?>
@@ -733,258 +754,192 @@ $articleType = static function (array $article): string {
 
     return $type !== '' ? $type : 'standard';
 };
-$takeFromPool = static function (array &$pool, array &$usedIds, callable $predicate): ?array {
-    foreach ($pool as $index => $article) {
-        $id = $article['id'] ?? null;
-        if (($id !== null && isset($usedIds[$id])) || ! $predicate($article)) {
-            continue;
-        }
-
-        if ($id !== null) {
-            $usedIds[$id] = true;
-        }
-
-        unset($pool[$index]);
-
-        return $article;
-    }
-
-    return null;
-};
 $allLatestPool = array_values($restArticles);
-$usedLatestIds = [];
-$isVisualArticle = static fn (array $article): bool => in_array($articleType($article), ['hot_news', 'long_form'], true)
+$isImageArticle = static fn (array $article): bool => in_array($articleType($article), ['hot_news', 'long_form'], true)
     || ! empty($article['cover_image_url']);
-$isEditorialBlockArticle = static fn (array $article): bool => $articleType($article) === 'standard';
+$isEditorialArticle = static fn (array $article): bool => $articleType($article) === 'standard';
 $isHotNewsArticle = static fn (array $article): bool => $articleType($article) === 'hot_news';
 $isLongFormArticle = static fn (array $article): bool => $articleType($article) === 'long_form';
+$latestColorCardContent = 'flex flex-col justify-end gap-3';
+$latestColorCardTitle = 'line-clamp-3 text-xl font-semibold leading-tight';
+$latestColorCardTitleLarge = 'line-clamp-3 text-2xl font-semibold leading-tight max-sm:text-xl';
+$latestColorCardExcerpt = 'line-clamp-2 text-sm';
+$latestHeroTitleMedium = 'line-clamp-3 text-xl font-semibold leading-tight';
+$latestHeroTitleSmall = 'line-clamp-3 text-lg font-semibold leading-tight';
+$latestColorCardMeta = 'text-xs';
+$pickLatestArticle = static function (array &$pool, callable ...$predicates): ?array {
+    foreach ($predicates as $predicate) {
+        foreach ($pool as $index => $article) {
+            if (! $predicate($article)) {
+                continue;
+            }
 
-$firstArt = $takeFromPool($allLatestPool, $usedLatestIds, $isVisualArticle)
-    ?? ($restArticles[0] ?? null);
-$secondArt = $takeFromPool($allLatestPool, $usedLatestIds, $isVisualArticle)
-    ?? ($restArticles[1] ?? null);
-$hotNewsArt = $takeFromPool($allLatestPool, $usedLatestIds, $isHotNewsArticle)
-    ?? $takeFromPool($allLatestPool, $usedLatestIds, $isLongFormArticle)
-    ?? ($restArticles[2] ?? null);
-$artLeft = $takeFromPool($allLatestPool, $usedLatestIds, $isEditorialBlockArticle)
-    ?? ($restArticles[10] ?? null);
-$artLeft2 = $takeFromPool($allLatestPool, $usedLatestIds, $isVisualArticle)
-    ?? ($restArticles[6] ?? null);
-$middleRightArticles = [];
-for ($i = 0; $i < 2; $i++) {
-    $middleRightArticles[] = $takeFromPool($allLatestPool, $usedLatestIds, $isEditorialBlockArticle)
-        ?? array_shift($allLatestPool)
-        ?? null;
-}
-$middleRightArticles = array_values(array_filter($middleRightArticles));
-$artRight = $takeFromPool($allLatestPool, $usedLatestIds, $isVisualArticle)
-    ?? ($restArticles[11] ?? null);
-$artForFullPhoto1 = $takeFromPool($allLatestPool, $usedLatestIds, $isVisualArticle)
-    ?? ($restArticles[5] ?? null);
-$artForFullPhoto2 = $takeFromPool($allLatestPool, $usedLatestIds, $isVisualArticle)
-    ?? ($restArticles[7] ?? null);
+            unset($pool[$index]);
+
+            return $article;
+        }
+    }
+
+    return array_shift($pool) ?: null;
+};
+$latestImageData = static function (array $article, int $width, int $height, string $slot): array {
+    $categorySlug = $article['category']['slug'] ?? null;
+    $articleId = $article['id'] ?? $article['slug'] ?? null;
+    $fallback = vivat_category_fallback_image($categorySlug, $width, $height, $articleId, $slot);
+    $image = ! empty($article['cover_image_url']) ? $article['cover_image_url'] : $fallback;
+
+    return [$image, $fallback];
+};
+
+$topFeatureEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isLongFormArticle, $isHotNewsArticle);
+$topVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isHotNewsArticle);
+$leftEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isLongFormArticle);
+$centerVisualArt = $pickLatestArticle($allLatestPool, $isLongFormArticle, $isImageArticle);
+$rightEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isHotNewsArticle, $isLongFormArticle);
+$bottomLeftVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isLongFormArticle);
+$bottomCenterEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isLongFormArticle);
+$bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isHotNewsArticle);
 ?>
 
     <?php if (count($restArticles) > 0) { ?>
     <section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-6 md:grid-cols-8 md:mt-16 lg:grid-cols-12">
         <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
-
-        <!-- Colonne gauche | md 4 cols, lg 6 cols -->
-        <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full gap-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
-                <?php if ($firstArt) { ?>
-                <?php $f0CatSlug = $firstArt['category']['slug'] ?? null;
-                    $f0ArtId = $firstArt['id'] ?? $firstArt['slug'] ?? null;
-                    $f0Fallback = vivat_category_fallback_image($f0CatSlug, 302, 419, $f0ArtId, 'card-0');
-                    $f0Img = ! empty($firstArt['cover_image_url']) ? $firstArt['cover_image_url'] : $f0Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($firstArt['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($f0Img) ?>" data-fallback-url="<?= htmlspecialchars($f0Fallback) ?>" alt="<?= htmlspecialchars($firstArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                    <div class="<?= $overlayImageSoft ?>"></div>
-                    <div class="<?= $cardOverlay ?> flex items-end z-10">
-                        <div class="<?= $glassBox ?> w-full">
-                            <?php if (! empty($firstArt['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($firstArt['category']['name']) ?></span>
-                            <?php } ?>
-                            <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($firstArt['title'] ?? '') ?></h3>
-                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
-                        </div>
-                        </div>
-                </a>
-                <?php } ?>
-
-                <?php if ($secondArt) { ?>
-                <?php $artCatSlug = $secondArt['category']['slug'] ?? null;
-                    $artId = $secondArt['id'] ?? $secondArt['slug'] ?? null;
-                    $artFallback = vivat_category_fallback_image($artCatSlug, 254, 190, $artId, 'card-1');
-                    $artImg = ! empty($secondArt['cover_image_url']) ? $secondArt['cover_image_url'] : $artFallback; ?>
-                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($artImg) ?>" data-fallback-url="<?= htmlspecialchars($artFallback) ?>" alt="<?= htmlspecialchars($secondArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                    <div class="<?= $overlayImagePhoto ?>"></div>
-                    <div class="<?= $cardOverlay ?> flex items-end z-10">
-                        <div class="<?= $glassBox ?> w-full">
-                            <?php if (! empty($secondArt['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($secondArt['category']['name']) ?></span>
-                            <?php } ?>
-                            <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($secondArt['title'] ?? '') ?></h3>
-                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
-                        </div>
-                    </div>
-                </a>
-                <?php } ?>
-            </div>
-
-            <?php if ($hotNewsArt) { ?>
-            <?php $hotCatSlug = $hotNewsArt['category']['slug'] ?? null;
-            $hotArtId = $hotNewsArt['id'] ?? $hotNewsArt['slug'] ?? null;
-            $hotFallback = vivat_category_fallback_image($hotCatSlug, 626, 240, $hotArtId, 'hot');
-            $hotNewsImg = ! empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : $hotFallback; ?>
-            <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[32px] overflow-hidden relative min-w-0 w-full h-60">
-                <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                <div class="<?= $cardOverlay ?> flex justify-end items-end">
-                    <div class="<?= $glassBox ?> w-full">
-                        <?php if (! empty($hotNewsArt['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hotNewsArt['category']['name']) ?></span>
-                        <?php } ?>
-                        <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($hotNewsArt['title'] ?? '') ?></h3>
-                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
-                    </div>
-                        </div>
-            </a>
-            <?php } ?>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
-                <?php if ($artLeft) { ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="group relative flex min-w-0 w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] p-6 h-[419px] <?= $cardYellowSurface ?>">
-                    <span class="<?= $cardArrowOnYellow ?>">
-                        <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
-                    </span>
-                    <?php if (! empty($artLeft['category'])) { ?>
-                    <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($artLeft['category']['name']) ?></span>
-                    <?php } ?>
-                    <h3 class="font-semibold text-[#004241] line-clamp-5 text-xl"><?= htmlspecialchars($artLeft['title']) ?></h3>
-                    <p class="text-[#004241]/70 text-xs"><?= htmlspecialchars($artLeft['published_at'] ?? '') ?> • <?= (int) ($artLeft['reading_time'] ?? 0) ?> min</p>
-                </a>
-                <?php } ?>
-
-                <?php if ($artLeft2) { ?>
-                <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null;
-            $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null;
-            $left2Fallback = vivat_category_fallback_image($left2CatSlug, 302, 419, $left2ArtId, 'left2');
-            $artLeft2Img = ! empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                    <div class="<?= $overlayImageSoft ?>"></div>
-                    <div class="<?= $cardOverlay ?> flex items-end z-10">
-                        <div class="<?= $glassBox ?> w-full">
-                            <?php if (! empty($artLeft2['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artLeft2['category']['name']) ?></span>
-                            <?php } ?>
-                            <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artLeft2['title'] ?? '') ?></h3>
-                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
-                        </div>
-                        </div>
-                    </a>
-                <?php } ?>
-                </div>
-            </div>
-
-        <!-- Colonne droite | md 4 cols, lg 6 cols -->
-        <div class="md:col-span-4 lg:col-span-6 flex flex-col min-w-0 w-full gap-6">
-            <?php foreach ($middleRightArticles as $i => $art) {
-                $type = $articleType($art);
-                $usesSolidEditorialCard = $type === 'standard';
-                $isDark = ($i % 2 === 0);
-                $tileCatSlug = $art['category']['slug'] ?? null;
-                $tileArtId = $art['id'] ?? $art['slug'] ?? null;
-                $tileFallback = vivat_category_fallback_image($tileCatSlug, 626, 198, $tileArtId, 'tile-'.$i);
-                $tileImg = ! empty($art['cover_image_url']) ? $art['cover_image_url'] : $tileFallback;
-                ?>
-            <?php if ($usesSolidEditorialCard) { ?>
-            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="group relative flex min-w-0 w-full flex-col justify-end gap-2 overflow-hidden rounded-[30px] border border-white/10 p-6 h-[198px] <?= $isDark ? $cardGreenSurface : $cardYellowSurface ?>">
-                <span class="<?= $isDark ? $cardArrowOnGreen : $cardArrowOnYellow ?>">
+        <div class="grid min-w-0 w-full grid-cols-1 gap-6 md:col-span-8 md:grid-cols-8 lg:col-span-12 lg:grid-cols-12">
+            <?php if ($topFeatureEditorialArt) { ?>
+            <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardYellowSurface ?>">
+                <span class="<?= $cardArrowOnYellow ?>">
                     <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
-                <?php if (! empty($art['category'])) { ?>
-                <span class="<?= $tagClass ?> <?= $isDark ? $tagOnGreenCard : $tagOnYellowCard ?>"><?= htmlspecialchars($art['category']['name']) ?></span>
-                <?php } ?>
-                <h3 class="font-medium line-clamp-2 text-xl <?= $isDark ? 'text-white' : 'text-[#004241]' ?>"><?= htmlspecialchars($art['title']) ?></h3>
-                <p class="text-xs <?= $isDark ? 'text-white/70' : 'text-[#004241]/70' ?>"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                <div class="<?= $latestColorCardContent ?> max-w-[760px]">
+                    <?php if (! empty($topFeatureEditorialArt['category'])) { ?>
+                    <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($topFeatureEditorialArt['category']['name']) ?></span>
+                    <?php } ?>
+                    <h3 class="<?= $latestColorCardTitleLarge ?> text-[#004241]"><?= htmlspecialchars($topFeatureEditorialArt['title'] ?? '') ?></h3>
+                    <?php if (! empty($topFeatureEditorialArt['excerpt'])) { ?>
+                    <p class="<?= $latestColorCardExcerpt ?> text-[#004241]/75"><?= htmlspecialchars($topFeatureEditorialArt['excerpt']) ?></p>
+                    <?php } ?>
+                    <p class="<?= $latestColorCardMeta ?> text-[#004241]/70"><?= htmlspecialchars($topFeatureEditorialArt['published_at'] ?? '') ?> • <?= (int) ($topFeatureEditorialArt['reading_time'] ?? 0) ?> min</p>
+                </div>
             </a>
-            <?php } else { ?>
-            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[198px]">
-                <img src="<?= htmlspecialchars($tileImg) ?>" data-fallback-url="<?= htmlspecialchars($tileFallback) ?>" alt="<?= htmlspecialchars($art['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                <div class="<?= $isDark ? $overlayImagePhoto : $overlayImageSoft ?>"></div>
-                <div class="<?= $cardOverlay ?> flex items-end z-10">
-                    <div class="<?= $glassBox ?> w-full">
-                        <?php if (! empty($art['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($art['category']['name']) ?></span>
+            <?php } ?>
+
+            <?php if ($topVisualArt) { ?>
+            <?php [$topVisualImg, $topVisualFallback] = $latestImageData($topVisualArt, 520, 340, 'latest-top-visual'); ?>
+            <a href="/articles/<?= htmlspecialchars($topVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[300px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[340px]">
+                <img src="<?= htmlspecialchars($topVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($topVisualFallback) ?>" alt="<?= htmlspecialchars($topVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $overlayImagePhoto ?>"></div>
+                <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
+                    <div class="<?= $glassBox ?> min-h-[146px] justify-end">
+                        <?php if (! empty($topVisualArt['category'])) { ?>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($topVisualArt['category']['name']) ?></span>
                         <?php } ?>
-                        <h3 class="font-medium text-white line-clamp-2 text-xl"><?= htmlspecialchars($art['title']) ?></h3>
-                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($art['published_at'] ?? '') ?> • <?= (int) ($art['reading_time'] ?? 0) ?> min</p>
+                        <h3 class="<?= $latestHeroTitleMedium ?> text-white"><?= htmlspecialchars($topVisualArt['title'] ?? '') ?></h3>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($topVisualArt['published_at'] ?? '') ?> • <?= (int) ($topVisualArt['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
             <?php } ?>
+
+            <?php if ($leftEditorialArt) { ?>
+            <a href="/articles/<?= htmlspecialchars($leftEditorialArt['slug']) ?>" class="group relative flex h-[320px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-4 lg:col-span-3 lg:h-[360px] <?= $cardSoftSurface ?>">
+                <span class="<?= $cardArrowOnYellow ?>">
+                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
+                </span>
+                <div class="<?= $latestColorCardContent ?>">
+                    <?php if (! empty($leftEditorialArt['category'])) { ?>
+                    <span class="<?= $tagClass ?> <?= $tagOnSoftCard ?>"><?= htmlspecialchars($leftEditorialArt['category']['name']) ?></span>
+                    <?php } ?>
+                    <h3 class="<?= $latestColorCardTitleLarge ?> line-clamp-4 text-[#004241]"><?= htmlspecialchars($leftEditorialArt['title'] ?? '') ?></h3>
+                    <?php if (! empty($leftEditorialArt['excerpt'])) { ?>
+                    <p class="<?= $latestColorCardExcerpt ?> line-clamp-3 text-[#004241]/72"><?= htmlspecialchars($leftEditorialArt['excerpt']) ?></p>
+                    <?php } ?>
+                    <p class="<?= $latestColorCardMeta ?> text-[#004241]/70"><?= htmlspecialchars($leftEditorialArt['published_at'] ?? '') ?> • <?= (int) ($leftEditorialArt['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
             <?php } ?>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0 gap-6">
-                <?php $artRight = $restArticles[11] ?? null;
-        if ($artRight) { ?>
-                <?php $rightCatSlug = $artRight['category']['slug'] ?? null;
-            $rightArtId = $artRight['id'] ?? $artRight['slug'] ?? null;
-            $rightFallback = vivat_category_fallback_image($rightCatSlug, 254, 190, $rightArtId, 'right');
-            $artRightImg = ! empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($artRightImg) ?>" data-fallback-url="<?= htmlspecialchars($rightFallback) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                    <div class="<?= $overlayImagePhoto ?>"></div>
-                    <div class="<?= $cardOverlay ?> flex items-end z-10">
-                        <div class="<?= $glassBox ?> w-full">
-                            <?php if (! empty($artRight['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artRight['category']['name']) ?></span>
-                            <?php } ?>
-                            <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artRight['title'] ?? '') ?></h3>
-                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
-                        </div>
-                        </div>
-                </a>
-                <?php } ?>
-
-                <?php if ($artForFullPhoto1) { ?>
-                <?php $full1CatSlug = $artForFullPhoto1['category']['slug'] ?? null;
-                    $full1ArtId = $artForFullPhoto1['id'] ?? $artForFullPhoto1['slug'] ?? null;
-                    $full1Fallback = vivat_category_fallback_image($full1CatSlug, 302, 419, $full1ArtId, 'full1');
-                    $fullPhoto1Img = ! empty($artForFullPhoto1['cover_image_url']) ? $artForFullPhoto1['cover_image_url'] : $full1Fallback; ?>
-                <a href="/articles/<?= htmlspecialchars($artForFullPhoto1['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[25px] overflow-hidden relative min-w-0 w-full h-[419px]">
-                    <img src="<?= htmlspecialchars($fullPhoto1Img) ?>" data-fallback-url="<?= htmlspecialchars($full1Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                    <div class="<?= $overlayImageSoft ?>"></div>
-                    <div class="<?= $cardOverlay ?> flex items-end z-10">
-                        <div class="<?= $glassBox ?> w-full">
-                            <?php if (! empty($artForFullPhoto1['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artForFullPhoto1['category']['name']) ?></span>
-                            <?php } ?>
-                            <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artForFullPhoto1['title'] ?? '') ?></h3>
-                            <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artForFullPhoto1['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto1['reading_time'] ?? 0) ?> min</p>
-                        </div>
-                    </div>
-                </a>
-                <?php } ?>
-            </div>
-
-            <?php if ($artForFullPhoto2) { ?>
-            <?php $full2CatSlug = $artForFullPhoto2['category']['slug'] ?? null;
-                $full2ArtId = $artForFullPhoto2['id'] ?? $artForFullPhoto2['slug'] ?? null;
-                $full2Fallback = vivat_category_fallback_image($full2CatSlug, 629, 235, $full2ArtId, 'full2');
-                $fullPhoto2Img = ! empty($artForFullPhoto2['cover_image_url']) ? $artForFullPhoto2['cover_image_url'] : $full2Fallback; ?>
-            <a href="/articles/<?= htmlspecialchars($artForFullPhoto2['slug']) ?>" class="<?= $articleImageZoom ?> block rounded-[30px] overflow-hidden relative w-full min-w-0 h-[235px]">
-                <img src="<?= htmlspecialchars($fullPhoto2Img) ?>" data-fallback-url="<?= htmlspecialchars($full2Fallback) ?>" alt="<?= htmlspecialchars($artForFullPhoto2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
-                <div class="<?= $overlayImageSoft ?>"></div>
-                <div class="<?= $cardOverlay ?> flex items-end">
-                    <div class="<?= $glassBox ?> w-full">
-                        <?php if (! empty($artForFullPhoto2['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($artForFullPhoto2['category']['name']) ?></span>
+            <?php if ($centerVisualArt) { ?>
+            <?php [$centerVisualImg, $centerVisualFallback] = $latestImageData($centerVisualArt, 620, 360, 'latest-center-visual'); ?>
+            <a href="/articles/<?= htmlspecialchars($centerVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[320px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[360px]">
+                <img src="<?= htmlspecialchars($centerVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($centerVisualFallback) ?>" alt="<?= htmlspecialchars($centerVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
+                    <div class="<?= $glassBox ?> min-h-[146px] justify-end">
+                        <?php if (! empty($centerVisualArt['category'])) { ?>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($centerVisualArt['category']['name']) ?></span>
                         <?php } ?>
-                        <h3 class="font-medium text-white line-clamp-5 text-xl"><?= htmlspecialchars($artForFullPhoto2['title'] ?? '') ?></h3>
-                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($artForFullPhoto2['published_at'] ?? '') ?> • <?= (int) ($artForFullPhoto2['reading_time'] ?? 0) ?> min</p>
+                        <h3 class="<?= $latestHeroTitleMedium ?> text-white"><?= htmlspecialchars($centerVisualArt['title'] ?? '') ?></h3>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($centerVisualArt['published_at'] ?? '') ?> • <?= (int) ($centerVisualArt['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </div>
+            </a>
+            <?php } ?>
+
+            <?php if ($rightEditorialArt) { ?>
+            <a href="/articles/<?= htmlspecialchars($rightEditorialArt['slug']) ?>" class="group relative flex h-[320px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-8 lg:col-span-4 lg:h-[360px] <?= $cardGreenSurface ?>">
+                <span class="<?= $cardArrowOnGreen ?>">
+                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
+                </span>
+                <div class="<?= $latestColorCardContent ?>">
+                    <?php if (! empty($rightEditorialArt['category'])) { ?>
+                    <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($rightEditorialArt['category']['name']) ?></span>
+                    <?php } ?>
+                    <h3 class="<?= $latestColorCardTitleLarge ?> line-clamp-4 text-white"><?= htmlspecialchars($rightEditorialArt['title'] ?? '') ?></h3>
+                    <?php if (! empty($rightEditorialArt['excerpt'])) { ?>
+                    <p class="<?= $latestColorCardExcerpt ?> text-white/75"><?= htmlspecialchars($rightEditorialArt['excerpt']) ?></p>
+                    <?php } ?>
+                    <p class="<?= $latestColorCardMeta ?> text-white/70"><?= htmlspecialchars($rightEditorialArt['published_at'] ?? '') ?> • <?= (int) ($rightEditorialArt['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
+            <?php } ?>
+
+            <?php if ($bottomLeftVisualArt) { ?>
+            <?php [$bottomLeftVisualImg, $bottomLeftVisualFallback] = $latestImageData($bottomLeftVisualArt, 420, 280, 'latest-bottom-left-visual'); ?>
+            <a href="/articles/<?= htmlspecialchars($bottomLeftVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[250px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-4 lg:h-[290px]">
+                <img src="<?= htmlspecialchars($bottomLeftVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($bottomLeftVisualFallback) ?>" alt="<?= htmlspecialchars($bottomLeftVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
+                    <div class="<?= $glassBox ?> min-h-[132px] justify-end">
+                        <?php if (! empty($bottomLeftVisualArt['category'])) { ?>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($bottomLeftVisualArt['category']['name']) ?></span>
+                        <?php } ?>
+                        <h3 class="<?= $latestHeroTitleSmall ?> text-white"><?= htmlspecialchars($bottomLeftVisualArt['title'] ?? '') ?></h3>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($bottomLeftVisualArt['published_at'] ?? '') ?> • <?= (int) ($bottomLeftVisualArt['reading_time'] ?? 0) ?> min</p>
+                    </div>
+                </div>
+            </a>
+            <?php } ?>
+
+            <?php if ($bottomCenterEditorialArt) { ?>
+            <a href="/articles/<?= htmlspecialchars($bottomCenterEditorialArt['slug']) ?>" class="group relative flex h-[250px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-7 md:col-span-4 lg:col-span-4 lg:h-[290px] <?= $cardYellowSurface ?>">
+                <span class="<?= $cardArrowOnYellow ?>">
+                    <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
+                </span>
+                <div class="<?= $latestColorCardContent ?>">
+                    <?php if (! empty($bottomCenterEditorialArt['category'])) { ?>
+                    <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($bottomCenterEditorialArt['category']['name']) ?></span>
+                    <?php } ?>
+                    <h3 class="<?= $latestColorCardTitle ?> text-[#004241]"><?= htmlspecialchars($bottomCenterEditorialArt['title'] ?? '') ?></h3>
+                    <?php if (! empty($bottomCenterEditorialArt['excerpt'])) { ?>
+                    <p class="<?= $latestColorCardExcerpt ?> text-[#004241]/72"><?= htmlspecialchars($bottomCenterEditorialArt['excerpt']) ?></p>
+                    <?php } ?>
+                    <p class="<?= $latestColorCardMeta ?> text-[#004241]/70"><?= htmlspecialchars($bottomCenterEditorialArt['published_at'] ?? '') ?> • <?= (int) ($bottomCenterEditorialArt['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </a>
+            <?php } ?>
+
+            <?php if ($bottomRightVisualArt) { ?>
+            <?php [$bottomRightVisualImg, $bottomRightVisualFallback] = $latestImageData($bottomRightVisualArt, 420, 280, 'latest-bottom-right-visual'); ?>
+            <a href="/articles/<?= htmlspecialchars($bottomRightVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[250px] w-full overflow-hidden rounded-[32px] md:col-span-8 lg:col-span-4 lg:h-[290px]">
+                <img src="<?= htmlspecialchars($bottomRightVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($bottomRightVisualFallback) ?>" alt="<?= htmlspecialchars($bottomRightVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <div class="<?= $overlayImagePhoto ?>"></div>
+                <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
+                    <div class="<?= $glassBox ?> min-h-[132px] justify-end">
+                        <?php if (! empty($bottomRightVisualArt['category'])) { ?>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($bottomRightVisualArt['category']['name']) ?></span>
+                        <?php } ?>
+                        <h3 class="<?= $latestHeroTitleSmall ?> text-white"><?= htmlspecialchars($bottomRightVisualArt['title'] ?? '') ?></h3>
+                        <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($bottomRightVisualArt['published_at'] ?? '') ?> • <?= (int) ($bottomRightVisualArt['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
             </a>
