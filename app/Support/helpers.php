@@ -69,6 +69,134 @@ if (! function_exists('vivat_category_fallback_image')) {
     }
 }
 
+if (! function_exists('vivat_filter_label_case')) {
+    /**
+     * Libellé de filtre / sous-rubrique : première lettre de chaque mot en majuscule (cohérence UI).
+     */
+    function vivat_filter_label_case(string $label): string
+    {
+        $label = trim($label);
+        if ($label === '') {
+            return '';
+        }
+        $words = preg_split('/\s+/u', $label, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $out = [];
+        foreach ($words as $word) {
+            $lower = mb_strtolower($word, 'UTF-8');
+            $out[] = mb_strtoupper(mb_substr($lower, 0, 1, 'UTF-8')).mb_substr($lower, 1, null, 'UTF-8');
+        }
+
+        return implode(' ', $out);
+    }
+}
+
+if (! function_exists('vivat_hub_article_subcategory_badge_label')) {
+    /**
+     * Libellé du tag sur une carte du hub rubrique : une sous-rubrique (terme), alignée sur la logique
+     * de filtrage (LIKE sur title, content, excerpt, meta_*, keywords). Permet d’afficher "Argent" vs
+     * "Finance" quand plusieurs filtres sont actifs et les articles sont mélangés.
+     *
+     * @param  array<string, mixed>  $article
+     * @param  array<int, array{name?: string, slug?: string}>  $subCategories  Termes de la rubrique (description + mots fréquents)
+     * @param  array<int, string>  $activeSubCategorySlugs  Filtres actifs (vide = « Tous »)
+     */
+    function vivat_hub_article_subcategory_badge_label(
+        array $article,
+        array $subCategories,
+        array $activeSubCategorySlugs,
+        string $categoryName
+    ): string {
+        $bySlug = [];
+        foreach ($subCategories as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
+            $name = isset($row['name']) ? trim((string) $row['name']) : '';
+            if ($slug !== '' && $name !== '') {
+                $bySlug[$slug] = $name;
+            }
+        }
+
+        $keywords = $article['keywords'] ?? [];
+        $keywordsPart = '';
+        if (is_array($keywords)) {
+            $keywordsPart = implode(' ', array_map(static fn (mixed $k): string => trim((string) $k), $keywords));
+        }
+
+        $haystack = mb_strtolower(
+            trim(
+                implode(' ', array_filter([
+                    (string) ($article['title'] ?? ''),
+                    (string) ($article['excerpt'] ?? ''),
+                    (string) ($article['content'] ?? ''),
+                    (string) ($article['meta_title'] ?? ''),
+                    (string) ($article['meta_description'] ?? ''),
+                    $keywordsPart,
+                ]))
+            ),
+            'UTF-8'
+        );
+
+        $termMatches = static function (string $termName) use ($haystack): bool {
+            $termName = trim($termName);
+            if ($termName === '') {
+                return false;
+            }
+
+            return mb_stripos($haystack, mb_strtolower($termName, 'UTF-8'), 0, 'UTF-8') !== false;
+        };
+
+        $sub = $article['sub_category'] ?? null;
+        $articleSubSlug = is_array($sub) && ! empty($sub['slug']) ? (string) $sub['slug'] : '';
+
+        $activeSlugs = array_values(array_unique(array_filter(
+            array_map(static fn (mixed $s): string => trim((string) $s), $activeSubCategorySlugs),
+            static fn (string $s): bool => $s !== '' && isset($bySlug[$s])
+        )));
+
+        if ($activeSlugs !== []) {
+            if ($articleSubSlug !== '' && in_array($articleSubSlug, $activeSlugs, true)) {
+                return vivat_filter_label_case($bySlug[$articleSubSlug]);
+            }
+
+            foreach ($activeSlugs as $slug) {
+                $name = $bySlug[$slug] ?? '';
+                if ($name !== '' && $termMatches($name)) {
+                    return vivat_filter_label_case($name);
+                }
+            }
+
+            $dbName = is_array($sub) && isset($sub['name']) ? trim((string) $sub['name']) : '';
+            if ($dbName !== '') {
+                return vivat_filter_label_case($dbName);
+            }
+
+            return vivat_filter_label_case($categoryName);
+        }
+
+        if ($articleSubSlug !== '' && isset($bySlug[$articleSubSlug])) {
+            return vivat_filter_label_case($bySlug[$articleSubSlug]);
+        }
+
+        if (is_array($sub) && isset($sub['name']) && trim((string) $sub['name']) !== '') {
+            return vivat_filter_label_case((string) $sub['name']);
+        }
+
+        foreach ($subCategories as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $name = isset($row['name']) ? trim((string) $row['name']) : '';
+            if ($name !== '' && $termMatches($name)) {
+                return vivat_filter_label_case($name);
+            }
+        }
+
+        return vivat_filter_label_case($categoryName);
+    }
+}
+
 if (! function_exists('vivat_category_public_media_url')) {
     /**
      * URL d’un média local (public/) pour une rubrique : même nom de fichier que le slug (ou alias config).

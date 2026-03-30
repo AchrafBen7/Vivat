@@ -368,7 +368,7 @@ class PublicPageDataService
 
         $articlesPaginator = $data['articles'];
         $articlesCollection = $articlesPaginator->getCollection();
-        $articlesCollection->load('category');
+        $articlesCollection->load(['category', 'subCategory']);
 
         // sub_categories = termes extraits de la description (name + slug)
         $subCategories = $data['sub_categories'] ?? [];
@@ -500,6 +500,13 @@ class PublicPageDataService
             'article_type' => $a->article_type,
             'language' => $a->language ?? 'fr',
             'category' => $category,
+            'keywords' => is_array($a->keywords) ? $a->keywords : [],
+            'sub_category' => $a->relationLoaded('subCategory') && $a->subCategory
+                ? [
+                    'name' => $a->subCategory->name,
+                    'slug' => $a->subCategory->slug,
+                ]
+                : null,
         ];
     }
 

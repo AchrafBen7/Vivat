@@ -12,8 +12,15 @@ $pagination = $pagination ?? null;
 $category_name = $category['name'] ?? 'Rubrique';
 $category_slug = $category['slug'] ?? '';
 $category_image_url = $category['image_url'] ?? null;
-// Badge des articles : sous-catégorie active si filtre sélectionné, sinon nom de la catégorie
-$badgeLabel = count($current_sub_category_names) === 1 ? ($current_sub_category_names[0] ?? $category_name) : $category_name;
+// Tag carte : sous-rubrique (terme), cohérente avec les filtres / le contenu — pas seulement le nom de la rubrique
+$hubArticleBadgeLabel = static function (array $article) use ($category_name, $sub_categories, $current_sub_category_slugs): string {
+    return vivat_hub_article_subcategory_badge_label(
+        $article,
+        $sub_categories,
+        $current_sub_category_slugs,
+        $category_name
+    );
+};
 
 // Tags — mêmes classes que home pour cohérence visuelle
 $tagBase = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
@@ -99,12 +106,23 @@ $restArticles = array_values($byId);
         transform: translateY(-2px);
         box-shadow: 0 24px 48px rgba(0, 66, 65, 0.08);
     }
+    /* Cartes pleine couleur — même logique que la home (transition de teinte au survol) */
     .vivat-card-jaune {
         background: #FFF0B6 !important;
+        transition: transform 220ms ease, box-shadow 220ms ease, background-color 200ms ease;
+    }
+
+    .vivat-card-jaune:hover {
+        background: #FBE9A3 !important;
     }
 
     .vivat-card-dark {
         background: #004241 !important;
+        transition: transform 220ms ease, box-shadow 220ms ease, background-color 200ms ease;
+    }
+
+    .vivat-card-dark:hover {
+        background: #003130 !important;
     }
 
     .category-filter-chip--selected {
@@ -121,17 +139,32 @@ $restArticles = array_values($byId);
     <!-- 1) Marge 24px sous la navbar déjà gérée par le main -->
 
     <!-- 2) Pub 728x90 - flow vertical, border 1px, padding right/bottom/left 48px, gap 8 -->
-    <div class="flex flex-col rounded-[30px] bg-gray-100 border border-gray-300 text-gray-400 text-sm overflow-hidden box-border pr-12 pb-12 pl-12 gap-2 mb-6">
-        <div class="flex items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 w-full max-w-[728px] h-[90px]">Publicité</div>
+    <div class="mb-6 flex justify-center">
+        <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
+            Publicité
+        </div>
     </div>
 
-    <!-- 3) Grand carré hero catégorie: 1280x443, titre + description + filtres dans le carré. Image fixe pour ne jamais changer au filtre/rechargement. -->
+    <!-- 3) Hero rubrique : même logique que la home (image/vidéo catégorie), sinon Pexels par slug. -->
     <div class="rounded-[30px] overflow-hidden relative w-full max-w-[1280px] mx-auto h-[443px] mb-6">
         <?php
-        // Image hero stable (même URL toujours) pour que la grande photo ne change pas au changement de filtre ou rechargement
-        $heroImg = 'https://images.pexels.com/photos/34950/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1280&h=443&fit=crop';
+        $heroFallback = vivat_category_fallback_image($category_slug, 1280, 443, $category_slug, 'hub-hero');
+        $heroMedia = $category_image_url ?? null;
+        $heroIsVideo = is_string($heroMedia) && $heroMedia !== '' && preg_match('/\.(mp4|webm|mov)(\?|$)/i', $heroMedia);
+        $heroPoster = ($heroIsVideo && $heroMedia)
+            ? (vivat_cloudinary_video_poster_url($heroMedia) ?? vivat_category_public_poster_url($category_slug))
+            : null;
+        $hasHeroImage = is_string($heroMedia) && $heroMedia !== '' && ! $heroIsVideo;
 ?>
-        <img src="<?= htmlspecialchars($heroImg) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 w-full h-full object-cover">
+        <?php if ($heroIsVideo && $heroMedia) { ?>
+        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline autoplay preload="metadata"<?= $heroPoster ? ' poster="'.htmlspecialchars($heroPoster).'"' : '' ?>>
+            <source src="<?= htmlspecialchars($heroMedia) ?>" type="video/mp4">
+        </video>
+        <?php } elseif ($hasHeroImage) { ?>
+        <img src="<?= htmlspecialchars($heroMedia) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="eager" decoding="async">
+        <?php } else { ?>
+        <img src="<?= htmlspecialchars($heroFallback) ?>" data-fallback-url="<?= htmlspecialchars($heroFallback) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
+        <?php } ?>
         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         <div class="absolute left-0 top-0 flex flex-col p-8 max-w-[500px]">
             <h1 class="font-semibold text-white leading-none text-5xl font-sans"><?= htmlspecialchars($category_name) ?></h1>
@@ -150,7 +183,7 @@ $restArticles = array_values($byId);
             <?php $subSlug = (string) ($sub['slug'] ?? ''); ?>
             <?php $isSelected = in_array($subSlug, $current_sub_category_slugs, true); ?>
             <a href="<?= htmlspecialchars($buildSubCategoryUrl($subSlug)) ?>" class="group inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0 <?= $isSelected ? 'relative category-filter-chip--selected' : '' ?>" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $isSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
-                <?= htmlspecialchars($sub['name'] ?? '') ?>
+                <?= htmlspecialchars(vivat_filter_label_case((string) ($sub['name'] ?? ''))) ?>
                 <?php if ($isSelected) { ?><span class="pointer-events-none absolute right-[18px] top-1/2 inline-flex h-4 w-4 -translate-y-1/2 flex-shrink-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></span><?php } ?>
             </a>
             <?php } ?>
@@ -183,7 +216,7 @@ $remainingArticles = array_values($featuredPool);
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                             <?php if (! empty($featured0['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($featured0)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($featured0['title'] ?? '') ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($featured0['published_at'] ?? '') ?> • <?= (int) ($featured0['reading_time'] ?? 0) ?> min</p>
@@ -193,11 +226,11 @@ $remainingArticles = array_values($featuredPool);
                 <?php } ?>
 
                 <?php if ($featured1) { ?>
-                <a href="/articles/<?= htmlspecialchars($featured1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFF0B6; padding: 24px; gap: 18px;">
+                <a href="/articles/<?= htmlspecialchars($featured1['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px;">
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <div class="flex flex-col min-h-0" style="gap: 8px;">
                         <?php if (! empty($featured1['category'])) { ?>
-                        <span class="<?= $tagOnYellowCard ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagOnYellowCard ?>"><?= htmlspecialchars($hubArticleBadgeLabel($featured1)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubColorTitle ?> text-[#004241]"><?= htmlspecialchars($featured1['title']) ?></h3>
                         <?php if (! empty($featured1['excerpt'])) { ?>
@@ -218,7 +251,7 @@ $remainingArticles = array_values($featuredPool);
                 <div class="vivat-card-overlay flex justify-end items-end">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                         <?php if (! empty($featured2['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($featured2)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubImageTitle ?>"><?= htmlspecialchars($featured2['title'] ?? '') ?></h3>
                         <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($featured2['published_at'] ?? '') ?> • <?= (int) ($featured2['reading_time'] ?? 0) ?> min</p>
@@ -238,7 +271,7 @@ $remainingArticles = array_values($featuredPool);
                 <div class="vivat-card-overlay flex items-end">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                         <?php if (! empty($featured3['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($featured3)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubImageTitle ?>"><?= htmlspecialchars($featured3['title'] ?? '') ?></h3>
                         <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($featured3['published_at'] ?? '') ?> • <?= (int) ($featured3['reading_time'] ?? 0) ?> min</p>
@@ -249,11 +282,11 @@ $remainingArticles = array_values($featuredPool);
 
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php if ($featured4) { ?>
-                <a href="/articles/<?= htmlspecialchars($featured4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #004241; padding: 24px; gap: 18px;">
+                <a href="/articles/<?= htmlspecialchars($featured4['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px;">
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <div class="flex flex-col min-h-0" style="gap: 8px;">
                         <?php if (! empty($featured4['category'])) { ?>
-                        <span class="<?= $tagOnGreenCard ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagOnGreenCard ?>"><?= htmlspecialchars($hubArticleBadgeLabel($featured4)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubColorTitle ?> text-white"><?= htmlspecialchars($featured4['title']) ?></h3>
                         <?php if (! empty($featured4['excerpt'])) { ?>
@@ -274,7 +307,7 @@ $remainingArticles = array_values($featuredPool);
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                             <?php if (! empty($featured5['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($featured5)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($featured5['title'] ?? '') ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($featured5['published_at'] ?? '') ?> • <?= (int) ($featured5['reading_time'] ?? 0) ?> min</p>
@@ -290,8 +323,10 @@ $remainingArticles = array_values($featuredPool);
     <?php } ?>
 
     <!-- Bloc pub sous les articles : 24px marge, 970×250, padding 48px, fond #686868 -->
-    <div class="flex flex-col rounded-[30px] overflow-hidden box-border" style="margin-top: 24px; width: 970px; max-width: 100%; height: 250px; padding: 48px; gap: 8px; background: #686868;">
-        <div class="flex-1 flex items-center justify-center text-white/80 text-sm">Espace publicitaire</div>
+    <div class="mt-6 flex justify-center">
+        <div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
+            Espace publicitaire
+        </div>
     </div>
 
     <?php
@@ -336,7 +371,7 @@ $hasSecondBlockCards = (bool) array_filter([
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                             <?php if (! empty($firstArt['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($firstArt)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($firstArt['title'] ?? '') ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($firstArt['published_at'] ?? '') ?> • <?= (int) ($firstArt['reading_time'] ?? 0) ?> min</p>
@@ -346,11 +381,11 @@ $hasSecondBlockCards = (bool) array_filter([
                 <?php } ?>
 
                 <?php if ($secondArt && $isEditorialArticle($secondArt)) { ?>
-                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #004241; padding: 24px; gap: 18px;">
+                <a href="/articles/<?= htmlspecialchars($secondArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px;">
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <div class="flex flex-col min-h-0" style="gap: 8px;">
                         <?php if (! empty($secondArt['category'])) { ?>
-                        <span class="<?= $tagOnGreenCard ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagOnGreenCard ?>"><?= htmlspecialchars($hubArticleBadgeLabel($secondArt)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubColorTitle ?> text-white"><?= htmlspecialchars($secondArt['title']) ?></h3>
                         <?php if (! empty($secondArt['excerpt'])) { ?>
@@ -370,7 +405,7 @@ $hasSecondBlockCards = (bool) array_filter([
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                             <?php if (! empty($secondArt['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($secondArt)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($secondArt['title'] ?? '') ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($secondArt['published_at'] ?? '') ?> • <?= (int) ($secondArt['reading_time'] ?? 0) ?> min</p>
@@ -390,7 +425,7 @@ $hasSecondBlockCards = (bool) array_filter([
                 <div class="vivat-card-overlay flex justify-end items-end">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                         <?php if (! empty($hotNewsArt['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($hotNewsArt)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubImageTitle ?>"><?= htmlspecialchars($hotNewsArt['title'] ?? '') ?></h3>
                         <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($hotNewsArt['published_at'] ?? '') ?> • <?= (int) ($hotNewsArt['reading_time'] ?? 0) ?> min</p>
@@ -401,11 +436,11 @@ $hasSecondBlockCards = (bool) array_filter([
 
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php if ($artLeft) { ?>
-                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; background: #FFF0B6; padding: 24px; gap: 18px;">
+                <a href="/articles/<?= htmlspecialchars($artLeft['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-jaune flex flex-col justify-end rounded-[30px] overflow-hidden min-w-0 w-full" style="height: 419px; padding: 24px; gap: 18px;">
                     <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-[#004241] text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                     <div class="flex flex-col min-h-0" style="gap: 8px;">
                         <?php if (! empty($artLeft['category'])) { ?>
-                        <span class="<?= $tagOnYellowCard ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagOnYellowCard ?>"><?= htmlspecialchars($hubArticleBadgeLabel($artLeft)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubColorTitle ?> text-[#004241]"><?= htmlspecialchars($artLeft['title']) ?></h3>
                         <?php if (! empty($artLeft['excerpt'])) { ?>
@@ -427,7 +462,7 @@ $hasSecondBlockCards = (bool) array_filter([
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                             <?php if (! empty($artLeft2['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($artLeft2)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($artLeft2['title'] ?? '') ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($artLeft2['published_at'] ?? '') ?> • <?= (int) ($artLeft2['reading_time'] ?? 0) ?> min</p>
@@ -442,10 +477,10 @@ $hasSecondBlockCards = (bool) array_filter([
             <?php foreach ($compactColorCards as $i => $art) {
                 $bg = $stdColors[$i % 2];
                 $isDark = ($bg === '#004241'); ?>
-            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col justify-end rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 198px; padding: 24px; background: <?= $bg ?>; gap: 8px;">
+            <a href="/articles/<?= htmlspecialchars($art['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative <?= $isDark ? 'vivat-card-dark' : 'vivat-card-jaune' ?> flex flex-col justify-end rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 198px; padding: 24px; gap: 8px;">
                 <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 <?= $isDark ? 'bg-white/25 text-white' : 'bg-[#004241] text-white' ?>" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (! empty($art['category'])) { ?>
-                <span class="<?= $isDark ? $tagOnGreenCard : $tagOnYellowCard ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                <span class="<?= $isDark ? $tagOnGreenCard : $tagOnYellowCard ?>"><?= htmlspecialchars($hubArticleBadgeLabel($art)) ?></span>
                 <?php } ?>
                 <h3 class="<?= $hubColorTitle ?> <?= $isDark ? 'text-white' : 'text-[#004241]' ?>"><?= htmlspecialchars($art['title']) ?></h3>
                 <?php if (! empty($art['excerpt'])) { ?>
@@ -466,7 +501,7 @@ $hasSecondBlockCards = (bool) array_filter([
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                             <?php if (! empty($artRight['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($artRight)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($artRight['title']) ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($artRight['published_at'] ?? '') ?> • <?= (int) ($artRight['reading_time'] ?? 0) ?> min</p>
@@ -485,7 +520,7 @@ $hasSecondBlockCards = (bool) array_filter([
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 8px;">
                             <?php if (! empty($moreFull1['category'])) { ?>
-                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                            <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($moreFull1)) ?></span>
                             <?php } ?>
                             <h3 class="<?= $hubImageTitleCompact ?>"><?= htmlspecialchars($moreFull1['title'] ?? '') ?></h3>
                             <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($moreFull1['published_at'] ?? '') ?> • <?= (int) ($moreFull1['reading_time'] ?? 0) ?> min</p>
@@ -496,10 +531,10 @@ $hasSecondBlockCards = (bool) array_filter([
             </div>
 
             <?php if ($moreFull2 && $isEditorialArticle($moreFull2)) { ?>
-            <a href="/articles/<?= htmlspecialchars($moreFull2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark flex flex-col justify-end rounded-[30px] overflow-hidden w-full min-w-0" style="height: 235px; background: #004241; padding: 24px; gap: 10px;">
+            <a href="/articles/<?= htmlspecialchars($moreFull2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-no-image group relative vivat-card-dark flex flex-col justify-end rounded-[30px] overflow-hidden w-full min-w-0" style="height: 235px; padding: 24px; gap: 10px;">
                 <span class="absolute top-[18px] right-[18px] w-12 h-12 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100 bg-white/25 text-white" aria-hidden="true"><svg class="w-6 h-6 flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
                 <?php if (! empty($moreFull2['category'])) { ?>
-                <span class="<?= $tagOnGreenCard ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                <span class="<?= $tagOnGreenCard ?>"><?= htmlspecialchars($hubArticleBadgeLabel($moreFull2)) ?></span>
                 <?php } ?>
                 <h3 class="<?= $hubColorTitle ?> text-white"><?= htmlspecialchars($moreFull2['title'] ?? '') ?></h3>
                 <?php if (! empty($moreFull2['excerpt'])) { ?>
@@ -517,7 +552,7 @@ $hasSecondBlockCards = (bool) array_filter([
                 <div class="vivat-card-overlay flex items-end" >
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 8px;">
                         <?php if (! empty($moreFull2['category'])) { ?>
-                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                        <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($hubArticleBadgeLabel($moreFull2)) ?></span>
                         <?php } ?>
                         <h3 class="<?= $hubImageTitle ?>"><?= htmlspecialchars($moreFull2['title'] ?? '') ?></h3>
                         <p class="<?= $hubImageMeta ?>"><?= htmlspecialchars($moreFull2['published_at'] ?? '') ?> • <?= (int) ($moreFull2['reading_time'] ?? 0) ?> min</p>
@@ -530,7 +565,7 @@ $hasSecondBlockCards = (bool) array_filter([
     <?php } ?>
 
     <?php $paginationView = $pagination ? $pagination->withQueryString() : null; ?>
-    <?php if ($paginationView && $paginationView->hasPages()) { ?>
+    <?php if ($paginationView) { ?>
     <nav class="flex flex-wrap items-center justify-center gap-3 mt-9" aria-label="Pagination des articles de la rubrique">
         <?php if ($paginationView->onFirstPage()) { ?>
         <span class="inline-flex h-10 items-center justify-center rounded-full bg-[#EBF1EF] px-4 text-sm font-medium text-[#004241]/40">Précédent</span>

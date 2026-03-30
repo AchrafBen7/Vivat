@@ -83,7 +83,7 @@ class Category extends Model
             }
             $seen[$slug] = true;
             $descriptionTermsLower[] = mb_strtolower($name);
-            $out[] = ['name' => $name, 'slug' => $slug];
+            $out[] = ['name' => vivat_filter_label_case($name), 'slug' => $slug];
         }
         $descriptionTermsLower[] = mb_strtolower($this->name ?? '');
 
@@ -161,7 +161,7 @@ class Category extends Model
         $out = [];
         foreach ($top as $word) {
             $out[] = [
-                'name' => mb_convert_case($word, MB_CASE_TITLE, 'UTF-8'),
+                'name' => vivat_filter_label_case($word),
                 'slug' => Str::slug($word),
             ];
         }
