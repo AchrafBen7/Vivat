@@ -40,7 +40,12 @@ class EnrichContentJob implements ShouldQueue
 
     public function handle(ContentExtractorService $extractor): void
     {
-        $this->item->update(['status' => 'enriching']);
+        if (! $this->claimItemForEnrichment()) {
+            Log::info("EnrichContentJob skipped duplicate for item {$this->item->id}");
+            return;
+        }
+
+        $this->item->refresh();
 
         $data = $extractor->extract($this->item->url);
         if ($data === null) {
@@ -57,8 +62,13 @@ class EnrichContentJob implements ShouldQueue
         }
 
         $enrichment = $this->callOpenAI($data);
+        if (($enrichment['__retry'] ?? false) === true) {
+            return;
+        }
+
         if ($enrichment === null) {
-            $this->item->update(['status' => 'new']);
+            $this->item->update(['status' => 'failed']);
+            Log::warning("EnrichContentJob: enrichment failed for item {$this->item->id}");
             return;
         }
 
@@ -121,12 +131,12 @@ class EnrichContentJob implements ShouldQueue
         } catch (Throwable $e) {
             Log::error("EnrichContentJob OpenAI request failed: {$e->getMessage()}");
             $this->release(60);
-            return null;
+            return ['__retry' => true];
         }
 
         if ($response->status() === 429) {
             $this->release(60);
-            return null;
+            return ['__retry' => true];
         }
 
         if ($response->status() === 402) {
@@ -145,6 +155,31 @@ class EnrichContentJob implements ShouldQueue
 
         $decoded = json_decode($content, true);
         return is_array($decoded) ? $decoded : null;
+    }
+
+    private function claimItemForEnrichment(): bool
+    {
+        if ($this->attempts() > 1) {
+            $status = $this->item->fresh()?->status;
+
+            if ($status === 'enriching') {
+                return true;
+            }
+
+            if (in_array($status, ['new', 'failed'], true)) {
+                return RssItem::query()
+                    ->whereKey($this->item->id)
+                    ->where('status', $status)
+                    ->update(['status' => 'enriching']) === 1;
+            }
+
+            return false;
+        }
+
+        return RssItem::query()
+            ->whereKey($this->item->id)
+            ->whereIn('status', ['new', 'failed'])
+            ->update(['status' => 'enriching']) === 1;
     }
 
     public function failed(Throwable $e): void

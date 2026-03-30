@@ -36,6 +36,7 @@ class PaymentResource extends Resource
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->with(['user', 'submission'])
+                ->orderByRaw('CASE WHEN submission_id IS NULL THEN 1 ELSE 0 END')
                 ->orderByRaw("FIELD(status, 'pending', 'paid', 'refunded', 'failed')")
                 ->orderByDesc('created_at'))
             ->columns([
@@ -48,6 +49,7 @@ class PaymentResource extends Resource
                     ->wrap()
                     ->weight(FontWeight::SemiBold)
                     ->lineClamp(2)
+                    ->formatStateUsing(fn (?string $state, Payment $record): string => $state ?: 'Paiement en attente sans soumission liée')
                     ->description(function (Payment $record): HtmlString {
                         $author = e($record->user?->name ?? 'Utilisateur inconnu');
                         $email = e($record->user?->email ?? 'Email indisponible');
@@ -60,6 +62,16 @@ class PaymentResource extends Resource
                         });
                         $date = e($record->created_at?->format('d/m/Y à H:i') ?? 'Date inconnue');
 
+                        if (! $record->submission) {
+                            return new HtmlString(
+                                '<div class="mt-1 space-y-1 text-xs text-gray-500">'
+                                . '<div><span class="font-medium text-gray-700">' . $author . '</span> · ' . $email . '</div>'
+                                . '<div>Paiement créé le ' . $date . '</div>'
+                                . '<div class="text-gray-600">Aucune soumission n’est liée à cette transaction. Il s’agit généralement d’un paiement abandonné ou d’un article supprimé.</div>'
+                                . '</div>'
+                            );
+                        }
+
                         return new HtmlString(
                             '<div class="mt-1 space-y-1 text-xs text-gray-500">'
                             . '<div><span class="font-medium text-gray-700">' . $author . '</span> · ' . $email . '</div>'
@@ -67,8 +79,7 @@ class PaymentResource extends Resource
                             . '</div>'
                         );
                     })
-                    ->html()
-                    ->placeholder('Paiement sans soumission'),
+                    ->html(),
                 TextColumn::make('amount')
                     ->label('Montant')
                     ->weight(FontWeight::SemiBold)
@@ -89,7 +100,10 @@ class PaymentResource extends Resource
                         'refunded' => 'gray',
                         'failed' => 'danger',
                         default => 'gray',
-                    }),
+                    })
+                    ->description(fn (Payment $record): ?string => ! $record->submission && $record->status === 'pending'
+                        ? 'À vérifier'
+                        : null),
                 TextColumn::make('refund_reason')
                     ->label('Remboursement')
                     ->wrap()
@@ -115,6 +129,17 @@ class PaymentResource extends Resource
                         $data['value'] ?? null,
                         fn (Builder $innerQuery, string $status): Builder => $innerQuery->whereHas('submission', fn (Builder $submissionQuery) => $submissionQuery->where('status', $status))
                     )),
+                SelectFilter::make('link_state')
+                    ->label('Liaison article')
+                    ->options([
+                        'linked' => 'Avec soumission',
+                        'orphan' => 'Sans soumission liée',
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        'linked' => $query->whereNotNull('submission_id'),
+                        'orphan' => $query->whereNull('submission_id'),
+                        default => $query,
+                    }),
             ])
             ->paginated([10, 25, 50])
             ->defaultPaginationPageOption(10)

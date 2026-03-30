@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -38,19 +39,31 @@ class GenerateArticleJob implements ShouldQueue
 
     public function handle(ArticleGeneratorService $generator): void
     {
-        Log::info('GenerateArticleJob started', ['item_ids' => $this->itemIds]);
+        $lock = Cache::lock($this->lockKey(), 300);
 
-        $article = $generator->generate(
-            itemIds: $this->itemIds,
-            categoryId: $this->categoryId,
-            customPrompt: $this->customPrompt,
-            articleType: $this->articleType,
-            minWords: $this->minWords,
-            maxWords: $this->maxWords,
-            contextPriority: $this->contextPriority
-        );
+        if (! $lock->get()) {
+            Log::info('GenerateArticleJob skipped duplicate lock', ['item_ids' => $this->itemIds]);
 
-        Log::info("GenerateArticleJob completed: article {$article->id}");
+            return;
+        }
+
+        try {
+            Log::info('GenerateArticleJob started', ['item_ids' => $this->itemIds]);
+
+            $article = $generator->generate(
+                itemIds: $this->itemIds,
+                categoryId: $this->categoryId,
+                customPrompt: $this->customPrompt,
+                articleType: $this->articleType,
+                minWords: $this->minWords,
+                maxWords: $this->maxWords,
+                contextPriority: $this->contextPriority
+            );
+
+            Log::info("GenerateArticleJob completed: article {$article->id}");
+        } finally {
+            $lock->release();
+        }
     }
 
     public function failed(Throwable $e): void
@@ -58,5 +71,13 @@ class GenerateArticleJob implements ShouldQueue
         Log::error('GenerateArticleJob failed: ' . $e->getMessage(), [
             'item_ids' => $this->itemIds,
         ]);
+    }
+
+    private function lockKey(): string
+    {
+        $sortedItemIds = $this->itemIds;
+        sort($sortedItemIds);
+
+        return 'pipeline:generation:' . sha1(json_encode($sortedItemIds));
     }
 }

@@ -93,7 +93,6 @@ class ContributorController extends Controller
             'slug' => $submission->slug,
             'edit_url' => route('contributor.articles.edit', ['submission' => $submission->slug]),
             'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
-            'saved_at' => now()->format('H:i'),
             'notice' => [
                 'title' => 'Brouillon sauvegardé',
                 'message' => 'Votre dernière version a bien été enregistrée.',
@@ -183,11 +182,14 @@ class ContributorController extends Controller
     {
         $user = $request->user();
         $submissions = Submission::where('user_id', $user->id)
-            ->with(['category', 'reviewer'])
+            ->with(['category', 'reviewer', 'payment'])
             ->orderByDesc('created_at')
             ->limit(20)
             ->get()
-            ->map(fn ($s) => [
+            ->map(function ($s) {
+                $payment = $s->payment;
+
+                return [
                 'id' => $s->id,
                 'title' => $s->title,
                 'slug' => $s->slug,
@@ -207,17 +209,46 @@ class ContributorController extends Controller
                 'reviewed_at' => $s->reviewed_at?->format('d/m/Y H:i'),
                 'reviewer_name' => $s->reviewer?->name,
                 'category' => $s->category ? ['name' => $s->category->name] : null,
+                'payment_status' => $payment?->status,
+                'payment_amount' => $payment?->amount,
+                'payment_amount_label' => $payment
+                    ? number_format($payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($payment->currency ?: 'EUR')
+                    : null,
+                'refund_reason' => $payment?->refund_reason,
+                'refunded_at' => $payment?->status === 'refunded' ? $payment->updated_at?->format('d/m/Y H:i') : null,
+                'refund_receipt_url' => $payment?->status === 'refunded'
+                    ? route('contributor.payments.refund-receipt', ['payment' => $payment->id])
+                    : null,
                 'preview_url' => route('contributor.articles.show', ['submission' => $s->slug]),
                 'edit_url' => $s->status === 'approved'
                     ? null
                     : route('contributor.articles.edit', ['submission' => $s->slug]),
                 'delete_url' => route('contributor.articles.destroy', ['submission' => $s->slug]),
-            ])
+                ];
+            })
             ->all();
 
         return $this->renderContributorPage('articles', 'site.contributor.articles', [
             'user' => $user,
             'submissions' => $submissions,
+        ]);
+    }
+
+    public function refundReceipt(Request $request, Payment $payment): Response
+    {
+        abort_unless(
+            $request->user()
+                && ($request->user()->id === $payment->user_id || $request->user()->hasRole('admin')),
+            403
+        );
+
+        abort_unless($payment->status === 'refunded', 404);
+
+        $payment->loadMissing('submission.category');
+
+        return $this->renderContributorPage('articles', 'site.contributor.refund_receipt', [
+            'payment' => $payment,
+            'submission' => $payment->submission,
         ]);
     }
 
@@ -303,6 +334,22 @@ class ContributorController extends Controller
 
             if ($shouldSubmit && ($request->expectsJson() || $request->ajax())) {
                 return response()->json($this->submissionAcceptedPayload(route('contributor.dashboard')));
+            }
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'ok' => true,
+                    'submission_id' => $submission->id,
+                    'status' => $status,
+                    'slug' => $submission->slug,
+                    'edit_url' => route('contributor.articles.edit', ['submission' => $submission->slug]),
+                    'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
+                    'redirect_url' => null,
+                    'notice' => [
+                        'title' => 'Brouillon enregistré',
+                        'message' => 'Votre brouillon a bien été mis à jour.',
+                    ],
+                ]);
             }
 
             return redirect()

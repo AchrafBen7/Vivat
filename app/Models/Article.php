@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Article extends Model
 {
@@ -105,9 +106,32 @@ class Article extends Model
             return false;
         }
 
-        return $this->update([
-            'status' => 'published',
-            'published_at' => now(),
-        ]);
+        return DB::transaction(function (): bool {
+            $updated = $this->update([
+                'status' => 'published',
+                'published_at' => now(),
+            ]);
+
+            if (! $updated) {
+                return false;
+            }
+
+            $this->articleSources()->whereNull('used_at')->update([
+                'used_at' => now(),
+            ]);
+
+            $rssItemIds = $this->articleSources()
+                ->pluck('rss_item_id')
+                ->filter()
+                ->all();
+
+            if ($rssItemIds !== []) {
+                RssItem::query()
+                    ->whereIn('id', $rssItemIds)
+                    ->update(['status' => 'used']);
+            }
+
+            return true;
+        });
     }
 }

@@ -2,12 +2,16 @@
 
 use App\Jobs\EnrichContentJob;
 use App\Jobs\FetchRssFeedJob;
+use App\Jobs\GenerateArticleJob;
+use App\Models\PipelineJob;
 use App\Models\RssFeed;
 use App\Models\RssItem;
+use App\Services\ArticleSelectionService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Artisan;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,20 +29,126 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {
-        $schedule->call(function () {
-            RssFeed::dueForFetch()->get()->each(fn (RssFeed $feed) => FetchRssFeedJob::dispatch($feed));
-        })->everyThirtyMinutes()->name('pipeline:fetch-rss');
+        $pipelineSchedule = config('pipeline_schedule');
+        $trackPipelineRun = function (string $jobType, callable $callback, array $metadata = []): void {
+            $job = PipelineJob::create([
+                'job_type' => $jobType,
+                'status' => 'pending',
+                'metadata' => $metadata,
+                'retry_count' => 0,
+            ]);
 
-        $schedule->call(function () {
-            RssItem::new()->limit(50)->get()->each(function (RssItem $item, int $index) {
-                EnrichContentJob::dispatch($item)
-                    ->onQueue('enrichment')
-                    ->delay(now()->addSeconds($index * 3));
-            });
-        })->hourly()->name('pipeline:enrich');
+            $job->start();
 
-        $schedule->command('horizon:snapshot')->everyFiveMinutes();
-        $schedule->command('queue:prune-failed', ['--hours' => 168])->daily();
+            try {
+                $result = $callback();
+
+                $job->update([
+                    'metadata' => array_merge($job->metadata ?? [], is_array($result) ? $result : []),
+                ]);
+                $job->complete();
+            } catch (\Throwable $exception) {
+                $job->fail($exception->getMessage());
+            }
+        };
+
+        if (data_get($pipelineSchedule, 'fetch_rss.enabled', true)) {
+            $schedule->call(function () use ($trackPipelineRun) {
+                $trackPipelineRun('fetch_rss', function (): array {
+                    $feeds = RssFeed::dueForFetch()->get();
+                    $feeds->each(fn (RssFeed $feed) => FetchRssFeedJob::dispatch($feed));
+
+                    return [
+                        'dispatched_feeds' => $feeds->count(),
+                    ];
+                });
+            })->everyThirtyMinutes()->name('pipeline:fetch-rss');
+        }
+
+        if (data_get($pipelineSchedule, 'enrich_items.enabled', true)) {
+            $schedule->call(function () use ($pipelineSchedule, $trackPipelineRun) {
+                $trackPipelineRun('enrich', function () use ($pipelineSchedule): array {
+                    $limit = (int) data_get($pipelineSchedule, 'enrich_items.limit', 50);
+                    $delaySeconds = (int) data_get($pipelineSchedule, 'enrich_items.delay_seconds', 3);
+                    $items = RssItem::new()->limit($limit)->get();
+
+                    $items->each(function (RssItem $item, int $index) use ($delaySeconds) {
+                        EnrichContentJob::dispatch($item)
+                            ->onQueue('enrichment')
+                            ->delay(now()->addSeconds($index * $delaySeconds));
+                    });
+
+                    return [
+                        'dispatched_items' => $items->count(),
+                        'limit' => $limit,
+                    ];
+                });
+            })->hourly()->name('pipeline:enrich');
+        }
+
+        if (data_get($pipelineSchedule, 'generate_daily_article.enabled', true)) {
+            $schedule->call(function () use ($pipelineSchedule, $trackPipelineRun) {
+                $trackPipelineRun('generate', function () use ($pipelineSchedule): array {
+                    /** @var ArticleSelectionService $selector */
+                    $selector = app(ArticleSelectionService::class);
+                    $count = max(1, (int) data_get($pipelineSchedule, 'generate_daily_article.count', 1));
+                    $proposals = $selector->selectBestTopics($count);
+                    $dispatched = 0;
+
+                    foreach ($proposals as $proposal) {
+                        $itemIds = collect($proposal['items'] ?? [])->pluck('id')->filter()->values()->all();
+
+                        if ($itemIds === []) {
+                            continue;
+                        }
+
+                        GenerateArticleJob::dispatch(
+                            $itemIds,
+                            data_get($proposal, 'category.id'),
+                            null,
+                            data_get($proposal, 'suggested_article_type', 'standard'),
+                            data_get($proposal, 'suggested_min_words'),
+                            data_get($proposal, 'suggested_max_words'),
+                            data_get($proposal, 'context_priority'),
+                        );
+                        $dispatched++;
+                    }
+
+                    return [
+                        'selected_proposals' => count($proposals),
+                        'generated_articles' => $dispatched,
+                    ];
+                });
+            })->dailyAt((string) data_get($pipelineSchedule, 'generate_daily_article.time', '08:00'))
+                ->name('pipeline:generate-daily');
+        }
+
+        if (data_get($pipelineSchedule, 'horizon_snapshot.enabled', true)) {
+            $schedule->call(function () use ($trackPipelineRun): void {
+                $trackPipelineRun('cleanup', function (): array {
+                    Artisan::call('horizon:snapshot');
+
+                    return [
+                        'command' => 'horizon:snapshot',
+                    ];
+                });
+            })->everyFiveMinutes()->name('pipeline:horizon-snapshot');
+        }
+
+        if (data_get($pipelineSchedule, 'prune_failed_jobs.enabled', true)) {
+            $schedule->call(function () use ($pipelineSchedule, $trackPipelineRun): void {
+                $hours = (int) data_get($pipelineSchedule, 'prune_failed_jobs.hours', 168);
+
+                $trackPipelineRun('cleanup', function () use ($hours): array {
+                    Artisan::call('queue:prune-failed', ['--hours' => $hours]);
+
+                    return [
+                        'command' => 'queue:prune-failed',
+                        'hours' => $hours,
+                    ];
+                });
+            })->daily()->name('pipeline:prune-failed');
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

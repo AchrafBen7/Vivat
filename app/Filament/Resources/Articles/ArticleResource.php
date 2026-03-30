@@ -6,7 +6,7 @@ use App\Filament\Resources\Articles\Pages\ListArticles;
 use App\Models\Article;
 use BackedEnum;
 use Filament\Actions\Action as TableAction;
-use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
@@ -81,11 +81,13 @@ class ArticleResource extends Resource
                         'published' => 'Publié',
                         'draft' => 'Brouillon',
                         'review' => 'En revue',
+                        'archived' => 'Dépublié',
                         default => ucfirst($state),
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'published' => 'success',
                         'review' => 'warning',
+                        'archived' => 'gray',
                         default => 'gray',
                     }),
             ])
@@ -95,6 +97,7 @@ class ArticleResource extends Resource
                         'published' => 'Publié',
                         'draft' => 'Brouillon',
                         'review' => 'En revue',
+                        'archived' => 'Dépublié',
                     ])
                     ->default('published'),
                 SelectFilter::make('article_type')
@@ -113,11 +116,26 @@ class ArticleResource extends Resource
                     ->icon(Heroicon::OutlinedEye)
                     ->url(fn (Article $record): string => url('/articles/' . $record->slug))
                     ->openUrlInNewTab(),
-                DeleteAction::make()
-                    ->label('Supprimer')
-                    ->modalHeading("Supprimer l'article ?")
-                    ->modalDescription("Cette action retire définitivement l’article du site.")
-                    ->successNotificationTitle('Article supprimé.'),
+                TableAction::make('unpublish')
+                    ->label('Dépublier')
+                    ->icon(Heroicon::OutlinedArrowDownOnSquare)
+                    ->color('gray')
+                    ->visible(fn (Article $record): bool => $record->status === 'published')
+                    ->requiresConfirmation()
+                    ->modalHeading("Dépublier l'article ?")
+                    ->modalDescription("L’article sera retiré du site public, mais restera disponible dans le dashboard admin.")
+                    ->action(function (Article $record): void {
+                        $record->update([
+                            'status' => 'archived',
+                            'published_at' => null,
+                        ]);
+                    })
+                    ->successNotification(
+                        fn () => Notification::make()
+                            ->success()
+                            ->title('Article dépublié')
+                            ->body('L’article a été retiré du site public et conservé dans l’administration.')
+                    ),
             ])
             ->defaultSort('published_at', 'desc');
     }

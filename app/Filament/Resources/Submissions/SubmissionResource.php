@@ -178,7 +178,11 @@ class SubmissionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'category', 'reviewer', 'payment'])->orderByRaw("FIELD(status, 'pending', 'draft', 'approved', 'rejected')")->orderByDesc('created_at'))
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with(['user', 'category', 'reviewer', 'payment'])
+                ->whereIn('status', ['pending', 'approved', 'rejected'])
+                ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+                ->orderByDesc('created_at'))
             ->columns([
                 ImageColumn::make('cover_image_url')
                     ->label('')
@@ -281,7 +285,6 @@ class SubmissionResource extends Resource
                 SelectFilter::make('status')
                     ->options([
                         'pending' => 'En attente',
-                        'draft' => 'Brouillon',
                         'approved' => 'Approuvée',
                         'rejected' => 'Rejetée',
                     ])

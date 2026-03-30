@@ -145,7 +145,7 @@ $uploadMaxBytes = (function (string $value): int {
 
     <div class="flex items-center justify-between pt-4">
         <span id="draft-autosave-status" class="text-sm text-[#004241]/60">
-            <?= $isEditing ? 'Après correction, renvoyez votre article pour une nouvelle validation.' : 'Brouillon sauvegardé automatiquement' ?>
+            Cet article est sauvegardé automatiquement pendant que vous écrivez.
         </span>
         <div class="flex gap-3">
             <button type="submit" name="status" value="draft" class="h-12 px-6 rounded-full border border-gray-300 bg-white text-[#004241] font-medium hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
@@ -296,6 +296,13 @@ $uploadMaxBytes = (function (string $value): int {
         autosaveStatus.classList.add('text-[#004241]/60');
     }
 
+    function currentLocalTimeLabel() {
+        return new Date().toLocaleTimeString('fr-BE', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
+
     function buildAutosaveFingerprint() {
         const title = form.querySelector('#title')?.value || '';
         const excerpt = form.querySelector('#excerpt')?.value || '';
@@ -376,7 +383,7 @@ $uploadMaxBytes = (function (string $value): int {
 
             autosaveLastFingerprint = buildAutosaveFingerprint();
             updateDraftRoute(data);
-            setAutosaveStatus(`Brouillon sauvegardé à ${data.saved_at || new Date().toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })}`, 'success');
+            setAutosaveStatus(`Brouillon sauvegardé à ${currentLocalTimeLabel()}`, 'success');
         } catch (error) {
             autosaveDirty = true;
             setAutosaveStatus(normalizeMessage(error.message, 'La sauvegarde automatique a échoué.'), 'error');
@@ -454,8 +461,8 @@ $uploadMaxBytes = (function (string $value): int {
         pendingRedirectUrl = redirectUrl;
     }
 
-    function setOverlayError(message) {
-        overlayTitle.textContent = 'Action interrompue';
+    function setOverlayError(message, title = 'Action interrompue') {
+        overlayTitle.textContent = title;
         overlayMessage.textContent = message;
         overlayButton.textContent = 'Fermer';
         overlayButton.classList.remove('hidden');
@@ -559,12 +566,24 @@ $uploadMaxBytes = (function (string $value): int {
         paymentSubmitButton.disabled = false;
     }
 
-    async function readJsonResponse(response) {
+    function fallbackMessageForResponse(response, fallback) {
+        if (response.status === 419) {
+            return 'Votre session a expiré. Rechargez la page puis réessayez.';
+        }
+
+        if (response.status >= 500) {
+            return 'Le serveur a rencontré un problème. Réessayez dans quelques instants.';
+        }
+
+        return fallback;
+    }
+
+    async function readJsonResponse(response, fallback = 'Le serveur a renvoyé une réponse inattendue.') {
         const contentType = response.headers.get('content-type') || '';
 
         if (!contentType.includes('application/json')) {
             const text = await response.text();
-            throw new Error(normalizeMessage(text, 'Le serveur a renvoyé une réponse inattendue.'));
+            throw new Error(normalizeMessage(text, fallbackMessageForResponse(response, fallback)));
         }
 
         return response.json();
@@ -589,7 +608,7 @@ $uploadMaxBytes = (function (string $value): int {
             body: JSON.stringify({ submission_id: submissionId }),
         });
 
-        const data = await readJsonResponse(response);
+        const data = await readJsonResponse(response, 'Impossible de preparer le paiement pour le moment.');
 
         if (!response.ok) {
             throw new Error(normalizeMessage(data.message, 'Impossible de preparer le paiement Stripe.'));
@@ -663,7 +682,7 @@ $uploadMaxBytes = (function (string $value): int {
             body: JSON.stringify({ payment_id: currentPaymentId }),
         });
 
-        const data = await readJsonResponse(response);
+        const data = await readJsonResponse(response, 'La confirmation du paiement n’a pas pu être finalisée pour le moment.');
 
         if (!response.ok) {
             setButtonsDisabled(false);
@@ -699,7 +718,10 @@ $uploadMaxBytes = (function (string $value): int {
             await confirmSubmissionPayment();
         } catch (error) {
             setButtonsDisabled(false);
-            setOverlayError(normalizeMessage(error.message, 'Le paiement n’a pas pu etre finalise.'));
+            setOverlayError(
+                normalizeMessage(error.message, 'Le paiement n’a pas pu etre finalise.'),
+                'Paiement interrompu'
+            );
         }
     });
 
@@ -780,6 +802,10 @@ $uploadMaxBytes = (function (string $value): int {
 
         const formData = new FormData(form);
         formData.set('status', isPublishAction ? 'submitted' : 'draft');
+        const responseFallback = isDraftAction
+            ? 'Le brouillon n’a pas pu être enregistré. Vérifiez les champs puis réessayez.'
+            : 'Votre article n’a pas pu être préparé pour l’envoi. Vérifiez les champs puis réessayez.';
+        const errorTitle = isDraftAction ? 'Brouillon non enregistré' : 'Envoi impossible';
 
         fetch(form.action, {
             method: 'POST',
@@ -792,10 +818,10 @@ $uploadMaxBytes = (function (string $value): int {
             body: formData,
         })
             .then(async (response) => {
-                const data = await readJsonResponse(response);
+                const data = await readJsonResponse(response, responseFallback);
 
                 if (!response.ok) {
-                    throw new Error(extractErrorMessage(data, 'Impossible de sauvegarder votre article.'));
+                    throw new Error(extractErrorMessage(data, responseFallback));
                 }
 
                 if (data.requires_payment) {
@@ -825,7 +851,10 @@ $uploadMaxBytes = (function (string $value): int {
             })
             .catch((error) => {
                 setButtonsDisabled(false);
-                setOverlayError(normalizeMessage(error.message, 'Une erreur est survenue pendant la preparation de votre article.'));
+                setOverlayError(
+                    normalizeMessage(error.message, responseFallback),
+                    errorTitle
+                );
                 isPublishing = false;
             });
     });

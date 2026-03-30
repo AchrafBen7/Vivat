@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\ArticleSource;
 use App\Models\CategoryTemplate;
 use App\Models\RssItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -38,6 +39,7 @@ class ArticleGeneratorService
         $items = RssItem::query()
             ->with(['enrichedItem', 'rssFeed.source', 'category'])
             ->whereIn('id', $itemIds)
+            ->where('status', 'enriched')
             ->get();
 
         if ($items->isEmpty()) {
@@ -48,6 +50,18 @@ class ArticleGeneratorService
             if ($item->enrichedItem === null) {
                 throw new \InvalidArgumentException("L'item {$item->id} n'est pas enrichi.");
             }
+        }
+
+        $alreadyLinkedItemIds = ArticleSource::query()
+            ->whereIn('rss_item_id', $items->pluck('id'))
+            ->whereHas('article', fn ($query) => $query->whereIn('status', ['draft', 'review', 'published']))
+            ->pluck('rss_item_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($alreadyLinkedItemIds !== []) {
+            throw new \RuntimeException('Une génération existe déjà pour une partie de ces sources. Vérifiez les brouillons IA avant de relancer.');
         }
 
         $template = null;
@@ -63,8 +77,8 @@ class ArticleGeneratorService
         $content = $this->sanitizeContent($json['content'] ?? $json['body'] ?? '');
         $title = $this->sanitizeContent($json['title'] ?? 'Sans titre');
         $excerpt = $this->sanitizeContent($json['excerpt'] ?? Str::limit(strip_tags($content), 200));
-        $metaTitle = $this->sanitizeContent($json['meta_title'] ?? Str::limit($title, 60));
-        $metaDescription = $this->sanitizeContent($json['meta_description'] ?? Str::limit($excerpt, 160));
+        $metaTitle = $this->sanitizeMetaText($json['meta_title'] ?? $title, 190);
+        $metaDescription = $this->sanitizeMetaText($json['meta_description'] ?? $excerpt, 190);
         $keywords = isset($json['keywords']) && is_array($json['keywords'])
             ? $json['keywords']
             : [];
@@ -74,32 +88,49 @@ class ArticleGeneratorService
 
         $slug = Str::slug($title) . '-' . Str::lower(Str::random(6));
 
-        $article = Article::create([
-            'title' => $title,
-            'slug' => $slug,
-            'excerpt' => $excerpt,
-            'content' => $content,
-            'meta_title' => $metaTitle,
-            'meta_description' => $metaDescription,
-            'keywords' => $keywords,
-            'category_id' => $categoryId,
-            'language' => 'fr',
-            'cluster_id' => null,
-            'reading_time' => $readingTime,
-            'status' => 'draft',
-            'article_type' => $articleType,
-            'quality_score' => $qualityScore,
-        ]);
-
-        foreach ($items as $item) {
-            ArticleSource::create([
-                'article_id' => $article->id,
-                'rss_item_id' => $item->id,
-                'source_id' => $item->rssFeed?->source_id,
-                'url' => $item->url,
+        $article = DB::transaction(function () use (
+            $title,
+            $slug,
+            $excerpt,
+            $content,
+            $metaTitle,
+            $metaDescription,
+            $keywords,
+            $categoryId,
+            $readingTime,
+            $articleType,
+            $qualityScore,
+            $items
+        ): Article {
+            $article = Article::create([
+                'title' => $title,
+                'slug' => $slug,
+                'excerpt' => $excerpt,
+                'content' => $content,
+                'meta_title' => $metaTitle,
+                'meta_description' => $metaDescription,
+                'keywords' => $keywords,
+                'category_id' => $categoryId,
+                'language' => 'fr',
+                'cluster_id' => null,
+                'reading_time' => $readingTime,
+                'status' => 'draft',
+                'article_type' => $articleType,
+                'quality_score' => $qualityScore,
             ]);
-            $item->update(['status' => 'used']);
-        }
+
+            foreach ($items as $item) {
+                ArticleSource::create([
+                    'article_id' => $article->id,
+                    'rss_item_id' => $item->id,
+                    'source_id' => $item->rssFeed?->source_id,
+                    'url' => $item->url,
+                    'used_at' => null,
+                ]);
+            }
+
+            return $article;
+        });
 
         return $article->load('articleSources');
     }
@@ -259,6 +290,15 @@ PROMPT;
         $text = preg_replace('/[\x{201C}\x{201D}]/u', '"', $text);
         $text = preg_replace('/[\x{2018}\x{2019}]/u', "'", $text);
         return trim($text);
+    }
+
+    private function sanitizeMetaText(?string $text, int $limit = 190): string
+    {
+        $cleaned = $this->sanitizeContent((string) $text);
+        $cleaned = trim(strip_tags(html_entity_decode($cleaned, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        $cleaned = preg_replace('/\s+/u', ' ', $cleaned ?? '');
+
+        return Str::limit(trim((string) $cleaned), $limit, '...');
     }
 
     private function calculateReadingTime(string $content): int

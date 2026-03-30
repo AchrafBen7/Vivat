@@ -5,7 +5,6 @@ use App\Http\Controllers\Web\AuthController as WebAuthController;
 use App\Http\Controllers\Web\CategoryController as WebCategoryController;
 use App\Http\Controllers\Web\ContactController as WebContactController;
 use App\Http\Controllers\Web\ContributorController as WebContributorController;
-use App\Http\Controllers\Web\EmailVerificationController as WebEmailVerificationController;
 use App\Http\Controllers\Web\FaqController as WebFaqController;
 use App\Http\Controllers\Web\HomeController as WebHomeController;
 use App\Http\Controllers\Web\NewsletterController as WebNewsletterController;
@@ -34,15 +33,13 @@ Route::get('/faq', [WebFaqController::class, 'index'])->name('faq');
 Route::post('/newsletter/subscribe', [WebNewsletterController::class, 'subscribe'])->middleware('throttle:newsletter-subscribe')->name('newsletter.subscribe.web');
 Route::get('/newsletter/confirm', [WebNewsletterController::class, 'confirm'])->name('newsletter.confirm');
 Route::get('/newsletter/unsubscribe', [WebNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
-Route::get('/email/verify', [WebEmailVerificationController::class, 'notice'])->middleware('auth')->name('verification.notice');
-Route::get('/email/verify/{id}/{hash}', [WebEmailVerificationController::class, 'verify'])->middleware(['auth', 'signed', 'throttle:6,1'])->name('verification.verify');
-Route::post('/email/verification-notification', [WebEmailVerificationController::class, 'resend'])->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
-Route::middleware(['auth', 'verified', 'role:contributor|admin'])->prefix('contributor')->group(function () {
+Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->group(function () {
     Route::get('/dashboard', [WebContributorController::class, 'dashboard'])->name('contributor.dashboard');
     Route::match(['get', 'post'], '/new', [WebContributorController::class, 'newArticle'])->name('contributor.new');
     Route::post('/payments/create-intent', [ApiPaymentController::class, 'createIntent'])->middleware('throttle:payment-actions')->name('contributor.web-payments.create-intent');
     Route::post('/payments/confirm', [ApiPaymentController::class, 'confirm'])->middleware('throttle:payment-actions')->name('contributor.web-payments.confirm');
+    Route::get('/payments/{payment}/refund-receipt', [WebContributorController::class, 'refundReceipt'])->name('contributor.payments.refund-receipt');
     Route::get('/articles/{submission:slug}', [WebContributorController::class, 'showSubmission'])->name('contributor.articles.show');
     Route::match(['get', 'post'], '/articles/{submission:slug}/edit', [WebContributorController::class, 'editSubmission'])->name('contributor.articles.edit');
     Route::delete('/articles/{submission:slug}', [WebContributorController::class, 'destroySubmission'])->name('contributor.articles.destroy');

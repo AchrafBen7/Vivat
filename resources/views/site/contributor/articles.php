@@ -62,6 +62,9 @@ $statusStyles = [
         $editUrl = $sub['edit_url'] ?? null;
         $previewUrl = $sub['preview_url'] ?? '#';
         $hasReviewerNote = ! empty($sub['reviewer_notes']);
+        $paymentStatus = $sub['payment_status'] ?? null;
+        $isRefunded = $paymentStatus === 'refunded';
+        $isRefundPending = $status === 'rejected' && $paymentStatus === 'paid';
         ?>
         <div class="group flex flex-col overflow-hidden rounded-[24px] border border-[#004241]/10 bg-white shadow-[0_4px_20px_rgba(0,66,65,0.06)] transition-shadow hover:shadow-[0_8px_32px_rgba(0,66,65,0.1)]">
             <div class="flex flex-col sm:flex-row min-h-0 gap-4 p-4">
@@ -102,6 +105,32 @@ $statusStyles = [
                     <p class="text-sm text-[#004241]/70 line-clamp-2 leading-relaxed">
                         <?= htmlspecialchars($sub['excerpt']) ?>
                     </p>
+                    <?php } ?>
+
+                    <?php if ($isRefunded || $isRefundPending) { ?>
+                    <div class="rounded-[18px] border px-4 py-3 <?= $isRefunded ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50' ?>">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm font-semibold <?= $isRefunded ? 'text-emerald-700' : 'text-amber-700' ?>">
+                                    <?= $isRefunded ? 'Paiement remboursé' : 'Remboursement à traiter' ?>
+                                </p>
+                                <p class="mt-1 text-xs <?= $isRefunded ? 'text-emerald-700/80' : 'text-amber-700/80' ?>">
+                                    <?php if ($isRefunded) { ?>
+                                        <?= htmlspecialchars($sub['payment_amount_label'] ?? 'Montant inconnu') ?>
+                                        <?php if (! empty($sub['refunded_at'])) { ?> · remboursé le <?= htmlspecialchars($sub['refunded_at']) ?><?php } ?>
+                                    <?php } else { ?>
+                                        L’article a été refusé, mais le remboursement n’est pas encore confirmé dans le système.
+                                    <?php } ?>
+                                </p>
+                            </div>
+
+                            <?php if ($isRefunded && ! empty($sub['refund_receipt_url'])) { ?>
+                            <a href="<?= htmlspecialchars($sub['refund_receipt_url']) ?>" class="inline-flex h-9 items-center rounded-full bg-white px-4 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100">
+                                Voir le reçu
+                            </a>
+                            <?php } ?>
+                        </div>
+                    </div>
                     <?php } ?>
 
                     <!-- Actions -->

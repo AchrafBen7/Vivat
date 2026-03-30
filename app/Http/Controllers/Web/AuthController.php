@@ -90,9 +90,8 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
-        $user->sendEmailVerificationNotification();
 
-        return redirect()->route('verification.notice')->with('success', 'Compte créé avec succès. Vérifiez maintenant votre adresse email pour activer votre espace rédacteur.');
+        return redirect()->route('contributor.dashboard')->with('success', 'Compte créé avec succès ! Vous êtes maintenant rédacteur contributeur sur Vivat.');
     }
 
     public function showLoginForm(Request $request): Response
@@ -137,10 +136,6 @@ class AuthController extends Controller
             }
 
             if ($user?->hasRole('contributor')) {
-                if (! $user->hasVerifiedEmail()) {
-                    return redirect()->route('verification.notice')->with('info', 'Confirmez votre adresse email pour accéder pleinement à votre espace rédacteur.');
-                }
-
                 return redirect()->route('contributor.dashboard')->with('success', 'Connexion réussie.');
             }
 
