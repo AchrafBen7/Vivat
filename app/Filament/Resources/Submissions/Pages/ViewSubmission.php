@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Submissions\Pages;
 use App\Filament\Resources\Submissions\SubmissionResource;
 use App\Models\Category;
 use App\Models\User;
+use App\Services\PaymentRefundService;
 use App\Services\SubmissionPublishingService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
@@ -160,6 +161,36 @@ class ViewSubmission extends ViewRecord
                         ->success()
                         ->title('Soumission rejetée')
                         ->body('Le retour éditorial a bien été enregistré. Le rédacteur peut corriger puis renvoyer sa soumission.')
+                ),
+            Action::make('refund')
+                ->label('Rembourser')
+                ->icon(Heroicon::OutlinedArrowUturnLeft)
+                ->color('danger')
+                ->visible(fn (): bool => (bool) $this->record->payment?->isRefundable())
+                ->form([
+                    Textarea::make('reason')
+                        ->label('Motif du remboursement')
+                        ->rows(4)
+                        ->default('Article refusé')
+                        ->helperText('Ce message sera inclus dans l’email de remboursement envoyé au rédacteur.')
+                        ->maxLength(255),
+                ])
+                ->requiresConfirmation()
+                ->modalHeading('Rembourser ce paiement ?')
+                ->modalDescription('Le paiement Stripe sera remboursé immédiatement si la transaction est éligible.')
+                ->action(function (array $data): void {
+                    app(PaymentRefundService::class)->refund(
+                        $this->record->payment,
+                        $data['reason'] ?? 'Article refusé',
+                    );
+
+                    $this->record->refresh();
+                })
+                ->successNotification(
+                    fn () => Notification::make()
+                        ->success()
+                        ->title('Paiement remboursé')
+                        ->body('Le remboursement a été traité et un email a été envoyé au rédacteur.')
                 ),
         ];
     }

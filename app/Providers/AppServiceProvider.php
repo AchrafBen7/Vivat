@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +23,49 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('auth-login', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinute(5)
+                ->by($key)
+                ->response(fn (Request $request, array $headers): RedirectResponse => back()
+                    ->withErrors([
+                        'email' => 'Trop de tentatives de connexion. Réessayez dans une minute.',
+                    ])
+                    ->withInput($request->only('email')));
+        });
+
+        RateLimiter::for('auth-register', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perHour(5)
+                ->by($key)
+                ->response(fn (Request $request, array $headers): RedirectResponse => back()
+                    ->withErrors([
+                        'email' => 'Trop de tentatives d’inscription. Réessayez un peu plus tard.',
+                    ])
+                    ->withInput($request->except('password', 'password_confirmation')));
+        });
+
+        RateLimiter::for('newsletter-subscribe', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('newsletter_email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinute(5)
+                ->by($key)
+                ->response(fn (Request $request, array $headers): RedirectResponse => back()
+                    ->withErrors([
+                        'newsletter_email' => 'Trop de tentatives. Merci de patienter avant de réessayer.',
+                    ])
+                    ->withInput($request->only('newsletter_email')));
+        });
+
+        RateLimiter::for('payment-actions', function (Request $request) {
+            return Limit::perMinute(10)->by((string) ($request->user()?->id ?: $request->ip()));
+        });
+
         // Rate limiter for OpenAI API calls via queues
         RateLimiter::for('openai', function (object $job) {
             $key = property_exists($job, 'item') && $job->item !== null

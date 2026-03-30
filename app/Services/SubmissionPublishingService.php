@@ -14,11 +14,12 @@ class SubmissionPublishingService
 
     public function __construct(
         private readonly SubmissionImageStorageService $submissionImageStorage,
+        private readonly EditorialDecisionMailService $editorialDecisionMailService,
     ) {}
 
     public function approveAndPublish(Submission $submission, array $data, ?User $reviewer = null): Article
     {
-        return DB::transaction(function () use ($submission, $data, $reviewer): Article {
+        $article = DB::transaction(function () use ($submission, $data, $reviewer): Article {
             if ($submission->status !== 'pending') {
                 throw new \RuntimeException('Only pending submissions can be approved and published.');
             }
@@ -67,6 +68,13 @@ class SubmissionPublishingService
 
             return $article;
         });
+
+        $this->editorialDecisionMailService->sendApproved(
+            $submission->fresh(['user', 'category', 'reviewer', 'payment']),
+            $article,
+        );
+
+        return $article;
     }
 
     public function reject(Submission $submission, array $data, ?User $reviewer = null): bool
@@ -75,11 +83,19 @@ class SubmissionPublishingService
             throw new \RuntimeException('Only pending submissions can be rejected.');
         }
 
-        return $submission->reject(
+        $rejected = $submission->reject(
             reviewerId: $data['reviewed_by'] ?? $reviewer?->id,
             notes: $data['notes'] ?? $data['reviewer_notes'] ?? null,
             reviewedAt: $data['reviewed_at'] ?? now(),
         );
+
+        if ($rejected) {
+            $this->editorialDecisionMailService->sendRejected(
+                $submission->fresh(['user', 'category', 'reviewer', 'payment']),
+            );
+        }
+
+        return $rejected;
     }
 
     private function resolveLanguage(Submission $submission): string

@@ -5,16 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Submission;
+use App\Services\PaymentRefundService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\PaymentIntent;
-use Stripe\Refund;
 use Stripe\Stripe;
 
 class PaymentController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly PaymentRefundService $paymentRefundService,
+    ) {
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
@@ -143,27 +144,25 @@ class PaymentController extends Controller
      */
     public function refund(Request $request, Payment $payment): JsonResponse
     {
-        if (! $payment->isRefundable()) {
-            return response()->json([
-                'message' => 'Ce paiement n\'est pas remboursable (statut: ' . $payment->status . ', soumission: ' . ($payment->submission?->status ?? 'N/A') . ').',
-            ], 422);
-        }
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
 
         try {
-            $refund = Refund::create([
-                'payment_intent' => $payment->stripe_payment_intent_id,
-                'reason'         => 'requested_by_customer',
-            ]);
-
-            $payment->markRefunded(
-                refundId: $refund->id,
-                reason: $request->input('reason', 'Article refusé')
+            $payment = $this->paymentRefundService->refund(
+                $payment->loadMissing('submission'),
+                $validated['reason'] ?? 'Article refusé',
             );
 
             return response()->json([
                 'message' => 'Remboursement effectué.',
-                'refund_id' => $refund->id,
+                'refund_id' => $payment->stripe_refund_id,
+                'status' => $payment->status,
             ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erreur lors du remboursement.',

@@ -6,6 +6,7 @@ use App\Filament\Resources\Submissions\Pages\ListSubmissions;
 use App\Filament\Resources\Submissions\Pages\ViewSubmission;
 use App\Models\Category;
 use App\Models\Submission;
+use App\Services\PaymentRefundService;
 use App\Services\SubmissionPublishingService;
 use BackedEnum;
 use Filament\Actions\Action as TableAction;
@@ -96,6 +97,44 @@ class SubmissionResource extends Resource
                             ->dateTime('d/m/Y H:i')
                             ->placeholder('Pas encore'),
                     ]),
+                Section::make('Paiement')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('payment.status')
+                            ->label('Statut de paiement')
+                            ->badge()
+                            ->placeholder('Aucun paiement')
+                            ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                'pending' => 'En attente',
+                                'paid' => 'Payé',
+                                'refunded' => 'Remboursé',
+                                'failed' => 'Échoué',
+                                null => 'Aucun paiement',
+                                default => ucfirst($state),
+                            })
+                            ->color(fn (?string $state): string => match ($state) {
+                                'pending' => 'warning',
+                                'paid' => 'success',
+                                'refunded' => 'gray',
+                                'failed' => 'danger',
+                                default => 'gray',
+                            }),
+                        TextEntry::make('payment.amount')
+                            ->label('Montant')
+                            ->placeholder('Aucun paiement')
+                            ->formatStateUsing(fn (?int $state, Submission $record): string => $state
+                                ? number_format($state / 100, 2, ',', ' ') . ' ' . strtoupper($record->payment?->currency ?? 'EUR')
+                                : 'Aucun paiement'),
+                        TextEntry::make('payment.created_at')
+                            ->label('Payé le')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('Pas encore'),
+                        TextEntry::make('payment.refund_reason')
+                            ->label('Motif du remboursement')
+                            ->placeholder('Aucun remboursement')
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible(),
                 Section::make('Couverture')
                     ->schema([
                         ImageEntry::make('cover_image_url')
@@ -139,7 +178,7 @@ class SubmissionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'category', 'reviewer'])->orderByRaw("FIELD(status, 'pending', 'draft', 'approved', 'rejected')")->orderByDesc('created_at'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'category', 'reviewer', 'payment'])->orderByRaw("FIELD(status, 'pending', 'draft', 'approved', 'rejected')")->orderByDesc('created_at'))
             ->columns([
                 ImageColumn::make('cover_image_url')
                     ->label('')
@@ -214,6 +253,29 @@ class SubmissionResource extends Resource
 
                         return implode(' · ', $parts);
                     }),
+                TextColumn::make('payment.status')
+                    ->label('Paiement')
+                    ->badge()
+                    ->alignCenter()
+                    ->placeholder('Aucun')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'pending' => 'En attente',
+                        'paid' => 'Payé',
+                        'refunded' => 'Remboursé',
+                        'failed' => 'Échoué',
+                        null => 'Aucun',
+                        default => ucfirst($state),
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'paid' => 'success',
+                        'refunded' => 'gray',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    })
+                    ->description(fn (Submission $record): ?string => $record->payment
+                        ? number_format($record->payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($record->payment->currency)
+                        : null),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -304,6 +366,36 @@ class SubmissionResource extends Resource
                             ->success()
                             ->title('Soumission rejetée')
                             ->body('Le retour éditorial a été enregistré pour "' . $record->title . '". Le rédacteur peut maintenant corriger puis renvoyer son article.')
+                    ),
+                TableAction::make('refund')
+                    ->label('Rembourser')
+                    ->icon(Heroicon::OutlinedArrowUturnLeft)
+                    ->color('danger')
+                    ->visible(fn (Submission $record): bool => (bool) $record->payment?->isRefundable())
+                    ->form([
+                        Textarea::make('reason')
+                            ->label('Motif du remboursement')
+                            ->rows(4)
+                            ->default('Article refusé')
+                            ->helperText('Ce message sera aussi visible dans le mail envoyé au rédacteur.')
+                            ->maxLength(255),
+                    ])
+                    ->requiresConfirmation()
+                    ->modalHeading('Rembourser ce paiement ?')
+                    ->modalDescription('Le montant Stripe sera remboursé et le rédacteur recevra un email de confirmation.')
+                    ->action(function (Submission $record, array $data): void {
+                        app(PaymentRefundService::class)->refund(
+                            $record->payment,
+                            $data['reason'] ?? 'Article refusé',
+                        );
+
+                        $record->refresh();
+                    })
+                    ->successNotification(
+                        fn (Submission $record) => Notification::make()
+                            ->success()
+                            ->title('Paiement remboursé')
+                            ->body('Le remboursement de "' . $record->title . '" a été traité et le rédacteur a été notifié.')
                     ),
             ])
             ->defaultSort('created_at', 'desc');

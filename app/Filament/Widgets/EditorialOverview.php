@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Article;
+use App\Models\Payment;
 use App\Models\Submission;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -20,6 +21,9 @@ class EditorialOverview extends StatsOverviewWidget
             ->where('status', 'published')
             ->whereNotNull('published_at')
             ->count();
+        $refundedPayments = Payment::query()
+            ->where('status', 'refunded')
+            ->count();
 
         return [
             Stat::make('Soumissions en attente', (string) $pendingSubmissions)
@@ -31,6 +35,9 @@ class EditorialOverview extends StatsOverviewWidget
             Stat::make('Articles publies', (string) $publishedArticles)
                 ->description('Contenu actuellement visible sur le site')
                 ->color('primary'),
+            Stat::make('Paiements rembourses', (string) $refundedPayments)
+                ->description('Transactions remboursees aux redacteurs')
+                ->color($refundedPayments > 0 ? 'gray' : 'success'),
         ];
     }
 }
