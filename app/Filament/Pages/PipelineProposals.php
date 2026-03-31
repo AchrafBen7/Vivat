@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Jobs\GenerateArticleJob;
+use App\Models\Cluster;
+use App\Models\ClusterItem;
 use App\Services\ArticleSelectionService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -82,6 +84,8 @@ class PipelineProposals extends Page
             return;
         }
 
+        $cluster = $this->persistProposalCluster($proposal, $itemIds);
+
         GenerateArticleJob::dispatch(
             $itemIds,
             $proposal['category']['id'] ?? null,
@@ -90,12 +94,40 @@ class PipelineProposals extends Page
             isset($proposal['suggested_min_words']) ? (int) $proposal['suggested_min_words'] : null,
             isset($proposal['suggested_max_words']) ? (int) $proposal['suggested_max_words'] : null,
             $proposal['context_priority'] ?? null,
+            $cluster->id,
         );
 
         Notification::make()
             ->success()
             ->title('Génération lancée')
-            ->body('La proposition a été envoyée à la queue generation pour créer un brouillon IA.')
+            ->body('La proposition a été persistée comme cluster et envoyée à la queue generation pour créer un brouillon IA.')
             ->send();
+    }
+
+    /**
+     * @param  array<string, mixed>  $proposal
+     * @param  array<int, string>  $itemIds
+     */
+    private function persistProposalCluster(array $proposal, array $itemIds): Cluster
+    {
+        $cluster = Cluster::create([
+            'category_id' => $proposal['category']['id'] ?? null,
+            'label' => (string) ($proposal['topic'] ?? 'Sujet IA'),
+            'keywords' => collect($proposal['seo_keywords'] ?? [])
+                ->map(fn ($keyword) => is_array($keyword) ? ($keyword['word'] ?? null) : $keyword)
+                ->filter()
+                ->values()
+                ->all(),
+            'status' => 'pending',
+        ]);
+
+        foreach ($itemIds as $itemId) {
+            ClusterItem::create([
+                'cluster_id' => $cluster->id,
+                'rss_item_id' => $itemId,
+            ]);
+        }
+
+        return $cluster;
     }
 }

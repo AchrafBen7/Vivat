@@ -26,11 +26,15 @@ class Submission extends Model
         'reviewed_by',
         'reviewed_at',
         'payment_id',
+        'published_article_id',
+        'depublication_requested_at',
+        'depublication_reason',
         'cover_image_url',
     ];
 
     protected $casts = [
         'reviewed_at' => 'datetime',
+        'depublication_requested_at' => 'datetime',
         'reading_time' => 'integer',
     ];
 
@@ -68,6 +72,11 @@ class Submission extends Model
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class, 'payment_id');
+    }
+
+    public function publishedArticle(): BelongsTo
+    {
+        return $this->belongsTo(Article::class, 'published_article_id');
     }
 
     public function payments(): HasMany

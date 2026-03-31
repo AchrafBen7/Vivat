@@ -42,6 +42,7 @@ Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->gr
     Route::get('/payments/{payment}/refund-receipt', [WebContributorController::class, 'refundReceipt'])->name('contributor.payments.refund-receipt');
     Route::get('/articles/{submission:slug}', [WebContributorController::class, 'showSubmission'])->name('contributor.articles.show');
     Route::match(['get', 'post'], '/articles/{submission:slug}/edit', [WebContributorController::class, 'editSubmission'])->name('contributor.articles.edit');
+    Route::post('/articles/{submission:slug}/request-unpublish', [WebContributorController::class, 'requestUnpublish'])->name('contributor.articles.request-unpublish');
     Route::delete('/articles/{submission:slug}', [WebContributorController::class, 'destroySubmission'])->name('contributor.articles.destroy');
     Route::match(['get', 'post'], '/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
 });

@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Models\Cluster;
+use App\Models\PipelineJob;
 use App\Services\ArticleGeneratorService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -32,7 +34,8 @@ class GenerateArticleJob implements ShouldQueue
         public ?string $articleType = null,
         public ?int $minWords = null,
         public ?int $maxWords = null,
-        public ?string $contextPriority = null
+        public ?string $contextPriority = null,
+        public ?string $clusterId = null
     ) {
         $this->onQueue('generation');
     }
@@ -47,8 +50,30 @@ class GenerateArticleJob implements ShouldQueue
             return;
         }
 
+        $pipelineJob = PipelineJob::create([
+            'job_type' => 'generate',
+            'status' => 'running',
+            'started_at' => now(),
+            'metadata' => [
+                'item_ids' => $this->itemIds,
+                'category_id' => $this->categoryId,
+                'cluster_id' => $this->clusterId,
+                'article_type' => $this->articleType,
+                'min_words' => $this->minWords,
+                'max_words' => $this->maxWords,
+                'context_priority' => $this->contextPriority,
+            ],
+            'retry_count' => max(0, $this->attempts() - 1),
+        ]);
+
         try {
             Log::info('GenerateArticleJob started', ['item_ids' => $this->itemIds]);
+
+            if ($this->clusterId) {
+                Cluster::query()
+                    ->whereKey($this->clusterId)
+                    ->update(['status' => 'processing']);
+            }
 
             $article = $generator->generate(
                 itemIds: $this->itemIds,
@@ -57,10 +82,42 @@ class GenerateArticleJob implements ShouldQueue
                 articleType: $this->articleType,
                 minWords: $this->minWords,
                 maxWords: $this->maxWords,
-                contextPriority: $this->contextPriority
+                contextPriority: $this->contextPriority,
+                clusterId: $this->clusterId,
             );
 
+            if ($this->clusterId) {
+                Cluster::query()
+                    ->whereKey($this->clusterId)
+                    ->update(['status' => 'generated']);
+            }
+
+            $pipelineJob->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'metadata' => array_merge($pipelineJob->metadata ?? [], [
+                    'article_id' => $article->id,
+                    'article_slug' => $article->slug,
+                    'article_status' => $article->status,
+                ]),
+            ]);
+
             Log::info("GenerateArticleJob completed: article {$article->id}");
+        } catch (Throwable $e) {
+            if ($this->clusterId) {
+                Cluster::query()
+                    ->whereKey($this->clusterId)
+                    ->update(['status' => 'failed']);
+            }
+
+            $pipelineJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => $e->getMessage(),
+                'retry_count' => max(0, $this->attempts() - 1),
+            ]);
+
+            throw $e;
         } finally {
             $lock->release();
         }

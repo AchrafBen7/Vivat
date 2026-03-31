@@ -36,6 +36,11 @@ class PaymentResource extends Resource
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->with(['user', 'submission'])
+                ->where(function (Builder $innerQuery): Builder {
+                    return $innerQuery
+                        ->where('status', '!=', 'pending')
+                        ->orWhereHas('submission', fn (Builder $submissionQuery) => $submissionQuery->where('status', '!=', 'draft'));
+                })
                 ->orderByRaw('CASE WHEN submission_id IS NULL THEN 1 ELSE 0 END')
                 ->orderByRaw("FIELD(status, 'pending', 'paid', 'refunded', 'failed')")
                 ->orderByDesc('created_at'))
@@ -49,7 +54,7 @@ class PaymentResource extends Resource
                     ->wrap()
                     ->weight(FontWeight::SemiBold)
                     ->lineClamp(2)
-                    ->formatStateUsing(fn (?string $state, Payment $record): string => $state ?: 'Paiement en attente sans soumission liée')
+                    ->formatStateUsing(fn (?string $state, Payment $record): string => $state ?: 'Paiement abandonné ou non relié')
                     ->description(function (Payment $record): HtmlString {
                         $author = e($record->user?->name ?? 'Utilisateur inconnu');
                         $email = e($record->user?->email ?? 'Email indisponible');
@@ -67,7 +72,17 @@ class PaymentResource extends Resource
                                 '<div class="mt-1 space-y-1 text-xs text-gray-500">'
                                 . '<div><span class="font-medium text-gray-700">' . $author . '</span> · ' . $email . '</div>'
                                 . '<div>Paiement créé le ' . $date . '</div>'
-                                . '<div class="text-gray-600">Aucune soumission n’est liée à cette transaction. Il s’agit généralement d’un paiement abandonné ou d’un article supprimé.</div>'
+                                . '<div class="text-gray-600">Aucune soumission n’est liée à cette transaction. Il s’agit généralement d’une tentative abandonnée ou d’un cas technique.</div>'
+                                . '</div>'
+                            );
+                        }
+
+                        if ($record->status === 'pending' && $record->submission->status === 'draft') {
+                            return new HtmlString(
+                                '<div class="mt-1 space-y-1 text-xs text-gray-500">'
+                                . '<div><span class="font-medium text-gray-700">' . $author . '</span> · ' . $email . '</div>'
+                                . '<div>Brouillon non soumis · ' . $date . '</div>'
+                                . '<div class="text-gray-600">Le rédacteur a initié le paiement sans le finaliser. Ce cas est masqué par défaut dans la liste.</div>'
                                 . '</div>'
                             );
                         }

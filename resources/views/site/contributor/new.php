@@ -94,8 +94,12 @@ $uploadMaxBytes = (function (string $value): int {
     </div>
 
     <div>
-        <label for="title" class="block font-medium text-[#004241] mb-2">Titre de l'article</label>
-        <input type="text" name="title" id="title" value="<?= htmlspecialchars($old['title'] ?? '') ?>" placeholder="Titre de l'article" required
+        <div class="mb-2 flex items-center justify-between gap-3">
+            <label for="title" class="block font-medium text-[#004241]">Titre de l'article</label>
+            <span id="title-char-count" class="text-xs font-medium tabular-nums text-[#004241]/50">0/255</span>
+        </div>
+        <input type="text" name="title" id="title" value="<?= htmlspecialchars($old['title'] ?? '') ?>" placeholder="Titre de l'article" required maxlength="255"
+            data-char-max="255" data-char-target="title-char-count"
             class="w-full max-w-2xl h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 focus:border-[#004241]">
         <?php if (!empty($errors['title'])): ?>
         <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['title']) ? $errors['title'][0] : $errors['title']) ?></p>
@@ -126,8 +130,12 @@ $uploadMaxBytes = (function (string $value): int {
     </div>
 
     <div>
-        <label for="excerpt" class="block font-medium text-[#004241] mb-2">Extrait / Chapô</label>
-        <textarea name="excerpt" id="excerpt" rows="3" placeholder="Commencez à écrire votre article ici..."
+        <div class="mb-2 flex items-center justify-between gap-3">
+            <label for="excerpt" class="block font-medium text-[#004241]">Extrait / Chapô</label>
+            <span id="excerpt-char-count" class="text-xs font-medium tabular-nums text-[#004241]/50">0/500</span>
+        </div>
+        <textarea name="excerpt" id="excerpt" rows="3" placeholder="Commencez à écrire votre article ici..." maxlength="500"
+            data-char-max="500" data-char-target="excerpt-char-count"
             class="w-full max-w-2xl pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
         <?php if (!empty($errors['excerpt'])): ?>
         <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['excerpt']) ? $errors['excerpt'][0] : $errors['excerpt']) ?></p>
@@ -301,6 +309,24 @@ $uploadMaxBytes = (function (string $value): int {
             hour: '2-digit',
             minute: '2-digit',
         });
+    }
+
+    function updateCharCounter(field) {
+        if (!field) {
+            return;
+        }
+
+        const targetId = field.dataset.charTarget || '';
+        const max = Number(field.dataset.charMax || '0');
+        const target = targetId ? document.getElementById(targetId) : null;
+
+        if (!target || max <= 0) {
+            return;
+        }
+
+        const currentLength = (field.value || '').length;
+        target.textContent = `${currentLength}/${max}`;
+        target.className = `text-xs font-medium tabular-nums ${currentLength >= max ? 'text-[#AE422E]' : 'text-[#004241]/50'}`;
     }
 
     function buildAutosaveFingerprint() {
@@ -768,6 +794,12 @@ $uploadMaxBytes = (function (string $value): int {
 
         field.addEventListener('input', () => scheduleAutosave());
         field.addEventListener('change', () => scheduleAutosave());
+    });
+
+    document.querySelectorAll('[data-char-target][data-char-max]').forEach((field) => {
+        updateCharCounter(field);
+        field.addEventListener('input', () => updateCharCounter(field));
+        field.addEventListener('change', () => updateCharCounter(field));
     });
 
     document.addEventListener('visibilitychange', () => {

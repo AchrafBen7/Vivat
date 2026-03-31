@@ -34,7 +34,8 @@ class ArticleGeneratorService
         ?string $articleType = null,
         ?int $minWords = null,
         ?int $maxWords = null,
-        ?string $contextPriority = null
+        ?string $contextPriority = null,
+        ?string $clusterId = null
     ): Article {
         $items = RssItem::query()
             ->with(['enrichedItem', 'rssFeed.source', 'category'])
@@ -97,6 +98,7 @@ class ArticleGeneratorService
             $metaDescription,
             $keywords,
             $categoryId,
+            $clusterId,
             $readingTime,
             $articleType,
             $qualityScore,
@@ -112,7 +114,7 @@ class ArticleGeneratorService
                 'keywords' => $keywords,
                 'category_id' => $categoryId,
                 'language' => 'fr',
-                'cluster_id' => null,
+                'cluster_id' => $clusterId,
                 'reading_time' => $readingTime,
                 'status' => 'draft',
                 'article_type' => $articleType,

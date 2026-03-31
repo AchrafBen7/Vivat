@@ -100,6 +100,73 @@ class ContributorController extends Controller
         ];
     }
 
+    private function shouldForkRejectedSubmission(Submission $submission): bool
+    {
+        return $submission->status === 'rejected'
+            && (
+                filled($submission->payment_id)
+                || filled($submission->reviewer_notes)
+                || filled($submission->reviewed_by)
+                || filled($submission->reviewed_at)
+            );
+    }
+
+    private function findExistingRevisionDraft(Submission $submission, string $userId): ?Submission
+    {
+        if (! $submission->published_article_id) {
+            return null;
+        }
+
+        return Submission::query()
+            ->where('user_id', $userId)
+            ->where('published_article_id', $submission->published_article_id)
+            ->where('status', 'draft')
+            ->whereKeyNot($submission->id)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    private function createRevisionDraftFromRejected(Submission $submission, string $userId): Submission
+    {
+        return Submission::create([
+            'user_id' => $userId,
+            'title' => $submission->title,
+            'slug' => $this->generateUniqueSubmissionSlug($submission->title),
+            'excerpt' => $submission->excerpt,
+            'content' => $submission->content,
+            'category_id' => $submission->category_id,
+            'reading_time' => $submission->reading_time ?: 5,
+            'status' => 'draft',
+            'reviewer_notes' => null,
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'payment_id' => null,
+            'cover_image_url' => $submission->cover_image_url,
+        ]);
+    }
+
+    private function createRevisionDraftFromPublished(Submission $submission, string $userId): Submission
+    {
+        return Submission::create([
+            'user_id' => $userId,
+            'title' => $submission->title,
+            'slug' => $this->generateUniqueSubmissionSlug($submission->title),
+            'excerpt' => $submission->excerpt,
+            'content' => $submission->content,
+            'category_id' => $submission->category_id,
+            'reading_time' => $submission->reading_time ?: 5,
+            'status' => 'draft',
+            'reviewer_notes' => null,
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'payment_id' => null,
+            'published_article_id' => $submission->published_article_id,
+            'depublication_requested_at' => null,
+            'depublication_reason' => null,
+            'cover_image_url' => $submission->cover_image_url,
+        ]);
+    }
+
     private function contributorSubmissionRules(bool $isAutosave, bool $isSubmitting): array
     {
         if ($isAutosave) {
@@ -181,11 +248,13 @@ class ContributorController extends Controller
     public function dashboard(Request $request): Response
     {
         $user = $request->user();
-        $submissions = Submission::where('user_id', $user->id)
-            ->with(['category', 'reviewer', 'payment'])
+        $submissionsPaginator = Submission::where('user_id', $user->id)
+            ->with(['category', 'reviewer', 'payment', 'publishedArticle'])
             ->orderByDesc('created_at')
-            ->limit(20)
-            ->get()
+            ->paginate(10)
+            ->withQueryString();
+
+        $submissions = $submissionsPaginator->getCollection()
             ->map(function ($s) {
                 $payment = $s->payment;
 
@@ -220,17 +289,26 @@ class ContributorController extends Controller
                     ? route('contributor.payments.refund-receipt', ['payment' => $payment->id])
                     : null,
                 'preview_url' => route('contributor.articles.show', ['submission' => $s->slug]),
-                'edit_url' => $s->status === 'approved'
-                    ? null
-                    : route('contributor.articles.edit', ['submission' => $s->slug]),
-                'delete_url' => route('contributor.articles.destroy', ['submission' => $s->slug]),
+                'published_article_url' => $s->publishedArticle?->slug ? url('/articles/' . $s->publishedArticle->slug) : null,
+                'depublication_requested_at' => $s->depublication_requested_at?->format('d/m/Y H:i'),
+                'edit_url' => route('contributor.articles.edit', ['submission' => $s->slug]),
+                'can_delete' => $s->status === 'draft' || $s->status === 'rejected',
+                'delete_url' => ($s->status === 'draft' || $s->status === 'rejected')
+                    ? route('contributor.articles.destroy', ['submission' => $s->slug])
+                    : null,
+                'request_unpublish_url' => $s->status === 'approved' && $s->published_article_id
+                    ? route('contributor.articles.request-unpublish', ['submission' => $s->slug])
+                    : null,
                 ];
             })
             ->all();
 
+        $submissionsPaginator->setCollection(collect($submissions));
+
         return $this->renderContributorPage('articles', 'site.contributor.articles', [
             'user' => $user,
-            'submissions' => $submissions,
+            'submissions' => $submissionsPaginator->items(),
+            'pagination' => $submissionsPaginator,
         ]);
     }
 
@@ -261,9 +339,17 @@ class ContributorController extends Controller
         );
 
         if ($submission->status === 'approved') {
+            $existingRevision = $this->findExistingRevisionDraft($submission, $request->user()->id);
+
+            if ($existingRevision) {
+                return redirect()->route('contributor.articles.edit', ['submission' => $existingRevision->slug]);
+            }
+
+            $revisionDraft = $this->createRevisionDraftFromPublished($submission, $request->user()->id);
+
             return redirect()
-                ->route('contributor.dashboard')
-                ->with('info', 'Cet article a deja ete approuve et ne peut plus etre modifie.');
+                ->route('contributor.articles.edit', ['submission' => $revisionDraft->slug])
+                ->with('info', 'Une nouvelle version brouillon a ete creee pour modifier gratuitement cet article publie.');
         }
 
         if ($request->isMethod('post')) {
@@ -274,7 +360,12 @@ class ContributorController extends Controller
                 $this->contributorSubmissionMessages()
             );
 
-            $status = $shouldSubmit && $this->hasPaidPublication($submission) ? 'pending' : 'draft';
+            if ($this->shouldForkRejectedSubmission($submission)) {
+                $submission = $this->createRevisionDraftFromRejected($submission, $request->user()->id);
+            }
+
+            $hasFreePublishedRevision = filled($submission->published_article_id);
+            $status = $shouldSubmit && ($this->hasPaidPublication($submission) || $hasFreePublishedRevision) ? 'pending' : 'draft';
             $coverImageUrl = $submission->cover_image_url;
 
             if ($request->hasFile('cover_image')) {
@@ -543,6 +634,18 @@ class ContributorController extends Controller
             403
         );
 
+        if ($submission->status === 'pending' || $submission->status === 'approved') {
+            return redirect()
+                ->route('contributor.dashboard')
+                ->with('error', 'Cet article ne peut plus être supprimé car il est déjà en relecture ou publié.');
+        }
+
+        if ($this->hasPaidPublication($submission)) {
+            return redirect()
+                ->route('contributor.dashboard')
+                ->with('error', 'Cet article ne peut pas être supprimé car un paiement y est déjà lié.');
+        }
+
         if (is_string($submission->cover_image_url) && str_starts_with($submission->cover_image_url, '/uploads/submissions/')) {
             $coverPath = public_path(ltrim($submission->cover_image_url, '/'));
 
@@ -556,6 +659,36 @@ class ContributorController extends Controller
         return redirect()
             ->route('contributor.dashboard')
             ->with('success', 'Article supprimé.');
+    }
+
+    public function requestUnpublish(Request $request, Submission $submission): RedirectResponse
+    {
+        abort_unless(
+            $request->user()
+                && ($request->user()->id === $submission->user_id || $request->user()->hasRole('admin')),
+            403
+        );
+
+        if ($submission->status !== 'approved' || ! $submission->published_article_id) {
+            return redirect()
+                ->route('contributor.dashboard')
+                ->with('error', 'Seul un article publié peut faire l’objet d’une demande de dépublication.');
+        }
+
+        if ($submission->depublication_requested_at) {
+            return redirect()
+                ->route('contributor.dashboard')
+                ->with('info', 'Une demande de dépublication a déjà été envoyée pour cet article.');
+        }
+
+        $submission->update([
+            'depublication_requested_at' => now(),
+            'depublication_reason' => 'Demande du rédacteur depuis son espace personnel.',
+        ]);
+
+        return redirect()
+            ->route('contributor.dashboard')
+            ->with('success', 'Votre demande de dépublication a bien été envoyée à la rédaction.');
     }
 
     public function profile(Request $request): Response|RedirectResponse

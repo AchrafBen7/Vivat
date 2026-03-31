@@ -96,6 +96,18 @@ class SubmissionResource extends Resource
                             ->label('Relue le')
                             ->dateTime('d/m/Y H:i')
                             ->placeholder('Pas encore'),
+                        TextEntry::make('published_article_id')
+                            ->label('Révision')
+                            ->badge()
+                            ->placeholder('Soumission standard')
+                            ->formatStateUsing(fn (?string $state): string => filled($state) ? 'Révision gratuite' : 'Soumission standard')
+                            ->color(fn (?string $state): string => filled($state) ? 'info' : 'gray'),
+                        TextEntry::make('depublication_requested_at')
+                            ->label('Dépublication')
+                            ->badge()
+                            ->placeholder('Aucune demande')
+                            ->formatStateUsing(fn ($state): string => $state ? 'Dépublication demandée' : 'Aucune demande')
+                            ->color(fn ($state): string => $state ? 'warning' : 'gray'),
                     ]),
                 Section::make('Paiement')
                     ->columns(2)
@@ -179,7 +191,7 @@ class SubmissionResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
-                ->with(['user', 'category', 'reviewer', 'payment'])
+                ->with(['user', 'category', 'reviewer', 'payment', 'publishedArticle'])
                 ->whereIn('status', ['pending', 'approved', 'rejected'])
                 ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
                 ->orderByDesc('created_at'))
@@ -241,11 +253,15 @@ class SubmissionResource extends Resource
                         default => Heroicon::OutlinedDocumentText,
                     })
                     ->description(function (Submission $record): ?string {
-                        if (! $record->reviewed_at && ! $record->reviewer) {
-                            return null;
+                        $parts = [];
+
+                        if ($record->published_article_id) {
+                            $parts[] = 'Révision gratuite';
                         }
 
-                        $parts = [];
+                        if ($record->depublication_requested_at) {
+                            $parts[] = 'Dépublication demandée';
+                        }
 
                         if ($record->reviewer?->name) {
                             $parts[] = 'Par ' . $record->reviewer->name;
@@ -255,7 +271,7 @@ class SubmissionResource extends Resource
                             $parts[] = $record->reviewed_at->format('d/m/Y H:i');
                         }
 
-                        return implode(' · ', $parts);
+                        return $parts !== [] ? implode(' · ', $parts) : null;
                     }),
                 TextColumn::make('payment.status')
                     ->label('Paiement')

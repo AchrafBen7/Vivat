@@ -24,7 +24,7 @@ class SubmissionPublishingService
                 throw new \RuntimeException('Only pending submissions can be approved and published.');
             }
 
-            $submission->loadMissing(['user', 'category']);
+            $submission->loadMissing(['user', 'category', 'publishedArticle']);
 
             $categoryId = $data['category_id'] ?? $submission->category_id;
             $articleType = $data['article_type'] ?? 'standard';
@@ -43,28 +43,52 @@ class SubmissionPublishingService
                 $submission->excerpt ?: Str::limit(strip_tags($submission->content), 180, '...')
             );
 
-            $article = Article::create([
-                'title' => $submission->title,
-                'slug' => $this->generateUniqueSlug($submission->title),
-                'excerpt' => $submission->excerpt,
-                'content' => $submission->content,
-                'meta_title' => $metaTitle,
-                'meta_description' => $metaDescription,
-                'category_id' => $categoryId,
-                'reading_time' => $submission->reading_time ?: 5,
-                'status' => 'published',
-                'article_type' => $articleType,
-                'cover_image_url' => $coverImageUrl,
-                'quality_score' => 100,
-                'published_at' => now(),
-                'language' => $language,
-            ]);
+            if ($submission->publishedArticle) {
+                $article = tap($submission->publishedArticle)->update([
+                    'title' => $submission->title,
+                    'excerpt' => $submission->excerpt,
+                    'content' => $submission->content,
+                    'meta_title' => $metaTitle,
+                    'meta_description' => $metaDescription,
+                    'category_id' => $categoryId,
+                    'reading_time' => $submission->reading_time ?: 5,
+                    'status' => 'published',
+                    'article_type' => $articleType,
+                    'cover_image_url' => $coverImageUrl,
+                    'quality_score' => 100,
+                    'published_at' => $submission->publishedArticle->published_at ?: now(),
+                    'language' => $language,
+                ]);
+            } else {
+                $article = Article::create([
+                    'title' => $submission->title,
+                    'slug' => $this->generateUniqueSlug($submission->title),
+                    'excerpt' => $submission->excerpt,
+                    'content' => $submission->content,
+                    'meta_title' => $metaTitle,
+                    'meta_description' => $metaDescription,
+                    'category_id' => $categoryId,
+                    'reading_time' => $submission->reading_time ?: 5,
+                    'status' => 'published',
+                    'article_type' => $articleType,
+                    'cover_image_url' => $coverImageUrl,
+                    'quality_score' => 100,
+                    'published_at' => now(),
+                    'language' => $language,
+                ]);
+            }
 
             $submission->approve(
                 reviewerId: $reviewerId,
                 notes: $notes,
                 reviewedAt: $reviewedAt,
             );
+
+            $submission->update([
+                'published_article_id' => $article->id,
+                'depublication_requested_at' => null,
+                'depublication_reason' => null,
+            ]);
 
             return $article;
         });
