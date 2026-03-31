@@ -78,6 +78,12 @@ $newsletterOldEmail = old('newsletter_email', '');
             padding-left: 18px;
             box-sizing: border-box;
         }
+        /* Menu mobile ouvert : fond header retiré pour que le voile noir soit uniforme (pas de bandeau clair au-dessus) */
+        header.header-menu-open {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
         /* Tag pill : effet glass sans padding supplémentaire */
         .vivat-glass-tag {
             background: rgba(190, 190, 190, 0.1);
@@ -251,7 +257,12 @@ $newsletterOldEmail = old('newsletter_email', '');
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
 
-    <header class="bg-white border-b border-[#004241]/6">
+    <header id="site-header" class="relative z-50 isolate bg-gradient-to-b from-white from-0% via-white via-[40%] to-[#EBF1EF]/32 to-100% shadow-[0_6px_20px_-4px_rgba(0,66,65,0.075),0_14px_36px_-18px_rgba(0,66,65,0.05)]">
+        <!-- Voile noir uniforme (sous la barre et le panneau, z-40) : pas de dégradé clair→foncé sur la page -->
+        <div id="mobile-nav-overlay"
+             data-open="false"
+             class="fixed inset-0 z-[40] bg-black/45 opacity-0 pointer-events-none transition-opacity duration-300 ease-out data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto"
+             aria-hidden="true"></div>
         <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 relative z-50">
             <div class="flex items-center gap-2 md:gap-3 h-[72px] md:h-[88px] py-[16px] md:py-[24px]">
 
@@ -480,58 +491,52 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </button>
             </div>
 
-            <!-- Panneau menu (data-open : JS) -->
+            <!-- Panneau menu -->
             <div id="mobile-menu-panel"
                  data-open="false"
-                 class="absolute top-full left-0 right-0 z-50 mt-2 origin-top rounded-[30px] border border-[rgba(230,230,230,0.18)] bg-[#004241] p-6 shadow-[0_10px_40px_rgba(0,66,65,0.15)] backdrop-blur-[18px] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] tablet:p-8 md:left-6 md:right-6 lg:left-auto lg:right-20 lg:mt-2 lg:w-[min(100%,715px)] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=false]:[clip-path:inset(0_0_100%_0)] data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(85vh,900px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100 data-[open=true]:[clip-path:inset(0_0_0_0)]"
+                 class="absolute top-full left-0 right-0 z-50 mt-3 origin-top rounded-[34px] border border-white/10 bg-[linear-gradient(165deg,#004241_0%,#003836_52%,#002E2D_100%)] p-8 shadow-[0_20px_60px_rgba(0,40,38,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] backdrop-blur-[24px] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 md:p-10 lg:left-auto lg:right-16 lg:mt-3 lg:w-[min(100%,780px)] lg:p-12 data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=false]:[clip-path:inset(0_0_100%_0)] data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100 data-[open=true]:[clip-path:inset(0_0_0_0)]"
                  role="dialog" aria-label="Menu de navigation" aria-modal="true">
 
                 <?php if (auth()->check()) { ?>
-                <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="block rounded-2xl bg-white/15 border border-white/20 p-4 mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#004241] flex items-center justify-center text-white font-semibold text-sm">
+                <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="mb-6 block rounded-[20px] border border-white/12 bg-white/8 p-5 transition-all duration-200 hover:border-white/25 hover:bg-white/15">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-base font-semibold text-white">
                             <?= strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) ?>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-white text-base truncate"><?= htmlspecialchars(auth()->user()->name ?? 'Mon compte') ?></p>
-                            <p class="text-white/80 text-sm"><?= auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Mon profil' ?></p>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-lg font-semibold text-white"><?= htmlspecialchars(auth()->user()->name ?? 'Mon compte') ?></p>
+                            <p class="text-sm text-white/65"><?= auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Mon profil' ?></p>
                         </div>
-                        <svg class="w-5 h-5 text-white/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="h-5 w-5 flex-shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </a>
-                <form action="<?= url('/logout') ?>" method="post" class="mb-4">
+                <form action="<?= url('/logout') ?>" method="post" class="mb-6">
                     <?= csrf_field() ?>
-                    <button type="submit" class="w-full py-2 px-3 rounded-2xl text-white/80 text-sm text-left">Se déconnecter</button>
+                    <button type="submit" class="w-full rounded-[16px] px-4 py-2.5 text-left text-sm text-white/60 transition-colors duration-200 hover:bg-white/8 hover:text-white/90">Se déconnecter</button>
                 </form>
                 <?php } ?>
 
-                <nav class="flex flex-col gap-2" aria-label="Navigation principale">
-                    <a href="/" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">Home</a>
-                    <a href="/a-propos" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">À propos</a>
+                <nav class="flex flex-col gap-1" aria-label="Navigation principale">
+                    <a href="/" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">Home</a>
+                    <a href="/a-propos" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">À propos</a>
                     <a
                         href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
-                        class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline"
+                        class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"
                     >
                         Rédiger un article
                     </a>
-                    <a href="/faq" class="py-3.5 px-4 rounded-2xl text-white font-medium text-base no-underline">FAQ</a>
+                    <a href="/faq" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">FAQ</a>
                 </nav>
 
-                <p class="font-semibold text-white text-base mt-6 mb-3 pt-5 border-t border-white/20">Rubriques</p>
-                <nav class="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2" aria-label="Rubriques">
+                <p class="mb-4 mt-8 border-t border-white/10 pt-7 text-sm font-medium uppercase tracking-[0.12em] text-white/45">Rubriques</p>
+                <nav class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 lg:grid-cols-3" aria-label="Rubriques">
                     <?php foreach ($categories as $cat) { ?>
-                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="py-3 px-4 rounded-2xl text-white font-medium text-base no-underline"><?= htmlspecialchars($cat['name']) ?></a>
+                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[14px] px-4 py-3.5 text-[15px] font-medium text-white/85 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php } ?>
                 </nav>
             </div>
         </div>
     </header>
-
-    <!-- Assombrit le fond quand le menu mobile est ouvert (le panneau reste au-dessus, z-50) -->
-    <div id="mobile-nav-overlay"
-         data-open="false"
-         class="fixed inset-0 z-40 bg-black/20 opacity-0 pointer-events-none transition-opacity duration-300 ease-out data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto"
-         aria-hidden="true"></div>
 
     <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 <?= ! empty($trim_main_bottom) ? 'pb-0' : 'pb-8' ?> overflow-x-hidden">
         <?php if (session('success')) { ?>
@@ -551,21 +556,37 @@ $newsletterOldEmail = old('newsletter_email', '');
 
     <?php if (empty($hide_cta_section)) { ?>
     <section class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
-        <a href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>" class="block rounded-[30px] overflow-hidden relative min-h-[340px] lg:min-h-[380px] bg-cover bg-center focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 bg-[url('https://images.pexels.com/photos/34950/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1200&h=380&fit=crop')]">
-            <span class="absolute inset-0 bg-black/30" aria-hidden="true"></span>
-            <span class="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
-                <span class="text-white font-semibold text-xl lg:text-2xl leading-tight">
-                    <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
-                    Accédez à votre espace rédacteur
-                    <?php } else { ?>
-                    Une idée, une histoire, un point de vue ?<br>
-                    Vivat est ouvert aux nouvelles voix
-                    <?php } ?>
-                </span>
-                <span class="inline-flex items-center justify-center h-12 px-6 rounded-full font-medium whitespace-nowrap bg-[#FFF0B6] text-[#004241] text-base transition-colors duration-200 hover:bg-[#FBE9A3]">
-                    <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Accéder au bureau' : 'Rédigez un article' ?>
-                </span>
-            </span>
+        <a
+            href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>"
+            class="group block rounded-[30px] border border-[#D6E1DD] bg-[#EBF1EF] p-6 no-underline transition-colors duration-200 hover:bg-[#E3ECE9] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 md:p-8"
+        >
+            <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
+                <div class="min-w-0 max-w-[44rem]">
+                    <span class="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#004241]">
+                        <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Contribuer' ?>
+                    </span>
+                    <h2 class="mt-4 text-[28px] font-semibold leading-[1.05] text-[#004241] md:text-[34px]">
+                        <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
+                        Accédez à votre espace rédacteur
+                        <?php } else { ?>
+                        Une idée, une histoire, un point de vue ?
+                        <?php } ?>
+                    </h2>
+                    <p class="mt-3 max-w-[40rem] text-base leading-relaxed text-[#004241]/82 md:text-[17px]">
+                        <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
+                        Retrouvez vos brouillons, vos contenus en cours et le suivi de vos soumissions.
+                        <?php } else { ?>
+                        Vivat est ouvert aux nouvelles voix pour partager des contenus utiles, clairs et ancrés dans le quotidien.
+                        <?php } ?>
+                    </p>
+                </div>
+                <div class="flex w-full md:w-auto md:justify-end">
+                    <span class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#004241] px-6 py-4 text-base font-semibold text-white transition-colors duration-200 group-hover:bg-[#003130] md:w-auto md:min-w-[240px]">
+                        <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Accéder au bureau' : 'Rédigez un article' ?>
+                        <svg class="h-5 w-5 flex-shrink-0 translate-x-0 transition-transform duration-300 ease-out group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
+                </div>
+            </div>
         </a>
     </section>
     <?php } ?>
@@ -610,25 +631,25 @@ $newsletterOldEmail = old('newsletter_email', '');
                             <nav class="flex flex-col gap-[14px]" aria-label="Découvrir">
                                 <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Découvrir</span>
                                 <ul class="m-0 flex list-none flex-col gap-3 p-0">
-                                    <li><a href="/" class="text-base text-[#004241]/85 no-underline">Accueil</a></li>
-                                    <li><a href="/a-propos" class="text-base text-[#004241]/85 no-underline">À propos</a></li>
-                                    <li><a href="/contact" class="text-base text-[#004241]/85 no-underline">Contact</a></li>
-                                    <li><a href="/faq" class="text-base text-[#004241]/85 no-underline">FAQ</a></li>
+                                    <li><a href="/" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Accueil</a></li>
+                                    <li><a href="/a-propos" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">À propos</a></li>
+                                    <li><a href="/contact" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Contact</a></li>
+                                    <li><a href="/faq" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">FAQ</a></li>
                                 </ul>
                             </nav>
                             <nav class="flex flex-col gap-[14px]" aria-label="Légal">
                                 <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Légal</span>
                                 <ul class="m-0 flex list-none flex-col gap-3 p-0">
-                                    <li><a href="/mentions-legales" class="text-base text-[#004241]/85 no-underline">Mentions légales</a></li>
-                                    <li><a href="/politique-confidentialite" class="text-base text-[#004241]/85 no-underline">Confidentialité</a></li>
-                                    <li><a href="/politique-cookies" class="text-base text-[#004241]/85 no-underline">Cookies</a></li>
+                                    <li><a href="/mentions-legales" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Mentions légales</a></li>
+                                    <li><a href="/politique-confidentialite" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Confidentialité</a></li>
+                                    <li><a href="/politique-cookies" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Cookies</a></li>
                                 </ul>
                             </nav>
                             <nav class="col-span-2 flex flex-col gap-[14px]" aria-label="Rubriques">
                                 <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Rubriques</span>
                                 <ul class="m-0 grid list-none grid-cols-2 gap-x-6 gap-y-3 p-0">
                                     <?php foreach ($categories as $cat) { ?>
-                                    <li><a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="text-base text-[#004241]/85 no-underline"><?= htmlspecialchars($cat['name']) ?></a></li>
+                                    <li><a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars($cat['name']) ?></a></li>
                                     <?php } ?>
                                 </ul>
                             </nav>
@@ -638,7 +659,7 @@ $newsletterOldEmail = old('newsletter_email', '');
 
                 <div class="mt-6 flex flex-col gap-3 border-t border-[#004241]/10 pt-5 text-sm text-[#004241]/60 md:flex-row md:items-center md:justify-between">
                     <p class="m-0">© <?= date('Y') ?> Vivat. Tous droits réservés.</p>
-                    <a href="/contact" class="text-sm text-[#004241]/70 no-underline">Une question ? Contactez-nous</a>
+                    <a href="/contact" class="text-sm text-[#004241]/70 no-underline transition-colors duration-200 hover:text-[#004241]">Une question ? Contactez-nous</a>
                 </div>
             </div>
         </div>
@@ -698,6 +719,10 @@ $newsletterOldEmail = old('newsletter_email', '');
                 btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 btn.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
                 applyHamburgerCross(!!isOpen);
+                var headerEl = btn.closest('header');
+                if (headerEl) {
+                    headerEl.classList.toggle('header-menu-open', isOpen);
+                }
                 if (overlay) {
                     overlay.setAttribute('data-open', isOpen ? 'true' : 'false');
                     overlay.setAttribute('aria-hidden', isOpen ? 'false' : 'true');

@@ -79,11 +79,11 @@ $faqGroups = [
             <div class="grid grid-cols-1 gap-3">
                 <a href="/contact" class="inline-flex items-center justify-between rounded-[24px] bg-[#F6F8F7] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#edf3f0]">
                     <span class="font-medium">Contacter l’équipe</span>
-                    <span aria-hidden="true">→</span>
+                    <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
                 <a href="/search" class="inline-flex items-center justify-between rounded-[24px] bg-[#F6F8F7] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#edf3f0]">
                     <span class="font-medium">Rechercher un article</span>
-                    <span aria-hidden="true">→</span>
+                    <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
             </div>
         </div>

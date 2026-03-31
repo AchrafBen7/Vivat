@@ -151,7 +151,7 @@ $shareLinks = [
             <p class="text-lg text-[#004241]/80 leading-relaxed mb-10 font-sans" style="line-height: 1.6;"><?= nl2br(htmlspecialchars($excerpt)) ?></p>
             <?php } ?>
             <div class="article-body text-[#004241] font-sans text-[18px]" style="line-height: 1.75;">
-                <?= $content ?>
+        <?= $content ?>
             </div>
 
             <aside class="flex flex-col items-center mt-14 pt-10 border-t border-[#004241]/10" aria-label="Partager l'article">

@@ -6,53 +6,46 @@ $first_name = $old['first_name'] ?? '';
 $email = $old['email'] ?? '';
 $termsAccepted = ! empty($old['terms_accepted']);
 $hero_img = 'https://images.pexels.com/photos/3761509/pexels-photo-3761509.jpeg?auto=compress&cs=tinysrgb&w=900&h=1100&fit=crop';
-$inputClass = 'h-10 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
+$inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
 ?>
 
 <div class="mx-auto grid w-full max-w-[1280px] items-stretch gap-6 pb-6 lg:min-h-[calc(100svh-136px)] lg:grid-cols-[1.02fr_0.98fr]">
-    <section class="relative min-h-[320px] overflow-hidden rounded-[32px] lg:h-full lg:min-h-0">
-        <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 h-full w-full object-cover" loading="eager">
-        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0.14)_42%,rgba(0,0,0,0.52)_100%)]"></div>
+    <section class="flex min-h-[320px] flex-col overflow-hidden rounded-[40px] border border-[#EBF1EF] bg-[#EBF1EF] shadow-[0_18px_48px_rgba(0,66,65,0.07)] lg:h-full lg:min-h-0">
+        <div class="relative min-h-[min(280px,42svh)] flex-1 basis-[55%] lg:min-h-[min(38vh,400px)]">
+            <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 h-full w-full object-cover object-center" loading="eager">
+            <div
+                class="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[min(34%,9.5rem)] min-h-[6rem] max-h-[11rem] bg-[linear-gradient(to_top,#EBF1EF_0%,rgba(235,241,239,0.97)_3%,rgba(235,241,239,0.88)_10%,rgba(235,241,239,0.72)_20%,rgba(235,241,239,0.52)_34%,rgba(235,241,239,0.32)_50%,rgba(235,241,239,0.16)_66%,rgba(235,241,239,0.06)_82%,transparent_100%)]"
+                aria-hidden="true"
+            ></div>
 
-        <a
-            href="/"
-            class="absolute left-5 top-5 z-10 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] transition hover:bg-white md:left-6 md:top-6"
-            aria-label="Retour"
-        >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Retour
-        </a>
+            <a
+                href="/"
+                class="absolute left-5 top-5 z-10 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white md:left-6 md:top-6"
+                aria-label="Retour"
+            >
+                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                Retour
+            </a>
+        </div>
 
-        <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
-            <div class="max-w-[31rem] rounded-[28px] border border-white/10 bg-white/10 p-5 backdrop-blur-[16px] md:p-6">
-                <span class="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#004241]">
-                    Devenir rédacteur
-                </span>
-                <h1 class="mt-4 text-[2rem] font-semibold leading-[1.02] text-white md:text-[2.55rem]">
-                    Écrire sur Vivat, simplement.
-                </h1>
-                <p class="mt-3 max-w-[27rem] text-[15px] leading-6 text-white/88">
-                    Créez votre compte, préparez votre article et rejoignez un espace pensé pour publier dans l’univers éditorial Vivat.
-                </p>
+        <div class="relative z-[1] -mt-px flex-shrink-0 bg-[#EBF1EF] px-5 py-6 md:px-7 md:py-7">
+            <span class="inline-flex items-center rounded-full border border-[#004241]/15 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#004241]">
+                Devenir rédacteur
+            </span>
+            <h1 class="mt-4 font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
+                Écrire sur Vivat, simplement.
+            </h1>
+            <p class="mt-3 max-w-[27rem] text-[15px] leading-relaxed text-[#004241]/82">
+                Créez votre compte, préparez votre article et rejoignez un espace pensé pour publier dans l’univers éditorial Vivat.
+            </p>
 
-                <div class="mt-5 flex flex-wrap gap-2">
-                    <span class="inline-flex items-center rounded-full bg-white/14 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-white/18">
-                        Brouillons enregistrables
-                    </span>
-                    <span class="inline-flex items-center rounded-full bg-white/14 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-white/18">
-                        Relecture éditoriale
-                    </span>
-                    <span class="inline-flex items-center rounded-full bg-white/14 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-white/18">
-                        Publication mise en avant
-                    </span>
-                </div>
-            </div>
+            <p class="mt-4 max-w-[27rem] text-[13px] leading-relaxed text-[#004241]/52">
+                Brouillons enregistrables <span class="text-[#004241]/28" aria-hidden="true">·</span> Relecture éditoriale <span class="text-[#004241]/28" aria-hidden="true">·</span> Publication mise en avant
+            </p>
         </div>
     </section>
 
-    <section class="rounded-[32px] border border-[#EBF1EF] bg-[#EBF1EF] p-5 shadow-[0_18px_48px_rgba(0,66,65,0.07)] md:p-6 lg:flex lg:h-full lg:flex-col lg:px-8 lg:py-7">
+    <section class="rounded-[40px] border border-[#EBF1EF] bg-[#EBF1EF] p-5 shadow-[0_18px_48px_rgba(0,66,65,0.07)] md:p-6 lg:flex lg:h-full lg:flex-col lg:px-8 lg:py-7">
         <div class="mx-auto flex w-full max-w-[34rem] flex-1 flex-col lg:max-w-[35rem] lg:justify-center">
             <div>
                 <h2 class="text-[2rem] font-medium leading-[1.1] text-[#004241]">
@@ -123,7 +116,7 @@ $inputClass = 'h-10 w-full rounded-xl border border-gray-300 bg-white px-4 text-
                         <?php } ?>
                     </div>
 
-                    <button type="submit" class="inline-flex h-10 w-full items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
+                    <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
                         S'inscrire
                     </button>
             </form>
@@ -137,7 +130,7 @@ $inputClass = 'h-10 w-full rounded-xl border border-gray-300 bg-white px-4 text-
 
                 <a
                     href="#"
-                    class="mt-5 inline-flex h-10 w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white text-sm font-medium text-[#004241] transition hover:bg-gray-50"
+                    class="mt-5 inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white text-sm font-medium text-[#004241] transition hover:bg-gray-50"
                     aria-label="Continuer avec Google"
                 >
                     <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">

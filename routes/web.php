@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AboutController as WebAboutController;
 use App\Http\Controllers\Web\ArticleController as WebArticleController;
 use App\Http\Controllers\Web\AuthController as WebAuthController;
 use App\Http\Controllers\Web\CategoryController as WebCategoryController;
@@ -29,6 +30,7 @@ Route::get('/logout', [WebAuthController::class, 'logout'])->name('logout.get');
 Route::get('/search/suggestions', [WebSearchController::class, 'suggestions'])->name('search.suggestions');
 Route::get('/search', [WebSearchController::class, 'index'])->name('search');
 Route::get('/contact', [WebContactController::class, 'index'])->name('contact');
+Route::get('/a-propos', WebAboutController::class)->name('about');
 Route::get('/faq', [WebFaqController::class, 'index'])->name('faq');
 Route::post('/newsletter/subscribe', [WebNewsletterController::class, 'subscribe'])->middleware('throttle:newsletter-subscribe')->name('newsletter.subscribe.web');
 Route::get('/newsletter/confirm', [WebNewsletterController::class, 'confirm'])->name('newsletter.confirm');
