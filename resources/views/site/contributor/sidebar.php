@@ -11,6 +11,10 @@ $activeTab = $activeTab ?? 'articles';
             <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             <span class="font-medium text-[15px]">Nouvel article</span>
         </a>
+        <a href="<?= url('/contributor/payments') ?>" class="flex items-center gap-3 rounded-[16px] h-12 px-4 transition-colors <?= $activeTab === 'payments' ? 'bg-[#004241] text-white' : 'text-[#004241] hover:bg-[#EBF1EF]' ?>">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M3.75 6h16.5A1.5 1.5 0 0121.75 7.5v9A1.5 1.5 0 0120.25 18H3.75a1.5 1.5 0 01-1.5-1.5v-9A1.5 1.5 0 013.75 6zm12 7.5h2.25"/></svg>
+            <span class="font-medium text-[15px]">Paiements</span>
+        </a>
         <a href="<?= url('/contributor/profile') ?>" class="flex items-center gap-3 rounded-[16px] h-12 px-4 transition-colors <?= $activeTab === 'profile' ? 'bg-[#004241] text-white' : 'text-[#004241] hover:bg-[#EBF1EF]' ?>">
             <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
             <span class="font-medium text-[15px]">Mon profil</span>

@@ -10,9 +10,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
+use Throwable;
 
 class PaymentController extends Controller
 {
+    private const STALE_PENDING_MINUTES = 30;
+
     public function __construct(
         private readonly PaymentRefundService $paymentRefundService,
     ) {
@@ -53,6 +56,36 @@ class PaymentController extends Controller
                 'message' => 'Cette soumission a déjà été payée.',
             ], 422);
         }
+
+        $activePendingPayment = Payment::query()
+            ->where('submission_id', $submission->id)
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'pending')
+            ->latest('created_at')
+            ->first();
+
+        if ($activePendingPayment) {
+            $activeIntent = $this->syncPendingPaymentState($activePendingPayment);
+
+            if ($activePendingPayment->fresh()?->status === 'paid') {
+                return response()->json([
+                    'message' => 'Cette soumission a déjà été payée.',
+                ], 422);
+            }
+
+            if ($activePendingPayment->fresh()?->status === 'pending' && $activeIntent) {
+                return response()->json([
+                    'client_secret' => $activeIntent->client_secret,
+                    'payment_id' => $activePendingPayment->id,
+                    'amount' => $activePendingPayment->amount,
+                    'currency' => $activePendingPayment->currency,
+                    'reused' => true,
+                    'message' => 'Un paiement en cours existe déjà pour cette soumission.',
+                ]);
+            }
+        }
+
+        $this->expireOldPendingPayments($submission->id, $request->user()->id);
 
         $amount = (int) config('services.stripe.publication_price', 1500); // 15.00 EUR
 
@@ -105,6 +138,31 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Non autorisé.'], 403);
         }
 
+        if ($payment->status === 'paid') {
+            return response()->json([
+                'message' => 'Ce paiement a déjà été confirmé.',
+                'status' => 'paid',
+            ], 422);
+        }
+
+        if ($payment->status === 'refunded') {
+            return response()->json([
+                'message' => 'Ce paiement a déjà été remboursé et ne peut plus être confirmé.',
+            ], 422);
+        }
+
+        if ($payment->status === 'abandoned') {
+            return response()->json([
+                'message' => 'Cette tentative de paiement a expiré. Merci de relancer un nouveau paiement.',
+            ], 422);
+        }
+
+        if ($payment->status === 'failed') {
+            return response()->json([
+                'message' => 'Cette tentative de paiement a échoué. Merci de relancer un nouveau paiement.',
+            ], 422);
+        }
+
         // Verify with Stripe
         try {
             $intent = PaymentIntent::retrieve($payment->stripe_payment_intent_id);
@@ -124,6 +182,24 @@ class PaymentController extends Controller
                     'message' => 'Paiement confirmé. Votre article est soumis pour validation.',
                     'status'  => 'paid',
                 ]);
+            }
+
+            if ($intent->status === 'canceled') {
+                $payment->markAbandoned();
+
+                return response()->json([
+                    'message' => 'Cette tentative de paiement a été annulée. Merci de relancer un nouveau paiement.',
+                    'status' => 'abandoned',
+                ], 422);
+            }
+
+            if ($intent->status === 'requires_payment_method') {
+                $payment->markFailed();
+
+                return response()->json([
+                    'message' => 'Le paiement n’a pas abouti. Vérifiez vos informations et réessayez.',
+                    'status' => 'failed',
+                ], 402);
             }
 
             return response()->json([
@@ -200,5 +276,78 @@ class PaymentController extends Controller
                 'current_page' => $payments->currentPage(),
             ],
         ]);
+    }
+
+    private function syncPendingPaymentState(Payment $payment): ?PaymentIntent
+    {
+        if (! $payment->isPending()) {
+            return null;
+        }
+
+        try {
+            $intent = PaymentIntent::retrieve($payment->stripe_payment_intent_id);
+        } catch (Throwable) {
+            return null;
+        }
+
+        if ($intent->status === 'succeeded') {
+            $payment->markPaid();
+
+            if ($payment->submission && $payment->submission->status === 'draft') {
+                $payment->submission->update([
+                    'status' => 'pending',
+                    'payment_id' => $payment->id,
+                ]);
+            }
+
+            return $intent;
+        }
+
+        if ($intent->status === 'canceled') {
+            $payment->markAbandoned();
+
+            return null;
+        }
+
+        if ($this->isStalePendingPayment($payment)) {
+            try {
+                if (in_array($intent->status, ['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing'], true)) {
+                    PaymentIntent::cancel($payment->stripe_payment_intent_id);
+                }
+            } catch (Throwable) {
+                // Best effort: even if Stripe cancel fails, we still stop reusing this local payment.
+            }
+
+            $payment->markAbandoned();
+
+            return null;
+        }
+
+        return $intent;
+    }
+
+    private function expireOldPendingPayments(string $submissionId, string $userId): void
+    {
+        Payment::query()
+            ->where('submission_id', $submissionId)
+            ->where('user_id', $userId)
+            ->where('status', 'pending')
+            ->where('created_at', '<', now()->subMinutes(self::STALE_PENDING_MINUTES))
+            ->get()
+            ->each(function (Payment $payment): void {
+                try {
+                    PaymentIntent::cancel($payment->stripe_payment_intent_id);
+                } catch (Throwable) {
+                    // Ignore cancellation failures for stale local payments.
+                }
+
+                $payment->markAbandoned();
+            });
+    }
+
+    private function isStalePendingPayment(Payment $payment): bool
+    {
+        return $payment->created_at !== null
+            && $payment->created_at->lt(now()->subMinutes(self::STALE_PENDING_MINUTES));
     }
 }

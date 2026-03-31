@@ -245,6 +245,70 @@ class ContributorController extends Controller
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
+    private function contributorSubmissionStatusLabel(?string $status): string
+    {
+        return match ($status) {
+            'draft' => 'Brouillon',
+            'pending' => 'En attente',
+            'approved' => 'Publié',
+            'rejected' => 'Refusé',
+            default => 'Aucune',
+        };
+    }
+
+    /**
+     * @return array{label:string,color:string,description:string}
+     */
+    private function contributorPaymentStatusMeta(Payment $payment): array
+    {
+        $submissionStatus = $payment->submission?->status;
+
+        if ($payment->status === 'paid') {
+            return [
+                'label' => 'Payé',
+                'color' => 'emerald',
+                'description' => match ($submissionStatus) {
+                    'pending' => 'Paiement confirmé. Votre article est en cours de relecture.',
+                    'approved' => 'Paiement confirmé. Votre article est publié.',
+                    'rejected' => 'Paiement confirmé. L’article a été refusé.',
+                    default => 'Paiement confirmé.',
+                },
+            ];
+        }
+
+        if ($payment->status === 'refunded') {
+            return [
+                'label' => 'Remboursé',
+                'color' => 'sky',
+                'description' => 'Le remboursement a été confirmé et un reçu est disponible.',
+            ];
+        }
+
+        if ($payment->status === 'failed') {
+            return [
+                'label' => 'Échoué',
+                'color' => 'rose',
+                'description' => 'Le paiement a échoué. Vous pouvez reprendre la soumission et réessayer.',
+            ];
+        }
+
+        if ($payment->status === 'abandoned') {
+            return [
+                'label' => 'Abandonné',
+                'color' => 'slate',
+                'description' => 'Cette tentative a expiré ou a été remplacée par un nouveau paiement.',
+            ];
+        }
+
+        return [
+            'label' => $submissionStatus === 'draft' ? 'Interrompu' : 'En attente',
+            'color' => $submissionStatus === 'draft' ? 'amber' : 'slate',
+            'description' => $submissionStatus === 'draft'
+                ? 'Un paiement a été initié, mais il n’a pas été finalisé.'
+                : 'Le paiement existe, mais Stripe ne l’a pas encore confirmé.',
+        ];
+    }
+
     public function dashboard(Request $request): Response
     {
         $user = $request->user();
@@ -324,9 +388,61 @@ class ContributorController extends Controller
 
         $payment->loadMissing('submission.category');
 
-        return $this->renderContributorPage('articles', 'site.contributor.refund_receipt', [
+        return $this->renderContributorPage('payments', 'site.contributor.refund_receipt', [
             'payment' => $payment,
             'submission' => $payment->submission,
+        ]);
+    }
+
+    public function paymentsHistory(Request $request): Response
+    {
+        $user = $request->user();
+        $paymentsPaginator = Payment::query()
+            ->where('user_id', $user->id)
+            ->with(['submission.category', 'submission.publishedArticle'])
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        $payments = $paymentsPaginator->getCollection()
+            ->map(function (Payment $payment) {
+                $submission = $payment->submission;
+                $statusMeta = $this->contributorPaymentStatusMeta($payment);
+
+                return [
+                    'id' => $payment->id,
+                    'title' => $submission?->title ?: 'Paiement sans soumission active',
+                    'amount_label' => number_format($payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($payment->currency ?: 'EUR'),
+                    'status' => $payment->status,
+                    'status_label' => $statusMeta['label'],
+                    'status_color' => $statusMeta['color'],
+                    'status_description' => $statusMeta['description'],
+                    'created_at' => $payment->created_at?->format('d/m/Y à H:i'),
+                    'submission_status_label' => $this->contributorSubmissionStatusLabel($submission?->status),
+                    'category_name' => $submission?->category?->name,
+                    'refund_reason' => $payment->refund_reason,
+                    'refund_receipt_url' => $payment->status === 'refunded'
+                        ? route('contributor.payments.refund-receipt', ['payment' => $payment->id])
+                        : null,
+                    'submission_preview_url' => $submission?->slug
+                        ? route('contributor.articles.show', ['submission' => $submission->slug])
+                        : null,
+                    'submission_edit_url' => $submission?->slug
+                        ? route('contributor.articles.edit', ['submission' => $submission->slug])
+                        : null,
+                    'published_article_url' => $submission?->publishedArticle?->slug
+                        ? url('/articles/' . $submission->publishedArticle->slug)
+                        : null,
+                ];
+            })
+            ->all();
+
+        $paymentsPaginator->setCollection(collect($payments));
+
+        return $this->renderContributorPage('payments', 'site.contributor.payments', [
+            'user' => $user,
+            'payments' => $paymentsPaginator->items(),
+            'pagination' => $paymentsPaginator,
         ]);
     }
 

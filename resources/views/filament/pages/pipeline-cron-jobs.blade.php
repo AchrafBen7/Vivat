@@ -2,10 +2,7 @@
     <div class="space-y-6">
         <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="text-xl font-semibold tracking-tight text-gray-900">Historique des cron jobs</h2>
-            <p class="mt-2 max-w-3xl text-sm text-gray-600">
-                Cette vue affiche les exécutions réelles du scheduler du pipeline, classées par jour.
-                Tu peux donc voir quels jobs se sont lancés, à quelle heure, et s’ils ont réussi ou échoué.
-            </p>
+            <p class="mt-2 max-w-3xl text-sm text-gray-600">Exécutions réelles du pipeline IA, classées par jour.</p>
         </div>
 
         @if ($this->getRecentJobsByDay() === [])
@@ -25,6 +22,7 @@
                                 <div class="flex flex-col gap-4 px-6 py-5 lg:flex-row lg:items-start lg:justify-between">
                                     <div class="min-w-0">
                                         <div class="text-sm font-semibold text-gray-900">{{ $job['label'] }}</div>
+                                        <div class="mt-1 text-sm text-gray-700">{{ $job['summary'] }}</div>
                                         <div class="mt-1 text-xs text-gray-500">
                                             Début
                                             <span class="font-medium text-gray-700">{{ $job['started_at'] ?? '—' }}</span>
@@ -32,11 +30,11 @@
                                             <span class="font-medium text-gray-700">{{ $job['completed_at'] ?? '—' }}</span>
                                         </div>
 
-                                        @if (!empty($job['metadata']))
-                                            <div class="mt-2 flex flex-wrap gap-2">
-                                                @foreach ($job['metadata'] as $key => $value)
+                                        @if (!empty($job['details']))
+                                            <div class="mt-3 flex flex-wrap gap-2">
+                                                @foreach ($job['details'] as $detail)
                                                     <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                                                        {{ str_replace('_', ' ', $key) }}: {{ is_array($value) ? json_encode($value) : $value }}
+                                                        {{ $detail }}
                                                     </span>
                                                 @endforeach
                                             </div>
@@ -51,20 +49,13 @@
 
                                     <div class="shrink-0">
                                         <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
-                                            @if($job['status'] === 'completed') bg-emerald-50 text-emerald-700
+                                            @if(($job['metadata']['retry_scheduled'] ?? false) === true) bg-amber-50 text-amber-700
+                                            @elseif($job['status'] === 'completed') bg-emerald-50 text-emerald-700
                                             @elseif($job['status'] === 'failed') bg-rose-50 text-rose-700
-                                            @elseif($job['status'] === 'running') bg-amber-50 text-amber-700
+                                            @elseif($job['status'] === 'running') bg-sky-50 text-sky-700
                                             @else bg-gray-100 text-gray-700
                                             @endif">
-                                            @if($job['status'] === 'completed')
-                                                Réussi
-                                            @elseif($job['status'] === 'failed')
-                                                Échec
-                                            @elseif($job['status'] === 'running')
-                                                En cours
-                                            @else
-                                                En attente
-                                            @endif
+                                            {{ $job['status_label'] }}
                                         </span>
                                     </div>
                                 </div>

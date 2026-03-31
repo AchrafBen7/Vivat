@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\EnrichedItem;
+use App\Models\PipelineJob;
 use App\Models\RssItem;
 use App\Services\ContentExtractorService;
 use Illuminate\Bus\Queueable;
@@ -47,9 +48,28 @@ class EnrichContentJob implements ShouldQueue
 
         $this->item->refresh();
 
+        $pipelineJob = PipelineJob::create([
+            'job_type' => 'enrich',
+            'status' => 'running',
+            'started_at' => now(),
+            'metadata' => [
+                'item_id' => $this->item->id,
+                'rss_feed_id' => $this->item->rss_feed_id,
+                'title' => $this->item->title,
+                'url' => $this->item->url,
+                'attempt' => $this->attempts(),
+            ],
+            'retry_count' => max(0, $this->attempts() - 1),
+        ]);
+
         $data = $extractor->extract($this->item->url);
         if ($data === null) {
             $this->item->update(['status' => 'failed']);
+            $pipelineJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => 'Extraction impossible ou contenu inaccessible.',
+            ]);
             Log::warning("EnrichContentJob: extraction failed for item {$this->item->id}");
             return;
         }
@@ -57,17 +77,42 @@ class EnrichContentJob implements ShouldQueue
         $text = $data['text'] ?? '';
         if (mb_strlen($text) < self::MIN_TEXT_LENGTH) {
             $this->item->update(['status' => 'failed']);
+            $pipelineJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => 'Texte extrait trop court pour enrichissement IA.',
+                'metadata' => array_merge($pipelineJob->metadata ?? [], [
+                    'word_count' => str_word_count($text),
+                ]),
+            ]);
             Log::warning("EnrichContentJob: text too short ({$this->item->id})");
             return;
         }
 
         $enrichment = $this->callOpenAI($data);
         if (($enrichment['__retry'] ?? false) === true) {
+            $pipelineJob->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'metadata' => array_merge($pipelineJob->metadata ?? [], [
+                    'retry_scheduled' => true,
+                    'retry_delay_seconds' => (int) ($enrichment['__retry_delay'] ?? 60),
+                    'outcome' => 'retry_scheduled',
+                ]),
+            ]);
             return;
         }
 
         if ($enrichment === null) {
             $this->item->update(['status' => 'failed']);
+            $pipelineJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => 'Réponse IA invalide ou enrichissement impossible.',
+                'metadata' => array_merge($pipelineJob->metadata ?? [], [
+                    'word_count' => str_word_count($text),
+                ]),
+            ]);
             Log::warning("EnrichContentJob: enrichment failed for item {$this->item->id}");
             return;
         }
@@ -89,6 +134,17 @@ class EnrichContentJob implements ShouldQueue
         );
 
         $this->item->update(['status' => 'enriched']);
+        $pipelineJob->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+            'metadata' => array_merge($pipelineJob->metadata ?? [], [
+                'primary_topic' => $enrichment['primary_topic'] ?? null,
+                'quality_score' => (int) ($enrichment['quality_score'] ?? 0),
+                'seo_score' => (int) ($enrichment['seo_score'] ?? 0),
+                'word_count' => str_word_count($text),
+                'outcome' => 'enriched',
+            ]),
+        ]);
         Log::info("EnrichContentJob: enriched item {$this->item->id}");
     }
 
@@ -131,12 +187,12 @@ class EnrichContentJob implements ShouldQueue
         } catch (Throwable $e) {
             Log::error("EnrichContentJob OpenAI request failed: {$e->getMessage()}");
             $this->release(60);
-            return ['__retry' => true];
+            return ['__retry' => true, '__retry_delay' => 60];
         }
 
         if ($response->status() === 429) {
             $this->release(60);
-            return ['__retry' => true];
+            return ['__retry' => true, '__retry_delay' => 60];
         }
 
         if ($response->status() === 402) {

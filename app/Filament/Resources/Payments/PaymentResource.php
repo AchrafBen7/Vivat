@@ -42,7 +42,7 @@ class PaymentResource extends Resource
                         ->orWhereHas('submission', fn (Builder $submissionQuery) => $submissionQuery->where('status', '!=', 'draft'));
                 })
                 ->orderByRaw('CASE WHEN submission_id IS NULL THEN 1 ELSE 0 END')
-                ->orderByRaw("FIELD(status, 'pending', 'paid', 'refunded', 'failed')")
+                ->orderByRaw("FIELD(status, 'pending', 'paid', 'refunded', 'failed', 'abandoned')")
                 ->orderByDesc('created_at'))
             ->columns([
                 TextColumn::make('submission.title')
@@ -107,6 +107,7 @@ class PaymentResource extends Resource
                         'paid' => 'Payé',
                         'refunded' => 'Remboursé',
                         'failed' => 'Échoué',
+                        'abandoned' => 'Abandonné',
                         default => ucfirst($state),
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -114,6 +115,7 @@ class PaymentResource extends Resource
                         'paid' => 'success',
                         'refunded' => 'gray',
                         'failed' => 'danger',
+                        'abandoned' => 'gray',
                         default => 'gray',
                     })
                     ->description(fn (Payment $record): ?string => ! $record->submission && $record->status === 'pending'
@@ -131,6 +133,7 @@ class PaymentResource extends Resource
                         'paid' => 'Payé',
                         'refunded' => 'Remboursé',
                         'failed' => 'Échoué',
+                        'abandoned' => 'Abandonné',
                     ]),
                 SelectFilter::make('submission_status')
                     ->label('Statut de la soumission')

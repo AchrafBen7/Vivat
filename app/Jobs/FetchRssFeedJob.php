@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\PipelineJob;
 use App\Models\RssFeed;
 use App\Models\RssItem;
 use App\Services\RssParserService;
@@ -32,50 +33,84 @@ class FetchRssFeedJob implements ShouldQueue
 
     public function handle(RssParserService $parser): void
     {
-        Log::info("Fetching RSS feed: {$this->feed->feed_url}");
+        $pipelineJob = PipelineJob::create([
+            'job_type' => 'fetch_rss',
+            'status' => 'running',
+            'started_at' => now(),
+            'metadata' => [
+                'feed_id' => $this->feed->id,
+                'feed_url' => $this->feed->feed_url,
+                'source' => $this->feed->source?->name,
+                'category' => $this->feed->category?->name,
+            ],
+            'retry_count' => max(0, $this->attempts() - 1),
+        ]);
 
-        $response = Http::timeout(30)
-            ->withHeaders([
-                'User-Agent' => 'Mozilla/5.0 (compatible; ContentBot/1.0)',
-                'Accept' => 'application/rss+xml, application/xml, text/xml, */*',
-            ])
-            ->get($this->feed->feed_url);
+        try {
+            Log::info("Fetching RSS feed: {$this->feed->feed_url}");
 
-        if ($response->failed()) {
-            throw new \Exception("HTTP {$response->status()} for {$this->feed->feed_url}");
-        }
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (compatible; ContentBot/1.0)',
+                    'Accept' => 'application/rss+xml, application/xml, text/xml, */*',
+                ])
+                ->get($this->feed->feed_url);
 
-        $items = $parser->parse($response->body());
-        $newCount = 0;
-
-        foreach ($items as $item) {
-            $hash = $parser->generateDedupHash(
-                $item['guid'] ?? null,
-                $item['link'],
-                $item['title']
-            );
-            if (RssItem::where('dedup_hash', $hash)->exists()) {
-                continue;
+            if ($response->failed()) {
+                throw new \Exception("HTTP {$response->status()} for {$this->feed->feed_url}");
             }
-            RssItem::create([
-                'rss_feed_id' => $this->feed->id,
-                'category_id' => $this->feed->category_id,
-                'title' => $item['title'],
-                'url' => $item['link'],
-                'description' => mb_substr($item['description'] ?? '', 0, 1000),
-                'guid' => $item['guid'] ?? null,
-                'dedup_hash' => $hash,
-                'published_at' => isset($item['pubDate']) && $item['pubDate']
-                    ? \Illuminate\Support\Carbon::parse($item['pubDate'])
-                    : null,
-                'fetched_at' => now(),
-                'status' => 'new',
-            ]);
-            $newCount++;
-        }
 
-        $this->feed->update(['last_fetched_at' => now()]);
-        Log::info("Fetched {$newCount} new items from {$this->feed->feed_url}");
+            $items = $parser->parse($response->body());
+            $newCount = 0;
+
+            foreach ($items as $item) {
+                $hash = $parser->generateDedupHash(
+                    $item['guid'] ?? null,
+                    $item['link'],
+                    $item['title']
+                );
+                if (RssItem::where('dedup_hash', $hash)->exists()) {
+                    continue;
+                }
+                RssItem::create([
+                    'rss_feed_id' => $this->feed->id,
+                    'category_id' => $this->feed->category_id,
+                    'title' => $item['title'],
+                    'url' => $item['link'],
+                    'description' => mb_substr($item['description'] ?? '', 0, 1000),
+                    'guid' => $item['guid'] ?? null,
+                    'dedup_hash' => $hash,
+                    'published_at' => isset($item['pubDate']) && $item['pubDate']
+                        ? \Illuminate\Support\Carbon::parse($item['pubDate'])
+                        : null,
+                    'fetched_at' => now(),
+                    'status' => 'new',
+                ]);
+                $newCount++;
+            }
+
+            $this->feed->update(['last_fetched_at' => now()]);
+
+            $pipelineJob->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'metadata' => array_merge($pipelineJob->metadata ?? [], [
+                    'discovered_items' => count($items),
+                    'new_items' => $newCount,
+                ]),
+            ]);
+
+            Log::info("Fetched {$newCount} new items from {$this->feed->feed_url}");
+        } catch (Throwable $e) {
+            $pipelineJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => $e->getMessage(),
+                'retry_count' => max(0, $this->attempts() - 1),
+            ]);
+
+            throw $e;
+        }
     }
 
     public function failed(Throwable $e): void

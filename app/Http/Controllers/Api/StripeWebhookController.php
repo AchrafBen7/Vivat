@@ -52,6 +52,10 @@ class StripeWebhookController extends Controller
             return;
         }
 
+        if (in_array($payment->status, ['refunded', 'abandoned'], true)) {
+            return;
+        }
+
         if ($payment->status !== 'paid') {
             $payment->markPaid();
         }
@@ -73,7 +77,7 @@ class StripeWebhookController extends Controller
             ->where('stripe_payment_intent_id', $intent->id)
             ->first();
 
-        if (! $payment || $payment->status === 'paid') {
+        if (! $payment || in_array($payment->status, ['paid', 'refunded', 'abandoned'], true)) {
             return;
         }
 

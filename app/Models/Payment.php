@@ -53,6 +53,16 @@ class Payment extends Model
         return $this->status === 'paid';
     }
 
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isTerminal(): bool
+    {
+        return in_array($this->status, ['paid', 'refunded', 'failed', 'abandoned'], true);
+    }
+
     public function isRefundable(): bool
     {
         return $this->status === 'paid' && $this->submission?->status === 'rejected';
@@ -66,6 +76,11 @@ class Payment extends Model
     public function markFailed(): bool
     {
         return $this->update(['status' => 'failed']);
+    }
+
+    public function markAbandoned(): bool
+    {
+        return $this->update(['status' => 'abandoned']);
     }
 
     public function markRefunded(string $refundId, ?string $reason = null): bool
