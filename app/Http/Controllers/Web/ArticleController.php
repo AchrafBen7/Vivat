@@ -21,6 +21,7 @@ class ArticleController extends Controller
             'title' => 'Toutes les actualités — Vivat',
             'meta_description' => 'Découvrez tous les articles et actualités Vivat. Parcourez nos derniers contenus par rubrique.',
             'canonical_url' => url('/articles'),
+            'trim_main_bottom' => true,
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -93,6 +94,8 @@ class ArticleController extends Controller
             'canonical_url'    => $articleUrl,
             'og_image'         => $ogImage,
             'og_article'       => true,
+            'trim_main_bottom' => true,
+            'compact_cta_spacing' => true,
             'json_ld'          => [
                 '@context'         => 'https://schema.org',
                 '@type'            => 'Article',

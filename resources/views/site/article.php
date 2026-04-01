@@ -24,6 +24,7 @@ $relatedItems = ! empty($related_articles) ? array_map(fn (array $a) => [
     'reading_time' => $a['reading_time'] ?? 4,
     'category'     => $a['category'] ?? $relatedCategoryName,
     'image'        => $a['image'] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-1'),
+    'fallback'     => $a['fallback'] ?? $a['image'] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-1b'),
 ], $related_articles) : [];
 $alsoCarouselItems = array_merge(
     [[
@@ -33,7 +34,10 @@ $alsoCarouselItems = array_merge(
     ]],
     array_map(fn (array $item): array => ['type' => 'article'] + $item, $relatedItems)
 );
-$tagClass = 'vivat-tag';
+$tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
+$glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
+$tagGlassOnImage = $tagClass.' '.$glassTagTailwind.' text-white';
+$tagCarousel = $tagClass.' bg-white text-[#004241] shadow-sm';
 $metaLine = trim(implode(' • ', array_filter([
     $published_at_display,
     $reading_time ? (int) $reading_time.' min' : null,
@@ -58,7 +62,7 @@ if (is_string($content) && trim($content) !== '' && ! preg_match('/<\s*\/?\s*[a-
 }
 
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
-$adMidContent = '<div class="flex items-center justify-center p-12 gap-2 my-6"><div class="flex items-center justify-center rounded-[30px] text-white/90 w-full max-w-[970px] h-[250px] bg-[#686868]"><span class="text-sm">Espace publicitaire 970×250</span></div></div>';
+$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400"><span>Espace publicitaire 970×250</span></div></div>';
 $paraCount = preg_match_all('/<\/p>\s*/i', $content);
 $insertAfterPara = $paraCount >= 2 ? (int) floor($paraCount / 2) : 1;
 $count = 0;
@@ -79,8 +83,8 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
     <?php } ?>
 
     <!-- Bannière pub 728×90 -->
-    <div class="flex items-center justify-center rounded-[30px] overflow-hidden mb-6 pr-12 pb-12 pl-12">
-        <div class="flex items-center justify-center text-[#686868] border-2 border-dashed border-[#686868]/40 rounded-[30px] w-full max-w-[728px] h-[90px] gap-2">
+    <div class="mb-6 flex items-center justify-center">
+        <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
             <span class="text-sm">Espace publicitaire 728×90</span>
         </div>
     </div>
@@ -90,9 +94,9 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
         <img src="<?= htmlspecialchars($coverSrc) ?>" data-fallback-url="<?= htmlspecialchars($coverFallback) ?>" alt="<?= htmlspecialchars($title) ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
         <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
         <div class="absolute inset-0 flex flex-col p-8 top-0 left-0">
-            <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center gap-2.5 self-start rounded-full font-normal transition hover:opacity-90 w-[127px] h-12 py-3 px-[18px] bg-[#EBF1EF] border border-white/10 font-sans text-xl leading-none text-[#004241] mb-[85px]">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 19l-7-7 7-7"/></svg>
-                <span>Retour</span>
+            <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white mb-[85px]" aria-label="Retour">
+                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                Retour
             </a>
             <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
             <?php if ($metaLine) { ?>
@@ -146,23 +150,20 @@ $shareLinks = [
     </div>
 </div>
 
-<section class="max-w-[1400px] mx-auto mt-16 px-4 sm:px-6 lg:px-8" aria-label="À lire aussi">
-    <style>#also-carousel-track::-webkit-scrollbar{display:none}</style>
+<section class="mx-auto mb-0 mt-16 max-w-[1400px] px-[18px] md:px-8 lg:px-10 xl:px-20" aria-label="À lire aussi">
     <h2 class="text-[#004241] font-medium mb-6 text-3xl font-sans">À lire aussi</h2>
-    <div id="also-carousel-frame" class="relative min-w-0 lg:mx-auto lg:max-w-[1200px]">
+    <div id="also-carousel-frame" class="relative min-w-0 w-full">
         <div
             id="also-carousel-track"
-            class="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]"
+            class="w-full overflow-hidden"
         >
-            <div id="also-carousel-rail" class="flex gap-6 w-max pr-6">
-                <?php for ($copy = 0; $copy < 3; $copy++) { ?>
-                <?php foreach ($alsoCarouselItems as $idx => $item) { ?>
+            <div id="also-carousel-rail" class="flex w-max gap-6 transition-transform duration-500 ease-out will-change-transform">
+                <?php foreach ($alsoCarouselItems as $item) { ?>
                 <?php $isAd = ($item['type'] ?? 'article') === 'ad'; ?>
-                <?php $isMiddleSequence = $copy === 1; ?>
                 <?php if ($isAd) { ?>
                 <aside
-                    class="hidden lg:flex flex-shrink-0 rounded-[30px] items-center justify-center text-center text-white/90 bg-[#4B4B4B] w-[380px] h-[380px]"
-                    <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>
+                    class="hidden lg:flex lg:w-[calc((100%-48px)/3)] flex-shrink-0 rounded-[30px] items-center justify-center text-center text-white/90 bg-[#4B4B4B] h-[380px]"
+                    data-carousel-item="1"
                 >
                     <div class="flex flex-col items-center justify-center gap-3">
                         <span class="font-semibold text-[22px]"><?= htmlspecialchars($item['label']) ?></span>
@@ -173,21 +174,20 @@ $shareLinks = [
                 <?php $itemCategory = $item['category'] ?? 'À la une'; ?>
                 <a
                     href="<?= ! empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
-                    class="group block flex-shrink-0 rounded-[30px] overflow-hidden relative w-[240px] sm:w-[320px] lg:w-[380px] h-[380px]"
+                    class="group relative block h-[380px] w-[240px] flex-shrink-0 overflow-hidden rounded-[30px] sm:w-[320px] lg:w-[calc((100%-48px)/3)]"
                     data-carousel-card="<?= ($isMiddleSequence ? $idx : '') ?>"
                     <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>
                 >
-                    <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <img src="<?= htmlspecialchars($item['image']) ?>" data-fallback-url="<?= htmlspecialchars($item['fallback'] ?? $item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
                     <div class="vivat-card-overlay flex flex-col justify-end">
                         <div class="rounded-[21px] vivat-glass flex flex-col w-full gap-2">
-                            <span class="<?= $tagClass ?> bg-white/20 text-white"><?= htmlspecialchars($itemCategory) ?></span>
+                            <span class="<?= $tagCarousel ?>"><?= htmlspecialchars($itemCategory) ?></span>
                             <h3 class="font-medium text-white leading-tight text-xl"><?= htmlspecialchars($item['title']) ?></h3>
                             <p class="text-white/80 text-xs"><?= htmlspecialchars($item['date']) ?> • <?= (int) $item['reading_time'] ?> min</p>
                         </div>
                     </div>
                 </a>
-                <?php } ?>
                 <?php } ?>
                 <?php } ?>
             </div>
@@ -218,118 +218,107 @@ $shareLinks = [
         (function() {
             var prevBtn = document.getElementById('also-carousel-prev');
             var nextBtn = document.getElementById('also-carousel-next');
-            var track = document.getElementById('also-carousel-track');
+            var frame = document.getElementById('also-carousel-frame');
             var rail = document.getElementById('also-carousel-rail');
-            if (!prevBtn || !nextBtn || !track || !rail) {
+            if (!prevBtn || !nextBtn || !frame || !rail) {
                 return;
             }
 
-            var normalizeTimer = null;
+            var currentIndex = 0;
 
             function getGap() {
                 return 24;
             }
 
-            function getCycleWidth() {
-                var cycleItems = rail.querySelectorAll('[data-cycle-item="1"]');
-                if (!cycleItems.length) {
-                    return 0;
-                }
-                var width = 0;
-                cycleItems.forEach(function(item, index) {
-                    width += item.getBoundingClientRect().width;
-                    if (index < cycleItems.length - 1) {
-                        width += getGap();
-                    }
+            function getItems() {
+                return Array.prototype.slice.call(rail.querySelectorAll('[data-carousel-item="1"]')).filter(function(item) {
+                    return window.getComputedStyle(item).display !== 'none';
                 });
-                return width;
             }
 
-            function getStep() {
-                var firstCard = rail.querySelector('[data-carousel-card]');
-                return firstCard ? firstCard.getBoundingClientRect().width + getGap() : 0;
+            function getVisibleCount() {
+                if (window.matchMedia('(min-width: 1024px)').matches) {
+                    return 3;
+                }
+
+                if (window.matchMedia('(min-width: 640px)').matches) {
+                    return 2;
+                }
+
+                return 1;
             }
 
-            function getSequenceSpan() {
-                var cycleWidth = getCycleWidth();
-                return cycleWidth ? cycleWidth + getGap() : 0;
-            }
-
-            function getViewportNudge() {
-                return 4;
-            }
-
-            function getStartOffset() {
-                var sequenceSpan = getSequenceSpan();
-                return sequenceSpan ? sequenceSpan - getViewportNudge() : 0;
-            }
-
-            function normalizePosition() {
-                var sequenceSpan = getSequenceSpan();
-                if (!sequenceSpan) {
+            function syncCardWidths() {
+                var items = getItems();
+                if (!items.length) {
                     return;
                 }
 
-                if (track.scrollLeft <= sequenceSpan * 0.5) {
-                    track.scrollLeft += sequenceSpan;
-                } else if (track.scrollLeft >= sequenceSpan * 1.5) {
-                    track.scrollLeft -= sequenceSpan;
-                }
+                var visibleCount = getVisibleCount();
+                var width = Math.floor((frame.getBoundingClientRect().width - (getGap() * (visibleCount - 1))) / visibleCount);
+
+                items.forEach(function(item) {
+                    item.style.width = width + 'px';
+                    item.style.minWidth = width + 'px';
+                });
             }
 
-            function scheduleNormalize() {
-                if (normalizeTimer) {
-                    window.clearTimeout(normalizeTimer);
-                }
-
-                normalizeTimer = window.setTimeout(function() {
-                    normalizePosition();
-                }, 180);
+            function getMaxIndex() {
+                return Math.max(0, getItems().length - getVisibleCount());
             }
 
-            function setInitialPosition() {
-                var startOffset = getStartOffset();
-                if (startOffset) {
-                    track.scrollLeft = startOffset;
-                }
+            function getOffsets() {
+                return getItems().map(function(item) {
+                    return item.offsetLeft;
+                });
             }
 
-            function move(direction) {
-                var step = getStep();
-                if (!step) {
+            function updateButtons() {
+                var maxIndex = getMaxIndex();
+                var atStart = currentIndex <= 0;
+                var atEnd = currentIndex >= maxIndex;
+
+                prevBtn.disabled = atStart;
+                nextBtn.disabled = atEnd;
+                prevBtn.classList.toggle('hidden', atStart);
+                nextBtn.classList.toggle('hidden', atEnd);
+            }
+
+            function scrollToIndex(index, behavior) {
+                var offsets = getOffsets();
+                if (!offsets.length) {
                     return;
                 }
 
-                track.scrollBy({ left: direction * step, behavior: 'smooth' });
-                window.setTimeout(normalizePosition, 420);
+                currentIndex = Math.max(0, Math.min(index, getMaxIndex()));
+                if (behavior === 'auto') {
+                    rail.classList.remove('duration-500');
+                } else {
+                    rail.classList.add('duration-500');
+                }
+
+                rail.style.transform = 'translateX(' + (-offsets[currentIndex]) + 'px)';
+                updateButtons();
             }
 
-            setInitialPosition();
+            syncCardWidths();
+            scrollToIndex(0, 'auto');
 
             prevBtn.addEventListener('click', function() {
-                move(-1);
+                scrollToIndex(currentIndex - 1);
             });
             nextBtn.addEventListener('click', function() {
-                move(1);
+                scrollToIndex(currentIndex + 1);
             });
 
-            track.addEventListener('scroll', function() {
-                scheduleNormalize();
-            }, { passive: true });
-
             window.addEventListener('resize', function() {
-                var sequenceSpan = getSequenceSpan();
-                if (!sequenceSpan) {
-                    return;
-                }
-
-                var relativeOffset = (track.scrollLeft + getViewportNudge()) % sequenceSpan;
-                track.scrollLeft = sequenceSpan + relativeOffset - getViewportNudge();
+                syncCardWidths();
+                scrollToIndex(Math.min(currentIndex, getMaxIndex()), 'auto');
             });
 
             window.setTimeout(function() {
-                setInitialPosition();
-                scheduleNormalize();
+                syncCardWidths();
+                scrollToIndex(0, 'auto');
             }, 0);
         })();
         </script>

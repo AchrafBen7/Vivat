@@ -37,12 +37,9 @@ $resolveImage = static function (array $article, int $width, int $height, string
 };
 ?>
 
-<div class="mx-auto flex w-full max-w-[1400px] flex-col px-[18px] pb-16 md:px-8 lg:px-10 xl:px-20">
-    <section class="relative overflow-hidden rounded-[36px] bg-[linear-gradient(135deg,#F6FAF8_0%,#E7F0ED_52%,#D9E7E2_100%)] px-6 py-8 md:px-10 md:py-10">
-        <div class="pointer-events-none absolute -right-12 top-0 h-40 w-40 rounded-full bg-white/55 blur-3xl"></div>
-        <div class="pointer-events-none absolute bottom-[-56px] left-[-24px] h-40 w-40 rounded-full bg-[#BFD4CE]/60 blur-3xl"></div>
-
-        <div class="relative">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col px-[18px] pb-0 md:px-8 lg:px-10 xl:px-20">
+    <section class="overflow-hidden rounded-[36px] bg-[#EBF1EF] px-6 py-8 md:px-10 md:py-10">
+        <div>
             <div class="max-w-4xl">
                 <span class="inline-flex items-center rounded-full border border-[#004241]/10 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#004241]/65">
                     <?= htmlspecialchars($t['badge']) ?>
