@@ -44,6 +44,23 @@ class ArticleController extends Controller
         // Catégorie toujours résolue via category_id pour cohérence avec la DB
         $category = $article->category_id ? Category::find($article->category_id) : null;
 
+        $relatedArticles = Article::published()
+            ->forLocale($locale)
+            ->where('id', '!=', $article->id)
+            ->when($article->category_id, fn ($q) => $q->where('category_id', $article->category_id))
+            ->orderByDesc('published_at')
+            ->limit(4)
+            ->get()
+            ->map(fn (Article $a) => [
+                'title'        => $a->title,
+                'slug'         => $a->slug,
+                'reading_time' => $a->reading_time,
+                'category'     => $category?->name ?? '',
+                'published_at_display' => $a->published_at?->locale('fr')->isoFormat('D MMMM YYYY'),
+                'image'        => $this->articleCoverOrFallback($a, $category),
+            ])
+            ->all();
+
         $data = [
             'article' => [
                 'id' => $article->id,
@@ -64,6 +81,7 @@ class ArticleController extends Controller
                     'slug' => $category->slug,
                 ] : null,
             ],
+            'related_articles' => $relatedArticles,
         ];
 
         $articleUrl = url('/articles/'.$article->slug);
@@ -74,13 +92,30 @@ class ArticleController extends Controller
 
         $content = render_php_view('site.article', $data);
         $html = render_php_view('site.layout', [
-            'content' => $content,
-            'content_locale' => $locale,
-            'title' => $article->meta_title ?: $article->title,
+            'content'          => $content,
+            'content_locale'   => $locale,
+            'title'            => $article->meta_title ?: $article->title,
             'meta_description' => $article->meta_description ?: $article->excerpt,
-            'canonical_url' => $articleUrl,
-            'og_image' => $ogImage,
-            'og_article' => true,
+            'canonical_url'    => $articleUrl,
+            'og_image'         => $ogImage,
+            'og_article'       => true,
+            'json_ld'          => [
+                '@context'         => 'https://schema.org',
+                '@type'            => 'Article',
+                'headline'         => $article->meta_title ?: $article->title,
+                'description'      => $article->meta_description ?: $article->excerpt,
+                'url'              => $articleUrl,
+                'datePublished'    => $article->published_at?->toIso8601String(),
+                'dateModified'     => $article->updated_at?->toIso8601String(),
+                'image'            => $ogImage,
+                'inLanguage'       => $locale === 'nl' ? 'nl-BE' : 'fr-BE',
+                'publisher'        => [
+                    '@type' => 'Organization',
+                    'name'  => 'Vivat',
+                    'url'   => url('/'),
+                ],
+                'keywords' => is_array($article->keywords) ? implode(', ', $article->keywords) : ($article->keywords ?? ''),
+            ],
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);

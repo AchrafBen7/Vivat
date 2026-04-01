@@ -17,36 +17,14 @@ $catSlug = ($category ?? [])['slug'] ?? null;
 $coverFallback = vivat_category_fallback_image($catSlug, 1282, 444, $relatedBaseId, 'cover');
 $coverSrc = ! empty($cover_image_url) ? $cover_image_url : $coverFallback;
 $backHref = $relatedCategorySlug ? '/categories/'.htmlspecialchars($relatedCategorySlug) : '/';
-$relatedItems = [
-    [
-        'title' => 'Deux squelettes enlacés livrent leurs secrets 12.000 ans après leur mort',
-        'date' => '12 février 2026',
-        'reading_time' => 4,
-        'category' => $relatedCategoryName,
-        'image' => vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-1'),
-    ],
-    [
-        'title' => 'A Bruxelles, un accord budgétaire aux contours encore imprécis',
-        'date' => '12 février 2026',
-        'reading_time' => 4,
-        'category' => $relatedCategoryName,
-        'image' => vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-2'),
-    ],
-    [
-        'title' => 'L’autosuffisance alimentaire est possible mais à certaines conditions',
-        'date' => '12 février 2026',
-        'reading_time' => 4,
-        'category' => $relatedCategoryName,
-        'image' => vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-3'),
-    ],
-    [
-        'title' => 'Des fouilles révèlent de nouvelles pistes sur les premiers peuples européens',
-        'date' => '12 février 2026',
-        'reading_time' => 4,
-        'category' => $relatedCategoryName,
-        'image' => vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-4'),
-    ],
-];
+$relatedItems = ! empty($related_articles) ? array_map(fn (array $a) => [
+    ‘title’        => $a[‘title’],
+    ‘slug’         => $a[‘slug’],
+    ‘date’         => $a[‘published_at_display’] ?? ‘’,
+    ‘reading_time’ => $a[‘reading_time’] ?? 4,
+    ‘category’     => $a[‘category’] ?? $relatedCategoryName,
+    ‘image’        => $a[‘image’] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, ‘also-1’),
+], $related_articles) : [];
 $alsoCarouselItems = array_merge(
     [[
         'type' => 'ad',
@@ -194,7 +172,7 @@ $shareLinks = [
                 <?php } else { ?>
                 <?php $itemCategory = $item['category'] ?? 'À la une'; ?>
                 <a
-                    href="#"
+                    href="<?= ! empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
                     class="group block flex-shrink-0 rounded-[30px] overflow-hidden relative w-[240px] sm:w-[320px] lg:w-[380px] h-[380px]"
                     data-carousel-card="<?= ($isMiddleSequence ? $idx : '') ?>"
                     <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>

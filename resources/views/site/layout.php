@@ -7,6 +7,7 @@ $meta_description = $meta_description ?? 'Vivat — Actualités et articles. Dé
 $canonical_url = $canonical_url ?? null;
 $og_image = $og_image ?? null;
 $og_article = $og_article ?? false;
+$json_ld = $json_ld ?? null;
 $meta_description_safe = htmlspecialchars($meta_description);
 $title_safe = htmlspecialchars($title);
 $sessionErrors = session()->get('errors');
@@ -33,6 +34,9 @@ $newsletterOldEmail = old('newsletter_email', '');
     <meta property="og:locale" content="<?= $content_locale === 'nl' ? 'nl_BE' : 'fr_FR' ?>">
     <?php if (! empty($og_image)) { ?>
     <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
+    <?php } ?>
+    <?php if (! empty($json_ld)) { ?>
+    <script type="application/ld+json"><?= json_encode($json_ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?></script>
     <?php } ?>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= $title_safe ?>">

@@ -136,6 +136,12 @@ return Application::configure(basePath: dirname(__DIR__))
             })->everyFiveMinutes()->name('pipeline:horizon-snapshot');
         }
 
+        // Digest newsletter hebdomadaire — chaque lundi à 8h00
+        $schedule->command('newsletter:send-digest')
+            ->weeklyOn(1, '08:00')
+            ->name('newsletter:weekly-digest')
+            ->withoutOverlapping();
+
         if (data_get($pipelineSchedule, 'prune_failed_jobs.enabled', true)) {
             $schedule->call(function () use ($pipelineSchedule, $trackPipelineRun): void {
                 $hours = (int) data_get($pipelineSchedule, 'prune_failed_jobs.hours', 168);

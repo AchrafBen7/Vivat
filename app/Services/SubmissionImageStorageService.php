@@ -134,7 +134,9 @@ class SubmissionImageStorageService
             File::makeDirectory($directory, 0755, true);
         }
 
-        $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
+        $guessed = $file->guessExtension();
+        $ext = in_array($guessed, ['jpg', 'jpeg', 'png']) ? $guessed : 'jpg';
+        $filename = Str::uuid()->toString() . '.' . $ext;
         $file->move($directory, $filename);
 
         return '/uploads/submissions/' . $filename;

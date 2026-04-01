@@ -56,8 +56,8 @@ class PublicPageDataService
         }
 
         // Si le terme correspond à une catégorie (nom ou slug), filtrer par cette catégorie
-        $matchedCategory = Category::whereRaw('LOWER(name) = ?', [$normalized])
-            ->orWhereRaw('LOWER(slug) = ?', [$normalized])
+        $matchedCategory = Category::where('name', $normalized)
+            ->orWhere('slug', $normalized)
             ->first();
 
         if ($matchedCategory) {

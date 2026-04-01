@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Web\AboutController as WebAboutController;
+use App\Http\Controllers\Web\LegalController as WebLegalController;
+use App\Http\Controllers\Web\SitemapController as WebSitemapController;
+use App\Http\Controllers\Web\PublicFeedController as WebPublicFeedController;
 use App\Http\Controllers\Web\ArticleController as WebArticleController;
 use App\Http\Controllers\Web\AuthController as WebAuthController;
 use App\Http\Controllers\Web\CategoryController as WebCategoryController;
@@ -19,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 | Pas de Blade. SEO-friendly.
 |--------------------------------------------------------------------------
 */
+Route::get('/sitemap.xml', WebSitemapController::class)->name('sitemap');
+Route::get('/feed.xml', WebPublicFeedController::class)->name('feed.rss');
 Route::get('/', WebHomeController::class)->name('home');
 Route::get('/devenir-redacteur', [WebAuthController::class, 'showBecomeContributor'])->name('become.contributor');
 Route::get('/register', [WebAuthController::class, 'showRegisterForm'])->name('register');
@@ -36,6 +41,9 @@ Route::get('/search/suggestions', [WebSearchController::class, 'suggestions'])->
 Route::get('/search', [WebSearchController::class, 'index'])->name('search');
 Route::get('/contact', [WebContactController::class, 'index'])->name('contact');
 Route::get('/a-propos', WebAboutController::class)->name('about');
+Route::get('/mentions-legales', [WebLegalController::class, 'mentions'])->name('legal.mentions');
+Route::get('/politique-confidentialite', [WebLegalController::class, 'confidentialite'])->name('legal.confidentialite');
+Route::get('/politique-cookies', [WebLegalController::class, 'cookies'])->name('legal.cookies');
 Route::get('/faq', [WebFaqController::class, 'index'])->name('faq');
 Route::post('/newsletter/subscribe', [WebNewsletterController::class, 'subscribe'])->middleware(['bot.protect:web', 'throttle:newsletter-subscribe'])->name('newsletter.subscribe.web');
 Route::get('/newsletter/confirm', [WebNewsletterController::class, 'confirm'])->name('newsletter.confirm');
