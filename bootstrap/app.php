@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'bot.protect' => \App\Http\Middleware\BotProtectionMiddleware::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

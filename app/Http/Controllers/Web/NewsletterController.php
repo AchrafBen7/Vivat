@@ -14,8 +14,17 @@ class NewsletterController extends Controller
         private readonly NewsletterSubscriptionService $newsletterSubscriptionService,
     ) {}
 
+    private function honeypotTriggered(Request $request): bool
+    {
+        return trim((string) $request->input('company_website', '')) !== '';
+    }
+
     public function subscribe(Request $request): RedirectResponse
     {
+        if ($this->honeypotTriggered($request)) {
+            return back()->with('success', 'Merci, votre demande d’inscription a bien été prise en compte.');
+        }
+
         $validated = $request->validate([
             'newsletter_email' => ['required', 'email', 'max:255'],
         ], [

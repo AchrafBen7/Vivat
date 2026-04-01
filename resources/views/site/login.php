@@ -102,7 +102,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                 </div>
 
                 <a
-                    href="#"
+                    href="<?= htmlspecialchars(route('auth.google.redirect')) ?>"
                     class="mt-5 inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white text-sm font-medium text-[#004241] transition hover:bg-gray-50"
                     aria-label="Continuer avec Google"
                 >

@@ -58,6 +58,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
 
             <form action="/register" method="post" class="mt-7 flex flex-col gap-4">
                     <?= csrf_field() ?>
+                    <input type="text" name="company_website" value="" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
 
                     <div class="grid gap-4 md:grid-cols-2">
                         <div>
@@ -129,7 +130,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                 </div>
 
                 <a
-                    href="#"
+                    href="<?= htmlspecialchars(route('auth.google.redirect')) ?>"
                     class="mt-5 inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white text-sm font-medium text-[#004241] transition hover:bg-gray-50"
                     aria-label="Continuer avec Google"
                 >

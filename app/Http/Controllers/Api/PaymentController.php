@@ -8,6 +8,7 @@ use App\Models\Submission;
 use App\Services\PaymentRefundService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Throwable;
@@ -36,11 +37,24 @@ class PaymentController extends Controller
 
         // Verify ownership
         if ($submission->user_id !== $request->user()->id) {
+            $this->logSecurityEvent('warning', 'Payment intent creation denied: submission ownership mismatch.', [
+                'submission_id' => $submission->id,
+                'submission_user_id' => $submission->user_id,
+                'actor_user_id' => $request->user()->id,
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json(['message' => 'Non autorisé.'], 403);
         }
 
         // Check submission is in right state
         if (! in_array($submission->status, ['draft', 'pending'])) {
+            $this->logSecurityEvent('notice', 'Payment intent creation blocked for invalid submission status.', [
+                'submission_id' => $submission->id,
+                'status' => $submission->status,
+                'actor_user_id' => $request->user()->id,
+            ]);
+
             return response()->json([
                 'message' => 'Cette soumission ne peut pas être payée (statut: ' . $submission->status . ').',
             ], 422);
@@ -52,6 +66,12 @@ class PaymentController extends Controller
             ->first();
 
         if ($existingPayment) {
+            $this->logSecurityEvent('notice', 'Duplicate paid payment creation attempt blocked.', [
+                'submission_id' => $submission->id,
+                'payment_id' => $existingPayment->id,
+                'actor_user_id' => $request->user()->id,
+            ]);
+
             return response()->json([
                 'message' => 'Cette soumission a déjà été payée.',
             ], 422);
@@ -135,10 +155,22 @@ class PaymentController extends Controller
         $payment = Payment::findOrFail($validated['payment_id']);
 
         if ($payment->user_id !== $request->user()->id) {
+            $this->logSecurityEvent('warning', 'Payment confirmation denied: payment ownership mismatch.', [
+                'payment_id' => $payment->id,
+                'payment_user_id' => $payment->user_id,
+                'actor_user_id' => $request->user()->id,
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json(['message' => 'Non autorisé.'], 403);
         }
 
         if ($payment->status === 'paid') {
+            $this->logSecurityEvent('notice', 'Duplicate payment confirmation blocked for already paid payment.', [
+                'payment_id' => $payment->id,
+                'actor_user_id' => $request->user()->id,
+            ]);
+
             return response()->json([
                 'message' => 'Ce paiement a déjà été confirmé.',
                 'status' => 'paid',
@@ -146,18 +178,33 @@ class PaymentController extends Controller
         }
 
         if ($payment->status === 'refunded') {
+            $this->logSecurityEvent('notice', 'Payment confirmation blocked for refunded payment.', [
+                'payment_id' => $payment->id,
+                'actor_user_id' => $request->user()->id,
+            ]);
+
             return response()->json([
                 'message' => 'Ce paiement a déjà été remboursé et ne peut plus être confirmé.',
             ], 422);
         }
 
         if ($payment->status === 'abandoned') {
+            $this->logSecurityEvent('notice', 'Payment confirmation blocked for abandoned payment.', [
+                'payment_id' => $payment->id,
+                'actor_user_id' => $request->user()->id,
+            ]);
+
             return response()->json([
                 'message' => 'Cette tentative de paiement a expiré. Merci de relancer un nouveau paiement.',
             ], 422);
         }
 
         if ($payment->status === 'failed') {
+            $this->logSecurityEvent('notice', 'Payment confirmation blocked for failed payment.', [
+                'payment_id' => $payment->id,
+                'actor_user_id' => $request->user()->id,
+            ]);
+
             return response()->json([
                 'message' => 'Cette tentative de paiement a échoué. Merci de relancer un nouveau paiement.',
             ], 422);
@@ -207,6 +254,12 @@ class PaymentController extends Controller
                 'stripe_status' => $intent->status,
             ], 402);
         } catch (\Exception $e) {
+            $this->logSecurityEvent('error', 'Stripe payment confirmation verification failed.', [
+                'payment_id' => $payment->id,
+                'actor_user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'message' => 'Erreur lors de la vérification du paiement.',
                 'error'   => $e->getMessage(),
@@ -324,6 +377,11 @@ class PaymentController extends Controller
         }
 
         return $intent;
+    }
+
+    private function logSecurityEvent(string $level, string $message, array $context = []): void
+    {
+        Log::channel('security')->log($level, $message, $context);
     }
 
     private function expireOldPendingPayments(string $submissionId, string $userId): void

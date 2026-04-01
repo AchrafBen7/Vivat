@@ -28,6 +28,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
 
         <form action="<?= route('password.email') ?>" method="post" class="mt-6 flex flex-col gap-4">
             <?= csrf_field() ?>
+            <input type="text" name="company_website" value="" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
 
             <div>
                 <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" placeholder="Email" required class="<?= $inputClass ?>">

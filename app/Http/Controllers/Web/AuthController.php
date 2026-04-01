@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,9 +13,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    private function honeypotTriggered(Request $request): bool
+    {
+        return trim((string) $request->input('company_website', '')) !== '';
+    }
+
     private function strongPasswordRules(): array
     {
         return [
@@ -83,6 +90,12 @@ class AuthController extends Controller
 
     public function register(Request $request): RedirectResponse|Response
     {
+        if ($this->honeypotTriggered($request)) {
+            return back()->withErrors([
+                'email' => 'Impossible de créer le compte pour le moment. Réessayez.',
+            ])->withInput($request->except('password', 'password_confirmation', 'company_website'));
+        }
+
         $validated = $request->validate([
             'first_name'      => ['required', 'string', 'max:255'],
             'last_name'       => ['required', 'string', 'max:255'],
@@ -172,6 +185,92 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    public function redirectToGoogle(): RedirectResponse
+    {
+        if (! $this->googleOAuthConfigured()) {
+            return redirect()->route('login')->with('error', 'La connexion Google n’est pas encore configurée.');
+        }
+
+        return Socialite::driver('google')
+            ->scopes(['openid', 'profile', 'email'])
+            ->redirect();
+    }
+
+    public function handleGoogleCallback(Request $request): RedirectResponse
+    {
+        if (! $this->googleOAuthConfigured()) {
+            return redirect()->route('login')->with('error', 'La connexion Google n’est pas encore configurée.');
+        }
+
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Throwable $exception) {
+            return redirect()->route('login')->with('error', 'Impossible de finaliser la connexion Google.');
+        }
+
+        $email = mb_strtolower(trim((string) ($googleUser->getEmail() ?? '')));
+
+        if ($email === '') {
+            return redirect()->route('login')->with('error', 'Votre compte Google ne fournit pas d’adresse email exploitable.');
+        }
+
+        $user = User::query()
+            ->where('google_id', $googleUser->getId())
+            ->orWhere('email', $email)
+            ->first();
+
+        if ($user === null) {
+            $name = trim((string) ($googleUser->getName() ?: $googleUser->getNickname() ?: 'Utilisateur Google'));
+
+            try {
+                $user = User::create([
+                    'name' => $name !== '' ? $name : 'Utilisateur Google',
+                    'email' => $email,
+                    'google_id' => $googleUser->getId(),
+                    'password' => Str::password(32),
+                    'language' => 'fr',
+                    'avatar' => $googleUser->getAvatar(),
+                ]);
+            } catch (QueryException $exception) {
+                return redirect()->route('login')->with('error', 'Ce compte Google ne peut pas être relié pour le moment.');
+            }
+
+            $user->forceFill([
+                'email_verified_at' => now(),
+            ])->save();
+
+            $user->assignRole('contributor');
+        } else {
+            $updates = [];
+
+            if (($user->google_id === null || $user->google_id === '') && $googleUser->getId()) {
+                $updates['google_id'] = $googleUser->getId();
+            }
+
+            if (empty($user->avatar) && $googleUser->getAvatar()) {
+                $updates['avatar'] = $googleUser->getAvatar();
+            }
+
+            if ($user->email_verified_at === null) {
+                $updates['email_verified_at'] = now();
+            }
+
+            if ($updates !== []) {
+                $user->update($updates);
+                $user = $user->fresh();
+            }
+        }
+
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        if ($user->hasRole('admin')) {
+            return redirect('/admin')->with('success', 'Connexion Google réussie.');
+        }
+
+        return redirect()->route('contributor.dashboard')->with('success', 'Connexion Google réussie.');
+    }
+
     public function showForgotPasswordForm(Request $request): Response
     {
         $errors = $request->session()->get('errors');
@@ -196,6 +295,10 @@ class AuthController extends Controller
 
     public function sendResetLink(Request $request): RedirectResponse
     {
+        if ($this->honeypotTriggered($request)) {
+            return back()->with('status', 'Si un compte existe pour cette adresse, un lien de réinitialisation vient d’être envoyé.');
+        }
+
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ], [
@@ -284,5 +387,12 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')->with('success', 'Déconnexion réussie.');
+    }
+
+    private function googleOAuthConfigured(): bool
+    {
+        return (string) config('services.google.client_id', '') !== ''
+            && (string) config('services.google.client_secret', '') !== ''
+            && (string) config('services.google.redirect', '') !== '';
     }
 }

@@ -711,6 +711,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                         </div>
                         <form action="<?= htmlspecialchars(route('newsletter.subscribe.web')) ?>" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_184px] xl:grid-cols-[minmax(0,1fr)_220px]">
                             <?= csrf_field() ?>
+                            <input type="text" name="company_website" value="" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
                             <div class="flex flex-col gap-2">
                                 <input
                                     type="email"

@@ -62,8 +62,62 @@ class AppServiceProvider extends ServiceProvider
                     ->withInput($request->only('newsletter_email')));
         });
 
+        RateLimiter::for('password-reset-link', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perHour(5)
+                ->by($key)
+                ->response(fn (Request $request, array $headers): RedirectResponse => back()
+                    ->withErrors([
+                        'email' => 'Trop de demandes de réinitialisation. Réessayez un peu plus tard.',
+                    ])
+                    ->withInput($request->only('email')));
+        });
+
+        RateLimiter::for('search-suggestions', function (Request $request) {
+            return Limit::perMinute(30)->by((string) $request->ip());
+        });
+
+        RateLimiter::for('api-auth-login', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
+
+        RateLimiter::for('api-auth-register', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perHour(5)->by($key);
+        });
+
+        RateLimiter::for('api-newsletter-subscribe', function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', ''));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
+
+        RateLimiter::for('api-newsletter-actions', function (Request $request) {
+            return Limit::perMinute(20)->by((string) $request->ip());
+        });
+
         RateLimiter::for('payment-actions', function (Request $request) {
             return Limit::perMinute(10)->by((string) ($request->user()?->id ?: $request->ip()));
+        });
+
+        RateLimiter::for('admin-pipeline-actions', function (Request $request) {
+            return Limit::perMinute(12)->by((string) ($request->user()?->id ?: $request->ip()));
+        });
+
+        RateLimiter::for('admin-moderation-actions', function (Request $request) {
+            return Limit::perMinute(20)->by((string) ($request->user()?->id ?: $request->ip()));
+        });
+
+        RateLimiter::for('admin-financial-actions', function (Request $request) {
+            return Limit::perMinute(5)->by((string) ($request->user()?->id ?: $request->ip()));
         });
 
         // Rate limiter for OpenAI API calls via queues

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 use UnexpectedValueException;
@@ -17,6 +18,10 @@ class StripeWebhookController extends Controller
         $webhookSecret = (string) config('services.stripe.webhook_secret');
 
         if ($webhookSecret === '') {
+            Log::channel('security')->error('Stripe webhook rejected because secret is not configured.', [
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json(['message' => 'Stripe webhook secret is not configured.'], 500);
         }
 
@@ -26,6 +31,12 @@ class StripeWebhookController extends Controller
         try {
             $event = Webhook::constructEvent($payload, $signature, $webhookSecret);
         } catch (UnexpectedValueException|SignatureVerificationException $exception) {
+            Log::channel('security')->warning('Invalid Stripe webhook payload rejected.', [
+                'ip' => $request->ip(),
+                'error' => $exception->getMessage(),
+                'signature_present' => $signature !== '',
+            ]);
+
             return response()->json([
                 'message' => 'Invalid Stripe webhook payload.',
             ], 400);
@@ -49,6 +60,9 @@ class StripeWebhookController extends Controller
             ->first();
 
         if (! $payment) {
+            Log::channel('security')->notice('Stripe webhook succeeded for unknown payment intent.', [
+                'payment_intent_id' => $intent->id ?? null,
+            ]);
             return;
         }
 

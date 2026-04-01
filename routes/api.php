@@ -33,8 +33,8 @@ use Illuminate\Support\Facades\Route;
 // ║  AUTH (public)                                                      ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register'])->name('auth.register');
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+    Route::post('register', [AuthController::class, 'register'])->middleware(['bot.protect:api', 'throttle:api-auth-register'])->name('auth.register');
+    Route::post('login', [AuthController::class, 'login'])->middleware(['bot.protect:api', 'throttle:api-auth-login'])->name('auth.login');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
@@ -78,9 +78,9 @@ Route::prefix('public')->group(function () {
 // ║  NEWSLETTER (public)                                                ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 Route::prefix('newsletter')->group(function () {
-    Route::post('subscribe', [NewsletterController::class, 'subscribe'])->name('api.newsletter.subscribe');
-    Route::post('unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('api.newsletter.unsubscribe');
-    Route::get('confirm', [NewsletterController::class, 'confirm'])->name('api.newsletter.confirm');
+    Route::post('subscribe', [NewsletterController::class, 'subscribe'])->middleware(['bot.protect:api', 'throttle:api-newsletter-subscribe'])->name('api.newsletter.subscribe');
+    Route::post('unsubscribe', [NewsletterController::class, 'unsubscribe'])->middleware(['bot.protect:api', 'throttle:api-newsletter-actions'])->name('api.newsletter.unsubscribe');
+    Route::get('confirm', [NewsletterController::class, 'confirm'])->middleware(['bot.protect:api', 'throttle:api-newsletter-actions'])->name('api.newsletter.confirm');
 });
 
 // ╔══════════════════════════════════════════════════════════════════════╗
@@ -133,39 +133,39 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
     // Articles (full CRUD + generation + publication)
     Route::prefix('articles')->group(function () {
-        Route::post('generate', [ArticleController::class, 'generate'])->name('articles.generate');
-        Route::post('generate-async', [ArticleController::class, 'generateAsync'])->name('articles.generate-async');
-        Route::post('{article}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
+        Route::post('generate', [ArticleController::class, 'generate'])->middleware('throttle:admin-pipeline-actions')->name('articles.generate');
+        Route::post('generate-async', [ArticleController::class, 'generateAsync'])->middleware('throttle:admin-pipeline-actions')->name('articles.generate-async');
+        Route::post('{article}/publish', [ArticleController::class, 'publish'])->middleware('throttle:admin-moderation-actions')->name('articles.publish');
     });
     Route::apiResource('articles', ArticleController::class);
 
     // Pipeline (déclenchement et monitoring)
     Route::prefix('pipeline')->group(function () {
-        Route::post('fetch-rss', [PipelineController::class, 'fetchRss'])->name('pipeline.fetch-rss');
-        Route::post('enrich', [PipelineController::class, 'enrich'])->name('pipeline.enrich');
-        Route::get('select-items', [PipelineController::class, 'selectItems'])->name('pipeline.select-items');
+        Route::post('fetch-rss', [PipelineController::class, 'fetchRss'])->middleware('throttle:admin-pipeline-actions')->name('pipeline.fetch-rss');
+        Route::post('enrich', [PipelineController::class, 'enrich'])->middleware('throttle:admin-pipeline-actions')->name('pipeline.enrich');
+        Route::get('select-items', [PipelineController::class, 'selectItems'])->middleware('throttle:admin-pipeline-actions')->name('pipeline.select-items');
         Route::get('status', [PipelineController::class, 'status'])->name('pipeline.status');
-        Route::get('export-trends-csv', [PipelineController::class, 'exportTrendsCsv'])->name('pipeline.export-trends-csv');
-        Route::post('analyze-trends', [PipelineController::class, 'analyzeTrends'])->name('pipeline.analyze-trends');
+        Route::get('export-trends-csv', [PipelineController::class, 'exportTrendsCsv'])->middleware('throttle:admin-pipeline-actions')->name('pipeline.export-trends-csv');
+        Route::post('analyze-trends', [PipelineController::class, 'analyzeTrends'])->middleware('throttle:admin-pipeline-actions')->name('pipeline.analyze-trends');
     });
 
     // Stats dashboard
     Route::get('stats', [StatsController::class, 'index'])->name('stats.index');
 
     // Seed 10 articles pour tester la home (Postman / dev)
-    Route::post('seed-home-articles', SeedHomeArticlesController::class)->name('admin.seed-home-articles');
+    Route::post('seed-home-articles', SeedHomeArticlesController::class)->middleware('throttle:admin-pipeline-actions')->name('admin.seed-home-articles');
 
     // Moderation des soumissions
     Route::prefix('submissions')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
         Route::get('{submission}', [App\Http\Controllers\Api\AdminSubmissionController::class, 'show'])->name('admin.submissions.show');
-        Route::post('{submission}/approve', [App\Http\Controllers\Api\AdminSubmissionController::class, 'approve'])->name('admin.submissions.approve');
-        Route::post('{submission}/reject', [App\Http\Controllers\Api\AdminSubmissionController::class, 'reject'])->name('admin.submissions.reject');
+        Route::post('{submission}/approve', [App\Http\Controllers\Api\AdminSubmissionController::class, 'approve'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.approve');
+        Route::post('{submission}/reject', [App\Http\Controllers\Api\AdminSubmissionController::class, 'reject'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.reject');
     });
 
     // Newsletter subscribers (admin)
     Route::get('newsletter/subscribers', [NewsletterController::class, 'subscribers'])->name('admin.newsletter.subscribers');
 
     // Remboursement (admin)
-    Route::post('payments/{payment}/refund', [PaymentController::class, 'refund'])->name('admin.payments.refund');
+    Route::post('payments/{payment}/refund', [PaymentController::class, 'refund'])->middleware('throttle:admin-financial-actions')->name('admin.payments.refund');
 });
