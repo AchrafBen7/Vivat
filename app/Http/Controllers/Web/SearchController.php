@@ -15,9 +15,6 @@ class SearchController extends Controller
     public function index(Request $request): Response
     {
         $locale = content_locale($request);
-        if (! $request->filled('lang')) {
-            $locale = 'fr';
-        }
         $q = trim((string) $request->get('q', ''));
 
         $data = app(PublicPageDataService::class)->getSearchData($locale, $q);
@@ -44,10 +41,6 @@ class SearchController extends Controller
     public function suggestions(Request $request): JsonResponse
     {
         $locale = content_locale($request);
-        if (! $request->filled('lang')) {
-            $locale = 'fr';
-        }
-
         $q = trim((string) $request->query('q', ''));
         $normalized = mb_strtolower($q);
 

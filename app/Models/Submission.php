@@ -20,6 +20,7 @@ class Submission extends Model
         'excerpt',
         'content',
         'category_id',
+        'language',
         'reading_time',
         'status',
         'reviewer_notes',

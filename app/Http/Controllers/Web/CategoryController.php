@@ -12,9 +12,6 @@ class CategoryController extends Controller
     public function hub(Request $request, string $slug, PublicPageDataService $pageData): Response
     {
         $locale = content_locale($request);
-        if (! $request->filled('lang')) {
-            $locale = 'fr';
-        }
         $subCategoryInput = $request->input('sub_category', []);
         $subCategorySlugs = is_array($subCategoryInput) ? $subCategoryInput : [$subCategoryInput];
         $subCategorySlugs = array_values(array_unique(array_filter(

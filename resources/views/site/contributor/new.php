@@ -120,6 +120,17 @@ $uploadMaxBytes = (function (string $value): int {
             <?php endif; ?>
         </div>
         <div>
+            <label for="language" class="block font-medium text-[#004241] mb-2">Langue</label>
+            <select name="language" id="language" class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
+                <?php $selectedLanguage = $old['language'] ?? 'fr'; ?>
+                <option value="fr" <?= $selectedLanguage === 'fr' ? 'selected' : '' ?>>Français</option>
+                <option value="nl" <?= $selectedLanguage === 'nl' ? 'selected' : '' ?>>Néerlandais</option>
+            </select>
+            <?php if (!empty($errors['language'])): ?>
+            <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['language']) ? $errors['language'][0] : $errors['language']) ?></p>
+            <?php endif; ?>
+        </div>
+        <div>
             <label for="reading_time" class="block font-medium text-[#004241] mb-2">Temps</label>
             <input type="number" name="reading_time" id="reading_time" value="<?= htmlspecialchars($old['reading_time'] ?? '5') ?>" placeholder="5 min" min="1" max="120"
                 class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-24">

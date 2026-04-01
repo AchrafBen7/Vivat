@@ -883,6 +883,19 @@ $newsletterOldEmail = old('newsletter_email', '');
                 }
             }
 
+            function navigateToLanguage(lang) {
+                applyLanguage(lang);
+
+                try {
+                    document.cookie = 'vivat_lang=' + encodeURIComponent(lang) + '; path=/; max-age=' + (60 * 60 * 24 * 30) + '; SameSite=Lax';
+                } catch (error) {
+                }
+
+                var url = new URL(window.location.href);
+                url.searchParams.set('lang', lang);
+                window.location.href = url.toString();
+            }
+
             var initialLanguage = switches[0].getAttribute('data-active') || 'fr';
             try {
                 var storedLanguage = window.sessionStorage.getItem('vivat-language-visual');
@@ -902,7 +915,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                     }
 
                     event.preventDefault();
-                    applyLanguage(button.getAttribute('data-lang-option'));
+                    navigateToLanguage(button.getAttribute('data-lang-option'));
                 });
             });
         }

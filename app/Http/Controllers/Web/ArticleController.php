@@ -13,9 +13,6 @@ class ArticleController extends Controller
     public function index(Request $request): Response
     {
         $locale = content_locale($request);
-        if (! $request->filled('lang')) {
-            $locale = 'fr';
-        }
         $data = app(\App\Services\PublicPageDataService::class)->getArticlesIndexData($locale);
         $content = render_php_view('site.articles_index', $data);
         $html = render_php_view('site.layout', [
@@ -32,9 +29,6 @@ class ArticleController extends Controller
     public function show(Request $request, string $slug): Response
     {
         $locale = content_locale($request);
-        if (! $request->filled('lang')) {
-            $locale = 'fr';
-        }
         $article = Article::published()
             ->forLocale($locale)
             ->with(['subCategory'])

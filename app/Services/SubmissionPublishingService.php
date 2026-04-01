@@ -124,7 +124,7 @@ class SubmissionPublishingService
 
     private function resolveLanguage(Submission $submission): string
     {
-        $language = strtolower((string) ($submission->user?->language ?? 'fr'));
+        $language = strtolower((string) ($submission->language ?: $submission->user?->language ?? 'fr'));
 
         return in_array($language, ['fr', 'nl'], true) ? $language : 'fr';
     }

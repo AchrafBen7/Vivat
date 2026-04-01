@@ -12,10 +12,6 @@ class HomeController extends Controller
     public function __invoke(Request $request, PublicPageDataService $pageData): Response
     {
         $locale = content_locale($request);
-        // Par défaut (sans ?lang=), afficher la home en français ; utiliser ?lang=nl pour forcer le néerlandais
-        if (! $request->filled('lang')) {
-            $locale = 'fr';
-        }
         $data = $pageData->getHomeData($locale);
         $data['writer_signup_url'] = config('vivat.writer_signup_url', '/register');
         $data['writer_dashboard_url'] = url('/contributor/dashboard');
