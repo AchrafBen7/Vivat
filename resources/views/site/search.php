@@ -121,7 +121,7 @@ if ($search_term !== '') {
             <?php } else { ?>
             <a
                 href="/articles/<?= htmlspecialchars($article['slug']) ?>"
-                class="group flex min-h-[390px] flex-col overflow-hidden rounded-[30px] border border-[#D8E3DF] bg-white p-6 shadow-[0_18px_40px_rgba(0,66,65,0.05)] transition-transform duration-300 hover:-translate-y-1"
+                class="group flex min-h-[390px] flex-col overflow-hidden rounded-[30px] bg-white p-6 shadow-[0_18px_48px_rgba(0,66,65,0.08)] transition-transform duration-300 hover:-translate-y-1"
             >
                 <div class="flex min-h-0 flex-1 flex-col">
                     <?php if (! empty($article['category'])) { ?>

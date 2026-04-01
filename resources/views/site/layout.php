@@ -1,5 +1,6 @@
 <?php
 $content_locale = $content_locale ?? content_locale();
+$isDutchLocale = $content_locale === 'nl';
 $title = $title ?? 'Vivat';
 $categories = $categories ?? get_layout_categories();
 $meta_description = $meta_description ?? 'Vivat — Actualités et articles. Découvrez nos rubriques et derniers articles.';
@@ -90,6 +91,62 @@ $newsletterOldEmail = old('newsletter_email', '');
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(230, 230, 230, 0.2);
+        }
+        .vivat-lang-switch {
+            --vivat-lang-active-bg: #004241;
+            --vivat-lang-active-text: #ffffff;
+            --vivat-lang-inactive-text: rgba(0, 66, 65, 0.68);
+            position: relative;
+            display: inline-grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem;
+            border-radius: 9999px;
+            isolation: isolate;
+        }
+        .vivat-lang-switch--on-dark {
+            --vivat-lang-active-bg: #0B5A56;
+            --vivat-lang-inactive-text: rgba(255, 255, 255, 0.68);
+        }
+        .vivat-lang-switch__indicator {
+            position: absolute;
+            top: 0.25rem;
+            bottom: 0.25rem;
+            left: 0.25rem;
+            width: calc(50% - 0.375rem);
+            border-radius: 9999px;
+            background: var(--vivat-lang-active-bg);
+            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.24s ease;
+            will-change: transform;
+            z-index: 0;
+        }
+        .vivat-lang-switch[data-active="nl"] .vivat-lang-switch__indicator {
+            transform: translateX(calc(100% + 0.25rem));
+        }
+        .vivat-lang-switch__button {
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            min-width: 3.25rem;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 9999px;
+            background: transparent;
+            color: var(--vivat-lang-inactive-text);
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: color 0.22s ease, transform 0.22s ease;
+        }
+        .vivat-lang-switch__button[aria-pressed="true"] {
+            color: var(--vivat-lang-active-text);
+        }
+        .vivat-lang-switch__button:active {
+            transform: scale(0.97);
         }
         /* Barre recherche header : pastille + loupe → s’étire au hover / focus / texte saisi */
         #header-search-form {
@@ -246,6 +303,18 @@ $newsletterOldEmail = old('newsletter_email', '');
         .header-search-view-all.is-active {
             background: rgba(255, 255, 255, 0.72);
         }
+        .vivat-lang-toggle {
+            transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease;
+        }
+        .vivat-lang-toggle:hover {
+            transform: translateY(-1px);
+        }
+        .vivat-lang-toggle-pill {
+            transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, color 220ms ease, opacity 220ms ease;
+        }
+        .vivat-lang-toggle:hover .vivat-lang-toggle-pill--active {
+            transform: scale(1.03);
+        }
         @media (min-width: 1024px) {
             #header-search-form:hover,
             #header-search-form:focus-within,
@@ -271,7 +340,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                     <a href="/" class="text-inherit no-underline">Vivat</a>
                 </h1>
 
-                <div class="hidden md:block flex-1 min-w-[16px]"></div>
+                <div class="flex-1 min-w-[16px]"></div>
 
                 <!-- Barre de recherche (pastille → s’allonge au survol / focus) -->
                 <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
@@ -476,10 +545,26 @@ $newsletterOldEmail = old('newsletter_email', '');
                 <!-- Bouton Ecrire un article -->
                 <a
                     href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
-                    class="hidden md:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none min-w-[164px] px-5 bg-[#004241] text-white transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2"
+                    class="hidden xl:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none min-w-[164px] px-5 bg-[#004241] text-white transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2"
                 >
                     Rédiger un article
                 </a>
+
+                <div
+                    class="vivat-lang-switch hidden md:inline-grid bg-[#EBF1EF]"
+                    data-language-switch
+                    data-active="<?= $isDutchLocale ? 'nl' : 'fr' ?>"
+                    role="group"
+                    aria-label="Langue du site"
+                >
+                    <span class="vivat-lang-switch__indicator" aria-hidden="true"></span>
+                    <button type="button" class="vivat-lang-switch__button" data-lang-option="fr" aria-pressed="<?= $isDutchLocale ? 'false' : 'true' ?>">
+                        FR
+                    </button>
+                    <button type="button" class="vivat-lang-switch__button" data-lang-option="nl" aria-pressed="<?= $isDutchLocale ? 'true' : 'false' ?>">
+                        NL
+                    </button>
+                </div>
 
                 <!-- Hamburger : 3 lignes avec plus d'espace ; croix = même centre de rotation -->
                 <button type="button" id="hamburger-menu" class="group relative flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-[30px] border-none bg-transparent" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
@@ -494,7 +579,7 @@ $newsletterOldEmail = old('newsletter_email', '');
             <!-- Panneau menu -->
             <div id="mobile-menu-panel"
                  data-open="false"
-                 class="absolute top-full left-0 right-0 z-50 mt-3 origin-top rounded-[34px] border border-white/10 bg-[linear-gradient(165deg,#004241_0%,#003836_52%,#002E2D_100%)] p-8 shadow-[0_20px_60px_rgba(0,40,38,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] backdrop-blur-[24px] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 md:p-10 lg:left-auto lg:right-16 lg:mt-3 lg:w-[min(100%,780px)] lg:p-12 data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=false]:[clip-path:inset(0_0_100%_0)] data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100 data-[open=true]:[clip-path:inset(0_0_0_0)]"
+                 class="absolute top-full left-0 right-0 z-50 mt-3 origin-top rounded-[34px] border border-white/10 bg-[#004241] p-8 shadow-[0_20px_60px_rgba(0,40,38,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] backdrop-blur-[24px] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 md:p-10 lg:left-auto lg:right-16 lg:mt-3 lg:w-[min(100%,780px)] lg:p-12 data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=false]:[clip-path:inset(0_0_100%_0)] data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100 data-[open=true]:[clip-path:inset(0_0_0_0)]"
                  role="dialog" aria-label="Menu de navigation" aria-modal="true">
 
                 <?php if (auth()->check()) { ?>
@@ -516,9 +601,29 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </form>
                 <?php } ?>
 
+                <div class="mb-6 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/6 p-4" aria-label="Langue du site">
+                    <span class="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">Langue</span>
+                    <div
+                        class="vivat-lang-switch vivat-lang-switch--on-dark w-fit bg-white/10"
+                        data-language-switch
+                        data-active="<?= $isDutchLocale ? 'nl' : 'fr' ?>"
+                        role="group"
+                        aria-label="Choix de langue"
+                    >
+                        <span class="vivat-lang-switch__indicator" aria-hidden="true"></span>
+                        <button type="button" class="vivat-lang-switch__button" data-lang-option="fr" aria-pressed="<?= $isDutchLocale ? 'false' : 'true' ?>">
+                            FR
+                        </button>
+                        <button type="button" class="vivat-lang-switch__button" data-lang-option="nl" aria-pressed="<?= $isDutchLocale ? 'true' : 'false' ?>">
+                            NL
+                        </button>
+                    </div>
+                </div>
+
                 <nav class="flex flex-col gap-1" aria-label="Navigation principale">
                     <a href="/" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">Home</a>
                     <a href="/a-propos" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">À propos</a>
+                    <a href="/contact" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">Contact</a>
                     <a
                         href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
                         class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"
@@ -555,10 +660,10 @@ $newsletterOldEmail = old('newsletter_email', '');
     </main>
 
     <?php if (empty($hide_cta_section)) { ?>
-    <section class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 mt-12 mb-6" aria-label="Contribuer à Vivat">
+    <section class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 <?= ! empty($compact_cta_spacing) ? 'mt-6' : 'mt-12' ?> mb-6" aria-label="Contribuer à Vivat">
         <a
             href="<?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register')) ?>"
-            class="group block rounded-[30px] border border-[#D6E1DD] bg-[#EBF1EF] p-6 no-underline transition-colors duration-200 hover:bg-[#E3ECE9] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 md:p-8"
+            class="group block rounded-[30px] bg-[#EBF1EF] p-6 no-underline transition-colors duration-200 hover:bg-[#E3ECE9] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2 md:p-8"
         >
             <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
                 <div class="min-w-0 max-w-[44rem]">
@@ -569,7 +674,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                         <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
                         Accédez à votre espace rédacteur
                         <?php } else { ?>
-                        Une idée, une histoire, un point de vue ?
+                        Une idée, une histoire, un point<span class="hidden lg:inline xl:hidden"><br></span><span class="lg:hidden xl:inline"> </span>de vue ?
                         <?php } ?>
                     </h2>
                     <p class="mt-3 max-w-[40rem] text-base leading-relaxed text-[#004241]/82 md:text-[17px]">
@@ -604,7 +709,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                             <h2 class="max-w-[13ch] font-medium text-white text-3xl sm:text-4xl md:text-2xl lg:text-5xl leading-[0.98]">Les articles à ne pas rater, directement dans votre boîte mail.</h2>
                             <p class="max-w-[44ch] text-white/[0.78] text-[17px] leading-[1.4]">Une sélection simple, claire, et utile pour suivre Vivat sans chercher partout.</p>
                         </div>
-                        <form action="<?= htmlspecialchars(route('newsletter.subscribe.web')) ?>" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+                        <form action="<?= htmlspecialchars(route('newsletter.subscribe.web')) ?>" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_184px] xl:grid-cols-[minmax(0,1fr)_220px]">
                             <?= csrf_field() ?>
                             <div class="flex flex-col gap-2">
                                 <input
@@ -619,7 +724,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                                 <p class="pl-4 text-sm text-[#FFD2C9]"><?= htmlspecialchars($newsletterEmailError) ?></p>
                                 <?php } ?>
                             </div>
-                            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0B6] px-8 font-semibold text-[#004241] transition-colors duration-200 hover:bg-[#FBE9A3]">
+                            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0B6] px-8 font-semibold text-[#004241] transition-colors duration-200 hover:bg-[#FBE9A3] lg:px-6 xl:px-8">
                                 S'abonner
                             </button>
                         </form>
@@ -747,6 +852,60 @@ $newsletterOldEmail = old('newsletter_email', '');
             document.addEventListener('DOMContentLoaded', initHamburgerMenu);
         } else {
             initHamburgerMenu();
+        }
+
+        function initLanguageSwitches() {
+            var switches = Array.prototype.slice.call(document.querySelectorAll('[data-language-switch]'));
+            if (!switches.length) {
+                return;
+            }
+
+            function syncSwitch(switchEl, lang) {
+                switchEl.setAttribute('data-active', lang);
+                switchEl.querySelectorAll('[data-lang-option]').forEach(function(button) {
+                    button.setAttribute('aria-pressed', button.getAttribute('data-lang-option') === lang ? 'true' : 'false');
+                });
+            }
+
+            function applyLanguage(lang) {
+                switches.forEach(function(switchEl) {
+                    syncSwitch(switchEl, lang);
+                });
+
+                try {
+                    window.sessionStorage.setItem('vivat-language-visual', lang);
+                } catch (error) {
+                }
+            }
+
+            var initialLanguage = switches[0].getAttribute('data-active') || 'fr';
+            try {
+                var storedLanguage = window.sessionStorage.getItem('vivat-language-visual');
+                if (storedLanguage === 'fr' || storedLanguage === 'nl') {
+                    initialLanguage = storedLanguage;
+                }
+            } catch (error) {
+            }
+
+            applyLanguage(initialLanguage);
+
+            switches.forEach(function(switchEl) {
+                switchEl.addEventListener('click', function(event) {
+                    var button = event.target.closest('[data-lang-option]');
+                    if (!button) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    applyLanguage(button.getAttribute('data-lang-option'));
+                });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLanguageSwitches);
+        } else {
+            initLanguageSwitches();
         }
 
         // Fallback image : utiliser l'URL de repli si l'image principale échoue

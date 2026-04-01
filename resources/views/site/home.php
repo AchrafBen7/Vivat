@@ -45,6 +45,8 @@ $cardArrowOnYellow = $cardArrowIcon.' bg-[#004241] text-white';
 $carouselSlideWidth = 'flex-[0_0_100%] box-border min-w-0';
 $carouselNavBtn = 'absolute top-1/2 z-[60] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#004241] text-white shadow-none transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2';
 
+$rubriqueTileTabletSplit = 'group relative hidden h-[420px] min-h-0 min-w-0 flex-[0_0_32%] overflow-hidden rounded-[30px] bg-black/20 md:block lg:hidden';
+$rubriqueTileTabletFull = 'group relative hidden h-[420px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 md:block lg:hidden';
 $rubriqueTileSm = 'group relative block h-[200px] w-full min-h-0 flex-shrink-0 overflow-hidden rounded-[30px] bg-black/20 lg:h-[250px]';
 $rubriqueTileTall = 'group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]';
 $rubriqueDim = 'absolute inset-0 z-[1] bg-black/30 pointer-events-none';
@@ -109,6 +111,22 @@ $h4CatSlug = $h4['category']['slug'] ?? null;
 $h4ArtId = $h4['id'] ?? $h4['slug'] ?? null;
 $h4Fallback = vivat_category_fallback_image($h4CatSlug, 519, 280, $h4ArtId, 'h4');
 $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback) ?: $h4Fallback;
+$tabletCategorySlides = array_values($categories);
+$tabletPrimaryCategory = array_shift($tabletCategorySlides);
+$tabletCategoryPairs = array_chunk($tabletCategorySlides, 2);
+$tabletCarouselSlides = [];
+if ($tabletPrimaryCategory) {
+    $tabletCarouselSlides[] = [
+        'type' => 'hero',
+        'categories' => [$tabletPrimaryCategory],
+    ];
+}
+foreach ($tabletCategoryPairs as $pair) {
+    $tabletCarouselSlides[] = [
+        'type' => 'pair',
+        'categories' => $pair,
+    ];
+}
 ?>
 
 <!-- Bandeau pub tablette uniquement (md) -->
@@ -219,11 +237,11 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
 </div>
 
 <!-- Grille principale : mobile 1 col, desktop lg 12 cols -->
-<div class="flex flex-col w-full">
-    <div class="grid grid-cols-1 md:hidden lg:grid lg:grid-cols-12 lg:gap-6 lg:items-stretch">
+<div class="flex w-full flex-col">
+    <div class="grid grid-cols-1 gap-[18px] md:hidden lg:grid lg:grid-cols-12 lg:gap-6 lg:items-stretch">
 
         <!-- Colonne gauche: Top news + Standard 2 | lg: enfants directement sur la grille ; xl: colonne empilée -->
-        <div class="flex flex-col gap-4 lg:contents xl:col-span-5 xl:flex xl:flex-col xl:gap-6">
+        <div class="flex flex-col gap-[18px] lg:contents xl:col-span-5 xl:flex xl:flex-col xl:gap-6">
             <?php if ($h0) { ?>
             <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="<?= $articleImageZoom ?> block h-[438px] w-full overflow-hidden rounded-[30px] relative lg:col-span-5 lg:row-start-1 lg:max-w-none">
                 <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager">
@@ -231,9 +249,9 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                 <div class="<?= $cardOverlay ?> flex items-end">
                     <div class="<?= $glassBox ?> w-full">
                         <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
-                        <h2 class="font-semibold text-white line-clamp-6 text-[32px] max-sm:text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
+                        <h2 class="font-semibold text-white line-clamp-4 text-[32px] max-sm:text-2xl sm:line-clamp-6"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                         <?php if (! empty($h0['excerpt'])) { ?>
-                        <p class="text-white/90 line-clamp-5 text-sm"><?= htmlspecialchars($h0['excerpt']) ?></p>
+                        <p class="text-white/90 line-clamp-3 text-sm sm:line-clamp-5"><?= htmlspecialchars($h0['excerpt']) ?></p>
                         <?php } ?>
                         <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h0['published_at'] ?? '') ?> • <?= (int) ($h0['reading_time'] ?? 0) ?> min</p>
                     </div>
@@ -259,9 +277,9 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         </div>
 
         <!-- Colonne droite: 3 cartes équivalentes (h1, h2, h3) — grille 3 lignes égales, gap 24px -->
-        <div class="flex flex-col gap-6 lg:col-span-7 lg:row-span-2 lg:grid lg:grid-rows-3 lg:min-h-0 lg:self-stretch xl:col-span-4 xl:row-auto xl:row-span-1">
+        <div class="flex flex-col gap-[18px] lg:col-span-7 lg:row-span-2 lg:grid lg:grid-rows-3 lg:min-h-0 lg:self-stretch lg:gap-6 xl:col-span-4 xl:row-auto xl:row-span-1">
             <?php if ($h1) { ?>
-            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[200px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full lg:min-h-0">
+            <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[248px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full lg:min-h-0">
                 <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
@@ -269,7 +287,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                         <?php if (! empty($h1['category'])) { ?>
                         <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h1['category']['name']) ?></span>
                         <?php } ?>
-                        <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
+                        <h3 class="font-semibold text-white line-clamp-4 text-lg sm:line-clamp-5"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
                         <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
@@ -277,7 +295,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
             <?php } ?>
 
             <?php if ($h2) { ?>
-            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex h-[200px] w-full min-h-0 flex-col justify-end gap-2 overflow-hidden rounded-[30px] p-6 lg:h-full <?= $cardGreenSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($h2['slug']) ?>" class="group relative flex h-[248px] w-full min-h-0 flex-col justify-end gap-2 overflow-hidden rounded-[30px] p-6 lg:h-full <?= $cardGreenSurface ?>">
                 <span class="<?= $cardArrowOnGreen ?>">
                     <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
@@ -293,7 +311,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
             <?php } ?>
 
             <?php if ($h3) { ?>
-            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[200px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full">
+            <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[248px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full">
                 <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
@@ -301,7 +319,7 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                         <?php if (! empty($h3['category'])) { ?>
                         <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h3['category']['name']) ?></span>
                         <?php } ?>
-                        <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
+                        <h3 class="font-semibold text-white line-clamp-4 text-lg sm:line-clamp-5"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
                         <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>
@@ -370,6 +388,8 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
     $numSlides = max(1, count($catChunks));
         $hasLoop = ($numSlides > 1);
         $totalSlides = $hasLoop ? $numSlides + 1 : $numSlides;
+        $tabletNumSlides = count($tabletCarouselSlides);
+        $tabletHasLoop = ($tabletNumSlides > 1);
         $isVideoMedia = function (?string $url): bool {
             if (! $url) {
                 return false;
@@ -381,14 +401,16 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         };
         ?>
     <!-- Section Rubriques - Carrousel -->
-    <section id="categories-section" class="relative z-10 w-full mt-[65px] overflow-visible">
+    <section id="categories-section" class="relative z-10 mt-[65px] hidden w-full overflow-visible md:hidden lg:block">
         <div id="categories-carousel-viewport" class="overflow-hidden w-full min-w-0">
             <div id="categories-carousel-track" class="flex transition-transform duration-[1100ms] ease-out will-change-transform">
                 <?php foreach ($catChunks as $slideIdx => $chunk) {
                         $cat1 = $chunk[0] ?? null;
-                        $cat2 = $chunk[1] ?? null;
-                        $cat3 = $chunk[2] ?? null;
+                    $cat2 = $chunk[1] ?? null;
+                    $cat3 = $chunk[2] ?? null;
+                    $tabletCategory = $cat3 ?? $cat1 ?? $cat2;
                     $isFirstSlide = ($slideIdx === 0);
+                    $tabletCategoryClass = $isFirstSlide ? $rubriqueTileTabletSplit : $rubriqueTileTabletFull;
                     ?>
                 <div class="categories-carousel-slide flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>">
                     <?php if ($isFirstSlide) { ?>
@@ -397,13 +419,32 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                             <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
-                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-end md:pb-8 md:pt-6 lg:p-8 lg:justify-center lg:pb-8">
+                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-center md:p-8 lg:p-8">
                             <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl">Découvrez vos rubriques préférées</h2>
                             <p class="mt-2 max-w-[90%] text-left text-lg text-white/95 sm:text-xl md:mt-2 md:max-w-[92%] md:text-base lg:max-w-[85%] lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
                     <?php } ?>
-                    <div class="grid min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] md:gap-5 lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
+                    <?php if ($tabletCategory) { ?>
+                    <?php $tabletCategoryPoster = vivat_cloudinary_video_poster_url($tabletCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCategory['slug'] ?? null); ?>
+                    <a href="/categories/<?= htmlspecialchars($tabletCategory['slug']) ?>" class="<?= $tabletCategoryClass ?>">
+                        <?php if (! empty($tabletCategory['image_url'])) { ?>
+                        <?php if ($isVideoMedia($tabletCategory['image_url'])) { ?>
+                        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletCategoryPoster ? ' poster="'.htmlspecialchars($tabletCategoryPoster).'"' : '' ?>>
+                            <source src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php } else { ?>
+                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <?php } ?>
+                        <?php } ?>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($tabletCategory['name']) ?></span>
+                        </div>
+                    </a>
+                    <?php } ?>
+                    <div class="hidden min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] lg:grid lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
                         <div class="row-span-2 flex min-h-0 flex-col gap-4 md:gap-5 lg:gap-6">
                         <?php if ($cat1) { ?>
                         <?php $cat1Poster = vivat_cloudinary_video_poster_url($cat1['image_url'] ?? null) ?? vivat_category_public_poster_url($cat1['slug'] ?? null); ?>
@@ -472,18 +513,38 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
                     $c1 = $c[0] ?? null;
                     $c2 = $c[1] ?? null;
                     $c3 = $c[2] ?? null; ?>
+                <?php $tabletCloneCategory = $c3 ?? $c1 ?? $c2; ?>
                 <div class="categories-carousel-slide categories-carousel-clone flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-4 px-4 [contain:layout] md:gap-5 md:px-6 lg:gap-6 <?= $carouselSlideWidth ?>" aria-hidden="true">
                     <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[300px] md:h-[420px] lg:h-[524px]">
                         <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
                             <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
-                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-end md:pb-8 md:pt-6 lg:p-8 lg:justify-center lg:pb-8">
+                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-center md:p-8 lg:p-8">
                             <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl">Découvrez vos rubriques préférées</h2>
                             <p class="mt-2 max-w-[90%] text-left text-lg text-white/95 sm:text-xl md:mt-2 md:max-w-[92%] md:text-base lg:max-w-[85%] lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
-                    <div class="grid min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] md:gap-5 lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
+                    <?php if ($tabletCloneCategory) { ?>
+                    <?php $tabletClonePoster = vivat_cloudinary_video_poster_url($tabletCloneCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCloneCategory['slug'] ?? null); ?>
+                    <a href="/categories/<?= htmlspecialchars($tabletCloneCategory['slug']) ?>" class="<?= $rubriqueTileTabletSplit ?>">
+                        <?php if (! empty($tabletCloneCategory['image_url'])) { ?>
+                        <?php if ($isVideoMedia($tabletCloneCategory['image_url'])) { ?>
+                        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletClonePoster ? ' poster="'.htmlspecialchars($tabletClonePoster).'"' : '' ?>>
+                            <source src="<?= htmlspecialchars($tabletCloneCategory['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php } else { ?>
+                        <img src="<?= htmlspecialchars($tabletCloneCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCloneCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <?php } ?>
+                        <?php } ?>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($tabletCloneCategory['name']) ?></span>
+                        </div>
+                    </a>
+                    <?php } ?>
+                    <div class="hidden min-h-0 min-w-0 flex-[5] grid-cols-2 gap-4 [grid-template-rows:repeat(2,200px)] lg:grid lg:gap-6 lg:[grid-template-rows:repeat(2,250px)]">
                         <div class="row-span-2 flex min-h-0 flex-col gap-4 md:gap-5 lg:gap-6">
                         <?php if ($c1) { ?>
                         <?php $c1Poster = vivat_cloudinary_video_poster_url($c1['image_url'] ?? null) ?? vivat_category_public_poster_url($c1['slug'] ?? null); ?>
@@ -557,6 +618,133 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         </button>
         <?php } ?>
     </section>
+    <section id="categories-section-tablet" class="relative z-10 mt-[65px] hidden w-full overflow-visible md:block lg:hidden">
+        <div id="categories-carousel-tablet-viewport" class="w-full overflow-hidden">
+            <div id="categories-carousel-tablet-track" class="flex transition-transform duration-[1100ms] ease-out will-change-transform">
+                <?php foreach ($tabletCarouselSlides as $tabletSlide) { ?>
+                <div class="categories-carousel-tablet-slide flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-5 px-6 [contain:layout] <?= $carouselSlideWidth ?>">
+                    <?php if ($tabletSlide['type'] === 'hero') { ?>
+                    <?php $tabletCategory = $tabletSlide['categories'][0] ?? null; ?>
+                    <?php $tabletPoster = $tabletCategory ? (vivat_cloudinary_video_poster_url($tabletCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCategory['slug'] ?? null)) : null; ?>
+                    <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[420px]">
+                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
+                            <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
+                        </video>
+                        <div class="<?= $overlayRubriqueHero ?>"></div>
+                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
+                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
+                            <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                        </div>
+                    </a>
+                    <?php if ($tabletCategory) { ?>
+                    <a href="/categories/<?= htmlspecialchars($tabletCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-[0_0_32%] overflow-hidden rounded-[30px] bg-black/20">
+                        <?php if (! empty($tabletCategory['image_url'])) { ?>
+                        <?php if ($isVideoMedia($tabletCategory['image_url'])) { ?>
+                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletPoster ? ' poster="'.htmlspecialchars($tabletPoster).'"' : '' ?>>
+                            <source src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php } else { ?>
+                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <?php } ?>
+                        <?php } ?>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCategory['name']) ?></span>
+                        </div>
+                    </a>
+                    <?php } ?>
+                    <?php } else { ?>
+                    <?php foreach ($tabletSlide['categories'] as $tabletCategory) { ?>
+                    <?php $tabletPoster = vivat_cloudinary_video_poster_url($tabletCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCategory['slug'] ?? null); ?>
+                    <a href="/categories/<?= htmlspecialchars($tabletCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-1 overflow-hidden rounded-[30px] bg-black/20">
+                        <?php if (! empty($tabletCategory['image_url'])) { ?>
+                        <?php if ($isVideoMedia($tabletCategory['image_url'])) { ?>
+                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletPoster ? ' poster="'.htmlspecialchars($tabletPoster).'"' : '' ?>>
+                            <source src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php } else { ?>
+                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <?php } ?>
+                        <?php } ?>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCategory['name']) ?></span>
+                        </div>
+                    </a>
+                    <?php } ?>
+                    <?php } ?>
+                </div>
+                <?php } ?>
+                <?php if ($tabletHasLoop && count($tabletCarouselSlides) > 0) { ?>
+                <?php $tabletCloneSlide = $tabletCarouselSlides[0]; ?>
+                <div class="categories-carousel-tablet-slide categories-carousel-tablet-clone flex min-h-0 min-w-0 flex-shrink-0 items-stretch gap-5 px-6 [contain:layout] <?= $carouselSlideWidth ?>" aria-hidden="true">
+                    <?php if ($tabletCloneSlide['type'] === 'hero') { ?>
+                    <?php $tabletCloneCategory = $tabletCloneSlide['categories'][0] ?? null; ?>
+                    <?php $tabletClonePoster = $tabletCloneCategory ? (vivat_cloudinary_video_poster_url($tabletCloneCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCloneCategory['slug'] ?? null)) : null; ?>
+                    <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[420px]">
+                        <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
+                            <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
+                        </video>
+                        <div class="<?= $overlayRubriqueHero ?>"></div>
+                        <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
+                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
+                            <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                        </div>
+                    </a>
+                    <?php if ($tabletCloneCategory) { ?>
+                    <a href="/categories/<?= htmlspecialchars($tabletCloneCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-[0_0_32%] overflow-hidden rounded-[30px] bg-black/20">
+                        <?php if (! empty($tabletCloneCategory['image_url'])) { ?>
+                        <?php if ($isVideoMedia($tabletCloneCategory['image_url'])) { ?>
+                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletClonePoster ? ' poster="'.htmlspecialchars($tabletClonePoster).'"' : '' ?>>
+                            <source src="<?= htmlspecialchars($tabletCloneCategory['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php } else { ?>
+                        <img src="<?= htmlspecialchars($tabletCloneCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCloneCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <?php } ?>
+                        <?php } ?>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCloneCategory['name']) ?></span>
+                        </div>
+                    </a>
+                    <?php } ?>
+                    <?php } else { ?>
+                    <?php foreach ($tabletCloneSlide['categories'] as $tabletCloneCategory) { ?>
+                    <?php $tabletClonePoster = vivat_cloudinary_video_poster_url($tabletCloneCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCloneCategory['slug'] ?? null); ?>
+                    <a href="/categories/<?= htmlspecialchars($tabletCloneCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-1 overflow-hidden rounded-[30px] bg-black/20">
+                        <?php if (! empty($tabletCloneCategory['image_url'])) { ?>
+                        <?php if ($isVideoMedia($tabletCloneCategory['image_url'])) { ?>
+                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletClonePoster ? ' poster="'.htmlspecialchars($tabletClonePoster).'"' : '' ?>>
+                            <source src="<?= htmlspecialchars($tabletCloneCategory['image_url']) ?>" type="video/mp4">
+                        </video>
+                        <?php } else { ?>
+                        <img src="<?= htmlspecialchars($tabletCloneCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCloneCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <?php } ?>
+                        <?php } ?>
+                        <div class="<?= $rubriqueDim ?>"></div>
+                        <div class="<?= $rubriqueHoverTint ?>"></div>
+                        <div class="<?= $rubriqueTitleWrap ?>">
+                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCloneCategory['name']) ?></span>
+                        </div>
+                    </a>
+                    <?php } ?>
+                    <?php } ?>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+        <?php if ($tabletNumSlides > 1) { ?>
+        <button type="button" id="categories-carousel-tablet-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="Rubriques précédentes">
+            <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+        <button type="button" id="categories-carousel-tablet-next" class="<?= $carouselNavBtn ?> right-0" aria-label="Rubriques suivantes">
+            <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+        <?php } ?>
+    </section>
     <script>
     (function() {
         var section = document.getElementById('categories-section');
@@ -625,6 +813,79 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
         }, { root: viewport, threshold: [0, 0.08, 0.2] });
         videos.forEach(function (v) {
             io.observe(v);
+        });
+    })();
+    </script>
+    <script>
+    (function() {
+        var section = document.getElementById('categories-section-tablet');
+        var viewport = document.getElementById('categories-carousel-tablet-viewport');
+        if (!section || !viewport) {
+            return;
+        }
+        var videos = section.querySelectorAll('video.categories-rubrique-tablet-video');
+        if (!videos.length) {
+            return;
+        }
+        var transitionActive = false;
+
+        function pauseRubriqueVideos() {
+            videos.forEach(function (video) {
+                video.pause();
+            });
+        }
+
+        function syncRubriqueVideos() {
+            var viewportRect = viewport.getBoundingClientRect();
+            videos.forEach(function (video) {
+                var videoRect = video.getBoundingClientRect();
+                if (videoRect.width < 1 || videoRect.height < 1) {
+                    video.pause();
+
+                    return;
+                }
+                var intersectionX = Math.max(0, Math.min(videoRect.right, viewportRect.right) - Math.max(videoRect.left, viewportRect.left));
+                var intersectionY = Math.max(0, Math.min(videoRect.bottom, viewportRect.bottom) - Math.max(videoRect.top, viewportRect.top));
+                var ratio = (intersectionX * intersectionY) / (videoRect.width * videoRect.height);
+
+                if (ratio >= 0.08) {
+                    video.play().catch(function () {});
+                } else {
+                    video.pause();
+                }
+            });
+        }
+
+        window.VivatCategoryCarouselTabletMedia = {
+            setTransitionActive: function (active) {
+                transitionActive = !!active;
+            },
+            pauseRubriqueVideos: pauseRubriqueVideos,
+            syncRubriqueVideos: syncRubriqueVideos,
+        };
+
+        if (!('IntersectionObserver' in window)) {
+            syncRubriqueVideos();
+
+            return;
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            if (transitionActive) {
+                return;
+            }
+            entries.forEach(function (entry) {
+                var video = entry.target;
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.08) {
+                    video.play().catch(function () {});
+                } else {
+                    video.pause();
+                }
+            });
+        }, { root: viewport, threshold: [0, 0.08, 0.2] });
+
+        videos.forEach(function (video) {
+            observer.observe(video);
         });
     })();
     </script>
@@ -722,6 +983,111 @@ $h4Img = (! empty($h4['cover_image_url']) ? $h4['cover_image_url'] : $h4Fallback
     })();
     </script>
     <?php } ?>
+    <?php if ($tabletNumSlides > 1) { ?>
+    <script>
+    (function() {
+        var track = document.getElementById('categories-carousel-tablet-track');
+        var viewport = document.getElementById('categories-carousel-tablet-viewport');
+        var nextBtn = document.getElementById('categories-carousel-tablet-next');
+        var prevBtn = document.getElementById('categories-carousel-tablet-prev');
+        var slides = document.querySelectorAll('.categories-carousel-tablet-slide');
+        if (!track || !viewport || !nextBtn || !prevBtn || slides.length < 2) {
+            return;
+        }
+
+        var total = slides.length;
+        var realCount = total - (document.querySelector('.categories-carousel-tablet-clone') ? 1 : 0);
+        var idx = 0;
+        var isAnimating = false;
+        var mediaApi = window.VivatCategoryCarouselTabletMedia;
+
+        function beforeSlideAnimation() {
+            if (mediaApi) {
+                mediaApi.setTransitionActive(true);
+                mediaApi.pauseRubriqueVideos();
+            }
+        }
+
+        function afterSlideSettled() {
+            if (mediaApi) {
+                mediaApi.setTransitionActive(false);
+                mediaApi.syncRubriqueVideos();
+            }
+        }
+
+        function slideOffset(index) {
+            return Math.round(index * viewport.getBoundingClientRect().width);
+        }
+
+        function goTo(index, noTransition) {
+            if (noTransition) {
+                track.style.transition = 'none';
+            }
+            track.style.transform = 'translate3d(-' + slideOffset(index) + 'px, 0, 0)';
+            if (noTransition) {
+                track.offsetHeight;
+                track.style.transition = '';
+            }
+        }
+
+        window.addEventListener('resize', function() {
+            goTo(idx, true);
+            requestAnimationFrame(function () {
+                if (mediaApi) {
+                    mediaApi.syncRubriqueVideos();
+                }
+            });
+        });
+
+        track.addEventListener('transitionend', function (event) {
+            if (event.target !== track || event.propertyName !== 'transform') {
+                return;
+            }
+
+            if (idx === total - 1) {
+                isAnimating = false;
+                idx = 0;
+                goTo(0, true);
+                afterSlideSettled();
+            } else {
+                isAnimating = false;
+                afterSlideSettled();
+            }
+        });
+
+        nextBtn.addEventListener('click', function() {
+            if (isAnimating) {
+                return;
+            }
+            beforeSlideAnimation();
+            isAnimating = true;
+            idx++;
+            goTo(idx, false);
+        });
+
+        prevBtn.addEventListener('click', function() {
+            if (isAnimating) {
+                return;
+            }
+            beforeSlideAnimation();
+            isAnimating = true;
+            if (idx === 0) {
+                idx = total - 1;
+                goTo(idx, true);
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        idx = realCount - 1;
+                        goTo(idx, false);
+                    });
+                });
+            } else {
+                idx--;
+                goTo(idx, false);
+            }
+        });
+    })();
+    </script>
+    <?php } ?>
     <?php } ?>
 
     <?php
@@ -799,12 +1165,101 @@ $rightEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $is
 $bottomLeftVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isLongFormArticle);
 $bottomCenterEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isLongFormArticle);
 $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isHotNewsArticle);
+$latestTabletCards = array_values(array_filter([
+    ['kind' => 'image', 'article' => $topVisualArt, 'slot' => 'latest-tablet-top-visual', 'width' => 520, 'height' => 320],
+    ['kind' => 'soft', 'article' => $leftEditorialArt],
+    ['kind' => 'image', 'article' => $centerVisualArt, 'slot' => 'latest-tablet-center-visual', 'width' => 620, 'height' => 320],
+    ['kind' => 'green', 'article' => $rightEditorialArt],
+    ['kind' => 'image', 'article' => $bottomLeftVisualArt, 'slot' => 'latest-tablet-bottom-left-visual', 'width' => 420, 'height' => 320],
+    ['kind' => 'yellow', 'article' => $bottomCenterEditorialArt],
+    ['kind' => 'image', 'article' => $bottomRightVisualArt, 'slot' => 'latest-tablet-bottom-right-visual', 'width' => 420, 'height' => 320],
+], static fn (array $card): bool => ! empty($card['article'])));
+$latestTabletCards = array_slice($latestTabletCards, 0, 4);
 ?>
 
     <?php if (count($restArticles) > 0) { ?>
-    <section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-6 md:grid-cols-8 md:mt-16 lg:grid-cols-12">
+    <section class="mt-16 hidden w-full min-w-0 grid-cols-8 gap-6 md:grid lg:hidden">
+        <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]">Dernières actualités</h2>
+        <?php if ($topFeatureEditorialArt) { ?>
+        <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative col-span-8 flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 <?= $cardYellowSurface ?>">
+            <span class="<?= $cardArrowOnYellow ?>">
+                <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
+            </span>
+            <div class="<?= $latestColorCardContent ?> max-w-[760px]">
+                <?php if (! empty($topFeatureEditorialArt['category'])) { ?>
+                <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($topFeatureEditorialArt['category']['name']) ?></span>
+                <?php } ?>
+                <h3 class="<?= $latestColorCardTitleLarge ?> text-[#004241]"><?= htmlspecialchars($topFeatureEditorialArt['title'] ?? '') ?></h3>
+                <?php if (! empty($topFeatureEditorialArt['excerpt'])) { ?>
+                <p class="<?= $latestColorCardExcerpt ?> text-[#004241]/75"><?= htmlspecialchars($topFeatureEditorialArt['excerpt']) ?></p>
+                <?php } ?>
+                <p class="<?= $latestColorCardMeta ?> text-[#004241]/70"><?= htmlspecialchars($topFeatureEditorialArt['published_at'] ?? '') ?> • <?= (int) ($topFeatureEditorialArt['reading_time'] ?? 0) ?> min</p>
+            </div>
+        </a>
+        <?php } ?>
+        <?php foreach ($latestTabletCards as $tabletCard) { ?>
+        <?php
+        $tabletArticle = $tabletCard['article'];
+        $tabletCardKind = $tabletCard['kind'];
+        $isImageTabletCard = $tabletCardKind === 'image';
+        $tabletCardSurface = match ($tabletCardKind) {
+            'soft' => $cardSoftSurface,
+            'green' => $cardGreenSurface,
+            default => $cardYellowSurface,
+        };
+        $tabletCardArrow = $tabletCardKind === 'green' ? $cardArrowOnGreen : $cardArrowOnYellow;
+        $tabletCardTag = match ($tabletCardKind) {
+            'soft' => $tagOnSoftCard,
+            'green' => $tagOnGreenCard,
+            default => $tagOnYellowCard,
+        };
+        $tabletCardTitleText = $tabletCardKind === 'green' ? 'text-white' : 'text-[#004241]';
+        $tabletCardExcerptText = $tabletCardKind === 'green' ? 'text-white/75' : 'text-[#004241]/72';
+        $tabletCardMetaText = $tabletCardKind === 'green' ? 'text-white/70' : 'text-[#004241]/70';
+        ?>
+        <?php if ($isImageTabletCard) { ?>
+        <?php [$tabletCardImage, $tabletCardFallback] = $latestImageData($tabletArticle, $tabletCard['width'], $tabletCard['height'], $tabletCard['slot']); ?>
+        <a href="/articles/<?= htmlspecialchars($tabletArticle['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-4 block h-[320px] w-full overflow-hidden rounded-[32px]">
+            <img src="<?= htmlspecialchars($tabletCardImage) ?>" data-fallback-url="<?= htmlspecialchars($tabletCardFallback) ?>" alt="<?= htmlspecialchars($tabletArticle['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+            <div class="<?= $overlayImagePhoto ?>"></div>
+            <div class="absolute inset-x-0 bottom-0 z-10 p-6">
+                <div class="<?= $glassBox ?> min-h-[146px] justify-end">
+                    <?php if (! empty($tabletArticle['category'])) { ?>
+                    <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($tabletArticle['category']['name']) ?></span>
+                    <?php } ?>
+                    <h3 class="<?= $latestHeroTitleMedium ?> text-white"><?= htmlspecialchars($tabletArticle['title'] ?? '') ?></h3>
+                    <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($tabletArticle['published_at'] ?? '') ?> • <?= (int) ($tabletArticle['reading_time'] ?? 0) ?> min</p>
+                </div>
+            </div>
+        </a>
+        <?php } else { ?>
+        <a href="/articles/<?= htmlspecialchars($tabletArticle['slug']) ?>" class="group relative col-span-4 flex h-[320px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 <?= $tabletCardSurface ?>">
+            <span class="<?= $tabletCardArrow ?>">
+                <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
+            </span>
+            <div class="<?= $latestColorCardContent ?>">
+                <?php if (! empty($tabletArticle['category'])) { ?>
+                <span class="<?= $tagClass ?> <?= $tabletCardTag ?>"><?= htmlspecialchars($tabletArticle['category']['name']) ?></span>
+                <?php } ?>
+                <h3 class="<?= $latestColorCardTitleLarge ?> line-clamp-4 <?= $tabletCardTitleText ?>"><?= htmlspecialchars($tabletArticle['title'] ?? '') ?></h3>
+                <?php if (! empty($tabletArticle['excerpt'])) { ?>
+                <p class="<?= $latestColorCardExcerpt ?> line-clamp-3 <?= $tabletCardExcerptText ?>"><?= htmlspecialchars($tabletArticle['excerpt']) ?></p>
+                <?php } ?>
+                <p class="<?= $latestColorCardMeta ?> <?= $tabletCardMetaText ?>"><?= htmlspecialchars($tabletArticle['published_at'] ?? '') ?> • <?= (int) ($tabletArticle['reading_time'] ?? 0) ?> min</p>
+            </div>
+        </a>
+        <?php } ?>
+        <?php } ?>
+        <div class="col-span-8 flex justify-center pt-2">
+            <a href="/articles" class="inline-flex h-12 items-center justify-center rounded-full bg-[#004241] px-8 text-base font-semibold text-white no-underline transition-colors duration-200 hover:bg-[#003130]">
+                Plus d'articles
+            </a>
+        </div>
+    </section>
+
+    <section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-[18px] md:hidden lg:mt-16 lg:grid lg:grid-cols-12 lg:gap-6">
         <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
-        <div class="grid min-w-0 w-full grid-cols-1 gap-6 md:col-span-8 md:grid-cols-8 lg:col-span-12 lg:grid-cols-12">
+        <div class="grid min-w-0 w-full grid-cols-1 gap-[18px] lg:col-span-12 lg:grid-cols-12 lg:gap-6">
             <?php if ($topFeatureEditorialArt) { ?>
             <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardYellowSurface ?>">
                 <span class="<?= $cardArrowOnYellow ?>">
@@ -825,7 +1280,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
 
             <?php if ($topVisualArt) { ?>
             <?php [$topVisualImg, $topVisualFallback] = $latestImageData($topVisualArt, 520, 340, 'latest-top-visual'); ?>
-            <a href="/articles/<?= htmlspecialchars($topVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[300px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[340px]">
+            <a href="/articles/<?= htmlspecialchars($topVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[280px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[340px]">
                 <img src="<?= htmlspecialchars($topVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($topVisualFallback) ?>" alt="<?= htmlspecialchars($topVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $overlayImagePhoto ?>"></div>
                 <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
@@ -841,7 +1296,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
             <?php } ?>
 
             <?php if ($leftEditorialArt) { ?>
-            <a href="/articles/<?= htmlspecialchars($leftEditorialArt['slug']) ?>" class="group relative flex h-[320px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-4 lg:col-span-3 lg:h-[360px] <?= $cardSoftSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($leftEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-4 lg:col-span-3 lg:h-[360px] <?= $cardSoftSurface ?>">
                 <span class="<?= $cardArrowOnYellow ?>">
                     <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
@@ -860,7 +1315,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
 
             <?php if ($centerVisualArt) { ?>
             <?php [$centerVisualImg, $centerVisualFallback] = $latestImageData($centerVisualArt, 620, 360, 'latest-center-visual'); ?>
-            <a href="/articles/<?= htmlspecialchars($centerVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[320px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[360px]">
+            <a href="/articles/<?= htmlspecialchars($centerVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[280px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[360px]">
                 <img src="<?= htmlspecialchars($centerVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($centerVisualFallback) ?>" alt="<?= htmlspecialchars($centerVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
                 <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
@@ -876,7 +1331,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
             <?php } ?>
 
             <?php if ($rightEditorialArt) { ?>
-            <a href="/articles/<?= htmlspecialchars($rightEditorialArt['slug']) ?>" class="group relative flex h-[320px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-8 lg:col-span-4 lg:h-[360px] <?= $cardGreenSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($rightEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-8 lg:col-span-4 lg:h-[360px] <?= $cardGreenSurface ?>">
                 <span class="<?= $cardArrowOnGreen ?>">
                     <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
@@ -895,7 +1350,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
 
             <?php if ($bottomLeftVisualArt) { ?>
             <?php [$bottomLeftVisualImg, $bottomLeftVisualFallback] = $latestImageData($bottomLeftVisualArt, 420, 280, 'latest-bottom-left-visual'); ?>
-            <a href="/articles/<?= htmlspecialchars($bottomLeftVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[250px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-4 lg:h-[290px]">
+            <a href="/articles/<?= htmlspecialchars($bottomLeftVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[280px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-4 lg:h-[290px]">
                 <img src="<?= htmlspecialchars($bottomLeftVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($bottomLeftVisualFallback) ?>" alt="<?= htmlspecialchars($bottomLeftVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
                 <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
@@ -911,7 +1366,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
             <?php } ?>
 
             <?php if ($bottomCenterEditorialArt) { ?>
-            <a href="/articles/<?= htmlspecialchars($bottomCenterEditorialArt['slug']) ?>" class="group relative flex h-[250px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-7 md:col-span-4 lg:col-span-4 lg:h-[290px] <?= $cardYellowSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($bottomCenterEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-7 md:col-span-4 lg:col-span-4 lg:h-[290px] <?= $cardYellowSurface ?>">
                 <span class="<?= $cardArrowOnYellow ?>">
                     <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 17L17 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 7h8v8"/></svg>
                 </span>
@@ -930,7 +1385,7 @@ $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isH
 
             <?php if ($bottomRightVisualArt) { ?>
             <?php [$bottomRightVisualImg, $bottomRightVisualFallback] = $latestImageData($bottomRightVisualArt, 420, 280, 'latest-bottom-right-visual'); ?>
-            <a href="/articles/<?= htmlspecialchars($bottomRightVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[250px] w-full overflow-hidden rounded-[32px] md:col-span-8 lg:col-span-4 lg:h-[290px]">
+            <a href="/articles/<?= htmlspecialchars($bottomRightVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[280px] w-full overflow-hidden rounded-[32px] md:col-span-8 lg:col-span-4 lg:h-[290px]">
                 <img src="<?= htmlspecialchars($bottomRightVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($bottomRightVisualFallback) ?>" alt="<?= htmlspecialchars($bottomRightVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
                 <div class="<?= $overlayImagePhoto ?>"></div>
                 <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">

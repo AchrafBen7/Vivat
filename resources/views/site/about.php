@@ -8,7 +8,7 @@ $aboutHeroImageUrl = 'https://images.pexels.com/photos/4050320/pexels-photo-4050
 $cardGreenSurface = 'bg-[#004241] transition-colors duration-200 hover:bg-[#003130]';
 $cardYellowSurface = 'bg-[#FFF0B6] transition-colors duration-200 hover:bg-[#FBE9A3]';
 $cardSoftSurface = 'bg-[#EBF1EF] transition-colors duration-200 hover:bg-[#DEE7E4]';
-$cardWhiteSurface = 'border border-[#D6E1DD] bg-white transition-colors duration-200 hover:bg-[#F7FAF9]';
+$cardWhiteSurface = 'bg-white shadow-[0_18px_48px_rgba(0,66,65,0.08)] transition-colors duration-200 hover:bg-[#F7FAF9]';
 
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
 $tagTopNews = 'bg-[#FFF1B9] text-[#004241]';
@@ -91,7 +91,7 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
         </div>
 
         <!-- Bandeau pleine largeur : respiration type bandeau CTA home -->
-        <section class="flex flex-col gap-8 overflow-hidden rounded-[30px] border border-[#D6E1DD] bg-white p-8 md:flex-row md:items-center md:justify-between md:gap-12 md:p-10 lg:col-span-12">
+        <section class="flex flex-col gap-8 overflow-hidden rounded-[30px] bg-white p-8 shadow-[0_18px_48px_rgba(0,66,65,0.08)] md:flex-row md:items-center md:justify-between md:gap-12 md:p-10 lg:col-span-12">
             <div class="min-w-0 flex-1">
                 <h2 class="m-0 font-semibold leading-tight text-[#004241] text-2xl md:text-3xl">Continuer la découverte</h2>
                 <p class="mt-3 max-w-[48ch] text-base leading-relaxed text-[#004241]/85 md:text-[17px]">Parcourez les derniers articles ou contactez-nous si vous avez une question ou une remarque.</p>
