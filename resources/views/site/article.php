@@ -18,12 +18,12 @@ $coverFallback = vivat_category_fallback_image($catSlug, 1282, 444, $relatedBase
 $coverSrc = ! empty($cover_image_url) ? $cover_image_url : $coverFallback;
 $backHref = $relatedCategorySlug ? '/categories/'.htmlspecialchars($relatedCategorySlug) : '/';
 $relatedItems = ! empty($related_articles) ? array_map(fn (array $a) => [
-    ‘title’        => $a[‘title’],
-    ‘slug’         => $a[‘slug’],
-    ‘date’         => $a[‘published_at_display’] ?? ‘’,
-    ‘reading_time’ => $a[‘reading_time’] ?? 4,
-    ‘category’     => $a[‘category’] ?? $relatedCategoryName,
-    ‘image’        => $a[‘image’] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, ‘also-1’),
+    'title'        => $a['title'],
+    'slug'         => $a['slug'],
+    'date'         => $a['published_at_display'] ?? '',
+    'reading_time' => $a['reading_time'] ?? 4,
+    'category'     => $a['category'] ?? $relatedCategoryName,
+    'image'        => $a['image'] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-1'),
 ], $related_articles) : [];
 $alsoCarouselItems = array_merge(
     [[
