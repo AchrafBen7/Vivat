@@ -810,6 +810,35 @@ class ContributorController extends Controller
     public function profile(Request $request): Response|RedirectResponse
     {
         if ($request->isMethod('post')) {
+            if ($request->input('form_type') === 'password') {
+                $validated = $request->validate([
+                    'current_password' => ['required', 'current_password'],
+                    'password' => [
+                        'required',
+                        'confirmed',
+                        \Illuminate\Validation\Rules\Password::min(12)
+                            ->mixedCase()
+                            ->numbers()
+                            ->symbols(),
+                    ],
+                ], [
+                    'current_password.required' => 'Votre mot de passe actuel est obligatoire.',
+                    'current_password.current_password' => 'Le mot de passe actuel est incorrect.',
+                    'password.required' => 'Le nouveau mot de passe est obligatoire.',
+                    'password.confirmed' => 'Les nouveaux mots de passe ne correspondent pas.',
+                    'password.min' => 'Le nouveau mot de passe doit contenir au moins 12 caractères.',
+                    'password.mixed' => 'Le nouveau mot de passe doit contenir une majuscule et une minuscule.',
+                    'password.numbers' => 'Le nouveau mot de passe doit contenir au moins un chiffre.',
+                    'password.symbols' => 'Le nouveau mot de passe doit contenir au moins un symbole.',
+                ]);
+
+                $request->user()->forceFill([
+                    'password' => $validated['password'],
+                ])->save();
+
+                return redirect()->route('contributor.profile')->with('success', 'Mot de passe mis à jour.');
+            }
+
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'bio' => ['nullable', 'string', 'max:2000'],

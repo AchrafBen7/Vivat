@@ -70,6 +70,12 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                     <?php } ?>
                 </div>
 
+                <div class="-mt-1 flex justify-end">
+                    <a href="<?= route('password.request') ?>" class="text-sm font-medium text-[#004241] underline underline-offset-4 hover:no-underline">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
                 <div class="flex items-start gap-3">
                     <label for="remember" class="flex items-start gap-3 text-sm leading-snug text-[#004241]">
                         <input

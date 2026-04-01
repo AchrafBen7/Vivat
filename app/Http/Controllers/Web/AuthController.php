@@ -4,15 +4,42 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Password as PasswordBroker;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
 {
+    private function strongPasswordRules(): array
+    {
+        return [
+            'required',
+            'confirmed',
+            PasswordRule::min(12)
+                ->mixedCase()
+                ->numbers()
+                ->symbols(),
+        ];
+    }
+
+    private function strongPasswordMessages(): array
+    {
+        return [
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+            'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
+            'password.mixed' => 'Le mot de passe doit contenir une majuscule et une minuscule.',
+            'password.letters' => 'Le mot de passe doit contenir des lettres.',
+            'password.numbers' => 'Le mot de passe doit contenir au moins un chiffre.',
+            'password.symbols' => 'Le mot de passe doit contenir au moins un symbole.',
+        ];
+    }
+
     public function showBecomeContributor(Request $request): Response
     {
         $priceCents = (int) config('services.stripe.publication_price', 1500);
@@ -60,9 +87,9 @@ class AuthController extends Controller
             'first_name'      => ['required', 'string', 'max:255'],
             'last_name'       => ['required', 'string', 'max:255'],
             'email'           => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password'        => ['required', 'confirmed', Password::defaults()],
+            'password'        => $this->strongPasswordRules(),
             'terms_accepted'  => ['required', 'accepted'],
-        ], [
+        ], array_merge([
             'first_name.required' => 'Le prénom est obligatoire.',
             'first_name.max' => 'Le prénom ne peut pas dépasser 255 caractères.',
             'last_name.required' => 'Le nom est obligatoire.',
@@ -71,11 +98,9 @@ class AuthController extends Controller
             'email.email' => "L'email n'est pas valide.",
             'email.max' => "L'email ne peut pas dépasser 255 caractères.",
             'email.unique' => 'Cet email est déjà utilisé.',
-            'password.required' => 'Le mot de passe est obligatoire.',
-            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
             'terms_accepted.required' => 'Vous devez accepter les conditions d\'utilisation.',
             'terms_accepted.accepted' => 'Vous devez accepter les conditions d\'utilisation.',
-        ]);
+        ], $this->strongPasswordMessages()));
 
         $name = trim($validated['first_name'] . ' ' . $validated['last_name']);
 
@@ -145,6 +170,111 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'Les identifiants sont incorrects.',
         ])->onlyInput('email');
+    }
+
+    public function showForgotPasswordForm(Request $request): Response
+    {
+        $errors = $request->session()->get('errors');
+        $old = $request->old();
+        $content = render_php_view('site.forgot_password', [
+            'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
+            'old' => $old,
+            'status' => session('status'),
+        ]);
+        $html = render_php_view('site.layout', [
+            'content' => $content,
+            'content_locale' => content_locale($request),
+            'title' => 'Mot de passe oublié — Vivat',
+            'meta_description' => 'Recevez un lien de réinitialisation de mot de passe pour votre compte Vivat.',
+            'hide_cta_section' => true,
+            'hide_footer' => true,
+            'trim_main_bottom' => true,
+        ]);
+
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    public function sendResetLink(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ], [
+            'email.required' => "L'email est obligatoire.",
+            'email.email' => "L'email n'est pas valide.",
+        ]);
+
+        $status = PasswordBroker::sendResetLink([
+            'email' => $validated['email'],
+        ]);
+
+        if ($status === PasswordBroker::RESET_LINK_SENT) {
+            return back()->with('status', 'Si un compte existe pour cette adresse, un lien de réinitialisation vient d’être envoyé.');
+        }
+
+        return back()->withErrors([
+            'email' => 'Impossible d’envoyer le lien de réinitialisation pour le moment.',
+        ])->onlyInput('email');
+    }
+
+    public function showResetPasswordForm(Request $request, string $token): Response
+    {
+        $errors = $request->session()->get('errors');
+        $old = $request->old();
+        $content = render_php_view('site.reset_password', [
+            'errors' => $errors ? $errors->getBag('default')->getMessages() : [],
+            'old' => $old,
+            'token' => $token,
+            'email' => (string) $request->query('email', $old['email'] ?? ''),
+        ]);
+        $html = render_php_view('site.layout', [
+            'content' => $content,
+            'content_locale' => content_locale($request),
+            'title' => 'Réinitialiser le mot de passe — Vivat',
+            'meta_description' => 'Choisissez un nouveau mot de passe pour votre compte Vivat.',
+            'hide_cta_section' => true,
+            'hide_footer' => true,
+            'trim_main_bottom' => true,
+        ]);
+
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    public function resetPassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => $this->strongPasswordRules(),
+        ], array_merge([
+            'token.required' => 'Le lien de réinitialisation est invalide.',
+            'email.required' => "L'email est obligatoire.",
+            'email.email' => "L'email n'est pas valide.",
+        ], $this->strongPasswordMessages()));
+
+        $status = PasswordBroker::reset(
+            [
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'password_confirmation' => $request->input('password_confirmation'),
+                'token' => $validated['token'],
+            ],
+            function (User $user, string $password): void {
+                $user->forceFill([
+                    'password' => $password,
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === PasswordBroker::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter.');
+        }
+
+        return back()->withErrors([
+            'email' => 'Le lien de réinitialisation est invalide ou a expiré.',
+        ])->withInput($request->except('password', 'password_confirmation'));
     }
 
     public function logout(Request $request): RedirectResponse

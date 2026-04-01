@@ -164,4 +164,62 @@ $initials = $initials !== '' ? $initials : 'V';
             </button>
         </div>
     </form>
+
+    <form action="<?= url('/contributor/profile') ?>" method="post" class="rounded-2xl border border-[#DED8CE66] bg-[#F8F6F2] p-5 flex flex-col gap-5">
+        <?= csrf_field() ?>
+        <input type="hidden" name="form_type" value="password">
+
+        <div class="w-full h-7">
+            <h2 class="text-[18px] leading-7 font-medium text-[#1B4B3B]">Changer mon mot de passe</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="pt-[5px] flex flex-col gap-[9px]">
+                <label for="current_password" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Mot de passe actuel</label>
+                <div>
+                    <input
+                        type="password"
+                        id="current_password"
+                        name="current_password"
+                        class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
+                    >
+                    <?php if (!empty($errors['current_password'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['current_password']) ? $errors['current_password'][0] : $errors['current_password']) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="pt-[5px] flex flex-col gap-[9px]">
+                <label for="new_password" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Nouveau mot de passe</label>
+                <div>
+                    <input
+                        type="password"
+                        id="new_password"
+                        name="password"
+                        class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
+                    >
+                    <p class="mt-2 text-xs text-[#004241]/60">Minimum 12 caractères avec majuscule, minuscule, chiffre et symbole.</p>
+                    <?php if (!empty($errors['password'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="pt-[5px] flex flex-col gap-[9px]">
+                <label for="password_confirmation" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Confirmation</label>
+                <input
+                    type="password"
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
+                >
+            </div>
+        </div>
+
+        <div class="flex justify-end pt-1">
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-7 text-sm font-medium leading-5 text-[#F3EFE7] hover:bg-[#003535] transition">
+                Mettre à jour le mot de passe
+            </button>
+        </div>
+    </form>
 </div>

@@ -25,6 +25,10 @@ Route::get('/register', [WebAuthController::class, 'showRegisterForm'])->name('r
 Route::post('/register', [WebAuthController::class, 'register'])->middleware('throttle:auth-register');
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login'])->middleware('throttle:auth-login');
+Route::get('/forgot-password', [WebAuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [WebAuthController::class, 'sendResetLink'])->middleware('throttle:auth-login')->name('password.email');
+Route::get('/reset-password/{token}', [WebAuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [WebAuthController::class, 'resetPassword'])->name('password.update');
 Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
 Route::get('/logout', [WebAuthController::class, 'logout'])->name('logout.get');
 Route::get('/search/suggestions', [WebSearchController::class, 'suggestions'])->name('search.suggestions');

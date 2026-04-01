@@ -22,7 +22,7 @@ $activeTab = $activeTab ?? 'articles';
     </nav>
 
     <div class="mt-auto border-t border-[#004241]/8 p-3 flex flex-col gap-1">
-        <a href="#" class="flex items-center gap-3 rounded-[12px] h-10 px-4 text-[14px] font-medium text-[#004241]/75 hover:bg-[#EBF1EF] hover:text-[#004241] transition-colors" title="Bientôt disponible">
+        <a href="<?= url('/contributor/profile') ?>#current_password" class="flex items-center gap-3 rounded-[12px] h-10 px-4 text-[14px] font-medium text-[#004241]/75 hover:bg-[#EBF1EF] hover:text-[#004241] transition-colors">
             <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
             Mot de passe
         </a>

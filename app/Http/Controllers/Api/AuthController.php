@@ -7,11 +7,23 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    private function strongPasswordRules(): array
+    {
+        return [
+            'required',
+            'confirmed',
+            PasswordRule::min(12)
+                ->mixedCase()
+                ->numbers()
+                ->symbols(),
+        ];
+    }
+
     /**
      * POST /api/auth/register
      */
@@ -20,8 +32,13 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => $this->strongPasswordRules(),
             'language' => ['sometimes', 'in:fr,nl'],
+        ], [
+            'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
+            'password.mixed' => 'Le mot de passe doit contenir une majuscule et une minuscule.',
+            'password.numbers' => 'Le mot de passe doit contenir au moins un chiffre.',
+            'password.symbols' => 'Le mot de passe doit contenir au moins un symbole.',
         ]);
 
         $user = User::create([
