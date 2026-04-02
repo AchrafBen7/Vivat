@@ -41,6 +41,7 @@ class ArticleController extends Controller
 
         $relatedArticles = Article::published()
             ->forLocale($locale)
+            ->with('category')
             ->where('id', '!=', $article->id)
             ->when($article->category_id, fn ($q) => $q->where('category_id', $article->category_id))
             ->orderByDesc('published_at')
@@ -50,9 +51,16 @@ class ArticleController extends Controller
                 'title'        => $a->title,
                 'slug'         => $a->slug,
                 'reading_time' => $a->reading_time,
-                'category'     => $category?->name ?? '',
+                'category'     => $a->category?->name ?? '',
                 'published_at_display' => $a->published_at?->locale('fr')->isoFormat('D MMMM YYYY'),
-                'image'        => $this->articleCoverOrFallback($a, $category),
+                'image'        => $this->articleCoverOrFallback($a, $a->category),
+                'fallback'     => vivat_category_fallback_image(
+                    $a->category?->slug ?? $category?->slug,
+                    760,
+                    520,
+                    (string) $a->id,
+                    'also'
+                ),
             ])
             ->all();
 
