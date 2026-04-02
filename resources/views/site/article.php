@@ -175,8 +175,7 @@ $shareLinks = [
                 <a
                     href="<?= ! empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
                     class="group relative block h-[380px] w-[240px] flex-shrink-0 overflow-hidden rounded-[30px] sm:w-[320px] lg:w-[calc((100%-48px)/3)]"
-                    data-carousel-card="<?= ($isMiddleSequence ? $idx : '') ?>"
-                    <?= $copy === 0 ? 'data-cycle-item="1"' : '' ?>
+                    data-cycle-item="1"
                 >
                     <img src="<?= htmlspecialchars($item['image']) ?>" data-fallback-url="<?= htmlspecialchars($item['fallback'] ?? $item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>

@@ -17,6 +17,7 @@ $roleLabel = match ($primaryRole) {
     default => 'Membre',
 };
 $avatarUrl = $user->avatar ?? null;
+$requiresPasswordForDeletion = empty($user->google_id);
 $initials = collect(preg_split('/\s+/', trim((string) $name)) ?: [])
     ->filter()
     ->take(2)
@@ -219,6 +220,78 @@ $initials = $initials !== '' ? $initials : 'V';
         <div class="flex justify-end pt-1">
             <button type="submit" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-7 text-sm font-medium leading-5 text-[#F3EFE7] hover:bg-[#003535] transition">
                 Mettre à jour le mot de passe
+            </button>
+        </div>
+    </form>
+
+    <form action="<?= url('/contributor/profile') ?>" method="post" class="rounded-2xl border border-[#D65B57]/25 bg-[#FFF8F7] p-5 flex flex-col gap-5">
+        <?= csrf_field() ?>
+        <input type="hidden" name="form_type" value="delete_account">
+
+        <div class="flex flex-col gap-2">
+            <h2 class="text-[18px] leading-7 font-medium text-[#8E2E2A]">Supprimer mon compte</h2>
+            <p class="text-sm leading-6 text-[#8E2E2A]/80">
+                Cette action est irréversible. Vos données personnelles seront anonymisées, votre accès sera révoqué,
+                mais les articles, paiements et décisions éditoriales pourront être conservés si une conservation légale ou comptable s’impose.
+            </p>
+            <?php if (!empty($errors['delete_account'])): ?>
+            <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_account']) ? $errors['delete_account'][0] : $errors['delete_account']) ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="pt-[5px] flex flex-col gap-[9px]">
+                <label for="delete_email" class="text-xs font-medium uppercase tracking-[0.06em] text-[#8E2E2A]">Confirmez votre email</label>
+                <div>
+                    <input
+                        type="email"
+                        id="delete_email"
+                        name="delete_email"
+                        value="<?= htmlspecialchars($old['delete_email'] ?? '') ?>"
+                        placeholder="<?= htmlspecialchars($email) ?>"
+                        class="w-full h-10 rounded-xl border border-[#E8C8C6] bg-white px-3 text-sm text-[#6A2420] outline-none focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
+                    >
+                    <p class="mt-2 text-xs text-[#8E2E2A]/60">Saisissez exactement l’adresse liée à ce compte pour confirmer l’opération.</p>
+                    <?php if (!empty($errors['delete_email'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_email']) ? $errors['delete_email'][0] : $errors['delete_email']) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <?php if ($requiresPasswordForDeletion): ?>
+            <div class="pt-[5px] flex flex-col gap-[9px]">
+                <label for="current_password_delete" class="text-xs font-medium uppercase tracking-[0.06em] text-[#8E2E2A]">Mot de passe actuel</label>
+                <div>
+                    <input
+                        type="password"
+                        id="current_password_delete"
+                        name="current_password_delete"
+                        class="w-full h-10 rounded-xl border border-[#E8C8C6] bg-white px-3 text-sm text-[#6A2420] outline-none focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
+                    >
+                    <p class="mt-2 text-xs text-[#8E2E2A]/60">Cette vérification protège votre compte contre une suppression lancée depuis une session ouverte.</p>
+                    <?php if (!empty($errors['current_password_delete'])): ?>
+                    <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['current_password_delete']) ? $errors['current_password_delete'][0] : $errors['current_password_delete']) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <label class="inline-flex items-start gap-3 rounded-xl border border-[#E8C8C6] bg-white px-4 py-3 text-sm leading-6 text-[#6A2420]">
+            <input type="checkbox" name="delete_confirmation" value="1" class="mt-1 h-4 w-4 rounded border-[#D65B57] text-[#8E2E2A] focus:ring-[#8E2E2A]/20">
+            <span>Je confirme vouloir supprimer définitivement mon compte et perdre l’accès à l’espace rédacteur.</span>
+        </label>
+        <?php if (!empty($errors['delete_confirmation'])): ?>
+        <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_confirmation']) ? $errors['delete_confirmation'][0] : $errors['delete_confirmation']) ?></p>
+        <?php endif; ?>
+
+        <div class="flex justify-end pt-1">
+            <button
+                type="submit"
+                class="inline-flex h-10 items-center justify-center rounded-full bg-[#8E2E2A] px-7 text-sm font-medium leading-5 text-white hover:bg-[#73231F] transition"
+                onclick="return window.confirm('Confirmez-vous la suppression définitive de votre compte ?');"
+            >
+                Supprimer mon compte
             </button>
         </div>
     </form>

@@ -6,17 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Payment;
 use App\Models\Submission;
+use App\Services\AccountDeletionService;
+use App\Services\SubmissionPublishingService;
 use App\Services\SubmissionImageStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class ContributorController extends Controller
 {
     public function __construct(
+        private readonly AccountDeletionService $accountDeletionService,
+        private readonly SubmissionPublishingService $submissionPublishingService,
         private readonly SubmissionImageStorageService $submissionImageStorage,
     ) {}
 
@@ -57,6 +62,19 @@ class ContributorController extends Controller
             'notice' => [
                 'title' => 'Article transmis',
                 'message' => 'Votre article va etre verifie par notre equipe et sera publie automatiquement apres acceptation.',
+            ],
+        ];
+    }
+
+    private function adminPublishedPayload(string $redirectUrl): array
+    {
+        return [
+            'ok' => true,
+            'status' => 'approved',
+            'redirect_url' => $redirectUrl,
+            'notice' => [
+                'title' => 'Article publié',
+                'message' => 'Votre article a été publié directement sans étape de paiement.',
             ],
         ];
     }
@@ -231,6 +249,11 @@ class ContributorController extends Controller
             'cover_image.mimes' => "L'image de couverture doit être au format JPG ou PNG.",
             'cover_image.max' => "L'image de couverture ne peut pas dépasser 5 Mo.",
         ];
+    }
+
+    private function canBypassPublicationPayment(Request $request): bool
+    {
+        return (bool) $request->user()?->hasRole('admin');
     }
 
     private function renderContributorPage(string $activeTab, string $contentView, array $data = []): Response
@@ -479,6 +502,7 @@ class ContributorController extends Controller
         if ($request->isMethod('post')) {
             $isAutosave = $this->isAutosaveRequest($request);
             $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
+            $canBypassPayment = $this->canBypassPublicationPayment($request);
             $validated = $request->validate(
                 $this->contributorSubmissionRules($isAutosave, $shouldSubmit),
                 $this->contributorSubmissionMessages()
@@ -489,7 +513,7 @@ class ContributorController extends Controller
             }
 
             $hasFreePublishedRevision = filled($submission->published_article_id);
-            $status = $shouldSubmit && ($this->hasPaidPublication($submission) || $hasFreePublishedRevision) ? 'pending' : 'draft';
+            $status = $shouldSubmit && ($this->hasPaidPublication($submission) || $hasFreePublishedRevision || $canBypassPayment) ? 'pending' : 'draft';
             $coverImageUrl = $submission->cover_image_url;
 
             if ($request->hasFile('cover_image')) {
@@ -549,7 +573,39 @@ class ContributorController extends Controller
             }
 
             if ($shouldSubmit && ($request->expectsJson() || $request->ajax())) {
+                if ($canBypassPayment) {
+                    $article = $this->submissionPublishingService->approveAndPublish(
+                        $submission->fresh(),
+                        [
+                            'category_id' => $submission->category_id,
+                            'article_type' => 'standard',
+                            'reviewer_notes' => 'Publication directe par un administrateur.',
+                        ],
+                        $request->user()
+                    );
+
+                    return response()->json(
+                        $this->adminPublishedPayload(url('/articles/' . $article->slug))
+                    );
+                }
+
                 return response()->json($this->submissionAcceptedPayload(route('contributor.dashboard')));
+            }
+
+            if ($shouldSubmit && $canBypassPayment) {
+                $article = $this->submissionPublishingService->approveAndPublish(
+                    $submission->fresh(),
+                    [
+                        'category_id' => $submission->category_id,
+                        'article_type' => 'standard',
+                        'reviewer_notes' => 'Publication directe par un administrateur.',
+                    ],
+                    $request->user()
+                );
+
+                return redirect()
+                    ->to(url('/articles/' . $article->slug))
+                    ->with('success', 'Article publié directement.');
             }
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -607,6 +663,7 @@ class ContributorController extends Controller
             'publication_price' => $this->publicationPrice(),
             'payment_create_url' => route('contributor.web-payments.create-intent'),
             'payment_confirm_url' => route('contributor.web-payments.confirm'),
+            'can_bypass_payment' => $this->canBypassPublicationPayment($request),
         ]);
     }
 
@@ -615,12 +672,13 @@ class ContributorController extends Controller
         if ($request->isMethod('post')) {
             $isAutosave = $this->isAutosaveRequest($request);
             $shouldSubmit = ! $isAutosave && $request->input('status') === 'submitted';
+            $canBypassPayment = $this->canBypassPublicationPayment($request);
             $validated = $request->validate(
                 $this->contributorSubmissionRules($isAutosave, $shouldSubmit),
                 $this->contributorSubmissionMessages()
             );
 
-            $status = 'draft';
+            $status = $shouldSubmit && $canBypassPayment ? 'pending' : 'draft';
             $coverImageUrl = $request->hasFile('cover_image')
                 ? $this->submissionImageStorage->storeUploadedImage($request->file('cover_image'))
                 : null;
@@ -645,6 +703,28 @@ class ContributorController extends Controller
             }
 
             if ($shouldSubmit) {
+                if ($canBypassPayment) {
+                    $article = $this->submissionPublishingService->approveAndPublish(
+                        $submission->fresh(),
+                        [
+                            'category_id' => $submission->category_id,
+                            'article_type' => 'standard',
+                            'reviewer_notes' => 'Publication directe par un administrateur.',
+                        ],
+                        $request->user()
+                    );
+
+                    if ($request->expectsJson() || $request->ajax()) {
+                        return response()->json(
+                            $this->adminPublishedPayload(url('/articles/' . $article->slug))
+                        );
+                    }
+
+                    return redirect()
+                        ->to(url('/articles/' . $article->slug))
+                        ->with('success', 'Article publié directement.');
+                }
+
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json($this->paymentRequiredPayload($submission));
                 }
@@ -700,6 +780,7 @@ class ContributorController extends Controller
             'publication_price' => $this->publicationPrice(),
             'payment_create_url' => route('contributor.web-payments.create-intent'),
             'payment_confirm_url' => route('contributor.web-payments.confirm'),
+            'can_bypass_payment' => $this->canBypassPublicationPayment($request),
         ]);
     }
 
@@ -822,6 +903,52 @@ class ContributorController extends Controller
     public function profile(Request $request): Response|RedirectResponse
     {
         if ($request->isMethod('post')) {
+            if ($request->input('form_type') === 'delete_account') {
+                $user = $request->user();
+
+                if ($user->hasRole('admin')) {
+                    return redirect()
+                        ->route('contributor.profile')
+                        ->withErrors(['delete_account' => 'La suppression automatique d’un compte administrateur est bloquée pour préserver l’accès au back-office.'])
+                        ->withInput();
+                }
+
+                $rules = [
+                    'delete_email' => ['required', 'email'],
+                    'delete_confirmation' => ['accepted'],
+                ];
+
+                if (blank($user->google_id)) {
+                    $rules['current_password_delete'] = ['required', 'current_password'];
+                }
+
+                $validated = $request->validate($rules, [
+                    'delete_email.required' => 'Veuillez confirmer votre adresse email.',
+                    'delete_email.email' => 'Veuillez entrer une adresse email valide.',
+                    'delete_confirmation.accepted' => 'Vous devez confirmer la suppression définitive du compte.',
+                    'current_password_delete.required' => 'Votre mot de passe actuel est obligatoire pour supprimer le compte.',
+                    'current_password_delete.current_password' => 'Le mot de passe actuel est incorrect.',
+                ]);
+
+                if (! hash_equals((string) $user->email, (string) $validated['delete_email'])) {
+                    return redirect()
+                        ->route('contributor.profile')
+                        ->withErrors(['delete_email' => 'L’adresse email de confirmation ne correspond pas à votre compte.'])
+                        ->withInput();
+                }
+
+                $this->accountDeletionService->anonymize($user);
+
+                Auth::guard('web')->logout();
+
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()
+                    ->route('home')
+                    ->with('success', 'Votre compte a été supprimé et vos données personnelles ont été anonymisées.');
+            }
+
             if ($request->input('form_type') === 'password') {
                 $validated = $request->validate([
                     'current_password' => ['required', 'current_password'],

@@ -9,6 +9,7 @@ $stripeKey = $stripe_key ?? '';
 $publicationPrice = (int) ($publication_price ?? 1500);
 $paymentCreateUrl = $payment_create_url ?? '';
 $paymentConfirmUrl = $payment_confirm_url ?? '';
+$canBypassPayment = (bool) ($can_bypass_payment ?? false);
 $publicationPriceLabel = number_format($publicationPrice / 100, 2, ',', ' ') . ' EUR';
 
 $uploadMaxRaw = ini_get('upload_max_filesize') ?: '2M';
@@ -31,7 +32,9 @@ $uploadMaxBytes = (function (string $value): int {
 ?>
 <h1 class="font-medium text-[#004241] text-2xl mb-2"><?= $isEditing ? 'Modifier l’article' : 'Nouvel article' ?></h1>
 <p class="text-[#004241]/80 mb-8">
-    <?= $isEditing ? 'Mettez à jour votre soumission puis renvoyez-la en validation.' : 'Partagez vos idées avec la communauté Vivat' ?>
+    <?= $canBypassPayment
+        ? ($isEditing ? 'Mettez à jour votre article puis publiez-le directement depuis cet écran.' : 'Créez et publiez un article sans étape de paiement.')
+        : ($isEditing ? 'Mettez à jour votre soumission puis renvoyez-la en validation.' : 'Partagez vos idées avec la communauté Vivat') ?>
 </p>
 
 <?php if ($isEditing && !empty($submission['reviewer_notes'])): ?>
@@ -60,6 +63,7 @@ $uploadMaxBytes = (function (string $value): int {
     data-payment-confirm-url="<?= htmlspecialchars($paymentConfirmUrl) ?>"
     data-publication-price-label="<?= htmlspecialchars($publicationPriceLabel) ?>"
     data-is-editing="<?= $isEditing ? '1' : '0' ?>"
+    data-can-bypass-payment="<?= $canBypassPayment ? '1' : '0' ?>"
 >
     <?= csrf_field() ?>
 
@@ -172,7 +176,7 @@ $uploadMaxBytes = (function (string $value): int {
             </button>
             <button type="submit" name="status" value="submitted" class="h-12 px-6 rounded-full bg-[#004241] text-white font-semibold hover:bg-[#003535] transition inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                <?= $isEditing ? 'Renvoyer en validation' : 'Publier' ?>
+                <?= $canBypassPayment ? 'Publier maintenant' : ($isEditing ? 'Renvoyer en validation' : 'Publier') ?>
             </button>
         </div>
     </div>
@@ -283,6 +287,7 @@ $uploadMaxBytes = (function (string $value): int {
     const paymentCreateUrl = form.dataset.paymentCreateUrl || '';
     const paymentConfirmUrl = form.dataset.paymentConfirmUrl || '';
     const publicationPriceLabel = form.dataset.publicationPriceLabel || '';
+    const canBypassPayment = form.dataset.canBypassPayment === '1';
     const csrfToken = form.querySelector('input[name="_token"]')?.value || '';
 
     let previewUrl = null;
@@ -839,7 +844,9 @@ $uploadMaxBytes = (function (string $value): int {
         showOverlayProgress(
             isPublishAction ? 'Enregistrement du brouillon...' : 'Enregistrement du brouillon...',
             isPublishAction
-                ? 'Nous sauvegardons votre article avant de lancer le paiement.'
+                ? (canBypassPayment
+                    ? 'Nous sauvegardons votre article avant publication directe.'
+                    : 'Nous sauvegardons votre article avant de lancer le paiement.')
                 : 'Nous enregistrons votre brouillon pour que vous puissiez le reprendre à tout moment.'
         );
 

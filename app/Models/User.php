@@ -36,6 +36,7 @@ class User extends Authenticatable
         'instagram_url',
         'twitter_url',
         'website_url',
+        'account_deleted_at',
     ];
 
     /**
@@ -59,6 +60,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'interests' => 'array',
+            'account_deleted_at' => 'datetime',
         ];
     }
 

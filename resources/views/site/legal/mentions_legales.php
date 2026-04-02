@@ -42,6 +42,9 @@
             <h2 style="font-size: 20px; font-weight: 600; color: #004241;">Signaler un contenu illicite</h2>
             <p>Vous pouvez signaler un contenu illicite en écrivant à l'adresse : <a href="mailto:info@mediaa.be" style="color:#004241;">info@mediaa.be</a></p>
 
+            <h2 style="font-size: 20px; font-weight: 600; color: #004241;">Suppression de compte et données personnelles</h2>
+            <p>Les utilisateurs peuvent demander la suppression de leur compte conformément à la réglementation applicable en matière de protection des données. Lorsque cette demande est recevable, les données personnelles directement identifiantes sont supprimées ou anonymisées, sous réserve des informations qui doivent être conservées pour répondre à des obligations légales, comptables, fiscales, de sécurité ou de preuve.</p>
+
             <h2 style="font-size: 20px; font-weight: 600; color: #004241;">Webmastering et référencement naturel</h2>
             <p>Le site <strong>Vivat.be</strong>, son code et sa base de donnée, est développé et maintenu par l'agence web Media*A (<a href="https://www.mediaa.be" target="_blank" rel="noopener noreferrer" style="color:#004241;">www.mediaa.be</a>) située à Genval en Belgique. Le référencement naturel du site internet dans les moteurs de recherche (SEO) est également assuré par l'équipe e-marketing de l'agence.</p>
 
