@@ -29,13 +29,30 @@ $t = $locale === 'nl'
         'response_time' => 'En général, l’équipe répond sous 48h ouvrées. Si vous hésitez, commencez par l’adresse de rédaction.',
         'see_faq' => 'Voir la FAQ',
     ];
+
+$contactHeroImageUrl = 'https://images.pexels.com/photos/8867244/pexels-photo-8867244.jpeg?auto=compress&cs=tinysrgb&w=1400&h=1750&fit=crop';
+
+$tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
+$tagTopNews = 'bg-[#FFF1B9] text-[#004241]';
 ?>
 <div class="mx-auto flex w-full max-w-[1280px] flex-col" style="gap: 24px;">
-    <section class="rounded-[32px] bg-[#EBF1EF] px-6 py-7 md:px-8 md:py-8">
-        <div class="flex flex-col" style="gap: 14px;">
-            <span class="inline-flex w-fit items-center justify-center rounded-full bg-white px-[16px] py-[8px] text-sm font-medium text-[#004241]"><?= htmlspecialchars($t['badge']) ?></span>
-            <h1 class="max-w-[10ch] font-semibold text-[#004241]" style="font-family: Figtree, sans-serif; font-size: clamp(34px, 5vw, 60px); line-height: 0.96;"><?= htmlspecialchars($t['title']) ?></h1>
-            <p class="max-w-[52ch] text-[#004241]/78" style="font-size: 18px; line-height: 1.45;"><?= htmlspecialchars($t['lead']) ?></p>
+    <section class="relative flex min-h-[420px] flex-col justify-start gap-4 overflow-hidden rounded-[30px] bg-neutral-900 p-8 text-white md:p-10 lg:min-h-[524px]">
+        <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[30px]" aria-hidden="true">
+            <img
+                src="<?= htmlspecialchars($contactHeroImageUrl) ?>"
+                alt=""
+                width="1400"
+                height="1750"
+                class="absolute left-1/2 top-1/2 h-[103%] w-[103%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover blur-sm sm:blur-[6px]"
+                loading="eager"
+                decoding="async"
+            >
+        </div>
+        <div class="pointer-events-none absolute inset-0 rounded-[30px] bg-gradient-to-b from-black/45 via-black/30 to-black/55" aria-hidden="true"></div>
+        <div class="relative z-[1] flex max-w-[58ch] flex-col gap-5">
+            <span class="<?= $tagClass ?> <?= $tagTopNews ?>"><?= htmlspecialchars($t['badge']) ?></span>
+            <h1 class="font-semibold leading-[1.08] text-[32px] text-white max-sm:text-2xl md:text-[36px] lg:text-[40px]"><?= htmlspecialchars($t['title']) ?></h1>
+            <p class="m-0 text-base leading-relaxed text-white/95 md:text-[17px]"><?= htmlspecialchars($t['lead']) ?></p>
         </div>
     </section>
 

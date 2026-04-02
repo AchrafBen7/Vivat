@@ -14,8 +14,6 @@ $writer_cta_title = $writer_cta_title ?? (count($writerCtaLines) === 2 ? $writer
 $writer_cta_subtitle = $writer_cta_subtitle ?? (count($writerCtaLines) === 2 ? $writerCtaLines[1] : '');
 $writer_cta_tag_1 = $writer_cta_tag_1 ?? 'Rédaction';
 $writer_cta_tag_2 = $writer_cta_tag_2 ?? 'Actualités';
-$writer_cta_secondary_label = $writer_cta_secondary_label ?? 'En savoir plus';
-$writer_cta_secondary_url = $writer_cta_secondary_url ?? '/devenir-redacteur';
 $rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dfcy6isdu/video/upload/v1774257142/rubriques_h5dyvo.mp4';
 $rubriquesHeroPosterUrl = vivat_cloudinary_video_poster_url($rubriquesHeroVideoUrl) ?? '/technologie.jpg';
 
@@ -29,8 +27,11 @@ $writerCtaTextWrap = 'min-w-0 flex-1 pr-16 text-left';
 $writerCtaTitle = 'font-semibold leading-snug text-[#004241] text-base';
 $writerCtaSubtitle = 'mt-0.5 text-sm font-normal leading-snug text-[#004241]/80';
 $writerCtaTagPill = 'inline-flex max-w-full shrink-0 items-center rounded-full bg-[#004241]/10 px-2.5 py-0.5 text-[11px] font-medium leading-none text-[#004241]';
-$writerCtaSecondaryBtn = 'relative z-[25] inline-flex max-w-full shrink-0 items-center rounded-full border border-[#004241] bg-transparent px-3 py-1 text-xs font-semibold text-[#004241] transition-colors hover:bg-[#004241]/10';
-$writerCtaIconBtn = 'absolute bottom-[18px] right-[18px] inline-flex h-12 w-12 flex-shrink-0 items-center justify-center text-[#004241]';
+/** Coin bas-droit du bandeau (padding 18px aligné sur le bloc) — z au-dessus du lien plein écran */
+$writerCtaIconBtn = 'pointer-events-none absolute bottom-[18px] right-[18px] z-[3] inline-flex h-12 w-12 flex-shrink-0 items-center justify-center text-[#004241]';
+/** CTA pleine largeur (mobile → lg) : sans tags pastilles, typo un peu au-dessus du base */
+$writerCtaTitleLarge = $writerCtaTitle.' text-lg leading-snug sm:text-xl sm:leading-snug';
+$writerCtaSubtitleLarge = $writerCtaSubtitle.' mt-1 text-sm leading-snug sm:text-base';
 
 // —— Design tokens & blocs Tailwind réutilisables (Vivat)
 $cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
@@ -63,9 +64,19 @@ $rubriqueTileTabletFull = 'group relative hidden h-[420px] min-h-0 min-w-0 w-ful
 $rubriqueTileSm = 'group relative block h-[200px] w-full min-h-0 flex-shrink-0 overflow-hidden rounded-[30px] bg-black/20 lg:h-[250px]';
 $rubriqueTileTall = 'group relative row-span-2 block h-[416px] min-h-0 min-w-0 w-full overflow-hidden rounded-[30px] bg-black/20 lg:h-[524px]';
 $rubriqueDim = 'absolute inset-0 z-[1] bg-black/30 pointer-events-none';
-$rubriqueHoverTint = 'pointer-events-none absolute inset-0 z-[1] bg-[#004241]/50 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100';
-$rubriqueTitleWrap = 'pointer-events-none absolute inset-0 z-[2] flex items-center justify-center p-4 md:p-[18px]';
+$rubriqueHoverTint = 'pointer-events-none absolute inset-0 z-[1] bg-black/40 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100';
+$rubriqueTitleWrap = 'pointer-events-none absolute inset-0 z-[2] flex flex-col items-center justify-center gap-0 p-4 md:p-[18px]';
 $rubriqueTitle = 'text-center text-base font-semibold leading-snug text-white lg:text-xl';
+$rubriqueDescHover = 'mt-0 max-h-0 w-full max-w-[min(100%,40ch)] shrink-0 overflow-hidden px-2 text-center text-xs font-normal leading-snug text-white/90 opacity-0 transition-all duration-300 ease-out [text-wrap:balance] group-hover:mt-2 group-hover:max-h-[7rem] group-hover:opacity-100 sm:text-sm lg:line-clamp-4';
+$renderRubriqueCategoryLabel = static function (array $cat, string $titleClass = '') use ($rubriqueTitle, $rubriqueDescHover): void {
+    $titleClasses = $titleClass !== '' ? $titleClass : $rubriqueTitle;
+    $name = htmlspecialchars($cat['name'] ?? '');
+    $desc = trim((string) ($cat['description'] ?? ''));
+    echo '<span class="'.$titleClasses.'">'.$name.'</span>';
+    if ($desc !== '') {
+        echo '<p class="'.$rubriqueDescHover.'">'.htmlspecialchars($desc).'</p>';
+    }
+};
 
 // Grille highlight : 5 emplacements depuis $highlight
 $h0 = $highlight[0] ?? null;
@@ -234,18 +245,19 @@ foreach ($tabletCategoryPairs as $pair) {
             </a>
     <?php } ?>
 
-    <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="col-span-8 <?= $writerCtaBanner ?>">
-        <div class="<?= $writerCtaTextWrap ?>">
-            <p class="<?= $writerCtaTitle ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
+    <div class="col-span-8 <?= $writerCtaBanner ?>">
+        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> — <?= htmlspecialchars($writer_cta_label) ?>"></a>
+        <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
+            <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
             <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
-            <p class="<?= $writerCtaSubtitle ?>"><?= htmlspecialchars($writer_cta_subtitle) ?></p>
+            <p class="<?= $writerCtaSubtitleLarge ?>"><?= htmlspecialchars($writer_cta_subtitle) ?></p>
             <?php } ?>
         </div>
-            <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
-                <span class="absolute inset-0 rounded-[30px] bg-[#004241] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"></span>
-                <svg class="relative z-[1] h-[26px] w-[26px] transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#EBF1EF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-            </span>
-    </a>
+        <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
+            <span class="absolute inset-0 rounded-[30px] bg-[#004241] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"></span>
+            <svg class="relative z-[1] h-[26px] w-[26px] transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#EBF1EF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </span>
+    </div>
 </div>
 
 <!-- Grille principale : mobile 1 col, desktop lg 12 cols -->
@@ -339,21 +351,16 @@ foreach ($tabletCategoryPairs as $pair) {
             <?php } ?>
         </div>
 
-        <!-- CTA rédacteur : pleine largeur sous le bloc hero (lg / 1024px seulement — tags + bouton secondaire) -->
+        <!-- CTA rédacteur : pleine largeur sous le bloc hero (lg / 1024px seulement — même variante que mobile / tablette) -->
         <div class="<?= $writerCtaBanner ?> hidden w-full items-center lg:col-span-12 lg:row-start-3 lg:flex xl:hidden">
             <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> — <?= htmlspecialchars($writer_cta_label) ?>"></a>
             <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
-                <p class="<?= $writerCtaTitle ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
+                <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                 <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
-                <p class="<?= $writerCtaSubtitle ?>"><?= htmlspecialchars($writer_cta_subtitle) ?></p>
+                <p class="<?= $writerCtaSubtitleLarge ?>"><?= htmlspecialchars($writer_cta_subtitle) ?></p>
                 <?php } ?>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                    <span class="<?= $writerCtaTagPill ?>"><?= htmlspecialchars($writer_cta_tag_1) ?></span>
-                    <span class="<?= $writerCtaTagPill ?>"><?= htmlspecialchars($writer_cta_tag_2) ?></span>
-                    <a href="<?= htmlspecialchars($writer_cta_secondary_url) ?>" class="<?= $writerCtaSecondaryBtn ?> pointer-events-auto"><?= htmlspecialchars($writer_cta_secondary_label) ?></a>
-                </div>
             </div>
-            <span class="<?= $writerCtaIconBtn ?> pointer-events-none relative z-[2]" aria-hidden="true">
+            <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
                 <span class="absolute inset-0 rounded-[30px] bg-[#004241] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"></span>
                 <svg class="relative z-[1] h-[26px] w-[26px] transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#EBF1EF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </span>
@@ -378,19 +385,20 @@ foreach ($tabletCategoryPairs as $pair) {
             </a>
     </div>
 
-        <!-- CTA rédacteur mobile uniquement -->
-        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBanner ?> relative w-full lg:hidden">
-            <div class="<?= $writerCtaTextWrap ?>">
-                <p class="<?= $writerCtaTitle ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
+        <!-- CTA rédacteur mobile (même variante typo que tablette / lg) -->
+        <div class="<?= $writerCtaBanner ?> relative w-full lg:hidden">
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> — <?= htmlspecialchars($writer_cta_label) ?>"></a>
+            <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
+                <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                 <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
-                <p class="<?= $writerCtaSubtitle ?>"><?= htmlspecialchars($writer_cta_subtitle) ?></p>
+                <p class="<?= $writerCtaSubtitleLarge ?>"><?= htmlspecialchars($writer_cta_subtitle) ?></p>
                 <?php } ?>
             </div>
             <span class="<?= $writerCtaIconBtn ?>" aria-hidden="true">
                 <span class="absolute inset-0 rounded-[30px] bg-[#004241] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"></span>
                 <svg class="relative z-[1] h-[26px] w-[26px] transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#EBF1EF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </span>
-        </a>
+        </div>
     </div>
 
     <!-- Bannière pub -->
@@ -514,7 +522,7 @@ foreach ($tabletCategoryPairs as $pair) {
                     <div class="<?= $rubriqueDim ?>"></div>
                     <div class="<?= $rubriqueHoverTint ?>"></div>
                     <div class="<?= $rubriqueTitleWrap ?> p-8">
-                        <span class="text-center text-4xl font-semibold leading-tight text-white"><?= htmlspecialchars($desktopSoloCategory['name']) ?></span>
+                        <?php $renderRubriqueCategoryLabel($desktopSoloCategory, 'text-center text-4xl font-semibold leading-tight text-white'); ?>
                     </div>
                 </a>
                 <?php } ?>
@@ -543,7 +551,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($pairCat['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($pairCat); ?>
                         </div>
                     </a>
                         <?php } ?>
@@ -586,7 +594,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($stackedCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($stackedCategory); ?>
                                 </div>
                             </a>
                     <?php } ?>
@@ -610,7 +618,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($tallCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($tallCategory); ?>
                                 </div>
                             </a>
                     <?php } ?>
@@ -631,7 +639,7 @@ foreach ($tabletCategoryPairs as $pair) {
                             <div class="<?= $rubriqueDim ?>"></div>
                             <div class="<?= $rubriqueHoverTint ?>"></div>
                             <div class="<?= $rubriqueTitleWrap ?>">
-                                <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($smallCategory['name']) ?></span>
+                                <?php $renderRubriqueCategoryLabel($smallCategory); ?>
                         </div>
                         </a>
                         <?php } ?>
@@ -652,7 +660,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?>"><?= htmlspecialchars($tallCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($tallCategory); ?>
                             </div>
                         </a>
                     <?php } ?>
@@ -704,7 +712,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($tabletCategory, $rubriqueTitle.' md:text-[17px]'); ?>
                         </div>
                     </a>
                     <?php } ?>
@@ -724,7 +732,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($tabletCategory, $rubriqueTitle.' md:text-[17px]'); ?>
                         </div>
                     </a>
                     <?php } ?>
@@ -761,7 +769,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCloneCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($tabletCloneCategory, $rubriqueTitle.' md:text-[17px]'); ?>
                         </div>
                     </a>
                     <?php } ?>
@@ -781,7 +789,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         <div class="<?= $rubriqueDim ?>"></div>
                         <div class="<?= $rubriqueHoverTint ?>"></div>
                         <div class="<?= $rubriqueTitleWrap ?>">
-                            <span class="<?= $rubriqueTitle ?> md:text-[17px]"><?= htmlspecialchars($tabletCloneCategory['name']) ?></span>
+                            <?php $renderRubriqueCategoryLabel($tabletCloneCategory, $rubriqueTitle.' md:text-[17px]'); ?>
                         </div>
                     </a>
                     <?php } ?>

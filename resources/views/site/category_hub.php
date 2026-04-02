@@ -165,15 +165,21 @@ $restArticles = array_values($byId);
         <?php } else { ?>
         <img src="<?= htmlspecialchars($heroFallback) ?>" data-fallback-url="<?= htmlspecialchars($heroFallback) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
         <?php } ?>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-        <div class="absolute left-0 top-0 flex flex-col p-8 max-w-[500px]">
-            <h1 class="font-semibold text-white leading-none text-5xl font-sans"><?= htmlspecialchars($category_name) ?></h1>
-            <?php if ($description) { ?>
-            <p class="font-light text-white/95 mt-4 text-xl font-sans"><?= htmlspecialchars($description) ?></p>
-            <?php } ?>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-[1]" aria-hidden="true"></div>
+        <a href="/" class="absolute left-8 top-8 z-20 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white" aria-label="Retour">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            Retour
+        </a>
+        <div class="absolute inset-0 z-10 flex flex-col pointer-events-none">
+            <div class="flex min-h-0 flex-1 flex-col items-center justify-center px-6 pb-4 pt-14 text-center sm:px-8 sm:pt-16">
+                <h1 class="max-w-[56ch] font-sans text-4xl font-semibold leading-none text-white sm:text-5xl"><?= htmlspecialchars($category_name) ?></h1>
+                <?php if ($description) { ?>
+                <p class="mt-4 max-w-[56ch] font-sans text-lg font-light text-white/95 sm:text-xl"><?= htmlspecialchars($description) ?></p>
+                <?php } ?>
+            </div>
         </div>
         <!-- Filtres dans le carré: left 32px, bottom, marge 11px entre les filtres -->
-        <nav id="category-hub-filters" class="absolute flex items-center flex-wrap left-8 bottom-8 gap-[11px]" aria-label="Filtrer par sous-rubrique">
+        <nav id="category-hub-filters" class="absolute bottom-8 left-8 z-20 flex flex-wrap items-center gap-[11px]" aria-label="Filtrer par sous-rubrique">
             <?php $allSelected = $current_sub_category_slugs === []; ?>
             <a href="/categories/<?= htmlspecialchars($category_slug) ?>" class="group inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0 <?= $allSelected ? 'relative category-filter-chip--selected' : '' ?>" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $allSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
                 Tous

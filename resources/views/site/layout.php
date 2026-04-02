@@ -89,6 +89,20 @@ $newsletterOldEmail = old('newsletter_email', '');
             box-shadow: none !important;
         }
 
+        /*
+         * clip-path: inset() sans « round » = rectangle aux coins vifs : le voile (z-40) réapparaît en gris dans les courbes du panneau vert.
+         * Même rayon que rounded-[34px] sur le panneau.
+         */
+        #mobile-menu-panel[data-open="true"] {
+            -webkit-clip-path: inset(0 0 0 0 round 34px);
+            clip-path: inset(0 0 0 0 round 34px);
+        }
+
+        #mobile-menu-panel[data-open="false"] {
+            -webkit-clip-path: inset(0 0 100% 0 round 34px);
+            clip-path: inset(0 0 100% 0 round 34px);
+        }
+
         /* Tag pill : effet glass sans padding supplémentaire */
         .vivat-glass-tag {
             background: rgba(190, 190, 190, 0.1);
@@ -555,7 +569,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </a>
 
                 <div
-                    class="vivat-lang-switch hidden md:inline-grid bg-[#EBF1EF]"
+                    class="vivat-lang-switch inline-grid shrink-0 bg-[#EBF1EF]"
                     data-language-switch
                     data-active="<?= $isDutchLocale ? 'nl' : 'fr' ?>"
                     role="group"
@@ -583,8 +597,9 @@ $newsletterOldEmail = old('newsletter_email', '');
             <!-- Panneau menu -->
             <div id="mobile-menu-panel"
                  data-open="false"
-                 class="absolute top-full left-0 right-0 z-50 mt-3 origin-top rounded-[34px] border border-white/10 bg-[#004241] p-8 shadow-[0_20px_60px_rgba(0,40,38,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] backdrop-blur-[24px] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 md:p-10 lg:left-auto lg:right-16 lg:mt-3 lg:w-[min(100%,780px)] lg:p-12 data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=false]:[clip-path:inset(0_0_100%_0)] data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100 data-[open=true]:[clip-path:inset(0_0_0_0)]"
+                 class="absolute top-full left-0 right-0 z-50 mt-0 origin-top isolate overflow-hidden rounded-[34px] border border-white/10 bg-[#004241] shadow-[0_20px_60px_rgba(0,40,38,0.35)] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 lg:left-auto lg:right-16 lg:mt-0 lg:w-[min(100%,780px)] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100"
                  role="dialog" aria-label="Menu de navigation" aria-modal="true">
+                <div class="p-8 md:p-10 lg:p-12">
 
                 <?php if (auth()->check()) { ?>
                 <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="mb-6 block rounded-[20px] border border-white/12 bg-white/8 p-5 transition-all duration-200 hover:border-white/25 hover:bg-white/15">
@@ -605,44 +620,26 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </form>
                 <?php } ?>
 
-                <div class="mb-6 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/6 p-4" aria-label="<?= htmlspecialchars(__('site.site_language')) ?>">
-                    <span class="text-xs font-semibold uppercase tracking-[0.14em] text-white/45"><?= htmlspecialchars(__('site.language')) ?></span>
-                    <div
-                        class="vivat-lang-switch vivat-lang-switch--on-dark w-fit bg-white/10"
-                        data-language-switch
-                        data-active="<?= $isDutchLocale ? 'nl' : 'fr' ?>"
-                        role="group"
-                        aria-label="<?= htmlspecialchars(__('site.language_choice')) ?>"
-                    >
-                        <span class="vivat-lang-switch__indicator" aria-hidden="true"></span>
-                        <button type="button" class="vivat-lang-switch__button" data-lang-option="fr" aria-pressed="<?= $isDutchLocale ? 'false' : 'true' ?>">
-                            FR
-                        </button>
-                        <button type="button" class="vivat-lang-switch__button" data-lang-option="nl" aria-pressed="<?= $isDutchLocale ? 'true' : 'false' ?>">
-                            NL
-                        </button>
-                    </div>
-                </div>
-
                 <nav class="flex flex-col gap-1" aria-label="Navigation principale">
-                    <a href="/" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.home')) ?></a>
-                    <a href="/a-propos" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.about')) ?></a>
-                    <a href="/contact" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.contact')) ?></a>
+                    <a href="/" class="rounded-[16px] px-5 py-4 text-[18px] font-normal text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.home')) ?></a>
+                    <a href="/a-propos" class="rounded-[16px] px-5 py-4 text-[18px] font-normal text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.about')) ?></a>
+                    <a href="/contact" class="rounded-[16px] px-5 py-4 text-[18px] font-normal text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.contact')) ?></a>
                     <a
                         href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
-                        class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"
+                        class="rounded-[16px] px-5 py-4 text-[18px] font-normal text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"
                     >
                         <?= htmlspecialchars(__('site.write_article')) ?>
                     </a>
-                    <a href="/faq" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.faq')) ?></a>
+                    <a href="/faq" class="rounded-[16px] px-5 py-4 text-[18px] font-normal text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.faq')) ?></a>
                 </nav>
 
-                <p class="mb-4 mt-8 border-t border-white/10 pt-7 text-sm font-medium uppercase tracking-[0.12em] text-white/45"><?= htmlspecialchars(__('site.sections')) ?></p>
+                <p class="mb-4 mt-8 border-t border-white/10 pt-7 text-sm font-normal uppercase tracking-[0.12em] text-white/45"><?= htmlspecialchars(__('site.sections')) ?></p>
                 <nav class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 lg:grid-cols-3" aria-label="<?= htmlspecialchars(__('site.sections')) ?>">
                     <?php foreach ($categories as $cat) { ?>
-                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[14px] px-4 py-3.5 text-[15px] font-medium text-white/85 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars($cat['name']) ?></a>
+                    <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[14px] px-4 py-3.5 text-[15px] font-normal text-white/85 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php } ?>
                 </nav>
+                </div>
             </div>
         </div>
     </header>
