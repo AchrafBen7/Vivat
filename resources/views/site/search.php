@@ -8,6 +8,7 @@ $totalArticles = $pagination ? (int) $pagination->total() : count($articles);
 $currentPage = $pagination ? (int) $pagination->currentPage() : 1;
 $lastPage = $pagination ? (int) $pagination->lastPage() : 1;
 $gridArticles = $articles;
+$locale = content_locale();
 
 $tagBase = 'inline-flex w-fit items-center justify-center rounded-full px-3 py-1.5 text-[12px] font-medium tracking-[0.02em]';
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
@@ -31,17 +32,21 @@ $resolveImage = static function (array $article, int $width, int $height, string
     return [$src, $fallback];
 };
 
-$heroTitle = 'Rechercher des articles';
-$heroDescription = 'Saisissez un mot-clé ou une rubrique pour parcourir les contenus Vivat dans la même mise en page que la page actualités.';
-$heroBadge = 'Recherche';
+$t = $locale === 'nl'
+    ? ['title' => 'Artikels zoeken', 'desc' => 'Typ een trefwoord of rubriek om Vivat-content te doorzoeken in dezelfde lay-out als de actualiteitspagina.', 'badge' => 'Zoeken', 'results_in' => 'Resultaten in ', 'results_for' => 'Resultaten voor', 'desc_cat' => 'Hier zie je de artikels die bij deze categorie horen, in hetzelfde redactionele ritme als de actualiteitspagina.', 'desc_search' => 'Hier zie je de artikels die overeenkomen met je zoekopdracht, met dezelfde visuele hiërarchie als de actualiteitspagina.', 'result' => 'resultaat', 'results' => 'resultaten', 'page' => 'Pagina', 'of' => 'van', 'keyword' => 'Zoekwoord', 'empty_badge' => 'Geen resultaat', 'empty_title' => 'Geen artikel gevonden', 'empty_text' => 'Geen enkel artikel komt momenteel overeen met deze zoekopdracht. Probeer een ander trefwoord of een andere rubriek.', 'start_badge' => 'Start een zoekopdracht', 'start_title' => 'Geef een trefwoord in', 'start_text' => 'Voer een onderwerp, categorie of enkele woorden in om de resultaten in deze lay-out te tonen.', 'pagination' => 'Paginering van zoekresultaten', 'previous' => 'Vorige', 'next' => 'Volgende']
+    : ['title' => 'Rechercher des articles', 'desc' => 'Saisissez un mot-clé ou une rubrique pour parcourir les contenus Vivat dans la même mise en page que la page actualités.', 'badge' => 'Recherche', 'results_in' => 'Résultats dans ', 'results_for' => 'Résultats pour', 'desc_cat' => 'Voici les articles correspondant à cette catégorie, présentés dans le même rythme éditorial que la page actualités.', 'desc_search' => 'Voici les articles correspondant à votre recherche, avec la même hiérarchie visuelle que la page actualités.', 'result' => 'résultat', 'results' => 'résultats', 'page' => 'Page', 'of' => 'sur', 'keyword' => 'Mot-clé', 'empty_badge' => 'Aucun résultat', 'empty_title' => 'Aucun article trouvé', 'empty_text' => 'Aucun article ne correspond à cette recherche pour le moment. Essayez un autre mot-clé ou une autre rubrique.', 'start_badge' => 'Lancez une recherche', 'start_title' => 'Saisissez un mot-clé', 'start_text' => 'Entrez un sujet, une catégorie ou quelques mots pour afficher les résultats dans ce même layout.', 'pagination' => 'Pagination des résultats de recherche', 'previous' => 'Précédent', 'next' => 'Suivant'];
+
+$heroTitle = $t['title'];
+$heroDescription = $t['desc'];
+$heroBadge = $t['badge'];
 
 if ($search_term !== '') {
     $heroTitle = $matched_category
-        ? 'Résultats dans '.($matched_category['name'] ?? 'cette rubrique')
-        : 'Résultats pour "'.$search_term.'"';
+        ? $t['results_in'].($matched_category['name'] ?? '')
+        : $t['results_for'].' "'.$search_term.'"';
     $heroDescription = $matched_category
-        ? 'Voici les articles correspondant à cette catégorie, présentés dans le même rythme éditorial que la page actualités.'
-        : 'Voici les articles correspondant à votre recherche, avec la même hiérarchie visuelle que la page actualités.';
+        ? $t['desc_cat']
+        : $t['desc_search'];
 }
 ?>
 
@@ -65,15 +70,15 @@ if ($search_term !== '') {
                 <div class="mt-6 flex flex-wrap gap-3">
                     <?php if ($search_term !== '') { ?>
                     <span class="inline-flex items-center rounded-full bg-[#004241] px-4 py-2 text-sm font-medium text-white">
-                        <?= $totalArticles ?> résultat<?= $totalArticles > 1 ? 's' : '' ?>
+                        <?= $totalArticles ?> <?= htmlspecialchars($totalArticles > 1 ? $t['results'] : $t['result']) ?>
                     </span>
                     <?php } ?>
                     <span class="inline-flex items-center rounded-full bg-white/75 px-4 py-2 text-sm font-medium text-[#004241]">
-                        Page <?= $currentPage ?> sur <?= $lastPage ?>
+                        <?= htmlspecialchars($t['page']) ?> <?= $currentPage ?> <?= htmlspecialchars($t['of']) ?> <?= $lastPage ?>
                     </span>
                     <?php if ($search_term !== '' && ! $matched_category) { ?>
                     <span class="inline-flex items-center rounded-full bg-white/75 px-4 py-2 text-sm font-medium text-[#004241]/80">
-                        Mot-clé: <?= htmlspecialchars($search_term) ?>
+                        <?= htmlspecialchars($t['keyword']) ?>: <?= htmlspecialchars($search_term) ?>
                     </span>
                     <?php } ?>
                 </div>
@@ -157,42 +162,42 @@ if ($search_term !== '') {
     <?php } elseif ($search_term !== '') { ?>
     <section class="mt-8 rounded-[34px] border border-[#D6E1DD] bg-[linear-gradient(135deg,#F8FBFA_0%,#EEF5F2_100%)] px-6 py-12 text-center md:px-10">
         <span class="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#004241] shadow-sm">
-            Aucun résultat
+            <?= htmlspecialchars($t['empty_badge']) ?>
         </span>
-        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]">Aucun article trouvé</h2>
+        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]"><?= htmlspecialchars($t['empty_title']) ?></h2>
         <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#004241]/70 md:text-base">
-            Aucun article ne correspond à cette recherche pour le moment. Essayez un autre mot-clé ou une autre rubrique.
+            <?= htmlspecialchars($t['empty_text']) ?>
         </p>
     </section>
     <?php } else { ?>
     <section class="mt-8 rounded-[34px] border border-[#D6E1DD] bg-[linear-gradient(135deg,#F8FBFA_0%,#EEF5F2_100%)] px-6 py-12 text-center md:px-10">
         <span class="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#004241] shadow-sm">
-            Lancez une recherche
+            <?= htmlspecialchars($t['start_badge']) ?>
         </span>
-        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]">Saisissez un mot-clé</h2>
+        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]"><?= htmlspecialchars($t['start_title']) ?></h2>
         <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#004241]/70 md:text-base">
-            Entrez un sujet, une catégorie ou quelques mots pour afficher les résultats dans ce même layout.
+            <?= htmlspecialchars($t['start_text']) ?>
         </p>
     </section>
     <?php } ?>
 
     <?php if ($paginationView && $paginationView->hasPages()) { ?>
-    <nav class="mt-10 flex flex-wrap items-center justify-center gap-3" aria-label="Pagination des résultats de recherche">
+    <nav class="mt-10 flex flex-wrap items-center justify-center gap-3" aria-label="<?= htmlspecialchars($t['pagination']) ?>">
         <?php if ($paginationView->onFirstPage()) { ?>
         <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#EBF1EF] px-5 text-sm font-medium text-[#004241]/40">
-            Précédent
+            <?= htmlspecialchars($t['previous']) ?>
         </span>
         <?php } else { ?>
         <a
             href="<?= htmlspecialchars($paginationView->previousPageUrl()) ?>"
             class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-medium text-white transition hover:opacity-90"
         >
-            Précédent
+            <?= htmlspecialchars($t['previous']) ?>
         </a>
         <?php } ?>
 
         <span class="text-sm font-medium text-[#004241]/80">
-            Page <?= $paginationView->currentPage() ?> sur <?= $paginationView->lastPage() ?>
+            <?= htmlspecialchars($t['page']) ?> <?= $paginationView->currentPage() ?> <?= htmlspecialchars($t['of']) ?> <?= $paginationView->lastPage() ?>
         </span>
 
         <?php if ($paginationView->hasMorePages()) { ?>
@@ -200,11 +205,11 @@ if ($search_term !== '') {
             href="<?= htmlspecialchars($paginationView->nextPageUrl()) ?>"
             class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-medium text-white transition hover:opacity-90"
         >
-            Suivant
+            <?= htmlspecialchars($t['next']) ?>
         </a>
         <?php } else { ?>
         <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#EBF1EF] px-5 text-sm font-medium text-[#004241]/40">
-            Suivant
+            <?= htmlspecialchars($t['next']) ?>
         </span>
         <?php } ?>
     </nav>

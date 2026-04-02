@@ -310,6 +310,9 @@ if (! function_exists('content_locale')) {
      */
     function content_locale(?\Illuminate\Http\Request $request = null): string
     {
-        return app(\App\Services\ContentLocaleService::class)->getLocale($request);
+        $locale = app(\App\Services\ContentLocaleService::class)->getLocale($request);
+        app()->setLocale($locale);
+
+        return $locale;
     }
 }

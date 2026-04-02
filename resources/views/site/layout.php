@@ -348,7 +348,7 @@ $newsletterOldEmail = old('newsletter_email', '');
 
                 <!-- Barre de recherche (pastille → s’allonge au survol / focus) -->
                 <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
-                    <input type="text" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="Rechercher…" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="Mot-clé ou catégorie" aria-expanded="false" aria-controls="header-search-suggestions" aria-autocomplete="list">
+                    <input type="text" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="<?= htmlspecialchars(__('site.search_placeholder')) ?>" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="<?= htmlspecialchars(__('site.search_keyword_label')) ?>" aria-expanded="false" aria-controls="header-search-suggestions" aria-autocomplete="list">
                     <button type="submit" aria-label="Lancer la recherche">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
@@ -551,7 +551,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                     href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
                     class="hidden xl:flex items-center justify-center rounded-full flex-shrink-0 h-12 font-medium text-base leading-none min-w-[164px] px-5 bg-[#004241] text-white transition-colors duration-200 hover:bg-[#003130] focus:outline-none focus:ring-2 focus:ring-[#004241] focus:ring-offset-2"
                 >
-                    Rédiger un article
+                    <?= htmlspecialchars(__('site.write_article')) ?>
                 </a>
 
                 <div
@@ -559,7 +559,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                     data-language-switch
                     data-active="<?= $isDutchLocale ? 'nl' : 'fr' ?>"
                     role="group"
-                    aria-label="Langue du site"
+                    aria-label="<?= htmlspecialchars(__('site.site_language')) ?>"
                 >
                     <span class="vivat-lang-switch__indicator" aria-hidden="true"></span>
                     <button type="button" class="vivat-lang-switch__button" data-lang-option="fr" aria-pressed="<?= $isDutchLocale ? 'false' : 'true' ?>">
@@ -571,7 +571,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </div>
 
                 <!-- Hamburger : 3 lignes avec plus d'espace ; croix = même centre de rotation -->
-                <button type="button" id="hamburger-menu" class="group relative flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-[30px] border-none bg-transparent" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu-panel">
+                <button type="button" id="hamburger-menu" class="group relative flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-[30px] border-none bg-transparent" aria-label="<?= htmlspecialchars(__('site.open_menu')) ?>" aria-expanded="false" aria-controls="mobile-menu-panel">
                     <span class="relative block h-[20px] w-7 shrink-0" aria-hidden="true">
                         <span class="absolute left-0 top-0 h-[2px] w-full origin-center rounded-full bg-[#004241] transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-[aria-expanded=true]:top-1/2 group-[aria-expanded=true]:-translate-y-1/2 group-[aria-expanded=true]:rotate-45"></span>
                         <span class="absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2 rounded-full bg-[#004241] transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-[aria-expanded=true]:opacity-0 group-[aria-expanded=true]:scale-x-0"></span>
@@ -593,26 +593,26 @@ $newsletterOldEmail = old('newsletter_email', '');
                             <?= strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) ?>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-lg font-semibold text-white"><?= htmlspecialchars(auth()->user()->name ?? 'Mon compte') ?></p>
-                            <p class="text-sm text-white/65"><?= auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Mon profil' ?></p>
+                            <p class="truncate text-lg font-semibold text-white"><?= htmlspecialchars(auth()->user()->name ?? __('site.my_account')) ?></p>
+                            <p class="text-sm text-white/65"><?= auth()->user()->hasRole(['contributor', 'admin']) ? __('site.writer_space') : __('site.my_profile') ?></p>
                         </div>
                         <svg class="h-5 w-5 flex-shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </a>
                 <form action="<?= url('/logout') ?>" method="post" class="mb-6">
                     <?= csrf_field() ?>
-                    <button type="submit" class="w-full rounded-[16px] px-4 py-2.5 text-left text-sm text-white/60 transition-colors duration-200 hover:bg-white/8 hover:text-white/90">Se déconnecter</button>
+                    <button type="submit" class="w-full rounded-[16px] px-4 py-2.5 text-left text-sm text-white/60 transition-colors duration-200 hover:bg-white/8 hover:text-white/90"><?= htmlspecialchars(__('site.logout')) ?></button>
                 </form>
                 <?php } ?>
 
-                <div class="mb-6 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/6 p-4" aria-label="Langue du site">
-                    <span class="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">Langue</span>
+                <div class="mb-6 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/6 p-4" aria-label="<?= htmlspecialchars(__('site.site_language')) ?>">
+                    <span class="text-xs font-semibold uppercase tracking-[0.14em] text-white/45"><?= htmlspecialchars(__('site.language')) ?></span>
                     <div
                         class="vivat-lang-switch vivat-lang-switch--on-dark w-fit bg-white/10"
                         data-language-switch
                         data-active="<?= $isDutchLocale ? 'nl' : 'fr' ?>"
                         role="group"
-                        aria-label="Choix de langue"
+                        aria-label="<?= htmlspecialchars(__('site.language_choice')) ?>"
                     >
                         <span class="vivat-lang-switch__indicator" aria-hidden="true"></span>
                         <button type="button" class="vivat-lang-switch__button" data-lang-option="fr" aria-pressed="<?= $isDutchLocale ? 'false' : 'true' ?>">
@@ -625,20 +625,20 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </div>
 
                 <nav class="flex flex-col gap-1" aria-label="Navigation principale">
-                    <a href="/" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">Home</a>
-                    <a href="/a-propos" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">À propos</a>
-                    <a href="/contact" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">Contact</a>
+                    <a href="/" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.home')) ?></a>
+                    <a href="/a-propos" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.about')) ?></a>
+                    <a href="/contact" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.contact')) ?></a>
                     <a
                         href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
                         class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"
                     >
-                        Rédiger un article
+                        <?= htmlspecialchars(__('site.write_article')) ?>
                     </a>
-                    <a href="/faq" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]">FAQ</a>
+                    <a href="/faq" class="rounded-[16px] px-5 py-4 text-[18px] font-semibold text-white no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars(__('site.faq')) ?></a>
                 </nav>
 
-                <p class="mb-4 mt-8 border-t border-white/10 pt-7 text-sm font-medium uppercase tracking-[0.12em] text-white/45">Rubriques</p>
-                <nav class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 lg:grid-cols-3" aria-label="Rubriques">
+                <p class="mb-4 mt-8 border-t border-white/10 pt-7 text-sm font-medium uppercase tracking-[0.12em] text-white/45"><?= htmlspecialchars(__('site.sections')) ?></p>
+                <nav class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 lg:grid-cols-3" aria-label="<?= htmlspecialchars(__('site.sections')) ?>">
                     <?php foreach ($categories as $cat) { ?>
                     <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[14px] px-4 py-3.5 text-[15px] font-medium text-white/85 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-[#FFF1B9]"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php } ?>
@@ -672,11 +672,11 @@ $newsletterOldEmail = old('newsletter_email', '');
             <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
                 <div class="min-w-0 max-w-[44rem]">
                     <span class="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#004241]">
-                        <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Espace rédacteur' : 'Contribuer' ?>
+                        <?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? __('site.writer_space') : __('site.contribute')) ?>
                     </span>
                     <h2 class="mt-4 text-[28px] font-semibold leading-[1.05] text-[#004241] md:text-[34px]">
                         <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
-                        Accédez à votre espace rédacteur
+                        <?= htmlspecialchars(__('site.writer_space')) ?>
                         <?php } else { ?>
                         Une idée, une histoire, un point<span class="hidden lg:inline xl:hidden"><br></span><span class="lg:hidden xl:inline"> </span>de vue ?
                         <?php } ?>
@@ -691,7 +691,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </div>
                 <div class="flex w-full md:w-auto md:justify-end">
                     <span class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#004241] px-6 py-4 text-base font-semibold text-white transition-colors duration-200 group-hover:bg-[#003130] md:w-auto md:min-w-[240px]">
-                        <?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? 'Accéder au bureau' : 'Rédigez un article' ?>
+                        <?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? __('site.writer_space') : __('site.write_article')) ?>
                         <svg class="h-5 w-5 flex-shrink-0 translate-x-0 transition-transform duration-300 ease-out group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </span>
                 </div>
@@ -708,10 +708,10 @@ $newsletterOldEmail = old('newsletter_email', '');
 
                     <!-- Newsletter -->
                     <div class="flex flex-col justify-center rounded-[30px] bg-[#004241] p-6 md:p-8 text-white lg:col-span-7 gap-5">
-                        <span class="inline-flex w-fit items-center justify-center rounded-full bg-white/[0.18] px-4 py-2 text-sm font-medium text-white backdrop-blur-[10px] border border-white/[0.14]">Newsletter</span>
+                        <span class="inline-flex w-fit items-center justify-center rounded-full bg-white/[0.18] px-4 py-2 text-sm font-medium text-white backdrop-blur-[10px] border border-white/[0.14]"><?= htmlspecialchars(__('site.newsletter')) ?></span>
                         <div class="flex flex-col gap-[10px]">
-                            <h2 class="max-w-[13ch] font-medium text-white text-3xl sm:text-4xl md:text-2xl lg:text-5xl leading-[0.98]">Les articles à ne pas rater, directement dans votre boîte mail.</h2>
-                            <p class="max-w-[44ch] text-white/[0.78] text-[17px] leading-[1.4]">Une sélection simple, claire, et utile pour suivre Vivat sans chercher partout.</p>
+                            <h2 class="max-w-[13ch] font-medium text-white text-3xl sm:text-4xl md:text-2xl lg:text-5xl leading-[0.98]"><?= htmlspecialchars(__('site.newsletter_title')) ?></h2>
+                            <p class="max-w-[44ch] text-white/[0.78] text-[17px] leading-[1.4]"><?= htmlspecialchars(__('site.newsletter_text')) ?></p>
                         </div>
                         <form action="<?= htmlspecialchars(route('newsletter.subscribe.web')) ?>" method="post" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_184px] xl:grid-cols-[minmax(0,1fr)_220px]">
                             <?= csrf_field() ?>
@@ -730,7 +730,7 @@ $newsletterOldEmail = old('newsletter_email', '');
                                 <?php } ?>
                             </div>
                             <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-[#FFF0B6] px-8 font-semibold text-[#004241] transition-colors duration-200 hover:bg-[#FBE9A3] lg:px-6 xl:px-8">
-                                S'abonner
+                                <?= htmlspecialchars(__('site.subscribe')) ?>
                             </button>
                         </form>
                     </div>
@@ -739,24 +739,24 @@ $newsletterOldEmail = old('newsletter_email', '');
                     <div class="flex flex-col rounded-[30px] bg-white p-6 md:p-8 lg:col-span-5 gap-[18px]">
                         <div class="grid grid-cols-2 gap-x-8 gap-y-6">
                             <nav class="flex flex-col gap-[14px]" aria-label="Découvrir">
-                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Découvrir</span>
+                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]"><?= htmlspecialchars(__('site.discover')) ?></span>
                                 <ul class="m-0 flex list-none flex-col gap-3 p-0">
-                                    <li><a href="/" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Accueil</a></li>
-                                    <li><a href="/a-propos" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">À propos</a></li>
-                                    <li><a href="/contact" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Contact</a></li>
-                                    <li><a href="/faq" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">FAQ</a></li>
+                                    <li><a href="/" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.home')) ?></a></li>
+                                    <li><a href="/a-propos" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.about')) ?></a></li>
+                                    <li><a href="/contact" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.contact')) ?></a></li>
+                                    <li><a href="/faq" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.faq')) ?></a></li>
                                 </ul>
                             </nav>
                             <nav class="flex flex-col gap-[14px]" aria-label="Légal">
-                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Légal</span>
+                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]"><?= htmlspecialchars(__('site.legal')) ?></span>
                                 <ul class="m-0 flex list-none flex-col gap-3 p-0">
-                                    <li><a href="/mentions-legales" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Mentions légales</a></li>
-                                    <li><a href="/politique-confidentialite" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Confidentialité</a></li>
-                                    <li><a href="/politique-cookies" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]">Cookies</a></li>
+                                    <li><a href="/mentions-legales" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.legal_notice')) ?></a></li>
+                                    <li><a href="/politique-confidentialite" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.privacy')) ?></a></li>
+                                    <li><a href="/politique-cookies" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.cookies')) ?></a></li>
                                 </ul>
                             </nav>
-                            <nav class="col-span-2 flex flex-col gap-[14px]" aria-label="Rubriques">
-                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]">Rubriques</span>
+                            <nav class="col-span-2 flex flex-col gap-[14px]" aria-label="<?= htmlspecialchars(__('site.sections')) ?>">
+                                <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[14px] py-[7px] text-sm font-medium text-[#004241]"><?= htmlspecialchars(__('site.sections')) ?></span>
                                 <ul class="m-0 grid list-none grid-cols-2 gap-x-6 gap-y-3 p-0">
                                     <?php foreach ($categories as $cat) { ?>
                                     <li><a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="text-base text-[#004241]/85 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars($cat['name']) ?></a></li>
@@ -768,8 +768,8 @@ $newsletterOldEmail = old('newsletter_email', '');
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3 border-t border-[#004241]/10 pt-5 text-sm text-[#004241]/60 md:flex-row md:items-center md:justify-between">
-                    <p class="m-0">© <?= date('Y') ?> Vivat. Tous droits réservés.</p>
-                    <a href="/contact" class="text-sm text-[#004241]/70 no-underline transition-colors duration-200 hover:text-[#004241]">Une question ? Contactez-nous</a>
+                    <p class="m-0">© <?= date('Y') ?> Vivat. <?= htmlspecialchars(__('site.copyright')) ?></p>
+                    <a href="/contact" class="text-sm text-[#004241]/70 no-underline transition-colors duration-200 hover:text-[#004241]"><?= htmlspecialchars(__('site.question_contact')) ?></a>
                 </div>
             </div>
         </div>
@@ -827,7 +827,7 @@ $newsletterOldEmail = old('newsletter_email', '');
             function setOpen(isOpen) {
                 panel.setAttribute('data-open', isOpen ? 'true' : 'false');
                 btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                btn.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
+                btn.setAttribute('aria-label', isOpen ? <?= json_encode(__('site.close_menu')) ?> : <?= json_encode(__('site.open_menu')) ?>);
                 applyHamburgerCross(!!isOpen);
                 var headerEl = btn.closest('header');
                 if (headerEl) {

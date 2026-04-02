@@ -4,6 +4,44 @@ $old = $old ?? [];
 $email = $old['email'] ?? '';
 $hero_img = 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=900&h=1100&fit=crop';
 $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
+$locale = content_locale();
+$t = $locale === 'nl'
+    ? [
+        'back' => 'Terug',
+        'badge' => 'Bijdragersruimte',
+        'hero_title' => 'Terug naar je Vivat-ruimte.',
+        'hero_text' => 'Log in om je concepten terug te vinden, je content te beheren en je inzendingen op te volgen.',
+        'hero_meta' => 'Bewaarbare concepten · Redactionele opvolging · Uitgelichte publicatie',
+        'title' => 'Inloggen',
+        'subtitle' => 'Log in op je bijdragersaccount',
+        'email' => 'E-mail',
+        'password' => 'Wachtwoord',
+        'forgot' => 'Wachtwoord vergeten?',
+        'remember' => 'Onthoud mij',
+        'submit' => 'Inloggen',
+        'or' => 'of ga verder met',
+        'google' => 'Verder met Google',
+        'no_account' => 'Nog geen account?',
+        'create' => 'Maak een account aan',
+    ]
+    : [
+        'back' => 'Retour',
+        'badge' => 'Espace contributeur',
+        'hero_title' => 'Reprendre votre espace Vivat.',
+        'hero_text' => 'Connectez-vous pour retrouver vos brouillons, gérer vos contenus et suivre vos soumissions.',
+        'hero_meta' => 'Brouillons enregistrables · Suivi éditorial · Publication mise en avant',
+        'title' => 'Se connecter',
+        'subtitle' => 'Connectez-vous à votre compte contributeur',
+        'email' => 'Email',
+        'password' => 'Mot de passe',
+        'forgot' => 'Mot de passe oublié ?',
+        'remember' => 'Se souvenir de moi',
+        'submit' => 'Se connecter',
+        'or' => 'ou continuer avec',
+        'google' => 'Continuer avec Google',
+        'no_account' => 'Pas encore de compte ?',
+        'create' => 'Crée un compte',
+    ];
 ?>
 
 <div class="mx-auto grid w-full max-w-[1280px] items-stretch gap-6 pb-6 lg:min-h-[calc(100svh-136px)] lg:grid-cols-[1.02fr_0.98fr]">
@@ -18,26 +56,26 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
             <a
                 href="/"
                 class="absolute left-5 top-5 z-10 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white md:left-6 md:top-6"
-                aria-label="Retour"
+                aria-label="<?= htmlspecialchars($t['back']) ?>"
             >
                 <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                Retour
+                <?= htmlspecialchars($t['back']) ?>
             </a>
         </div>
 
         <div class="relative z-[1] -mt-px flex-shrink-0 bg-[#EBF1EF] px-5 py-6 md:px-7 md:py-7">
             <span class="inline-flex items-center rounded-full border border-[#004241]/15 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#004241]">
-                Espace contributeur
+                <?= htmlspecialchars($t['badge']) ?>
             </span>
             <h1 class="mt-4 font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
-                Reprendre votre espace Vivat.
+                <?= htmlspecialchars($t['hero_title']) ?>
             </h1>
             <p class="mt-3 max-w-[27rem] text-[15px] leading-relaxed text-[#004241]/82">
-                Connectez-vous pour retrouver vos brouillons, gérer vos contenus et suivre vos soumissions.
+                <?= htmlspecialchars($t['hero_text']) ?>
             </p>
 
             <p class="mt-4 max-w-[27rem] text-[13px] leading-relaxed text-[#004241]/52">
-                Brouillons enregistrables <span class="text-[#004241]/28" aria-hidden="true">·</span> Suivi éditorial <span class="text-[#004241]/28" aria-hidden="true">·</span> Publication mise en avant
+                <?= htmlspecialchars($t['hero_meta']) ?>
             </p>
         </div>
     </section>
@@ -46,10 +84,10 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
         <div class="mx-auto flex w-full max-w-[34rem] flex-1 flex-col lg:max-w-[35rem] lg:justify-center">
             <div>
                 <h2 class="text-[2rem] font-medium leading-[1.1] text-[#004241]">
-                    Se connecter
+                    <?= htmlspecialchars($t['title']) ?>
                 </h2>
                 <p class="mt-2 text-sm text-[#004241]/80">
-                    Connectez-vous à votre compte contributeur
+                    <?= htmlspecialchars($t['subtitle']) ?>
                 </p>
             </div>
 
@@ -57,14 +95,14 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                 <?= csrf_field() ?>
 
                 <div class="grid gap-4">
-                    <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" placeholder="Email" required class="<?= $inputClass ?>">
+                    <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" placeholder="<?= htmlspecialchars($t['email']) ?>" required class="<?= $inputClass ?>">
                     <?php if (! empty($errors['email'])) { ?>
                     <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['email']) ? $errors['email'][0] : $errors['email']) ?></p>
                     <?php } ?>
                 </div>
 
                 <div class="grid gap-4">
-                    <input type="password" name="password" id="password" placeholder="Mot de passe" required class="<?= $inputClass ?>">
+                    <input type="password" name="password" id="password" placeholder="<?= htmlspecialchars($t['password']) ?>" required class="<?= $inputClass ?>">
                     <?php if (! empty($errors['password'])) { ?>
                     <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
                     <?php } ?>
@@ -72,7 +110,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
 
                 <div class="-mt-1 flex justify-end">
                     <a href="<?= route('password.request') ?>" class="text-sm font-medium text-[#004241] underline underline-offset-4 hover:no-underline">
-                        Mot de passe oublié ?
+                        <?= htmlspecialchars($t['forgot']) ?>
                     </a>
                 </div>
 
@@ -85,26 +123,26 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                             value="1"
                             class="mt-1 h-4 w-4 rounded-full border-gray-300 text-[#004241] focus:ring-[#004241]/25"
                         >
-                        <span>Se souvenir de moi</span>
+                        <span><?= htmlspecialchars($t['remember']) ?></span>
                     </label>
                 </div>
 
                 <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
-                    Se connecter
+                    <?= htmlspecialchars($t['submit']) ?>
                 </button>
             </form>
 
             <div class="mt-7 flex flex-col items-center">
                 <div class="flex w-full items-center gap-3 text-[#004241]/45">
                     <span class="h-px flex-1 bg-[#D9E5E1]"></span>
-                    <span class="text-xs font-medium">ou continuer avec</span>
+                    <span class="text-xs font-medium"><?= htmlspecialchars($t['or']) ?></span>
                     <span class="h-px flex-1 bg-[#D9E5E1]"></span>
                 </div>
 
                 <a
                     href="<?= htmlspecialchars(route('auth.google.redirect')) ?>"
                     class="mt-5 inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white text-sm font-medium text-[#004241] transition hover:bg-gray-50"
-                    aria-label="Continuer avec Google"
+                    aria-label="<?= htmlspecialchars($t['google']) ?>"
                 >
                     <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -116,7 +154,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                 </a>
 
                 <p class="mt-6 text-sm text-[#004241]/78">
-                    Pas encore de compte ? <a href="/register" class="font-medium text-[#004241] underline hover:no-underline">Crée un compte</a>
+                    <?= htmlspecialchars($t['no_account']) ?> <a href="/register" class="font-medium text-[#004241] underline hover:no-underline"><?= htmlspecialchars($t['create']) ?></a>
                 </p>
             </div>
         </div>

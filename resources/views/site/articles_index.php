@@ -8,6 +8,10 @@ $lastPage = $pagination ? (int) $pagination->lastPage() : 1;
 
 $gridArticles = $articles;
 $paginationView = $pagination ? $pagination->withQueryString() : null;
+$locale = content_locale();
+$t = $locale === 'nl'
+    ? ['badge' => 'Redactionele stroom', 'title' => 'Alle actualiteit', 'lead' => 'Doorzoek de volledige Vivat-stroom in een lay-out die gemaakt is om snel te scannen, relevante onderwerpen te vinden en zonder frictie in artikels te duiken.', 'article' => 'artikel', 'articles' => 'artikels', 'page' => 'Pagina', 'of' => 'van', 'empty_badge' => 'Lege stroom', 'empty_title' => 'Nog geen actualiteit', 'empty_text' => 'Nieuwe publicaties verschijnen hier. Kom later terug om de nieuwe Vivat-content te ontdekken.', 'pagination' => 'Paginering van actualiteit', 'previous' => 'Vorige', 'next' => 'Volgende']
+    : ['badge' => 'Flux editorial', 'title' => 'Toutes les actualités', 'lead' => 'Parcourez l’ensemble du flux Vivat dans une mise en page pensée pour scanner vite, repérer les sujets qui comptent et entrer dans les articles sans friction.', 'article' => 'article', 'articles' => 'articles', 'page' => 'Page', 'of' => 'sur', 'empty_badge' => 'Flux vide', 'empty_title' => 'Aucune actualite pour le moment', 'empty_text' => 'Les prochaines publications apparaitront ici. Revenez un peu plus tard pour decouvrir les nouveaux contenus Vivat.', 'pagination' => 'Pagination des actualités', 'previous' => 'Précédent', 'next' => 'Suivant'];
 
 $tagBase = 'inline-flex w-fit items-center justify-center rounded-full px-3 py-1.5 text-[12px] font-medium tracking-[0.02em]';
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
@@ -41,21 +45,21 @@ $resolveImage = static function (array $article, int $width, int $height, string
         <div class="relative">
             <div class="max-w-4xl">
                 <span class="inline-flex items-center rounded-full border border-[#004241]/10 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#004241]/65">
-                    Flux editorial
+                    <?= htmlspecialchars($t['badge']) ?>
                 </span>
                 <h1 class="mt-5 max-w-4xl text-[2.5rem] font-semibold leading-[1.02] text-[#004241] sm:text-[3.15rem]">
-                    Toutes les actualités
+                    <?= htmlspecialchars($t['title']) ?>
                 </h1>
                 <p class="mt-4 max-w-3xl text-base leading-7 text-[#004241]/76 md:text-lg">
-                    Parcourez l’ensemble du flux Vivat dans une mise en page pensée pour scanner vite, repérer les sujets qui comptent et entrer dans les articles sans friction.
+                    <?= htmlspecialchars($t['lead']) ?>
                 </p>
 
                 <div class="mt-6 flex flex-wrap gap-3">
                     <span class="inline-flex items-center rounded-full bg-[#004241] px-4 py-2 text-sm font-medium text-white">
-                        <?= $totalArticles ?> article<?= $totalArticles > 1 ? 's' : '' ?>
+                        <?= $totalArticles ?> <?= htmlspecialchars($totalArticles > 1 ? $t['articles'] : $t['article']) ?>
                     </span>
                     <span class="inline-flex items-center rounded-full bg-white/75 px-4 py-2 text-sm font-medium text-[#004241]">
-                        Page <?= $currentPage ?> sur <?= $lastPage ?>
+                        <?= htmlspecialchars($t['page']) ?> <?= $currentPage ?> <?= htmlspecialchars($t['of']) ?> <?= $lastPage ?>
                     </span>
                 </div>
             </div>
@@ -140,32 +144,32 @@ $resolveImage = static function (array $article, int $width, int $height, string
     <?php if ($articles === []) { ?>
     <section class="mt-8 rounded-[34px] border border-[#D6E1DD] bg-[linear-gradient(135deg,#F8FBFA_0%,#EEF5F2_100%)] px-6 py-12 text-center md:px-10">
         <span class="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#004241] shadow-sm">
-            Flux vide
+            <?= htmlspecialchars($t['empty_badge']) ?>
         </span>
-        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]">Aucune actualite pour le moment</h2>
+        <h2 class="mt-5 text-[2rem] font-semibold text-[#004241]"><?= htmlspecialchars($t['empty_title']) ?></h2>
         <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#004241]/70 md:text-base">
-            Les prochaines publications apparaitront ici. Revenez un peu plus tard pour decouvrir les nouveaux contenus Vivat.
+            <?= htmlspecialchars($t['empty_text']) ?>
         </p>
     </section>
     <?php } ?>
 
     <?php if ($paginationView && $paginationView->hasPages()) { ?>
-    <nav class="mt-10 flex flex-wrap items-center justify-center gap-3" aria-label="Pagination des actualités">
+    <nav class="mt-10 flex flex-wrap items-center justify-center gap-3" aria-label="<?= htmlspecialchars($t['pagination']) ?>">
         <?php if ($paginationView->onFirstPage()) { ?>
         <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#EBF1EF] px-5 text-sm font-medium text-[#004241]/40">
-            Précédent
+            <?= htmlspecialchars($t['previous']) ?>
         </span>
         <?php } else { ?>
         <a
             href="<?= htmlspecialchars($paginationView->previousPageUrl()) ?>"
             class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-medium text-white transition hover:opacity-90"
         >
-            Précédent
+            <?= htmlspecialchars($t['previous']) ?>
         </a>
         <?php } ?>
 
         <span class="text-sm font-medium text-[#004241]/80">
-            Page <?= $paginationView->currentPage() ?> sur <?= $paginationView->lastPage() ?>
+            <?= htmlspecialchars($t['page']) ?> <?= $paginationView->currentPage() ?> <?= htmlspecialchars($t['of']) ?> <?= $paginationView->lastPage() ?>
         </span>
 
         <?php if ($paginationView->hasMorePages()) { ?>
@@ -173,11 +177,11 @@ $resolveImage = static function (array $article, int $width, int $height, string
             href="<?= htmlspecialchars($paginationView->nextPageUrl()) ?>"
             class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-medium text-white transition hover:opacity-90"
         >
-            Suivant
+            <?= htmlspecialchars($t['next']) ?>
         </a>
         <?php } else { ?>
         <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#EBF1EF] px-5 text-sm font-medium text-[#004241]/40">
-            Suivant
+            <?= htmlspecialchars($t['next']) ?>
         </span>
         <?php } ?>
     </nav>

@@ -7,6 +7,54 @@ $email = $old['email'] ?? '';
 $termsAccepted = ! empty($old['terms_accepted']);
 $hero_img = 'https://images.pexels.com/photos/3761509/pexels-photo-3761509.jpeg?auto=compress&cs=tinysrgb&w=900&h=1100&fit=crop';
 $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
+$locale = content_locale();
+$t = $locale === 'nl'
+    ? [
+        'back' => 'Terug',
+        'badge' => 'Redacteur worden',
+        'hero_title' => 'Schrijven op Vivat, eenvoudig.',
+        'hero_text' => 'Maak je account aan, bereid je artikel voor en kom terecht in een ruimte die gemaakt is om te publiceren binnen het redactionele universum van Vivat.',
+        'hero_meta' => 'Bewaarbare concepten · Redactionele nalezing · Uitgelichte publicatie',
+        'title' => 'Maak je account aan',
+        'subtitle' => 'Vul je gegevens in om je in te schrijven',
+        'last_name' => 'Naam',
+        'first_name' => 'Voornaam',
+        'email' => 'E-mail',
+        'password' => 'Wachtwoord',
+        'password_confirm' => 'Bevestig je wachtwoord',
+        'password_help' => 'Minimaal 12 tekens met een hoofdletter, een kleine letter, een cijfer en een symbool.',
+        'terms_prefix' => 'Ik aanvaard de',
+        'terms' => 'Gebruiksvoorwaarden',
+        'privacy' => 'Privacyverklaring',
+        'signup' => 'Inschrijven',
+        'or' => 'of ga verder met',
+        'google' => 'Verder met Google',
+        'have_account' => 'Al een account?',
+        'login' => 'Inloggen',
+    ]
+    : [
+        'back' => 'Retour',
+        'badge' => 'Devenir rédacteur',
+        'hero_title' => 'Écrire sur Vivat, simplement.',
+        'hero_text' => 'Créez votre compte, préparez votre article et rejoignez un espace pensé pour publier dans l’univers éditorial Vivat.',
+        'hero_meta' => 'Brouillons enregistrables · Relecture éditoriale · Publication mise en avant',
+        'title' => 'Créer votre compte',
+        'subtitle' => 'Entrez vos informations pour vous inscrire',
+        'last_name' => 'Nom',
+        'first_name' => 'Prénom',
+        'email' => 'Email',
+        'password' => 'Mot de passe',
+        'password_confirm' => 'Confirmer le mot de passe',
+        'password_help' => 'Minimum 12 caractères avec une majuscule, une minuscule, un chiffre et un symbole.',
+        'terms_prefix' => 'J’accepte les',
+        'terms' => 'Conditions d’utilisation',
+        'privacy' => 'Politique de confidentialité',
+        'signup' => "S'inscrire",
+        'or' => 'ou continuer avec',
+        'google' => 'Continuer avec Google',
+        'have_account' => 'Déjà un compte ?',
+        'login' => 'Se connecter',
+    ];
 ?>
 
 <div class="mx-auto grid w-full max-w-[1280px] items-stretch gap-6 pb-6 lg:min-h-[calc(100svh-136px)] lg:grid-cols-[1.02fr_0.98fr]">
@@ -21,26 +69,26 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
             <a
                 href="/"
                 class="absolute left-5 top-5 z-10 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white md:left-6 md:top-6"
-                aria-label="Retour"
+                aria-label="<?= htmlspecialchars($t['back']) ?>"
             >
                 <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                Retour
+                <?= htmlspecialchars($t['back']) ?>
             </a>
         </div>
 
         <div class="relative z-[1] -mt-px flex-shrink-0 bg-[#EBF1EF] px-5 py-6 md:px-7 md:py-7">
             <span class="inline-flex items-center rounded-full border border-[#004241]/15 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#004241]">
-                Devenir rédacteur
+                <?= htmlspecialchars($t['badge']) ?>
             </span>
             <h1 class="mt-4 font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
-                Écrire sur Vivat, simplement.
+                <?= htmlspecialchars($t['hero_title']) ?>
             </h1>
             <p class="mt-3 max-w-[27rem] text-[15px] leading-relaxed text-[#004241]/82">
-                Créez votre compte, préparez votre article et rejoignez un espace pensé pour publier dans l’univers éditorial Vivat.
+                <?= htmlspecialchars($t['hero_text']) ?>
             </p>
 
             <p class="mt-4 max-w-[27rem] text-[13px] leading-relaxed text-[#004241]/52">
-                Brouillons enregistrables <span class="text-[#004241]/28" aria-hidden="true">·</span> Relecture éditoriale <span class="text-[#004241]/28" aria-hidden="true">·</span> Publication mise en avant
+                <?= htmlspecialchars($t['hero_meta']) ?>
             </p>
         </div>
     </section>
@@ -49,10 +97,10 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
         <div class="mx-auto flex w-full max-w-[34rem] flex-1 flex-col lg:max-w-[35rem] lg:justify-center">
             <div>
                 <h2 class="text-[2rem] font-medium leading-[1.1] text-[#004241]">
-                    Créer votre compte
+                    <?= htmlspecialchars($t['title']) ?>
                 </h2>
                 <p class="mt-2 text-sm text-[#004241]/80">
-                    Entrez vos informations pour vous inscrire
+                    <?= htmlspecialchars($t['subtitle']) ?>
                 </p>
             </div>
 
@@ -62,14 +110,14 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
 
                     <div class="grid gap-4 md:grid-cols-2">
                         <div>
-                            <input type="text" name="last_name" id="last_name" value="<?= htmlspecialchars($last_name) ?>" placeholder="Nom" required class="<?= $inputClass ?>">
+                            <input type="text" name="last_name" id="last_name" value="<?= htmlspecialchars($last_name) ?>" placeholder="<?= htmlspecialchars($t['last_name']) ?>" required class="<?= $inputClass ?>">
                             <?php if (! empty($errors['last_name'])) { ?>
                             <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['last_name']) ? $errors['last_name'][0] : $errors['last_name']) ?></p>
                             <?php } ?>
                         </div>
 
                         <div>
-                            <input type="text" name="first_name" id="first_name" value="<?= htmlspecialchars($first_name) ?>" placeholder="Prénom" required class="<?= $inputClass ?>">
+                            <input type="text" name="first_name" id="first_name" value="<?= htmlspecialchars($first_name) ?>" placeholder="<?= htmlspecialchars($t['first_name']) ?>" required class="<?= $inputClass ?>">
                             <?php if (! empty($errors['first_name'])) { ?>
                             <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['first_name']) ? $errors['first_name'][0] : $errors['first_name']) ?></p>
                             <?php } ?>
@@ -77,7 +125,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                     </div>
 
                     <div class="grid gap-4">
-                        <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" placeholder="Email" required class="<?= $inputClass ?>">
+                        <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" placeholder="<?= htmlspecialchars($t['email']) ?>" required class="<?= $inputClass ?>">
                         <?php if (! empty($errors['email'])) { ?>
                         <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['email']) ? $errors['email'][0] : $errors['email']) ?></p>
                         <?php } ?>
@@ -85,15 +133,15 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
 
                     <div class="grid gap-4 md:grid-cols-2">
                         <div>
-                            <input type="password" name="password" id="password" placeholder="Mot de passe" required class="<?= $inputClass ?>">
-                            <p class="mt-2 text-xs leading-5 text-[#004241]/62">Minimum 12 caractères avec une majuscule, une minuscule, un chiffre et un symbole.</p>
+                            <input type="password" name="password" id="password" placeholder="<?= htmlspecialchars($t['password']) ?>" required class="<?= $inputClass ?>">
+                            <p class="mt-2 text-xs leading-5 text-[#004241]/62"><?= htmlspecialchars($t['password_help']) ?></p>
                             <?php if (! empty($errors['password'])) { ?>
                             <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
                             <?php } ?>
                         </div>
 
                         <div>
-                            <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirmer le mot de passe" required class="<?= $inputClass ?>">
+                            <input type="password" name="password_confirmation" id="password_confirmation" placeholder="<?= htmlspecialchars($t['password_confirm']) ?>" required class="<?= $inputClass ?>">
                         </div>
                     </div>
 
@@ -109,7 +157,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                                 class="mt-1 h-4 w-4 rounded-full border-gray-300 text-[#004241] focus:ring-[#004241]/25"
                             >
                             <span>
-                                J’accepte les <a href="/conditions" class="font-medium text-[#004241] underline hover:no-underline">Conditions d’utilisation</a> et la <a href="/confidentialite" class="font-medium text-[#004241] underline hover:no-underline">Politique de confidentialité</a>
+                                <?= htmlspecialchars($t['terms_prefix']) ?> <a href="/conditions" class="font-medium text-[#004241] underline hover:no-underline"><?= htmlspecialchars($t['terms']) ?></a> et la <a href="/confidentialite" class="font-medium text-[#004241] underline hover:no-underline"><?= htmlspecialchars($t['privacy']) ?></a>
                             </span>
                         </label>
                         <?php if (! empty($errors['terms_accepted'])) { ?>
@@ -118,21 +166,21 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                     </div>
 
                     <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
-                        S'inscrire
+                        <?= htmlspecialchars($t['signup']) ?>
                     </button>
             </form>
 
             <div class="mt-7 flex flex-col items-center">
                 <div class="flex w-full items-center gap-3 text-[#004241]/45">
                     <span class="h-px flex-1 bg-[#D9E5E1]"></span>
-                    <span class="text-xs font-medium">ou continuer avec</span>
+                    <span class="text-xs font-medium"><?= htmlspecialchars($t['or']) ?></span>
                     <span class="h-px flex-1 bg-[#D9E5E1]"></span>
                 </div>
 
                 <a
                     href="<?= htmlspecialchars(route('auth.google.redirect')) ?>"
                     class="mt-5 inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white text-sm font-medium text-[#004241] transition hover:bg-gray-50"
-                    aria-label="Continuer avec Google"
+                    aria-label="<?= htmlspecialchars($t['google']) ?>"
                 >
                     <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -144,7 +192,7 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
                 </a>
 
                 <p class="mt-6 text-sm text-[#004241]/78">
-                    Déjà un compte ? <a href="/login" class="font-medium text-[#004241] underline hover:no-underline">Se connecter</a>
+                    <?= htmlspecialchars($t['have_account']) ?> <a href="/login" class="font-medium text-[#004241] underline hover:no-underline"><?= htmlspecialchars($t['login']) ?></a>
                 </p>
             </div>
         </div>

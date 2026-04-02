@@ -7,7 +7,7 @@ $categories = $categories ?? [];
 $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
 $writer_cta_url = $writer_cta_url ?? $writer_signup_url;
-$writer_cta_label = $writer_cta_label ?? 'Rédigez un article';
+$writer_cta_label = $writer_cta_label ?? __('site.write_article');
 $writer_cta_description = $writer_cta_description ?? 'Écrivez sur Vivat. Votre voix compte.';
 $writerCtaLines = preg_split('/\.\s+/', trim($writer_cta_description), 2);
 $rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dfcy6isdu/video/upload/v1774257142/rubriques_h5dyvo.mp4';
@@ -132,7 +132,7 @@ foreach ($tabletCategoryPairs as $pair) {
 <!-- Bandeau pub tablette uniquement (md) -->
 <div class="hidden md:block lg:hidden w-full mb-6">
     <div class="rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm flex items-center justify-center mx-auto w-full max-w-[728px] h-[90px]">
-        Publicité 728×90
+        <?= htmlspecialchars(__('site.ad_banner')) ?>
     </div>
 </div>
 
@@ -144,7 +144,7 @@ foreach ($tabletCategoryPairs as $pair) {
         <div class="absolute inset-0 bg-black/30"></div>
         <div class="<?= $cardOverlay ?> flex items-end">
             <div class="<?= $glassBox ?> w-full">
-                <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
+                <span class="<?= $tagClass ?> <?= $tagTopNews ?>"><?= htmlspecialchars(__('site.top_news')) ?></span>
                 <h2 class="font-semibold text-white line-clamp-6 text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                 <?php if (! empty($h0['excerpt'])) { ?>
                 <p class="text-white/90 line-clamp-5 text-sm"><?= htmlspecialchars($h0['excerpt']) ?></p>
@@ -248,7 +248,7 @@ foreach ($tabletCategoryPairs as $pair) {
                 <div class="absolute inset-0 bg-black/30"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
                     <div class="<?= $glassBox ?> w-full">
-                        <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
+                        <span class="<?= $tagClass ?> <?= $tagTopNews ?>"><?= htmlspecialchars(__('site.top_news')) ?></span>
                         <h2 class="font-semibold text-white line-clamp-4 text-[32px] max-sm:text-2xl sm:line-clamp-6"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                         <?php if (! empty($h0['excerpt'])) { ?>
                         <p class="text-white/90 line-clamp-3 text-sm sm:line-clamp-5"><?= htmlspecialchars($h0['excerpt']) ?></p>
@@ -420,7 +420,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-center md:p-8 lg:p-8">
-                            <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl">Découvrez vos rubriques préférées</h2>
+                            <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
                             <p class="mt-2 max-w-[90%] text-left text-lg text-white/95 sm:text-xl md:mt-2 md:max-w-[92%] md:text-base lg:max-w-[85%] lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
@@ -521,7 +521,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-6 md:justify-center md:p-8 lg:p-8">
-                            <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl">Découvrez vos rubriques préférées</h2>
+                            <h2 class="max-w-[90%] text-left text-3xl font-semibold text-white sm:text-4xl md:max-w-[92%] md:text-2xl lg:max-w-[85%] lg:text-5xl"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
                             <p class="mt-2 max-w-[90%] text-left text-lg text-white/95 sm:text-xl md:mt-2 md:max-w-[92%] md:text-base lg:max-w-[85%] lg:text-2xl">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
@@ -610,10 +610,10 @@ foreach ($tabletCategoryPairs as $pair) {
             </div>
         </div>
         <?php if ($numSlides > 1) { ?>
-        <button type="button" id="categories-carousel-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="Rubriques précédentes">
+        <button type="button" id="categories-carousel-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="<?= htmlspecialchars(__('site.categories_previous')) ?>">
             <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
-        <button type="button" id="categories-carousel-next" class="<?= $carouselNavBtn ?> right-0" aria-label="Rubriques suivantes">
+        <button type="button" id="categories-carousel-next" class="<?= $carouselNavBtn ?> right-0" aria-label="<?= htmlspecialchars(__('site.categories_next')) ?>">
             <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <?php } ?>
@@ -632,7 +632,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
-                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
+                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
                             <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
@@ -689,7 +689,7 @@ foreach ($tabletCategoryPairs as $pair) {
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
-                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
+                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
                             <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
                     </a>
@@ -737,10 +737,10 @@ foreach ($tabletCategoryPairs as $pair) {
             </div>
         </div>
         <?php if ($tabletNumSlides > 1) { ?>
-        <button type="button" id="categories-carousel-tablet-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="Rubriques précédentes">
+        <button type="button" id="categories-carousel-tablet-prev" class="<?= $carouselNavBtn ?> left-0" aria-label="<?= htmlspecialchars(__('site.categories_previous')) ?>">
             <svg class="h-6 w-6 flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
-        <button type="button" id="categories-carousel-tablet-next" class="<?= $carouselNavBtn ?> right-0" aria-label="Rubriques suivantes">
+        <button type="button" id="categories-carousel-tablet-next" class="<?= $carouselNavBtn ?> right-0" aria-label="<?= htmlspecialchars(__('site.categories_next')) ?>">
             <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <?php } ?>
@@ -1179,7 +1179,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
     <?php if (count($restArticles) > 0) { ?>
     <section class="mt-16 hidden w-full min-w-0 grid-cols-8 gap-6 md:grid lg:hidden">
-        <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]">Dernières actualités</h2>
+        <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]"><?= htmlspecialchars(__('site.latest_news')) ?></h2>
         <?php if ($topFeatureEditorialArt) { ?>
         <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative col-span-8 flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 <?= $cardYellowSurface ?>">
             <span class="<?= $cardArrowOnYellow ?>">
@@ -1258,7 +1258,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
     </section>
 
     <section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-[18px] md:hidden lg:mt-16 lg:grid lg:grid-cols-12 lg:gap-6">
-        <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
+        <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12"><?= htmlspecialchars(__('site.latest_news')) ?></h2>
         <div class="grid min-w-0 w-full grid-cols-1 gap-[18px] lg:col-span-12 lg:grid-cols-12 lg:gap-6">
             <?php if ($topFeatureEditorialArt) { ?>
             <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardYellowSurface ?>">
