@@ -27,7 +27,7 @@ class HomeController extends Controller
     public function index(Request $request): JsonResponse
     {
         $locale = content_locale($request);
-        $cacheKey = 'vivat.home.' . $locale;
+        $cacheKey = config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $locale;
         $cacheTtl = (int) config('vivat.home_cache_ttl', 300); // 5 min
         $closure = function () use ($locale) {
             $topNews = Article::published()
@@ -63,11 +63,7 @@ class HomeController extends Controller
 
             $categories = Category::query()
                 ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)])
-                ->when(
-                    Category::whereNotNull('home_order')->exists(),
-                    fn ($q) => $q->whereNotNull('home_order')->orderBy('home_order'),
-                    fn ($q) => $q->orderBy('name')
-                )
+                ->orderedForHome()
                 ->limit($categoriesLimit)
                 ->get();
 

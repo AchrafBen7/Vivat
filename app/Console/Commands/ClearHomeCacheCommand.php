@@ -20,7 +20,7 @@ class ClearHomeCacheCommand extends Command
     {
         $locales = ['fr', 'nl'];
         foreach ($locales as $locale) {
-            Cache::forget('vivat.home.' . $locale);
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $locale);
         }
         $this->info('Cache home (fr et nl) vidé.');
 

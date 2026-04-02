@@ -19,6 +19,12 @@ class HomeController extends Controller
         $data['writer_cta_url'] = $isContributor ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register');
         $data['writer_cta_label'] = $isContributor ? 'Accéder au bureau' : 'Rédigez un article';
         $data['writer_cta_description'] = $isContributor ? 'Accédez à votre espace rédacteur.' : 'Écrivez sur Vivat. Votre voix compte.';
+        $data['writer_cta_title'] = $isContributor ? 'Accédez à votre espace rédacteur' : 'Écrivez sur Vivat.';
+        $data['writer_cta_subtitle'] = $isContributor ? 'Gérez vos articles et vos soumissions.' : 'Votre voix compte.';
+        $data['writer_cta_tag_1'] = 'Rédaction';
+        $data['writer_cta_tag_2'] = 'Actualités';
+        $data['writer_cta_secondary_label'] = $isContributor ? 'Mes soumissions' : 'En savoir plus';
+        $data['writer_cta_secondary_url'] = $isContributor ? url('/contributor/submissions') : url('/devenir-redacteur');
 
         $content = render_php_view('site.home', $data);
         $html = render_php_view('site.layout', [

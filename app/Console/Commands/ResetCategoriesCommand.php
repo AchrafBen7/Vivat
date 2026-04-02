@@ -31,7 +31,9 @@ class ResetCategoriesCommand extends Command
 
         Category::query()->delete();
         Cache::forget('vivat.categories.index');
-        Cache::forget('vivat.home');
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
+        }
 
         $this->info(sprintf('%d catégorie(s) supprimée(s). Tu peux recréer les 9 catégories via POST /api/categories (voir docs/POSTMAN_9_CATEGORIES_BODIES.md).', $count));
 

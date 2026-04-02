@@ -288,11 +288,7 @@ if (! function_exists('get_layout_categories')) {
     {
         $limit = (int) config('vivat.home_categories_count', 9);
         $categories = \App\Models\Category::query()
-            ->when(
-                \App\Models\Category::whereNotNull('home_order')->exists(),
-                fn ($q) => $q->whereNotNull('home_order')->orderBy('home_order'),
-                fn ($q) => $q->orderBy('name')
-            )
+            ->orderedForHome()
             ->limit($limit)
             ->get(['name', 'slug']);
 

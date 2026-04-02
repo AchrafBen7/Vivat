@@ -95,7 +95,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
         <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
         <div class="absolute inset-0 flex flex-col p-8 top-0 left-0">
             <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white mb-[85px]" aria-label="Retour">
-                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 Retour
             </a>
             <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
@@ -201,7 +201,7 @@ $shareLinks = [
             aria-label="Article précédent"
         >
             <svg class="w-6 h-6 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
         <button
@@ -211,7 +211,7 @@ $shareLinks = [
             aria-label="Article suivant"
         >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
         <script>

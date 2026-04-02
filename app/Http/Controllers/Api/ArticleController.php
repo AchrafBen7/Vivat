@@ -170,7 +170,7 @@ class ArticleController extends Controller
 
         if ($article->status === 'published') {
             foreach (['fr', 'nl'] as $loc) {
-                Cache::forget('vivat.home.' . $loc);
+                Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
                 Cache::forget('vivat.categories.index.' . $loc);
             }
             if ($article->category) {
@@ -197,7 +197,7 @@ class ArticleController extends Controller
 
         if ($article->status === 'published') {
             foreach (['fr', 'nl'] as $loc) {
-                Cache::forget('vivat.home.' . $loc);
+                Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
                 Cache::forget('vivat.categories.index.' . $loc);
             }
             if ($article->category) {
@@ -218,7 +218,7 @@ class ArticleController extends Controller
 
         // Invalider le cache pour que le site public et l'API reflètent la suppression tout de suite
         foreach (['fr', 'nl'] as $loc) {
-            Cache::forget('vivat.home.' . $loc);
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
             Cache::forget('vivat.categories.index.' . $loc);
             if ($categorySlug) {
                 Cache::forget('vivat.hub.' . $categorySlug . '.' . $loc);
@@ -307,7 +307,7 @@ class ArticleController extends Controller
             }
         }
         foreach (['fr', 'nl'] as $loc) {
-            Cache::forget('vivat.home.' . $loc);
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
         }
 
         return new ArticleResource($article->fresh(['category', 'articleSources']));

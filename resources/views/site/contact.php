@@ -46,7 +46,7 @@ $t = $locale === 'nl'
                 <h2 class="text-[32px] font-medium leading-[1.02]"><?= htmlspecialchars($t['editorial_title']) ?></h2>
                 <p class="max-w-[30ch] text-white/78" style="font-size: 17px; line-height: 1.45;"><?= htmlspecialchars($t['editorial_text']) ?></p>
             </div>
-            <span class="inline-flex items-center gap-2 text-base font-medium text-white"><?= htmlspecialchars($editorialEmail) ?><svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+            <span class="inline-flex items-center gap-2 text-base font-medium text-white"><?= htmlspecialchars($editorialEmail) ?><svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
         </a>
 
         <a href="mailto:<?= htmlspecialchars($partnershipEmail) ?>" class="group flex min-h-[260px] flex-col justify-between rounded-[30px] bg-white p-6 text-[#004241] no-underline transition hover:bg-[#f8fbfa]" style="gap: 18px; box-shadow: 0 18px 48px rgba(0, 66, 65, 0.08);">
@@ -55,7 +55,7 @@ $t = $locale === 'nl'
                 <h2 class="text-[32px] font-medium leading-[1.02]"><?= htmlspecialchars($t['partnership_title']) ?></h2>
                 <p class="max-w-[30ch] text-[#004241]/75" style="font-size: 17px; line-height: 1.45;"><?= htmlspecialchars($t['partnership_text']) ?></p>
             </div>
-            <span class="inline-flex items-center gap-2 text-base font-medium text-[#004241]"><?= htmlspecialchars($partnershipEmail) ?><svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+            <span class="inline-flex items-center gap-2 text-base font-medium text-[#004241]"><?= htmlspecialchars($partnershipEmail) ?><svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
         </a>
     </section>
 

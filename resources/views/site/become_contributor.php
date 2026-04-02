@@ -14,7 +14,7 @@ $advantages = [
         <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager">
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent"></div>
         <a href="/" class="absolute flex items-center justify-center gap-2 rounded-full text-[#004241] font-medium text-sm bg-white/95 hover:bg-white transition top-6 left-6 px-4 py-2.5 z-10" aria-label="Retour">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             Retour
         </a>
         <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex flex-col md:flex-row md:items-end md:justify-between md:gap-8">
@@ -26,7 +26,7 @@ $advantages = [
             </div>
             <a href="<?= url('/register') ?>" class="mt-6 md:mt-0 flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-[#FFF0B6] text-[#004241] font-semibold text-base px-8 py-4 hover:bg-[#FFE999] transition-colors shadow-lg">
                 Écrire mon premier article
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
         </div>
     </div>

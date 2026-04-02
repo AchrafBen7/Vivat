@@ -69,6 +69,12 @@ return [
     ],
 
     'home_cache_ttl' => (int) env('VIVAT_HOME_CACHE_TTL', 1800), // 30 min par défaut
+
+    /**
+     * Préfixe des clés de cache Laravel pour la home (clé complète : {prefix}.fr / {prefix}.nl).
+     * Changer la valeur (ou VIVAT_HOME_CACHE_KEY_PREFIX dans .env) invalide les entrées mises en cache avant un changement de données.
+     */
+    'home_cache_key_prefix' => (string) env('VIVAT_HOME_CACHE_KEY_PREFIX', 'vivat.home.v2'),
     'home_featured_count' => (int) env('VIVAT_HOME_FEATURED_COUNT', 4),
     'home_latest_count' => (int) env('VIVAT_HOME_LATEST_COUNT', 12),
     'home_categories_count' => (int) env('VIVAT_HOME_CATEGORIES_COUNT', 9),

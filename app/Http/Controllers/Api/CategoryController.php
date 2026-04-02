@@ -149,7 +149,7 @@ class CategoryController extends Controller
         $category->refresh(); // charge created_at défini par la BDD (useCurrent)
         foreach (['fr', 'nl'] as $loc) {
             Cache::forget('vivat.categories.index.' . $loc);
-            Cache::forget('vivat.home.' . $loc);
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
         }
 
         return (new CategoryResource($category))->response()->setStatusCode(201);
@@ -170,7 +170,7 @@ class CategoryController extends Controller
         foreach (['fr', 'nl'] as $loc) {
             Cache::forget('vivat.categories.index.' . $loc);
             Cache::forget('vivat.hub.' . $category->slug . '.' . $loc);
-            Cache::forget('vivat.home.' . $loc);
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
         }
 
         return new CategoryResource($category->fresh());
@@ -183,7 +183,7 @@ class CategoryController extends Controller
         foreach (['fr', 'nl'] as $loc) {
             Cache::forget('vivat.categories.index.' . $loc);
             Cache::forget('vivat.hub.' . $slug . '.' . $loc);
-            Cache::forget('vivat.home.' . $loc);
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
         }
 
         return response()->json(null, 204);

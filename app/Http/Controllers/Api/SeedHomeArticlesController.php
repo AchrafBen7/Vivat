@@ -20,7 +20,9 @@ class SeedHomeArticlesController extends Controller
         $seeder = new HomeArticlesSeeder;
         $seeder->run();
 
-        Cache::forget('vivat.home');
+        foreach (['fr', 'nl'] as $loc) {
+            Cache::forget(config('vivat.home_cache_key_prefix', 'vivat.home.v2') . '.' . $loc);
+        }
 
         return response()->json([
             'message' => '10 articles home créés et publiés (slugs comme dans POSTMAN_10_ARTICLES_HOME_BODIES.md). Appelez GET /api/public/home pour tester.',
