@@ -2,6 +2,7 @@
 $activeTab = $activeTab ?? 'articles';
 $contributorContent = $contributorContent ?? '';
 $submissionNotice = session('submission_notice');
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 ?>
 <div class="flex gap-8 pt-6 pb-12">
     <?= render_php_view('site.contributor.sidebar', ['activeTab' => $activeTab]) ?>
@@ -21,7 +22,7 @@ $submissionNotice = session('submission_notice');
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-[20px] font-semibold leading-7 text-[#1B4B3B]"><?= htmlspecialchars($submissionNotice['title'] ?? 'Soumission envoyée') ?></h2>
+                    <h2 class="text-[20px] font-semibold leading-7 text-[#1B4B3B]"><?= htmlspecialchars($submissionNotice['title'] ?? $t('site.submission_sent', 'Soumission envoyée')) ?></h2>
                     <p class="mt-2 text-sm leading-6 text-[#006664]/80"><?= htmlspecialchars($submissionNotice['message']) ?></p>
                 </div>
             </div>
@@ -34,7 +35,7 @@ $submissionNotice = session('submission_notice');
 
         <div class="mt-6 flex justify-end">
             <button type="button" id="submission-notice-confirm" class="inline-flex h-11 items-center justify-center rounded-full bg-[#006664] px-6 text-sm font-semibold text-[#F8F6F2] transition hover:bg-[#003535]">
-                Compris
+                <?= htmlspecialchars($t('site.got_it', 'Compris')) ?>
             </button>
         </div>
     </div>

@@ -2,6 +2,7 @@
 $categories = $categories ?? [];
 $errors = $errors ?? [];
 $old = $old ?? [];
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 $submission = $submission ?? null;
 $formAction = $form_action ?? url('/contributor/new');
 $isEditing = (bool) ($is_editing ?? false);
@@ -11,6 +12,48 @@ $paymentCreateUrl = $payment_create_url ?? '';
 $paymentConfirmUrl = $payment_confirm_url ?? '';
 $canBypassPayment = (bool) ($can_bypass_payment ?? false);
 $publicationPriceLabel = number_format($publicationPrice / 100, 2, ',', ' ') . ' EUR';
+$jsTranslations = [
+    'saving_draft' => $t('site.js_saving_draft', 'Sauvegarde du brouillon…'),
+    'draft_saved_at' => $t('site.js_draft_saved_at', 'Brouillon sauvegardé à'),
+    'autosave_failed' => $t('site.js_autosave_failed', 'La sauvegarde automatique a échoué.'),
+    'unsaved_changes' => $t('site.js_unsaved_changes', 'Modifications non enregistrées…'),
+    'sending_in_progress_title' => $t('site.js_sending_in_progress_title', 'Transmission en cours...'),
+    'sending_in_progress_text' => $t('site.js_sending_in_progress_text', 'Nous envoyons votre article à l’espace rédacteur. Vous pouvez patienter quelques instants.'),
+    'continue' => $t('site.got_it', 'Continuer'),
+    'action_interrupted' => $t('site.js_action_interrupted', 'Action interrompue'),
+    'draft_saved_auto' => $t('site.js_draft_saved_auto', 'Brouillon sauvegardé automatiquement'),
+    'session_expired' => $t('site.js_session_expired', 'Votre session a expiré. Rechargez la page puis réessayez.'),
+    'server_problem' => $t('site.js_server_problem', 'Le serveur a rencontré un problème. Réessayez dans quelques instants.'),
+    'unexpected_response' => $t('site.js_unexpected_response', 'Le serveur a renvoyé une réponse inattendue.'),
+    'stripe_key_missing' => $t('site.js_stripe_key_missing', 'La clé Stripe publishable est absente.'),
+    'preparing_submission_title' => $t('site.js_preparing_submission_title', 'Préparation de votre soumission...'),
+    'preparing_payment_text' => $t('site.js_preparing_payment_text', 'Votre brouillon est enregistré. Nous préparons maintenant le paiement de :amount pour l’envoyer en validation éditoriale.'),
+    'payment_prepare_failed' => $t('site.js_payment_prepare_failed', 'Impossible de preparer le paiement pour le moment.'),
+    'payment_prepare_stripe_failed' => $t('site.js_payment_prepare_stripe_failed', 'Impossible de preparer le paiement Stripe.'),
+    'stripe_load_failed' => $t('site.js_stripe_load_failed', 'Stripe.js n’a pas pu etre charge.'),
+    'payment_form_not_ready' => $t('site.js_payment_form_not_ready', 'Le formulaire de paiement n’est pas prêt.'),
+    'payment_refused' => $t('site.js_payment_refused', 'Le paiement a ete refuse. Verifiez vos donnees puis reessayez.'),
+    'payment_validated_title' => $t('site.js_payment_validated_title', 'Paiement validé...'),
+    'payment_validated_text' => $t('site.js_payment_validated_text', 'Votre règlement a bien été accepté. Nous transmettons maintenant votre article à l’équipe éditoriale.'),
+    'payment_confirm_failed' => $t('site.js_payment_confirm_failed', 'La confirmation du paiement n’a pas pu être finalisée pour le moment.'),
+    'payment_done_but_local_failed' => $t('site.js_payment_done_but_local_failed', 'Le paiement a ete effectue, mais la confirmation locale a echoue. Verifiez le tableau de bord dans quelques instants.'),
+    'article_sent' => $t('site.js_article_sent', 'Article transmis'),
+    'article_sent_text' => $t('site.js_article_sent_text', 'Votre article a bien ete envoye en validation.'),
+    'payment_interrupted' => $t('site.js_payment_interrupted', 'Paiement interrompu'),
+    'payment_finalize_failed' => $t('site.js_payment_finalize_failed', 'Le paiement n’a pas pu etre finalise.'),
+    'image_too_large' => $t('site.js_image_too_large', 'Cette image dépasse la limite PHP locale actuelle (:limit). Choisissez un fichier plus léger.'),
+    'saving_before_publish' => $t('site.js_saving_before_publish', 'Enregistrement du brouillon...'),
+    'saving_before_direct_publish' => $t('site.js_saving_before_direct_publish', 'Nous sauvegardons votre article avant publication directe.'),
+    'saving_before_payment' => $t('site.js_saving_before_payment', 'Nous sauvegardons votre article avant de lancer le paiement.'),
+    'saving_draft_text' => $t('site.js_saving_draft_text', 'Nous enregistrons votre brouillon pour que vous puissiez le reprendre à tout moment.'),
+    'draft_save_failed' => $t('site.js_draft_save_failed', 'Le brouillon n’a pas pu être enregistré. Vérifiez les champs puis réessayez.'),
+    'submit_prepare_failed' => $t('site.js_submit_prepare_failed', 'Votre article n’a pas pu être préparé pour l’envoi. Vérifiez les champs puis réessayez.'),
+    'draft_not_saved' => $t('site.js_draft_not_saved', 'Brouillon non enregistré'),
+    'send_impossible' => $t('site.js_send_impossible', 'Envoi impossible'),
+    'submission_not_ready_for_stripe' => $t('site.js_submission_not_ready_for_stripe', 'La soumission n’a pas pu etre preparee pour Stripe.'),
+    'draft_saved' => $t('site.js_draft_saved', 'Brouillon enregistré'),
+    'draft_saved_text' => $t('site.js_draft_saved_text', 'Votre brouillon a bien été enregistré. Vous pourrez le reprendre plus tard.'),
+];
 
 $uploadMaxRaw = ini_get('upload_max_filesize') ?: '2M';
 $uploadMaxBytes = (function (string $value): int {
@@ -30,18 +73,18 @@ $uploadMaxBytes = (function (string $value): int {
     };
 })($uploadMaxRaw);
 ?>
-<h1 class="font-medium text-[#004241] text-2xl mb-2"><?= $isEditing ? 'Modifier l’article' : 'Nouvel article' ?></h1>
+<h1 class="font-medium text-[#004241] text-2xl mb-2"><?= htmlspecialchars($isEditing ? $t('site.edit_article', 'Modifier l’article') : $t('site.create_article', 'Nouvel article')) ?></h1>
 <p class="text-[#004241]/80 mb-8">
     <?= $canBypassPayment
-        ? ($isEditing ? 'Mettez à jour votre article puis publiez-le directement depuis cet écran.' : 'Créez et publiez un article sans étape de paiement.')
-        : ($isEditing ? 'Mettez à jour votre soumission puis renvoyez-la en validation.' : 'Partagez vos idées avec la communauté Vivat') ?>
+        ? htmlspecialchars($isEditing ? $t('site.admin_edit_article_text', 'Mettez à jour votre article puis publiez-le directement depuis cet écran.') : $t('site.admin_create_article_text', 'Créez et publiez un article sans étape de paiement.'))
+        : htmlspecialchars($isEditing ? $t('site.edit_submission_text', 'Mettez à jour votre soumission puis renvoyez-la en validation.') : $t('site.create_submission_text', 'Partagez vos idées avec la communauté Vivat')) ?>
 </p>
 
 <?php if ($isEditing && !empty($submission['reviewer_notes'])): ?>
 <div class="mb-6 rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
     <div class="flex items-center gap-2 text-sm font-semibold">
         <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
-        <span>Retour de l’équipe éditoriale</span>
+        <span><?= htmlspecialchars($t('site.editorial_feedback', "Retour de l’équipe éditoriale")) ?></span>
     </div>
     <p class="mt-3 text-sm leading-6 text-[#004241]/84"><?= nl2br(htmlspecialchars($submission['reviewer_notes'])) ?></p>
     <?php if (!empty($submission['reviewer_name']) || !empty($submission['reviewed_at'])): ?>
@@ -80,9 +123,9 @@ $uploadMaxBytes = (function (string $value): int {
             >
             <div id="cover-image-empty-state">
                 <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span class="text-[#004241]/70 text-sm"><?= $isEditing && !empty($submission['cover_image_url']) ? 'Cliquez pour remplacer l’image' : 'Cliquez pour ajouter une image' ?></span>
+                <span class="text-[#004241]/70 text-sm"><?= htmlspecialchars($isEditing && !empty($submission['cover_image_url']) ? $t('site.replace_image', 'Cliquez pour remplacer l’image') : $t('site.add_image', 'Cliquez pour ajouter une image')) ?></span>
                 <span class="block text-gray-400 text-xs mt-1">JPG, PNG - max 5 Mo</span>
-                <span class="block text-gray-400 text-xs mt-1">Limite PHP locale actuelle: <?= htmlspecialchars($uploadMaxRaw) ?></span>
+                <span class="block text-gray-400 text-xs mt-1"><?= htmlspecialchars($t('site.current_php_limit', 'Limite PHP locale actuelle')) ?>: <?= htmlspecialchars($uploadMaxRaw) ?></span>
             </div>
 
             <div id="cover-image-preview-wrapper" class="hidden">
@@ -99,10 +142,10 @@ $uploadMaxBytes = (function (string $value): int {
 
     <div>
         <div class="mb-2 flex items-center justify-between gap-3">
-            <label for="title" class="block font-medium text-[#004241]">Titre de l'article</label>
+            <label for="title" class="block font-medium text-[#004241]"><?= htmlspecialchars($t('site.article_title', "Titre de l'article")) ?></label>
             <span id="title-char-count" class="text-xs font-medium tabular-nums text-[#004241]/50">0/255</span>
         </div>
-        <input type="text" name="title" id="title" value="<?= htmlspecialchars($old['title'] ?? '') ?>" placeholder="Titre de l'article" required maxlength="255"
+        <input type="text" name="title" id="title" value="<?= htmlspecialchars($old['title'] ?? '') ?>" placeholder="<?= htmlspecialchars($t('site.article_title', "Titre de l'article")) ?>" required maxlength="255"
             data-char-max="255" data-char-target="title-char-count"
             class="w-full max-w-2xl h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 focus:border-[#004241]">
         <?php if (!empty($errors['title'])): ?>
@@ -112,9 +155,9 @@ $uploadMaxBytes = (function (string $value): int {
 
     <div class="flex gap-4 flex-wrap">
         <div>
-            <label for="category_id" class="block font-medium text-[#004241] mb-2">Catégorie</label>
+            <label for="category_id" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.category', 'Catégorie')) ?></label>
             <select name="category_id" id="category_id" class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
-                <option value="">Choisir...</option>
+                <option value=""><?= htmlspecialchars($t('site.choose', 'Choisir...')) ?></option>
                 <?php foreach ($categories as $cat): ?>
                 <option value="<?= htmlspecialchars($cat['id']) ?>" <?= ($old['category_id'] ?? '') === $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
                 <?php endforeach; ?>
@@ -124,7 +167,7 @@ $uploadMaxBytes = (function (string $value): int {
             <?php endif; ?>
         </div>
         <div>
-            <label for="language" class="block font-medium text-[#004241] mb-2">Langue</label>
+            <label for="language" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.language', 'Langue')) ?></label>
             <select name="language" id="language" class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
                 <?php $selectedLanguage = $old['language'] ?? 'fr'; ?>
                 <option value="fr" <?= $selectedLanguage === 'fr' ? 'selected' : '' ?>>Français</option>
@@ -135,7 +178,7 @@ $uploadMaxBytes = (function (string $value): int {
             <?php endif; ?>
         </div>
         <div>
-            <label for="reading_time" class="block font-medium text-[#004241] mb-2">Temps</label>
+            <label for="reading_time" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.reading_time', 'Temps')) ?></label>
             <input type="number" name="reading_time" id="reading_time" value="<?= htmlspecialchars($old['reading_time'] ?? '5') ?>" placeholder="5 min" min="1" max="120"
                 class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-24">
             <?php if (!empty($errors['reading_time'])): ?>
@@ -146,10 +189,10 @@ $uploadMaxBytes = (function (string $value): int {
 
     <div>
         <div class="mb-2 flex items-center justify-between gap-3">
-            <label for="excerpt" class="block font-medium text-[#004241]">Extrait / Chapô</label>
+            <label for="excerpt" class="block font-medium text-[#004241]"><?= htmlspecialchars($t('site.excerpt', 'Extrait / Chapô')) ?></label>
             <span id="excerpt-char-count" class="text-xs font-medium tabular-nums text-[#004241]/50">0/500</span>
         </div>
-        <textarea name="excerpt" id="excerpt" rows="3" placeholder="Commencez à écrire votre article ici..." maxlength="500"
+        <textarea name="excerpt" id="excerpt" rows="3" placeholder="<?= htmlspecialchars($t('site.start_writing', 'Commencez à écrire votre article ici...')) ?>" maxlength="500"
             data-char-max="500" data-char-target="excerpt-char-count"
             class="w-full max-w-2xl pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
         <?php if (!empty($errors['excerpt'])): ?>
@@ -158,8 +201,8 @@ $uploadMaxBytes = (function (string $value): int {
     </div>
 
     <div>
-        <label for="content" class="block font-medium text-[#004241] mb-2">Contenu</label>
-        <textarea name="content" id="content" rows="12" placeholder="Commencez à écrire votre article ici..." required
+        <label for="content" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.content', 'Contenu')) ?></label>
+        <textarea name="content" id="content" rows="12" placeholder="<?= htmlspecialchars($t('site.start_writing', 'Commencez à écrire votre article ici...')) ?>" required
             class="w-full max-w-2xl pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['content'] ?? '') ?></textarea>
         <?php if (!empty($errors['content'])): ?>
         <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['content']) ? $errors['content'][0] : $errors['content']) ?></p>
@@ -168,15 +211,15 @@ $uploadMaxBytes = (function (string $value): int {
 
     <div class="flex items-center justify-between pt-4">
         <span id="draft-autosave-status" class="text-sm text-[#004241]/60">
-            Cet article est sauvegardé automatiquement pendant que vous écrivez.
+            <?= htmlspecialchars($t('site.autosave_info', 'Cet article est sauvegardé automatiquement pendant que vous écrivez.')) ?>
         </span>
         <div class="flex gap-3">
             <button type="submit" name="status" value="draft" class="h-12 px-6 rounded-full border border-gray-300 bg-white text-[#004241] font-medium hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                <?= $isEditing ? 'Enregistrer' : 'Brouillon' ?>
+                <?= htmlspecialchars($isEditing ? $t('site.save_draft', 'Enregistrer') : $t('site.draft_button', 'Brouillon')) ?>
             </button>
             <button type="submit" name="status" value="submitted" class="h-12 px-6 rounded-full bg-[#004241] text-white font-semibold hover:bg-[#003535] transition inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                <?= $canBypassPayment ? 'Publier maintenant' : ($isEditing ? 'Renvoyer en validation' : 'Publier') ?>
+                <?= htmlspecialchars($canBypassPayment ? $t('site.publish_now', 'Publier maintenant') : ($isEditing ? $t('site.resubmit', 'Renvoyer en validation') : $t('site.publish', 'Publier'))) ?>
             </button>
         </div>
     </div>
@@ -253,6 +296,7 @@ $uploadMaxBytes = (function (string $value): int {
 
 <script>
 (() => {
+    const i18n = <?= json_encode($jsTranslations, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const form = document.getElementById('contributor-new-article-form');
     const input = document.getElementById('cover_image');
     const previewWrapper = document.getElementById('cover-image-preview-wrapper');
@@ -321,7 +365,7 @@ $uploadMaxBytes = (function (string $value): int {
     }
 
     function currentLocalTimeLabel() {
-        return new Date().toLocaleTimeString('fr-BE', {
+        return new Date().toLocaleTimeString(document.documentElement.lang === 'nl' ? 'nl-BE' : 'fr-BE', {
             hour: '2-digit',
             minute: '2-digit',
         });
@@ -398,7 +442,7 @@ $uploadMaxBytes = (function (string $value): int {
 
         autosaveInFlight = true;
         autosaveDirty = false;
-        setAutosaveStatus('Sauvegarde du brouillon…');
+        setAutosaveStatus(i18n.saving_draft);
 
         const formData = new FormData(form);
         formData.set('status', 'draft');
@@ -420,15 +464,15 @@ $uploadMaxBytes = (function (string $value): int {
             const data = await readJsonResponse(response);
 
             if (!response.ok) {
-                throw new Error(normalizeMessage(data.message, 'Impossible de sauvegarder votre brouillon.'));
+                throw new Error(normalizeMessage(data.message, i18n.draft_save_failed));
             }
 
             autosaveLastFingerprint = buildAutosaveFingerprint();
             updateDraftRoute(data);
-            setAutosaveStatus(`Brouillon sauvegardé à ${currentLocalTimeLabel()}`, 'success');
+            setAutosaveStatus(`${i18n.draft_saved_at} ${currentLocalTimeLabel()}`, 'success');
         } catch (error) {
             autosaveDirty = true;
-            setAutosaveStatus(normalizeMessage(error.message, 'La sauvegarde automatique a échoué.'), 'error');
+            setAutosaveStatus(normalizeMessage(error.message, i18n.autosave_failed), 'error');
         } finally {
             autosaveInFlight = false;
 
@@ -445,7 +489,7 @@ $uploadMaxBytes = (function (string $value): int {
         }
 
         autosaveDirty = true;
-        setAutosaveStatus('Modifications non enregistrées…');
+        setAutosaveStatus(i18n.unsaved_changes);
 
         if (autosaveTimeout) {
             window.clearTimeout(autosaveTimeout);
@@ -470,9 +514,9 @@ $uploadMaxBytes = (function (string $value): int {
     }
 
     function resetOverlayState() {
-        overlayTitle.textContent = 'Transmission en cours...';
-        overlayMessage.textContent = 'Nous envoyons votre article à l’espace rédacteur. Vous pouvez patienter quelques instants.';
-        overlayButton.textContent = 'Continuer';
+        overlayTitle.textContent = i18n.sending_in_progress_title;
+        overlayMessage.textContent = i18n.sending_in_progress_text;
+        overlayButton.textContent = i18n.continue;
         overlayButton.classList.add('hidden');
         spinner.classList.remove('hidden');
         check.classList.add('hidden');
@@ -495,7 +539,7 @@ $uploadMaxBytes = (function (string $value): int {
     function setOverlaySuccess(title, message, redirectUrl = null) {
         overlayTitle.textContent = title;
         overlayMessage.textContent = message;
-        overlayButton.textContent = 'Continuer';
+        overlayButton.textContent = i18n.continue;
         overlayButton.classList.remove('hidden');
         spinner.classList.add('hidden');
         errorIcon.classList.add('hidden');
@@ -503,10 +547,10 @@ $uploadMaxBytes = (function (string $value): int {
         pendingRedirectUrl = redirectUrl;
     }
 
-    function setOverlayError(message, title = 'Action interrompue') {
+    function setOverlayError(message, title = i18n.action_interrupted) {
         overlayTitle.textContent = title;
         overlayMessage.textContent = message;
-        overlayButton.textContent = 'Fermer';
+        overlayButton.textContent = i18n.close || 'Fermer';
         overlayButton.classList.remove('hidden');
         spinner.classList.add('hidden');
         check.classList.add('hidden');
@@ -590,7 +634,7 @@ $uploadMaxBytes = (function (string $value): int {
         resetPaymentElement();
         setButtonsDisabled(false);
         isPublishing = false;
-        setAutosaveStatus('Brouillon sauvegardé automatiquement');
+        setAutosaveStatus(i18n.draft_saved_auto);
     }
 
     function openPaymentOverlay() {
@@ -610,17 +654,17 @@ $uploadMaxBytes = (function (string $value): int {
 
     function fallbackMessageForResponse(response, fallback) {
         if (response.status === 419) {
-            return 'Votre session a expiré. Rechargez la page puis réessayez.';
+            return i18n.session_expired;
         }
 
         if (response.status >= 500) {
-            return 'Le serveur a rencontré un problème. Réessayez dans quelques instants.';
+            return i18n.server_problem;
         }
 
         return fallback;
     }
 
-    async function readJsonResponse(response, fallback = 'Le serveur a renvoyé une réponse inattendue.') {
+    async function readJsonResponse(response, fallback = i18n.unexpected_response) {
         const contentType = response.headers.get('content-type') || '';
 
         if (!contentType.includes('application/json')) {
@@ -633,10 +677,10 @@ $uploadMaxBytes = (function (string $value): int {
 
     async function preparePayment(submissionId) {
         if (!stripeKey) {
-            throw new Error('La clé Stripe publishable est absente.');
+            throw new Error(i18n.stripe_key_missing);
         }
 
-        showOverlayProgress('Préparation de votre soumission...', `Votre brouillon est enregistré. Nous préparons maintenant le paiement de ${publicationPriceLabel} pour l’envoyer en validation éditoriale.`);
+        showOverlayProgress(i18n.preparing_submission_title, i18n.preparing_payment_text.replace(':amount', publicationPriceLabel));
 
         const response = await fetch(paymentCreateUrl, {
             method: 'POST',
@@ -650,14 +694,14 @@ $uploadMaxBytes = (function (string $value): int {
             body: JSON.stringify({ submission_id: submissionId }),
         });
 
-        const data = await readJsonResponse(response, 'Impossible de preparer le paiement pour le moment.');
+        const data = await readJsonResponse(response, i18n.payment_prepare_failed);
 
         if (!response.ok) {
-            throw new Error(normalizeMessage(data.message, 'Impossible de preparer le paiement Stripe.'));
+            throw new Error(normalizeMessage(data.message, i18n.payment_prepare_stripe_failed));
         }
 
         if (!window.Stripe) {
-            throw new Error('Stripe.js n’a pas pu etre charge.');
+            throw new Error(i18n.stripe_load_failed);
         }
 
         if (!stripe) {
@@ -689,7 +733,7 @@ $uploadMaxBytes = (function (string $value): int {
 
     async function confirmSubmissionPayment() {
         if (!stripe || !elements || !currentPaymentId) {
-            showPaymentError('Le formulaire de paiement n’est pas prêt.');
+            showPaymentError(i18n.payment_form_not_ready);
             return;
         }
 
@@ -703,14 +747,14 @@ $uploadMaxBytes = (function (string $value): int {
         });
 
         if (stripeResult.error) {
-            showPaymentError(normalizeMessage(stripeResult.error.message, 'Le paiement a ete refuse. Verifiez vos donnees puis reessayez.'));
+            showPaymentError(normalizeMessage(stripeResult.error.message, i18n.payment_refused));
             return;
         }
 
         paymentOverlay.classList.add('hidden');
         paymentOverlay.classList.remove('flex');
         document.body.style.overflow = '';
-        showOverlayProgress('Paiement validé...', 'Votre règlement a bien été accepté. Nous transmettons maintenant votre article à l’équipe éditoriale.');
+        showOverlayProgress(i18n.payment_validated_title, i18n.payment_validated_text);
 
         const response = await fetch(paymentConfirmUrl, {
             method: 'POST',
@@ -724,18 +768,18 @@ $uploadMaxBytes = (function (string $value): int {
             body: JSON.stringify({ payment_id: currentPaymentId }),
         });
 
-        const data = await readJsonResponse(response, 'La confirmation du paiement n’a pas pu être finalisée pour le moment.');
+        const data = await readJsonResponse(response, i18n.payment_confirm_failed);
 
         if (!response.ok) {
             setButtonsDisabled(false);
-            setOverlayError(normalizeMessage(data.message, 'Le paiement a ete effectue, mais la confirmation locale a echoue. Verifiez le tableau de bord dans quelques instants.'));
+            setOverlayError(normalizeMessage(data.message, i18n.payment_done_but_local_failed));
             return;
         }
 
         setButtonsDisabled(false);
         setOverlaySuccess(
-            'Article transmis',
-            normalizeMessage(data.message, 'Votre article a bien ete envoye en validation.'),
+            i18n.article_sent,
+            normalizeMessage(data.message, i18n.article_sent_text),
             window.location.origin + '/contributor/dashboard'
         );
     }
@@ -761,8 +805,8 @@ $uploadMaxBytes = (function (string $value): int {
         } catch (error) {
             setButtonsDisabled(false);
             setOverlayError(
-                normalizeMessage(error.message, 'Le paiement n’a pas pu etre finalise.'),
-                'Paiement interrompu'
+                normalizeMessage(error.message, i18n.payment_finalize_failed),
+                i18n.payment_interrupted
             );
         }
     });
@@ -779,7 +823,7 @@ $uploadMaxBytes = (function (string $value): int {
 
         if (maxBytes > 0 && file.size > maxBytes) {
             resetPreview();
-            errorEl.textContent = `Cette image dépasse la limite PHP locale actuelle (${maxLabel}). Choisissez un fichier plus léger.`;
+            errorEl.textContent = i18n.image_too_large.replace(':limit', maxLabel);
             errorEl.classList.remove('hidden');
             setButtonsDisabled(true);
             return;
@@ -842,20 +886,20 @@ $uploadMaxBytes = (function (string $value): int {
         isPublishing = isPublishAction;
         setButtonsDisabled(true);
         showOverlayProgress(
-            isPublishAction ? 'Enregistrement du brouillon...' : 'Enregistrement du brouillon...',
+            i18n.saving_before_publish,
             isPublishAction
                 ? (canBypassPayment
-                    ? 'Nous sauvegardons votre article avant publication directe.'
-                    : 'Nous sauvegardons votre article avant de lancer le paiement.')
-                : 'Nous enregistrons votre brouillon pour que vous puissiez le reprendre à tout moment.'
+                    ? i18n.saving_before_direct_publish
+                    : i18n.saving_before_payment)
+                : i18n.saving_draft_text
         );
 
         const formData = new FormData(form);
         formData.set('status', isPublishAction ? 'submitted' : 'draft');
         const responseFallback = isDraftAction
-            ? 'Le brouillon n’a pas pu être enregistré. Vérifiez les champs puis réessayez.'
-            : 'Votre article n’a pas pu être préparé pour l’envoi. Vérifiez les champs puis réessayez.';
-        const errorTitle = isDraftAction ? 'Brouillon non enregistré' : 'Envoi impossible';
+            ? i18n.draft_save_failed
+            : i18n.submit_prepare_failed;
+        const errorTitle = isDraftAction ? i18n.draft_not_saved : i18n.send_impossible;
 
         fetch(form.action, {
             method: 'POST',
@@ -876,7 +920,7 @@ $uploadMaxBytes = (function (string $value): int {
 
                 if (data.requires_payment) {
                     if (!data.submission_id) {
-                        throw new Error('La soumission n’a pas pu etre preparee pour Stripe.');
+                        throw new Error(i18n.submission_not_ready_for_stripe);
                     }
 
                     await preparePayment(data.submission_id);
@@ -889,12 +933,12 @@ $uploadMaxBytes = (function (string $value): int {
 
                 setButtonsDisabled(false);
                 setOverlaySuccess(
-                    data.notice && data.notice.title ? data.notice.title : (isDraftAction ? 'Brouillon enregistré' : 'Article transmis'),
+                    data.notice && data.notice.title ? data.notice.title : (isDraftAction ? i18n.draft_saved : i18n.article_sent),
                     normalizeMessage(
                         data.notice && data.notice.message ? data.notice.message : '',
                         isDraftAction
-                            ? 'Votre brouillon a bien été enregistré. Vous pourrez le reprendre plus tard.'
-                            : 'Votre article a ete envoye en validation.'
+                            ? i18n.draft_saved_text
+                            : i18n.article_sent_text
                     ),
                     data.redirect_url || null
                 );

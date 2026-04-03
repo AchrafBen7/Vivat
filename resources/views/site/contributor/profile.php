@@ -2,6 +2,7 @@
 $user = $user ?? null;
 $errors = $errors ?? [];
 $old = $old ?? [];
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 
 $name = $old['name'] ?? ($user->name ?? '');
 $email = $user->email ?? '';
@@ -12,9 +13,9 @@ $websiteUrl = $old['website_url'] ?? ($user->website_url ?? '');
 $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
 $primaryRole = $roles instanceof \Illuminate\Support\Collection ? $roles->first() : null;
 $roleLabel = match ($primaryRole) {
-    'admin' => 'Administrateur',
-    'contributor' => 'Redacteur',
-    default => 'Membre',
+    'admin' => $t('site.administrator', 'Administrateur'),
+    'contributor' => $t('site.editor', 'Rédacteur'),
+    default => $t('site.member', 'Membre'),
 };
 $avatarUrl = $user->avatar ?? null;
 $requiresPasswordForDeletion = empty($user->google_id);
@@ -51,7 +52,7 @@ $initials = $initials !== '' ? $initials : 'V';
     </section>
 
     <div class="w-full h-7">
-        <h2 class="text-[18px] leading-7 font-medium text-[#1B4B3B]">Modifier mon profil</h2>
+        <h2 class="text-[18px] leading-7 font-medium text-[#1B4B3B]"><?= htmlspecialchars($t('site.edit_profile', 'Modifier mon profil')) ?></h2>
     </div>
 
     <form action="<?= url('/contributor/profile') ?>" method="post" class="mt-[-16px] rounded-2xl border border-[#DED8CE66] bg-[#F8F6F2] p-5 flex flex-col gap-5">
@@ -59,7 +60,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="name" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Nom complet</label>
+                <label for="name" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]"><?= htmlspecialchars($t('site.full_name', 'Nom complet')) ?></label>
                 <div>
                     <input
                         type="text"
@@ -68,7 +69,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         value="<?= htmlspecialchars($name) ?>"
                         class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60">C’est le nom affiché publiquement avec vos articles.</p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.public_name_help', 'C’est le nom affiché publiquement avec vos articles.')) ?></p>
                     <?php if (!empty($errors['name'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['name']) ? $errors['name'][0] : $errors['name']) ?></p>
                     <?php endif; ?>
@@ -88,7 +89,7 @@ $initials = $initials !== '' ? $initials : 'V';
         </div>
 
         <div class="pt-[5px] flex flex-col gap-[9px]">
-            <label for="bio" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Biographie</label>
+                <label for="bio" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]"><?= htmlspecialchars($t('site.biography', 'Biographie')) ?></label>
             <div>
                 <textarea
                     id="bio"
@@ -96,7 +97,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     rows="3"
                     class="min-h-20 w-full rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 pt-2 pb-[30px] text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                 ><?= htmlspecialchars($bio) ?></textarea>
-                <p class="mt-2 text-xs text-[#004241]/60">Présentez-vous en quelques lignes. Cette bio peut apparaître dans votre espace auteur.</p>
+                <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.bio_help', 'Présentez-vous en quelques lignes. Cette bio peut apparaître dans votre espace auteur.')) ?></p>
                 <?php if (!empty($errors['bio'])): ?>
                 <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['bio']) ? $errors['bio'][0] : $errors['bio']) ?></p>
                 <?php endif; ?>
@@ -115,7 +116,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://twitter.com/votre-profil"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60">Ajoutez un lien complet si vous souhaitez le partager.</p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.add_full_link_help', 'Ajoutez un lien complet si vous souhaitez le partager.')) ?></p>
                     <?php if (!empty($errors['twitter_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['twitter_url']) ? $errors['twitter_url'][0] : $errors['twitter_url']) ?></p>
                     <?php endif; ?>
@@ -133,7 +134,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://instagram.com/votre-profil"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60">Ajoutez un lien complet si vous souhaitez le partager.</p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.add_full_link_help', 'Ajoutez un lien complet si vous souhaitez le partager.')) ?></p>
                     <?php if (!empty($errors['instagram_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['instagram_url']) ? $errors['instagram_url'][0] : $errors['instagram_url']) ?></p>
                     <?php endif; ?>
@@ -151,7 +152,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://votresite.be"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60">Utilisez l’adresse complète de votre site ou portfolio.</p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.website_help', 'Utilisez l’adresse complète de votre site ou portfolio.')) ?></p>
                     <?php if (!empty($errors['website_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['website_url']) ? $errors['website_url'][0] : $errors['website_url']) ?></p>
                     <?php endif; ?>
@@ -161,7 +162,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
         <div class="flex justify-end pt-1">
             <button type="submit" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-7 text-sm font-medium leading-5 text-[#F3EFE7] hover:bg-[#003535] transition">
-                Sauvegarder
+                <?= htmlspecialchars($t('site.save', 'Sauvegarder')) ?>
             </button>
         </div>
     </form>
@@ -171,12 +172,12 @@ $initials = $initials !== '' ? $initials : 'V';
         <input type="hidden" name="form_type" value="password">
 
         <div class="w-full h-7">
-            <h2 class="text-[18px] leading-7 font-medium text-[#1B4B3B]">Changer mon mot de passe</h2>
+            <h2 class="text-[18px] leading-7 font-medium text-[#1B4B3B]"><?= htmlspecialchars($t('site.change_password', 'Changer mon mot de passe')) ?></h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="current_password" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Mot de passe actuel</label>
+                <label for="current_password" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]"><?= htmlspecialchars($t('site.current_password', 'Mot de passe actuel')) ?></label>
                 <div>
                     <input
                         type="password"
@@ -191,7 +192,7 @@ $initials = $initials !== '' ? $initials : 'V';
             </div>
 
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="new_password" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Nouveau mot de passe</label>
+                <label for="new_password" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]"><?= htmlspecialchars($t('site.new_password', 'Nouveau mot de passe')) ?></label>
                 <div>
                     <input
                         type="password"
@@ -199,7 +200,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         name="password"
                         class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60">Minimum 12 caractères avec majuscule, minuscule, chiffre et symbole.</p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.password_rules_help', 'Minimum 12 caractères avec majuscule, minuscule, chiffre et symbole.')) ?></p>
                     <?php if (!empty($errors['password'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
                     <?php endif; ?>
@@ -207,7 +208,7 @@ $initials = $initials !== '' ? $initials : 'V';
             </div>
 
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="password_confirmation" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]">Confirmation</label>
+                <label for="password_confirmation" class="text-xs font-medium uppercase tracking-[0.06em] text-[#004241]"><?= htmlspecialchars($t('site.confirmation', 'Confirmation')) ?></label>
                 <input
                     type="password"
                     id="password_confirmation"
@@ -219,7 +220,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
         <div class="flex justify-end pt-1">
             <button type="submit" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-7 text-sm font-medium leading-5 text-[#F3EFE7] hover:bg-[#003535] transition">
-                Mettre à jour le mot de passe
+                <?= htmlspecialchars($t('site.update_password', 'Mettre à jour le mot de passe')) ?>
             </button>
         </div>
     </form>
@@ -229,10 +230,9 @@ $initials = $initials !== '' ? $initials : 'V';
         <input type="hidden" name="form_type" value="delete_account">
 
         <div class="flex flex-col gap-2">
-            <h2 class="text-[18px] leading-7 font-medium text-[#8E2E2A]">Supprimer mon compte</h2>
+            <h2 class="text-[18px] leading-7 font-medium text-[#8E2E2A]"><?= htmlspecialchars($t('site.delete_my_account', 'Supprimer mon compte')) ?></h2>
             <p class="text-sm leading-6 text-[#8E2E2A]/80">
-                Cette action est irréversible. Vos données personnelles seront anonymisées, votre accès sera révoqué,
-                mais les articles, paiements et décisions éditoriales pourront être conservés si une conservation légale ou comptable s’impose.
+                <?= htmlspecialchars($t('site.delete_account_warning', 'Cette action est irréversible. Vos données personnelles seront anonymisées, votre accès sera révoqué, mais les articles, paiements et décisions éditoriales pourront être conservés si une conservation légale ou comptable s’impose.')) ?>
             </p>
             <?php if (!empty($errors['delete_account'])): ?>
             <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_account']) ? $errors['delete_account'][0] : $errors['delete_account']) ?></p>
@@ -241,7 +241,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="delete_email" class="text-xs font-medium uppercase tracking-[0.06em] text-[#8E2E2A]">Confirmez votre email</label>
+                <label for="delete_email" class="text-xs font-medium uppercase tracking-[0.06em] text-[#8E2E2A]"><?= htmlspecialchars($t('site.confirm_your_email', 'Confirmez votre email')) ?></label>
                 <div>
                     <input
                         type="email"
@@ -251,7 +251,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         placeholder="<?= htmlspecialchars($email) ?>"
                         class="w-full h-10 rounded-xl border border-[#E8C8C6] bg-white px-3 text-sm text-[#6A2420] outline-none focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
                     >
-                    <p class="mt-2 text-xs text-[#8E2E2A]/60">Saisissez exactement l’adresse liée à ce compte pour confirmer l’opération.</p>
+                    <p class="mt-2 text-xs text-[#8E2E2A]/60"><?= htmlspecialchars($t('site.delete_email_help', 'Saisissez exactement l’adresse liée à ce compte pour confirmer l’opération.')) ?></p>
                     <?php if (!empty($errors['delete_email'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_email']) ? $errors['delete_email'][0] : $errors['delete_email']) ?></p>
                     <?php endif; ?>
@@ -260,7 +260,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
             <?php if ($requiresPasswordForDeletion): ?>
             <div class="pt-[5px] flex flex-col gap-[9px]">
-                <label for="current_password_delete" class="text-xs font-medium uppercase tracking-[0.06em] text-[#8E2E2A]">Mot de passe actuel</label>
+                <label for="current_password_delete" class="text-xs font-medium uppercase tracking-[0.06em] text-[#8E2E2A]"><?= htmlspecialchars($t('site.current_password', 'Mot de passe actuel')) ?></label>
                 <div>
                     <input
                         type="password"
@@ -268,7 +268,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         name="current_password_delete"
                         class="w-full h-10 rounded-xl border border-[#E8C8C6] bg-white px-3 text-sm text-[#6A2420] outline-none focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
                     >
-                    <p class="mt-2 text-xs text-[#8E2E2A]/60">Cette vérification protège votre compte contre une suppression lancée depuis une session ouverte.</p>
+                    <p class="mt-2 text-xs text-[#8E2E2A]/60"><?= htmlspecialchars($t('site.delete_password_help', 'Cette vérification protège votre compte contre une suppression lancée depuis une session ouverte.')) ?></p>
                     <?php if (!empty($errors['current_password_delete'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['current_password_delete']) ? $errors['current_password_delete'][0] : $errors['current_password_delete']) ?></p>
                     <?php endif; ?>
@@ -279,7 +279,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
         <label class="inline-flex items-start gap-3 rounded-xl border border-[#E8C8C6] bg-white px-4 py-3 text-sm leading-6 text-[#6A2420]">
             <input type="checkbox" name="delete_confirmation" value="1" class="mt-1 h-4 w-4 rounded border-[#D65B57] text-[#8E2E2A] focus:ring-[#8E2E2A]/20">
-            <span>Je confirme vouloir supprimer définitivement mon compte et perdre l’accès à l’espace rédacteur.</span>
+            <span><?= htmlspecialchars($t('site.delete_account_checkbox', 'Je confirme vouloir supprimer définitivement mon compte et perdre l’accès à l’espace rédacteur.')) ?></span>
         </label>
         <?php if (!empty($errors['delete_confirmation'])): ?>
         <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_confirmation']) ? $errors['delete_confirmation'][0] : $errors['delete_confirmation']) ?></p>
@@ -289,9 +289,9 @@ $initials = $initials !== '' ? $initials : 'V';
             <button
                 type="submit"
                 class="inline-flex h-10 items-center justify-center rounded-full bg-[#8E2E2A] px-7 text-sm font-medium leading-5 text-white hover:bg-[#73231F] transition"
-                onclick="return window.confirm('Confirmez-vous la suppression définitive de votre compte ?');"
+                onclick="return window.confirm('<?= htmlspecialchars($t('site.delete_account_confirm', 'Confirmez-vous la suppression définitive de votre compte ?')) ?>');"
             >
-                Supprimer mon compte
+                <?= htmlspecialchars($t('site.delete_my_account', 'Supprimer mon compte')) ?>
             </button>
         </div>
     </form>

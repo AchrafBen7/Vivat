@@ -10,6 +10,8 @@ use Illuminate\Http\Response;
 
 class ArticleController extends Controller
 {
+    private const RELATED_ARTICLES_TARGET = 4;
+
     public function index(Request $request): Response
     {
         $locale = content_locale($request);
@@ -39,29 +41,34 @@ class ArticleController extends Controller
         // Catégorie toujours résolue via category_id pour cohérence avec la DB
         $category = $article->category_id ? Category::find($article->category_id) : null;
 
-        $relatedArticles = Article::published()
+        $primaryRelated = Article::published()
             ->forLocale($locale)
             ->with('category')
             ->where('id', '!=', $article->id)
             ->when($article->category_id, fn ($q) => $q->where('category_id', $article->category_id))
             ->orderByDesc('published_at')
-            ->limit(4)
-            ->get()
-            ->map(fn (Article $a) => [
-                'title'        => $a->title,
-                'slug'         => $a->slug,
-                'reading_time' => $a->reading_time,
-                'category'     => $a->category?->name ?? '',
-                'published_at_display' => $a->published_at?->locale('fr')->isoFormat('D MMMM YYYY'),
-                'image'        => $this->articleCoverOrFallback($a, $a->category),
-                'fallback'     => vivat_category_fallback_image(
-                    $a->category?->slug ?? $category?->slug,
-                    760,
-                    520,
-                    (string) $a->id,
-                    'also'
-                ),
-            ])
+            ->limit(self::RELATED_ARTICLES_TARGET)
+            ->get();
+
+        $selectedIds = $primaryRelated->pluck('id')->prepend($article->id)->all();
+        $missingCount = max(0, self::RELATED_ARTICLES_TARGET - $primaryRelated->count());
+
+        $fallbackRelated = collect();
+        if ($missingCount > 0) {
+            $fallbackRelated = Article::published()
+                ->forLocale($locale)
+                ->with('category')
+                ->whereNotIn('id', $selectedIds)
+                ->orderByDesc('published_at')
+                ->limit($missingCount)
+                ->get();
+        }
+
+        $relatedArticles = $primaryRelated
+            ->concat($fallbackRelated)
+            ->take(self::RELATED_ARTICLES_TARGET)
+            ->map(fn (Article $a) => $this->mapRelatedArticle($a, $category, $locale))
+            ->values()
             ->all();
 
         $data = [
@@ -136,5 +143,24 @@ class ArticleController extends Controller
         }
 
         return $cover;
+    }
+
+    private function mapRelatedArticle(Article $article, ?Category $currentCategory, string $locale): array
+    {
+        return [
+            'title' => $article->title,
+            'slug' => $article->slug,
+            'reading_time' => $article->reading_time,
+            'category' => $article->category?->name ?? '',
+            'published_at_display' => $article->published_at?->locale($locale)->isoFormat('D MMMM YYYY'),
+            'image' => $this->articleCoverOrFallback($article, $article->category),
+            'fallback' => vivat_category_fallback_image(
+                $article->category?->slug ?? $currentCategory?->slug,
+                760,
+                520,
+                (string) $article->id,
+                'also'
+            ),
+        ];
     }
 }

@@ -1,5 +1,6 @@
 <?php
 $article = $article ?? [];
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 $title = $article['title'] ?? 'Article';
 $slug = $article['slug'] ?? '';
 $published_at = $article['published_at'] ?? null;
@@ -10,7 +11,7 @@ $category = $article['category'] ?? null;
 $cover_image_url = $article['cover_image_url'] ?? null;
 $content = $article['content'] ?? '';
 $excerpt = $article['excerpt'] ?? '';
-$relatedCategoryName = $category['name'] ?? 'À la une';
+$relatedCategoryName = $category['name'] ?? $t('site.featured', 'À la une');
 $relatedCategorySlug = $category['slug'] ?? null;
 $relatedBaseId = $article['id'] ?? $slug ?? 'article';
 $catSlug = ($category ?? [])['slug'] ?? null;
@@ -26,14 +27,16 @@ $relatedItems = ! empty($related_articles) ? array_map(fn (array $a) => [
     'image'        => $a['image'] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-1'),
     'fallback'     => $a['fallback'] ?? $a['image'] ?? vivat_category_fallback_image($relatedCategorySlug, 760, 520, (string) $relatedBaseId, 'also-1b'),
 ], $related_articles) : [];
-$alsoCarouselItems = array_merge(
-    [[
+$showRelatedSection = count($relatedItems) > 0;
+$useRelatedCarousel = count($relatedItems) > 2;
+$alsoCarouselItems = array_values(array_filter(array_merge(
+    $useRelatedCarousel ? [[
         'type' => 'ad',
-        'label' => 'Publicité',
+        'label' => $t('site.advertising', 'Publicité'),
         'size' => '400×400',
-    ]],
+    ]] : [],
     array_map(fn (array $item): array => ['type' => 'article'] + $item, $relatedItems)
-);
+)));
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
 $glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
 $tagGlassOnImage = $tagClass.' '.$glassTagTailwind.' text-white';
@@ -45,6 +48,54 @@ $metaLine = trim(implode(' • ', array_filter([
 $shareUrl = url('/articles/'.$slug);
 $shareTitle = $title;
 $isPreview = (bool) ($article['is_preview'] ?? false);
+
+if (! function_exists('vivat_normalize_article_html')) {
+    /**
+     * Répare un HTML d'article potentiellement mal fermé pour éviter qu'il casse le layout suivant.
+     */
+    function vivat_normalize_article_html(string $html): string
+    {
+        $trimmed = trim($html);
+
+        if ($trimmed === '' || ! preg_match('/<\s*\/?\s*[a-z][^>]*>/i', $trimmed) || ! class_exists(\DOMDocument::class)) {
+            return $html;
+        }
+
+        libxml_use_internal_errors(true);
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $wrapped = '<!DOCTYPE html><html><body>'.$trimmed.'</body></html>';
+        $flags = \LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD | \LIBXML_NOERROR | \LIBXML_NOWARNING;
+
+        if (! $dom->loadHTML('<?xml encoding="utf-8" ?>'.$wrapped, $flags)) {
+            libxml_clear_errors();
+
+            return $html;
+        }
+
+        foreach (['script', 'style', 'iframe'] as $tag) {
+            while (($nodes = $dom->getElementsByTagName($tag))->length > 0) {
+                $nodes->item(0)?->parentNode?->removeChild($nodes->item(0));
+            }
+        }
+
+        $body = $dom->getElementsByTagName('body')->item(0);
+        if (! $body) {
+            libxml_clear_errors();
+
+            return $html;
+        }
+
+        $normalized = '';
+        foreach ($body->childNodes as $child) {
+            $normalized .= $dom->saveHTML($child);
+        }
+
+        libxml_clear_errors();
+
+        return $normalized !== '' ? $normalized : $html;
+    }
+}
 
 // Si le contenu est du texte brut saisi par un rédacteur, convertir les lignes vides en paragraphes.
 // On conserve le HTML existant pour ne pas casser les anciens articles déjà formatés.
@@ -61,8 +112,12 @@ if (is_string($content) && trim($content) !== '' && ! preg_match('/<\s*\/?\s*[a-
     }, $paragraphs));
 }
 
+if (is_string($content) && trim($content) !== '') {
+    $content = vivat_normalize_article_html($content);
+}
+
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
-$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400"><span>Espace publicitaire 970×250</span></div></div>';
+$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400"><span>' . htmlspecialchars($t('site.advertising_space', 'Espace publicitaire')) . ' 970×250</span></div></div>';
 $paraCount = preg_match_all('/<\/p>\s*/i', $content);
 $insertAfterPara = $paraCount >= 2 ? (int) floor($paraCount / 2) : 1;
 $count = 0;
@@ -77,7 +132,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
     <div class="mb-6 flex items-center justify-center">
         <div class="inline-flex items-center gap-3 rounded-full border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-3 text-sm font-medium text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
-            <span>Ceci est un aperçu de votre article. Il n’est pas encore affiché publiquement comme version finale.</span>
+            <span><?= htmlspecialchars($t('site.article_preview_notice', "Ceci est un aperçu de votre article. Il n’est pas encore affiché publiquement comme version finale.")) ?></span>
         </div>
     </div>
     <?php } ?>
@@ -85,7 +140,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
     <!-- Bannière pub 728×90 -->
     <div class="mb-6 flex items-center justify-center">
         <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
-            <span class="text-sm">Espace publicitaire 728×90</span>
+            <span class="text-sm"><?= htmlspecialchars($t('site.advertising_space', 'Espace publicitaire')) ?> 728×90</span>
         </div>
     </div>
 
@@ -94,9 +149,9 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
         <img src="<?= htmlspecialchars($coverSrc) ?>" data-fallback-url="<?= htmlspecialchars($coverFallback) ?>" alt="<?= htmlspecialchars($title) ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
         <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
         <div class="absolute inset-0 flex flex-col p-8 top-0 left-0">
-            <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white mb-[85px]" aria-label="Retour">
+            <a href="<?= htmlspecialchars($backHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white mb-[85px]" aria-label="<?= htmlspecialchars($t('site.back', 'Retour')) ?>">
                 <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                Retour
+                <?= htmlspecialchars($t('site.back', 'Retour')) ?>
             </a>
             <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
             <?php if ($metaLine) { ?>
@@ -136,11 +191,11 @@ $shareLinks = [
         <?= $content ?>
             </div>
 
-            <aside class="flex flex-col items-center mt-14 pt-10 border-t border-[#004241]/10" aria-label="Partager l'article">
-                <span class="text-sm font-medium text-[#004241]/60 uppercase tracking-wider mb-5">Partager</span>
+            <aside class="flex flex-col items-center mt-14 pt-10 border-t border-[#004241]/10" aria-label="<?= htmlspecialchars($t('site.share_article', "Partager l'article")) ?>">
+                <span class="text-sm font-medium text-[#004241]/60 uppercase tracking-wider mb-5"><?= htmlspecialchars($t('site.share', 'Partager')) ?></span>
                 <div class="flex items-center justify-center gap-5">
                     <?php foreach ($shareLinks as $share) { ?>
-                    <a href="<?= htmlspecialchars($share[1]) ?>" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-11 h-11 rounded-full bg-[#EBF1EF] text-[#004241] hover:bg-[#004241] hover:text-white transition-colors duration-200" aria-label="Partager sur <?= htmlspecialchars($share[0]) ?>">
+                    <a href="<?= htmlspecialchars($share[1]) ?>" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-11 h-11 rounded-full bg-[#EBF1EF] text-[#004241] hover:bg-[#004241] hover:text-white transition-colors duration-200" aria-label="<?= htmlspecialchars($t('site.share_on', 'Partager sur')) ?> <?= htmlspecialchars($share[0]) ?>">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="<?= htmlspecialchars($share[2]) ?>"/></svg>
                     </a>
                     <?php } ?>
@@ -150,20 +205,21 @@ $shareLinks = [
     </div>
 </div>
 
-<section class="mx-auto mb-0 mt-16 max-w-[1400px] px-[18px] md:px-8 lg:px-10 xl:px-20" aria-label="À lire aussi">
-    <h2 class="text-[#004241] font-medium mb-6 text-3xl font-sans">À lire aussi</h2>
+<?php if ($showRelatedSection) { ?>
+<section class="mx-auto mb-0 mt-16 max-w-[1400px] px-[18px] md:px-8 lg:px-10 xl:px-20" aria-label="<?= htmlspecialchars($t('site.read_also', 'À lire aussi')) ?>">
+    <h2 class="text-[#004241] font-medium mb-6 text-3xl font-sans"><?= htmlspecialchars($t('site.read_also', 'À lire aussi')) ?></h2>
     <div id="also-carousel-frame" class="relative min-w-0 w-full">
         <div
             id="also-carousel-track"
             class="w-full overflow-hidden"
         >
-            <div id="also-carousel-rail" class="flex w-max gap-6 transition-transform duration-500 ease-out will-change-transform">
+            <div id="also-carousel-rail" class="<?= $useRelatedCarousel ? 'flex w-max gap-6 transition-transform duration-500 ease-out will-change-transform' : 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3' ?>">
                 <?php foreach ($alsoCarouselItems as $item) { ?>
                 <?php $isAd = ($item['type'] ?? 'article') === 'ad'; ?>
                 <?php if ($isAd) { ?>
                 <aside
-                    class="hidden lg:flex lg:w-[calc((100%-48px)/3)] flex-shrink-0 rounded-[30px] items-center justify-center text-center text-white/90 bg-[#4B4B4B] h-[380px]"
-                    data-carousel-item="1"
+                    class="hidden lg:flex rounded-[30px] items-center justify-center text-center text-white/90 bg-[#4B4B4B] h-[380px] <?= $useRelatedCarousel ? 'flex-shrink-0' : '' ?>"
+                    <?= $useRelatedCarousel ? 'data-carousel-item="1"' : '' ?>
                 >
                     <div class="flex flex-col items-center justify-center gap-3">
                         <span class="font-semibold text-[22px]"><?= htmlspecialchars($item['label']) ?></span>
@@ -171,11 +227,11 @@ $shareLinks = [
                     </div>
                 </aside>
                 <?php } else { ?>
-                <?php $itemCategory = $item['category'] ?? 'À la une'; ?>
+                <?php $itemCategory = $item['category'] ?? $t('site.featured', 'À la une'); ?>
                 <a
                     href="<?= ! empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
-                    class="group relative block h-[380px] w-[240px] flex-shrink-0 overflow-hidden rounded-[30px] sm:w-[320px] lg:w-[calc((100%-48px)/3)]"
-                    data-carousel-item="1"
+                    class="group relative block h-[380px] overflow-hidden rounded-[30px] <?= $useRelatedCarousel ? 'w-[240px] flex-shrink-0 sm:w-[320px]' : 'w-full' ?>"
+                    <?= $useRelatedCarousel ? 'data-carousel-item="1"' : '' ?>
                 >
                     <img src="<?= htmlspecialchars($item['image']) ?>" data-fallback-url="<?= htmlspecialchars($item['fallback'] ?? $item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
@@ -192,12 +248,12 @@ $shareLinks = [
             </div>
         </div>
 
-        <?php if (count($relatedItems) > 1) { ?>
+        <?php if ($useRelatedCarousel) { ?>
         <button
             type="button"
             id="also-carousel-prev"
             class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition -left-[24px] w-12 h-12 bg-[#F2E8D2]"
-            aria-label="Article précédent"
+            aria-label="<?= htmlspecialchars($t('site.previous_article', 'Article précédent')) ?>"
         >
             <svg class="w-6 h-6 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -207,7 +263,7 @@ $shareLinks = [
             type="button"
             id="also-carousel-next"
             class="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full text-[#004241] shadow-sm hover:scale-[1.03] transition -right-[24px] w-12 h-12 bg-[#F2E8D2]"
-            aria-label="Article suivant"
+            aria-label="<?= htmlspecialchars($t('site.next_article', 'Article suivant')) ?>"
         >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -324,3 +380,4 @@ $shareLinks = [
         <?php } ?>
     </div>
 </section>
+<?php } ?>
