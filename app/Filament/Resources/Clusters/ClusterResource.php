@@ -21,15 +21,17 @@ class ClusterResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
-    protected static ?string $navigationLabel = 'Clusters';
+    protected static ?string $navigationLabel = 'Sujets regroupés';
 
-    protected static ?string $modelLabel = 'cluster';
+    protected static ?string $modelLabel = 'sujet regroupé';
 
-    protected static ?string $pluralModelLabel = 'clusters';
+    protected static ?string $pluralModelLabel = 'sujets regroupés';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pipeline IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
 
     protected static ?int $navigationSort = 5;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function table(Table $table): Table
     {
@@ -40,7 +42,7 @@ class ClusterResource extends Resource
                 ->orderByDesc('created_at'))
             ->columns([
                 TextColumn::make('label')
-                    ->label('Cluster')
+                    ->label('Sujet')
                     ->searchable()
                     ->wrap()
                     ->weight(FontWeight::SemiBold)

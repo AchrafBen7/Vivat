@@ -23,15 +23,17 @@ class RssFeedResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRss;
 
-    protected static ?string $navigationLabel = 'Flux RSS';
+    protected static ?string $navigationLabel = 'Flux automatiques';
 
-    protected static ?string $modelLabel = 'flux RSS';
+    protected static ?string $modelLabel = 'flux automatique';
 
-    protected static ?string $pluralModelLabel = 'flux RSS';
+    protected static ?string $pluralModelLabel = 'flux automatiques';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pipeline IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
 
     protected static ?int $navigationSort = 2;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function table(Table $table): Table
     {

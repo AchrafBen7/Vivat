@@ -138,7 +138,10 @@ class SearchController extends Controller
         $categorySlug = $article->category?->slug;
         $cover = $article->cover_image_url;
 
-        if (is_string($cover) && $cover !== '' && stripos($cover, 'picsum') === false && str_starts_with($cover, 'http')) {
+        if (is_string($cover)
+            && $cover !== ''
+            && stripos($cover, 'picsum') === false
+            && (str_starts_with($cover, 'http') || str_starts_with($cover, '/uploads/'))) {
             return $cover;
         }
 

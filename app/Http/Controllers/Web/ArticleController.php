@@ -38,6 +38,23 @@ class ArticleController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        return $this->renderArticlePage($article, $locale);
+    }
+
+    public function preview(Request $request, Article $article): Response
+    {
+        abort_unless($request->user()?->hasRole(['admin']), 403);
+
+        $locale = content_locale($request);
+        $article->loadMissing(['subCategory', 'category']);
+
+        return $this->renderArticlePage($article, $locale, true);
+    }
+
+    private function renderArticlePage(Article $article, string $locale, bool $isPreview = false): Response
+    {
+        $article = $article->fresh(['subCategory', 'category']) ?? $article;
+
         // Catégorie toujours résolue via category_id pour cohérence avec la DB
         $category = $article->category_id ? Category::find($article->category_id) : null;
 
@@ -86,6 +103,7 @@ class ArticleController extends Controller
                 'published_at_iso' => $article->published_at?->toIso8601String(),
                 'cover_image_url' => $this->articleCoverOrFallback($article, $category),
                 'cover_video_url' => $article->cover_video_url,
+                'is_preview' => $isPreview,
                 'category' => $category ? [
                     'name' => $category->name,
                     'slug' => $category->slug,
@@ -138,7 +156,7 @@ class ArticleController extends Controller
         $cover = $article->cover_image_url;
         if (empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
-            || (is_string($cover) && ! str_starts_with($cover, 'http'))) {
+            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'))) {
             return vivat_category_fallback_image($category?->slug, 800, 450, (string) $article->id, 'cover');
         }
 

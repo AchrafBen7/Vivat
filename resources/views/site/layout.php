@@ -675,14 +675,14 @@ $newsletterOldEmail = old('newsletter_email', '');
                         <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
                         <?= htmlspecialchars(__('site.writer_space')) ?>
                         <?php } else { ?>
-                        Une idée, une histoire, un point<span class="hidden lg:inline xl:hidden"><br></span><span class="lg:hidden xl:inline"> </span>de vue ?
+                        <?= htmlspecialchars(__('site.global_contribute_title_prefix')) ?><span class="hidden lg:inline xl:hidden"><br></span><span class="lg:hidden xl:inline"> </span><?= htmlspecialchars(__('site.global_contribute_title_suffix')) ?>
                         <?php } ?>
                     </h2>
                     <p class="mt-3 max-w-[40rem] text-base leading-relaxed text-[#004241]/82 md:text-[17px]">
                         <?php if (auth()->check() && auth()->user()->hasRole(['contributor', 'admin'])) { ?>
-                        Retrouvez vos brouillons, vos contenus en cours et le suivi de vos soumissions.
+                        <?= htmlspecialchars(__('site.global_writer_space_text')) ?>
                         <?php } else { ?>
-                        Vivat est ouvert aux nouvelles voix pour partager des contenus utiles, clairs et ancrés dans le quotidien.
+                        <?= htmlspecialchars(__('site.global_contribute_text')) ?>
                         <?php } ?>
                     </p>
                 </div>

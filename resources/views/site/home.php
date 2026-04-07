@@ -1,4 +1,5 @@
 <?php
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 $highlight = $highlight ?? [];
 $featured = $featured ?? [];
 $latest = $latest ?? [];
@@ -7,13 +8,13 @@ $categories = $categories ?? [];
 $writer_signup_url = $writer_signup_url ?? '#';
 $writer_dashboard_url = $writer_dashboard_url ?? '#';
 $writer_cta_url = $writer_cta_url ?? $writer_signup_url;
-$writer_cta_label = $writer_cta_label ?? 'Rédigez un article';
-$writer_cta_description = $writer_cta_description ?? 'Écrivez sur Vivat. Votre voix compte.';
+$writer_cta_label = $writer_cta_label ?? $t('site.writer_cta_guest_label', 'Rédigez un article');
+$writer_cta_description = $writer_cta_description ?? $t('site.writer_cta_guest_description', 'Écrivez sur Vivat. Votre voix compte.');
 $writerCtaLines = preg_split('/\.\s+/', trim($writer_cta_description), 2);
-$writer_cta_title = $writer_cta_title ?? (count($writerCtaLines) === 2 ? $writerCtaLines[0].'.' : $writer_cta_description);
+$writer_cta_title = $writer_cta_title ?? $t('site.writer_cta_guest_title', (count($writerCtaLines) === 2 ? $writerCtaLines[0].'.' : $writer_cta_description));
 $writer_cta_subtitle = $writer_cta_subtitle ?? (count($writerCtaLines) === 2 ? $writerCtaLines[1] : '');
-$writer_cta_tag_1 = $writer_cta_tag_1 ?? 'Rédaction';
-$writer_cta_tag_2 = $writer_cta_tag_2 ?? 'Actualités';
+$writer_cta_tag_1 = $writer_cta_tag_1 ?? $t('site.writer_cta_tag_1', 'Rédaction');
+$writer_cta_tag_2 = $writer_cta_tag_2 ?? $t('site.writer_cta_tag_2', 'Actualités');
 $rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dfcy6isdu/video/upload/v1774257142/rubriques_h5dyvo.mp4';
 $rubriquesHeroPosterUrl = vivat_cloudinary_video_poster_url($rubriquesHeroVideoUrl) ?? '/technologie.jpg';
 

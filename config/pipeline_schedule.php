@@ -5,16 +5,17 @@ return [
         'enabled' => true,
         'label' => 'Fetch des flux RSS',
         'description' => 'Récupère automatiquement les flux RSS à rafraîchir et les envoie dans la queue rss.',
-        'cadence' => 'Toutes les 30 minutes',
+        'cadence' => 'Toutes les 6 heures',
     ],
 
     'enrich_items' => [
         'enabled' => true,
         'label' => 'Enrichissement IA',
         'description' => 'Prend les items RSS nouveaux et les envoie dans la queue enrichment pour extraction + analyse IA.',
-        'cadence' => 'Toutes les heures',
-        'limit' => 50,
-        'delay_seconds' => 3,
+        'cadence' => 'Chaque jour à 06:30',
+        'limit' => 3,
+        'delay_seconds' => 10,
+        'time' => '06:30',
     ],
 
     'generate_daily_article' => [
@@ -22,7 +23,7 @@ return [
         'label' => 'Génération quotidienne',
         'description' => 'Sélectionne automatiquement la meilleure proposition IA du moment et lance 1 génération de brouillon par jour.',
         'cadence' => 'Chaque jour à 08:00',
-        'time' => '08:00',
+        'time' => '10:00',
         'count' => 1,
     ],
 

@@ -46,9 +46,9 @@ class ArticleSelectionService
     private function getClusteringConfig(): array
     {
         return array_merge([
-            'min_items_per_topic' => 2,
-            'max_items_per_topic' => 5,
-            'similarity_threshold' => 0.20,
+            'min_items_per_topic' => 1,
+            'max_items_per_topic' => 6,
+            'similarity_threshold' => 0.12,
         ], config('selection.clustering', []));
     }
 
@@ -86,23 +86,33 @@ class ArticleSelectionService
             return [];
         }
 
-        // 2. Scorer chaque item individuellement
+        // 2. Filtrer les sujets hors-scope (politique, faits divers, etc.)
+        $items = $items->filter(fn ($item) => ! $this->isOffTopic($item));
+
+        if ($items->isEmpty()) {
+            return [];
+        }
+
+        // 3. Scorer chaque item individuellement
         $scoredItems = $items->map(fn ($item) => [
             'item' => $item,
             'score' => $this->scoreItem($item),
             'keywords' => $this->extractKeywords($item),
         ]);
 
-        // 3. Regrouper par similarité de sujet (topic clustering)
+        // 4. Regrouper par similarité de sujet (topic clustering)
         $topics = $this->clusterByTopic($scoredItems);
         $totalPoolSize = $items->count();
 
-        // 4. Scorer chaque topic-group (avec bonus "fréquence du sujet" et type d'article suggéré)
+        // 5. Scorer chaque topic-group (avec bonus "fréquence du sujet" et type d'article suggéré)
         $scoredTopics = collect($topics)->map(function ($group) use ($totalPoolSize) {
             return $this->scoreTopic($group, $totalPoolSize);
         });
 
-        // 5. Trier par score décroissant et prendre les N meilleurs
+        // 6. Ne garder que les propositions avec une catégorie identifiée
+        $scoredTopics = $scoredTopics->filter(fn ($t) => $t['category'] !== null);
+
+        // 7. Trier par score décroissant et prendre les N meilleurs
         $best = $scoredTopics
             ->sortByDesc('score')
             ->take($count)
@@ -164,13 +174,17 @@ class ArticleSelectionService
         $text = mb_strtolower(implode(' ', [
             $item->title ?? '',
             $enriched->lead ?? '',
-            implode(' ', $enriched->key_points ?? []),
-            implode(' ', $enriched->headings ?? []),
+            implode(' ', $this->normalizeTextList($enriched->key_points ?? [])),
+            implode(' ', $this->normalizeTextList($enriched->headings ?? [])),
         ]));
 
         // Supprimer la ponctuation et les mots trop courts
         $text = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $text);
         $words = preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $words = array_values(array_filter(array_map(
+            fn (mixed $word): ?string => is_string($word) ? $this->cleanKeywordToken($word) : null,
+            $words ?: []
+        )));
 
         // Filtrer les stop words français
         $stopWords = $this->getStopWords();
@@ -194,6 +208,47 @@ class ArticleSelectionService
         usort($keywords, fn ($a, $b) => ($b['seo_weight'] * 10 + $b['frequency']) <=> ($a['seo_weight'] * 10 + $a['frequency']));
 
         return $keywords;
+    }
+
+    /**
+     * @param mixed $items
+     * @return array<int, string>
+     */
+    private function normalizeTextList(mixed $items): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($items as $item) {
+            if (is_string($item) || is_numeric($item)) {
+                $value = trim((string) $item);
+                if ($value !== '') {
+                    $normalized[] = $value;
+                }
+
+                continue;
+            }
+
+            if (! is_array($item)) {
+                continue;
+            }
+
+            foreach (['text', 'title', 'heading', 'label', 'value', 'name'] as $key) {
+                $candidate = $item[$key] ?? null;
+
+                if (is_string($candidate) || is_numeric($candidate)) {
+                    $value = trim((string) $candidate);
+                    if ($value !== '') {
+                        $normalized[] = $value;
+                    }
+                }
+            }
+        }
+
+        return $normalized;
     }
 
     /**
@@ -383,9 +438,13 @@ class ArticleSelectionService
         // Déterminer le topic label
         $topicLabel = $this->generateTopicLabel($items, $consolidatedKeywords);
 
-        // Catégorie dominante
-        $categoryId = $items->pluck('category_id')->mode()[0] ?? null;
+        // Catégorie dominante (mode des items), sinon inférence par mots-clés
+        $categoryId = collect($items->pluck('category_id')->filter())->mode()[0] ?? null;
         $category = $categoryId ? Category::find($categoryId) : null;
+
+        if (! $category) {
+            $category = $this->inferCategoryFromKeywords($consolidatedKeywords);
+        }
 
         // Qualité moyenne des enrichissements
         $avgQuality = $items->map(fn ($i) => $i->enrichedItem?->quality_score ?? 0)->avg();
@@ -454,17 +513,85 @@ class ArticleSelectionService
     {
         $merged = [];
         foreach ($allKeywords as $kw) {
-            $word = $kw['word'];
-            if (! isset($merged[$word])) {
-                $merged[$word] = ['word' => $word, 'frequency' => 0, 'seo_weight' => $kw['seo_weight']];
+            $word = $this->cleanKeywordToken((string) ($kw['word'] ?? ''));
+            if ($word === null) {
+                continue;
             }
-            $merged[$word]['frequency'] += $kw['frequency'];
-            $merged[$word]['seo_weight'] = max($merged[$word]['seo_weight'], $kw['seo_weight']);
+
+            if (! isset($merged[$word])) {
+                $merged[$word] = ['word' => $word, 'frequency' => 0, 'seo_weight' => (int) ($kw['seo_weight'] ?? 0)];
+            }
+            $merged[$word]['frequency'] += (int) ($kw['frequency'] ?? 0);
+            $merged[$word]['seo_weight'] = max($merged[$word]['seo_weight'], (int) ($kw['seo_weight'] ?? 0));
         }
+
+        $merged = array_values(array_filter($merged, function (array $keyword): bool {
+            $word = $keyword['word'] ?? '';
+            $frequency = (int) ($keyword['frequency'] ?? 0);
+            $seoWeight = (int) ($keyword['seo_weight'] ?? 0);
+
+            if ($word === '' || $this->isSuspiciousKeyword($word)) {
+                return false;
+            }
+
+            return $frequency >= 2 || $seoWeight >= 55;
+        }));
 
         usort($merged, fn ($a, $b) => ($b['seo_weight'] * 5 + $b['frequency']) <=> ($a['seo_weight'] * 5 + $a['frequency']));
 
         return array_values(array_slice($merged, 0, 10));
+    }
+
+    private function cleanKeywordToken(string $word): ?string
+    {
+        $word = mb_strtolower(trim($word));
+        $word = preg_replace("/^[^\\p{L}\\p{N}]+|[^\\p{L}\\p{N}]+$/u", '', $word) ?? '';
+        $word = preg_replace('/[’\'`]+/u', '', $word) ?? $word;
+        $word = preg_replace('/-{2,}/', '-', $word) ?? $word;
+
+        if ($word === '') {
+            return null;
+        }
+
+        if (! preg_match('/^[\p{L}\p{N}-]+$/u', $word)) {
+            return null;
+        }
+
+        $length = mb_strlen($word);
+        if ($length < 4 || $length > 30) {
+            return null;
+        }
+
+        if ($this->isSuspiciousKeyword($word)) {
+            return null;
+        }
+
+        return $word;
+    }
+
+    private function isSuspiciousKeyword(string $word): bool
+    {
+        if (preg_match('/(.)\1{2,}/u', $word)) {
+            return true;
+        }
+
+        if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/iu', $word)) {
+            return true;
+        }
+
+        $lettersOnly = preg_replace('/[^a-zàâäéèêëîïôöùûüÿç]/iu', '', $word) ?? '';
+        $length = mb_strlen($lettersOnly);
+
+        if ($length >= 6) {
+            preg_match_all('/[aeiouyàâäéèêëîïôöùûüÿ]/iu', $lettersOnly, $matches);
+            $vowelCount = count($matches[0] ?? []);
+
+            if ($vowelCount > 0 && ($vowelCount / max($length, 1)) < 0.22) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -547,6 +674,101 @@ class ArticleSelectionService
         }
 
         return implode('. ', $reasons) . '.';
+    }
+
+    /**
+     * Vérifie si un item est hors-sujet (politique, guerre, faits divers, etc.).
+     */
+    private function isOffTopic(RssItem $item): bool
+    {
+        $text = mb_strtolower(implode(' ', array_filter([
+            $item->title ?? '',
+            $item->enrichedItem?->lead ?? '',
+            implode(' ', $item->enrichedItem?->key_points ?? []),
+        ])));
+
+        $blacklist = [
+            // Politique
+            'élection', 'elections', 'municipales', 'législatives', 'présidentielle',
+            'parti politique', 'extrême droite', 'extrême gauche', 'député', 'sénateur',
+            'assemblée nationale', 'sénat', 'premier ministre', 'président de la république',
+            'macron', 'mélenchon', 'le pen', 'bardella', 'opposition', 'majorité parlementaire',
+            'vote de confiance', 'motion de censure', 'référendum', 'campagne électorale',
+            'souveraineté', 'géopolitique', 'diplomatie',
+            // Guerre / conflits armés
+            'guerre', 'conflit armé', 'bombardement', 'missile', 'militaire', 'armée',
+            'invasion', 'otan', 'cessez-le-feu', 'front', 'combattants',
+            // Faits divers / violence
+            'meurtre', 'assassinat', 'viol', 'agression', 'terrorisme', 'attentat',
+            'fusillade', 'enlèvement', 'homicide', 'procès criminel',
+            'expulsions', 'expulsés', 'répression',
+            // Religion / polémiques
+            'laïcité', 'islamophobie', 'radicalisation', 'blasphème',
+            // Sujets people / gossip
+            'célébrité', 'scandale', 'polémique', 'clash', 'buzz',
+            // Militantisme / opinion / tribune
+            'capitaliste', 'anticapitaliste', 'néolibéral', 'colonialisme',
+            'libérons', 'manifeste', 'lutte', 'résistance', 'militant',
+            'tribune', 'posséder', 'piéger', 'condamné', 'amende',
+            'lobbies', 'lobby', 'victoire des', 'désinformation', 'propagande',
+            'dénonce', 'blanchit', 'scandale',
+            // Chasse / sujets clivants
+            'chasseurs', 'chasse', 'corrida', 'abattoir',
+            // Justice / procès
+            'procès', 'tribunal', 'condamnation', 'plainte', 'poursuite',
+        ];
+
+        foreach ($blacklist as $term) {
+            if (str_contains($text, $term)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Infère la catégorie la plus probable à partir des mots-clés consolidés.
+     */
+    private function inferCategoryFromKeywords(array $keywords): ?Category
+    {
+        $categoryKeywords = [
+            'energie' => ['énergie', 'renouvelable', 'nucléaire', 'pétrole', 'électricité', 'solaire', 'éolien', 'photovoltaïque', 'hydrogène', 'biomasse', 'carburant', 'gaz', 'charbon', 'réseau', 'watt'],
+            'au-quotidien' => ['quotidien', 'habitude', 'consommation', 'recyclage', 'déchet', 'compostage', 'alimentation', 'bio', 'courses', 'supermarché', 'emballage', 'zéro', 'plastique', 'eau'],
+            'finance' => ['finance', 'investissement', 'banque', 'épargne', 'bourse', 'économie', 'budget', 'impôt', 'fiscal', 'crédit', 'assurance', 'pension', 'retraite', 'subvention'],
+            'technologie' => ['technologie', 'numérique', 'intelligence', 'artificielle', 'application', 'logiciel', 'données', 'startup', 'innovation', 'robot', 'cyber', 'blockchain', 'algorithme'],
+            'chez-soi' => ['maison', 'rénovation', 'isolation', 'thermique', 'chauffage', 'habitat', 'logement', 'construction', 'immobilier', 'jardin', 'décoration', 'meubles', 'bricolage'],
+            'mode' => ['mode', 'textile', 'vêtement', 'fast', 'fashion', 'marque', 'collection', 'coton', 'tissu', 'seconde', 'main', 'friperie', 'tendance'],
+            'sante' => ['santé', 'médecin', 'hôpital', 'maladie', 'traitement', 'vaccin', 'pollution', 'pesticides', 'cancer', 'bien-être', 'mental', 'sport', 'sommeil', 'stress'],
+            'voyage' => ['voyage', 'tourisme', 'avion', 'train', 'mobilité', 'transport', 'vélo', 'voiture', 'électrique', 'destination', 'vacances', 'compagnie', 'aérien'],
+            'famille' => ['famille', 'enfant', 'éducation', 'école', 'parent', 'naissance', 'grossesse', 'adolescent', 'jeunesse', 'génération', 'héritage'],
+        ];
+
+        $words = collect($keywords)->pluck('word')->map(fn ($w) => mb_strtolower($w))->toArray();
+        $bestSlug = null;
+        $bestScore = 0;
+
+        foreach ($categoryKeywords as $slug => $catWords) {
+            $matches = count(array_intersect($words, $catWords));
+            // Also check partial matches (keyword contains a category word)
+            foreach ($words as $word) {
+                foreach ($catWords as $catWord) {
+                    if ($word !== $catWord && (str_contains($word, $catWord) || str_contains($catWord, $word))) {
+                        $matches += 0.5;
+                    }
+                }
+            }
+            if ($matches > $bestScore) {
+                $bestScore = $matches;
+                $bestSlug = $slug;
+            }
+        }
+
+        if ($bestSlug && $bestScore >= 1) {
+            return Category::where('slug', $bestSlug)->first();
+        }
+
+        return null;
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Filament\Resources\Sources\Pages\ListSources;
 use App\Models\Source;
 use BackedEnum;
 use Filament\Actions\Action as TableAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
@@ -20,15 +21,17 @@ class SourceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
-    protected static ?string $navigationLabel = 'Sources';
+    protected static ?string $navigationLabel = 'Sites sources';
 
-    protected static ?string $modelLabel = 'source';
+    protected static ?string $modelLabel = 'site source';
 
-    protected static ?string $pluralModelLabel = 'sources';
+    protected static ?string $pluralModelLabel = 'sites sources';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pipeline IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
 
     protected static ?int $navigationSort = 1;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function table(Table $table): Table
     {
@@ -73,6 +76,22 @@ class SourceResource extends Resource
                     ->visible(fn (Source $record): bool => filled($record->base_url))
                     ->url(fn (Source $record): string => $record->base_url)
                     ->openUrlInNewTab(),
+                TableAction::make('delete')
+                    ->label('Supprimer')
+                    ->icon(Heroicon::OutlinedTrash)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Supprimer cette source ?')
+                    ->modalDescription("Les flux liés perdront simplement leur liaison avec cette source. Les autres données du pipeline ne seront pas supprimées.")
+                    ->action(function (Source $record): void {
+                        $record->delete();
+                    })
+                    ->successNotification(
+                        fn () => Notification::make()
+                            ->success()
+                            ->title('Source supprimée')
+                            ->body('Le site source a bien été retiré de la liste.')
+                    ),
             ])
             ->defaultSort('name');
     }

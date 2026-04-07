@@ -99,7 +99,7 @@ class PublicFeedController extends Controller
         $cover = $article->cover_image_url ?? '';
         if (is_string($cover)
             && $cover !== ''
-            && str_starts_with($cover, 'http')
+            && (str_starts_with($cover, 'http') || str_starts_with($cover, '/uploads/'))
             && stripos($cover, 'picsum') === false
         ) {
             return $cover;

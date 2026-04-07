@@ -7,6 +7,7 @@ use App\Models\PipelineJob;
 use App\Models\RssFeed;
 use App\Models\RssItem;
 use App\Services\ArticleSelectionService;
+use App\Services\PipelineAutomationState;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         $pipelineSchedule = config('pipeline_schedule');
+        $automationState = app(PipelineAutomationState::class);
         $trackPipelineRun = function (string $jobType, callable $callback, array $metadata = []): void {
             $job = PipelineJob::create([
                 'job_type' => $jobType,
@@ -63,7 +65,9 @@ return Application::configure(basePath: dirname(__DIR__))
                         'dispatched_feeds' => $feeds->count(),
                     ];
                 });
-            })->everyThirtyMinutes()->name('pipeline:fetch-rss');
+            })->everySixHours()
+                ->when(fn (): bool => ! $automationState->isPaused())
+                ->name('pipeline:fetch-rss');
         }
 
         if (data_get($pipelineSchedule, 'enrich_items.enabled', true)) {
@@ -71,7 +75,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 $trackPipelineRun('enrich', function () use ($pipelineSchedule): array {
                     $limit = (int) data_get($pipelineSchedule, 'enrich_items.limit', 50);
                     $delaySeconds = (int) data_get($pipelineSchedule, 'enrich_items.delay_seconds', 3);
-                    $items = RssItem::new()->limit($limit)->get();
+                    $items = RssItem::new()
+                        ->orderByDesc('fetched_at')
+                        ->orderByDesc('created_at')
+                        ->limit($limit)
+                        ->get();
 
                     $items->each(function (RssItem $item, int $index) use ($delaySeconds) {
                         EnrichContentJob::dispatch($item)
@@ -84,7 +92,9 @@ return Application::configure(basePath: dirname(__DIR__))
                         'limit' => $limit,
                     ];
                 });
-            })->hourly()->name('pipeline:enrich');
+            })->dailyAt((string) data_get($pipelineSchedule, 'enrich_items.time', '06:30'))
+                ->when(fn (): bool => ! $automationState->isPaused())
+                ->name('pipeline:enrich');
         }
 
         if (data_get($pipelineSchedule, 'generate_daily_article.enabled', true)) {
@@ -121,6 +131,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ];
                 });
             })->dailyAt((string) data_get($pipelineSchedule, 'generate_daily_article.time', '08:00'))
+                ->when(fn (): bool => ! $automationState->isPaused())
                 ->name('pipeline:generate-daily');
         }
 

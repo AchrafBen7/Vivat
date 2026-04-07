@@ -12,8 +12,8 @@ class EnrichPendingItemsCommand extends Command
      * @var string
      */
     protected $signature = 'content:enrich
-                            {--limit=50 : Nombre max d’items à envoyer en queue}
-                            {--delay=3 : Délai en secondes entre chaque dispatch}';
+                            {--limit=3 : Nombre max d’items à envoyer en queue}
+                            {--delay=10 : Délai en secondes entre chaque dispatch}';
 
     protected $description = 'Dispatch EnrichContentJob pour les RssItem en statut "new" (queue: enrichment).';
 
@@ -22,7 +22,11 @@ class EnrichPendingItemsCommand extends Command
         $limit = (int) $this->option('limit');
         $delayStep = (int) $this->option('delay');
 
-        $items = RssItem::new()->limit($limit)->get();
+        $items = RssItem::new()
+            ->orderByDesc('fetched_at')
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
         if ($items->isEmpty()) {
             $this->info('Aucun item "new" à enrichir.');
 

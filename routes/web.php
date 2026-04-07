@@ -62,6 +62,7 @@ Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->gr
     Route::delete('/articles/{submission:slug}', [WebContributorController::class, 'destroySubmission'])->name('contributor.articles.destroy');
     Route::match(['get', 'post'], '/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
 });
+Route::middleware(['auth', 'role:admin'])->get('/admin-preview/articles/{article:slug}', [WebArticleController::class, 'preview'])->name('articles.preview.admin');
 Route::get('/categories/{slug}', [WebCategoryController::class, 'hub'])->name('categories.hub');
 Route::get('/articles', [WebArticleController::class, 'index'])->name('articles.index');
 Route::get('/articles/{slug}', [WebArticleController::class, 'show'])->name('articles.show');

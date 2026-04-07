@@ -15,13 +15,15 @@ class PipelineProposals extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedLightBulb;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pipeline IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
 
     protected static ?int $navigationSort = 6;
 
-    protected static ?string $navigationLabel = 'Propositions IA';
+    protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $title = 'Propositions IA';
+    protected static ?string $navigationLabel = "Idées d'articles";
+
+    protected static ?string $title = "Idées d'articles";
 
     protected string $view = 'filament.pages.pipeline-proposals';
 

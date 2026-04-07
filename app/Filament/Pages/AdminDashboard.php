@@ -3,9 +3,6 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Resources\Articles\ArticleResource;
-use App\Filament\Resources\EnrichedItems\EnrichedItemResource;
-use App\Filament\Resources\Payments\PaymentResource;
-use App\Filament\Resources\Submissions\SubmissionResource;
 use Filament\Actions\Action;
 use Filament\Pages\Dashboard;
 use Filament\Support\Icons\Heroicon;
@@ -21,22 +18,27 @@ class AdminDashboard extends Dashboard
                 ->label('Soumissions')
                 ->icon(Heroicon::OutlinedInboxStack)
                 ->color('primary')
-                ->url(SubmissionResource::getUrl('index')),
+                ->url(DashboardSubmissions::getUrl()),
             Action::make('publishedArticles')
                 ->label('Articles')
                 ->icon(Heroicon::OutlinedNewspaper)
                 ->color('gray')
-                ->url(ArticleResource::getUrl('index')),
+                ->url(DashboardArticles::getUrl()),
             Action::make('payments')
                 ->label('Paiements')
                 ->icon(Heroicon::OutlinedCreditCard)
                 ->color('gray')
-                ->url(PaymentResource::getUrl('index')),
+                ->url(DashboardPayments::getUrl()),
+            Action::make('newsletter')
+                ->label('Newsletter')
+                ->icon(Heroicon::OutlinedEnvelope)
+                ->color('gray')
+                ->url(DashboardNewsletter::getUrl()),
             Action::make('pipelineItems')
                 ->label('Pipeline IA')
                 ->icon(Heroicon::OutlinedCpuChip)
                 ->color('gray')
-                ->url(EnrichedItemResource::getUrl('index')),
+                ->url(PipelineStep1::getUrl()),
         ];
     }
 

@@ -12,7 +12,7 @@ class ArticleResource extends JsonResource
         $cover = $this->cover_image_url;
         if (empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
-            || (is_string($cover) && ! str_starts_with($cover, 'http'))) {
+            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'))) {
             return vivat_category_fallback_image(
                 $this->relationLoaded('category') ? $this->category?->slug : null,
                 800,

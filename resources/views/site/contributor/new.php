@@ -73,6 +73,24 @@ $uploadMaxBytes = (function (string $value): int {
     };
 })($uploadMaxRaw);
 ?>
+<div class="mb-6 rounded-[20px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.04)]">
+    <div class="flex items-start gap-3">
+        <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#004241] text-sm font-semibold text-white">i</span>
+        <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6">
+                <?= htmlspecialchars($t('site.autosave_title', 'Sauvegarde automatique active')) ?>
+            </p>
+            <p class="mt-1 text-sm leading-6 text-[#004241]/78">
+                <?= htmlspecialchars($isEditing
+                    ? $t('site.autosave_edit_explanation', 'Pendant que vous modifiez cet article, votre brouillon est enregistré automatiquement en arrière-plan. Vous pouvez quitter cette page et revenir plus tard sans perdre vos changements récents.')
+                    : $t('site.autosave_create_explanation', 'Pendant que vous écrivez, votre brouillon est enregistré automatiquement en arrière-plan. Vous pouvez reprendre votre article plus tard sans tout recommencer.')) ?>
+            </p>
+            <p id="draft-autosave-status" class="mt-2 text-sm font-medium text-[#004241]/60">
+                <?= htmlspecialchars($t('site.autosave_info', 'Dernière sauvegarde automatique affichée ici pendant votre rédaction.')) ?>
+            </p>
+        </div>
+    </div>
+</div>
 <h1 class="font-medium text-[#004241] text-2xl mb-2"><?= htmlspecialchars($isEditing ? $t('site.edit_article', 'Modifier l’article') : $t('site.create_article', 'Nouvel article')) ?></h1>
 <p class="text-[#004241]/80 mb-8">
     <?= $canBypassPayment
@@ -209,10 +227,7 @@ $uploadMaxBytes = (function (string $value): int {
         <?php endif; ?>
     </div>
 
-    <div class="flex items-center justify-between pt-4">
-        <span id="draft-autosave-status" class="text-sm text-[#004241]/60">
-            <?= htmlspecialchars($t('site.autosave_info', 'Cet article est sauvegardé automatiquement pendant que vous écrivez.')) ?>
-        </span>
+    <div class="flex items-center justify-end pt-1">
         <div class="flex gap-3">
             <button type="submit" name="status" value="draft" class="h-12 px-6 rounded-full border border-gray-300 bg-white text-[#004241] font-medium hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <?= htmlspecialchars($isEditing ? $t('site.save_draft', 'Enregistrer') : $t('site.draft_button', 'Brouillon')) ?>

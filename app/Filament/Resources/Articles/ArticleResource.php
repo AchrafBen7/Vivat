@@ -2,12 +2,18 @@
 
 namespace App\Filament\Resources\Articles;
 
+use App\Filament\Resources\Articles\Pages\EditArticle;
 use App\Filament\Resources\Articles\Pages\ListArticles;
 use App\Models\Article;
 use BackedEnum;
 use Filament\Actions\Action as TableAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
@@ -30,6 +36,60 @@ class ArticleResource extends Resource
     protected static ?string $pluralModelLabel = 'articles';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Editorial';
+
+    protected static bool $shouldRegisterNavigation = false;
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Article')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Titre')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        TextInput::make('slug')
+                            ->label('Slug')
+                            ->required()
+                            ->maxLength(255),
+                        Select::make('language')
+                            ->label('Langue')
+                            ->options([
+                                'fr' => 'Français',
+                                'nl' => 'Néerlandais',
+                            ])
+                            ->default('fr')
+                            ->required(),
+                        Select::make('status')
+                            ->label('Statut')
+                            ->options([
+                                'draft' => 'Brouillon',
+                                'review' => 'En revue',
+                                'published' => 'Publié',
+                                'archived' => 'Dépublié',
+                            ])
+                            ->required(),
+                        TextInput::make('cover_image_url')
+                            ->label('Image de couverture')
+                            ->url()
+                            ->maxLength(2048)
+                            ->columnSpanFull(),
+                        Textarea::make('excerpt')
+                            ->label('Extrait')
+                            ->rows(4)
+                            ->maxLength(500)
+                            ->columnSpanFull(),
+                        Textarea::make('content')
+                            ->label('Contenu')
+                            ->rows(18)
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
 
     public static function table(Table $table): Table
     {
@@ -114,7 +174,9 @@ class ArticleResource extends Resource
                 TableAction::make('preview')
                     ->label('Aperçu')
                     ->icon(Heroicon::OutlinedEye)
-                    ->url(fn (Article $record): string => url('/articles/' . $record->slug))
+                    ->url(fn (Article $record): string => $record->status === 'published'
+                        ? url('/articles/' . $record->slug)
+                        : url('/admin-preview/articles/' . $record->slug))
                     ->openUrlInNewTab(),
                 TableAction::make('unpublish')
                     ->label('Dépublier')
@@ -144,6 +206,7 @@ class ArticleResource extends Resource
     {
         return [
             'index' => ListArticles::route('/'),
+            'edit' => EditArticle::route('/{record}/edit'),
         ];
     }
 }

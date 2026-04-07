@@ -27,6 +27,7 @@ class EnrichContentJob implements ShouldQueue
     public int $timeout = 90;
 
     private const MIN_TEXT_LENGTH = 200;
+    private const OPENAI_TEXT_LIMIT = 3500;
 
     public function __construct(
         public RssItem $item
@@ -159,7 +160,7 @@ class EnrichContentJob implements ShouldQueue
             return null;
         }
 
-        $text = mb_substr($extractedData['text'] ?? '', 0, 6000);
+        $text = mb_substr($extractedData['text'] ?? '', 0, self::OPENAI_TEXT_LIMIT);
         $headings = implode(', ', array_slice($extractedData['headings'] ?? [], 0, 10));
         $userContent = "Titre: " . ($extractedData['title'] ?? '') . "\nTitres de sections: " . $headings . "\n\nContenu:\n" . $text;
         $userContent .= "\n\nAnalyse ce contenu et génère un JSON avec :\n"

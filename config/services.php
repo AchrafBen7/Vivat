@@ -39,6 +39,23 @@ return [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-4o'),
         'max_tokens' => (int) env('OPENAI_MAX_TOKENS', 4000),
+        'generate_cover_images' => filter_var(env('OPENAI_GENERATE_COVER_IMAGES', true), FILTER_VALIDATE_BOOL),
+    ],
+
+    'image_generation' => [
+        'provider' => env('IMAGE_GENERATION_PROVIDER', 'bfl'),
+    ],
+
+    'bfl' => [
+        'api_key' => env('BFL_API_KEY'),
+        'base_url' => env('BFL_BASE_URL', 'https://api.bfl.ai/v1'),
+        'model' => env('BFL_MODEL', 'flux-pro-1.1-ultra'),
+        'aspect_ratio' => env('BFL_ASPECT_RATIO', '16:9'),
+        'raw' => filter_var(env('BFL_RAW', true), FILTER_VALIDATE_BOOL),
+        'prompt_upsampling' => filter_var(env('BFL_PROMPT_UPSAMPLING', false), FILTER_VALIDATE_BOOL),
+        'safety_tolerance' => (int) env('BFL_SAFETY_TOLERANCE', 2),
+        'poll_max_attempts' => (int) env('BFL_POLL_MAX_ATTEMPTS', 25),
+        'poll_sleep_ms' => (int) env('BFL_POLL_SLEEP_MS', 2000),
     ],
 
     'stripe' => [

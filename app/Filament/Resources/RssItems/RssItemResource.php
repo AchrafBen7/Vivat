@@ -23,15 +23,17 @@ class RssItemResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentMagnifyingGlass;
 
-    protected static ?string $navigationLabel = 'Items RSS';
+    protected static ?string $navigationLabel = 'Articles repérés';
 
-    protected static ?string $modelLabel = 'item RSS';
+    protected static ?string $modelLabel = 'article repéré';
 
-    protected static ?string $pluralModelLabel = 'items RSS';
+    protected static ?string $pluralModelLabel = 'articles repérés';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pipeline IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
 
     protected static ?int $navigationSort = 3;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function table(Table $table): Table
     {
@@ -43,7 +45,7 @@ class RssItemResource extends Resource
                 ->orderByDesc('created_at'))
             ->columns([
                 TextColumn::make('title')
-                    ->label('Item')
+                    ->label('Article')
                     ->searchable()
                     ->wrap()
                     ->weight(FontWeight::SemiBold)

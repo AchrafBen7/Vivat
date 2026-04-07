@@ -31,6 +31,8 @@ class PaymentResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Editorial';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function table(Table $table): Table
     {
         return $table

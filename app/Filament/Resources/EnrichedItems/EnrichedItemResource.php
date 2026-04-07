@@ -26,15 +26,17 @@ class EnrichedItemResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCpuChip;
 
-    protected static ?string $navigationLabel = 'Items enrichis';
+    protected static ?string $navigationLabel = 'Analyses IA';
 
-    protected static ?string $modelLabel = 'item enrichi';
+    protected static ?string $modelLabel = 'analyse IA';
 
-    protected static ?string $pluralModelLabel = 'items enrichis';
+    protected static ?string $pluralModelLabel = 'analyses IA';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pipeline IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
 
     protected static ?int $navigationSort = 4;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function table(Table $table): Table
     {

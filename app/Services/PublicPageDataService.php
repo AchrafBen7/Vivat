@@ -470,7 +470,7 @@ class PublicPageDataService
         $cover = $a->cover_image_url;
         $useFallback = empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
-            || (is_string($cover) && ! str_starts_with($cover, 'http'));
+            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'));
 
         return [
             'id' => $a->id,
