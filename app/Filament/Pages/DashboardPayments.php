@@ -83,7 +83,7 @@ class DashboardPayments extends Page
                     'refund_reason' => $payment->refund_reason,
                     'created_at' => $payment->created_at?->format('d/m/Y à H:i') ?? 'Date inconnue',
                     'submission_url' => $payment->submission
-                        ? DashboardSubmissionView::getUrl(['record' => $payment->submission])
+                        ? \App\Filament\Resources\Submissions\SubmissionResource::getUrl('view', ['record' => $payment->submission])
                         : null,
                     'can_refund' => $payment->isRefundable(),
                 ];

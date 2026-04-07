@@ -8,10 +8,13 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class PipelineCronJobs extends Page
 {
+    private const DISPLAY_TIMEZONE = 'Europe/Brussels';
+
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
@@ -33,7 +36,7 @@ class PipelineCronJobs extends Page
             ->orderByDesc('created_at')
             ->limit(120)
             ->get()
-            ->groupBy(fn (PipelineJob $job): string => $job->created_at?->format('d/m/Y') ?? 'Date inconnue');
+            ->groupBy(fn (PipelineJob $job): string => $this->displayDate($job->created_at));
 
         return $jobs
             ->map(function (Collection $items, string $date): array {
@@ -44,8 +47,8 @@ class PipelineCronJobs extends Page
                             'label' => $this->labelForJobType($job->job_type, $job->metadata ?? []),
                             'status' => $job->status,
                             'status_label' => $this->statusLabel($job),
-                            'started_at' => $job->started_at?->format('H:i:s'),
-                            'completed_at' => $job->completed_at?->format('H:i:s'),
+                            'started_at' => $this->displayTime($job->started_at),
+                            'completed_at' => $this->displayTime($job->completed_at),
                             'error_message' => $job->error_message,
                             'metadata' => $job->metadata ?? [],
                             'summary' => $this->summaryForJob($job),
@@ -82,7 +85,7 @@ class PipelineCronJobs extends Page
             'retry_scheduled' => $retryScheduled,
             'days' => count($this->getRecentJobsByDay()),
             'last_label' => $lastJob ? $this->labelForJobType($lastJob->job_type, $lastJob->metadata ?? []) : null,
-            'last_time' => $lastJob?->created_at?->format('d/m à H:i'),
+            'last_time' => $this->displayDateTime($lastJob?->created_at, 'd/m à H:i'),
         ];
     }
 
@@ -118,12 +121,18 @@ class PipelineCronJobs extends Page
             return 'Nettoyage des failed jobs';
         }
 
+        if (($metadata['manual_action'] ?? null) === 'selection') {
+            return 'Recalcul des idées';
+        }
+
+        if (($metadata['manual_action'] ?? null) === 'full_flow') {
+            return 'Relance complète du flux';
+        }
+
         return match ($jobType) {
             'fetch_rss' => 'Fetch des flux RSS',
             'enrich' => 'Enrichissement IA',
-            'selection' => 'Recalcul des idées',
             'generate' => 'Génération IA',
-            'manual_flow' => 'Relance complète du flux',
             'cleanup' => 'Maintenance',
             default => ucfirst(str_replace('_', ' ', $jobType)),
         };
@@ -157,12 +166,14 @@ class PipelineCronJobs extends Page
             'enrich' => (($metadata['manual_dispatch'] ?? false) === true)
                 ? 'Relance manuelle de l’analyse IA'
                 : ($metadata['title'] ?? 'Item RSS'),
-            'selection' => 'Recalcul manuel des idées d’articles',
             'generate' => (($metadata['manual_dispatch'] ?? false) === true && ($metadata['outcome'] ?? null) === 'queued')
                 ? 'Relance manuelle de la génération'
                 : ($metadata['article_slug'] ?? ($metadata['cluster_id'] ?? 'Brouillon IA')),
-            'manual_flow' => 'Relance manuelle de tout le pipeline',
-            'cleanup' => $metadata['command'] ?? 'Maintenance',
+            'cleanup' => match ($metadata['manual_action'] ?? null) {
+                'selection' => 'Recalcul manuel des idées d’articles',
+                'full_flow' => 'Relance manuelle de tout le pipeline',
+                default => $metadata['command'] ?? 'Maintenance',
+            },
             default => ucfirst(str_replace('_', ' ', $job->job_type)),
         };
     }
@@ -174,6 +185,21 @@ class PipelineCronJobs extends Page
         }
 
         return Str::limit(trim(preg_replace('/\s+/', ' ', $message) ?? $message), 180);
+    }
+
+    private function displayDate(?Carbon $date): string
+    {
+        return $date?->copy()->timezone(self::DISPLAY_TIMEZONE)->format('d/m/Y') ?? 'Date inconnue';
+    }
+
+    private function displayTime(?Carbon $date): ?string
+    {
+        return $date?->copy()->timezone(self::DISPLAY_TIMEZONE)->format('H:i:s');
+    }
+
+    private function displayDateTime(?Carbon $date, string $format): ?string
+    {
+        return $date?->copy()->timezone(self::DISPLAY_TIMEZONE)->format($format);
     }
 
     /**
@@ -198,10 +224,6 @@ class PipelineCronJobs extends Page
                 isset($metadata['word_count']) ? 'Mots extraits : '.$metadata['word_count'] : null,
                 ($metadata['retry_scheduled'] ?? false) === true ? 'Nouvelle tentative planifiée dans '.($metadata['retry_delay_seconds'] ?? 60).'s' : null,
             ])),
-            'selection' => array_values(array_filter([
-                isset($metadata['proposal_count']) ? 'Idées disponibles : '.$metadata['proposal_count'] : null,
-                ($metadata['manual_dispatch'] ?? false) === true ? 'Lancement manuel' : null,
-            ])),
             'generate' => array_values(array_filter([
                 ($metadata['manual_dispatch'] ?? false) === true ? 'Lancement manuel' : null,
                 isset($metadata['article_type']) ? 'Type : '.$metadata['article_type'] : null,
@@ -209,19 +231,25 @@ class PipelineCronJobs extends Page
                 isset($metadata['cluster_id']) ? 'Cluster : '.$metadata['cluster_id'] : null,
                 isset($metadata['item_ids']) && is_array($metadata['item_ids']) ? 'Sources : '.count($metadata['item_ids']) : null,
             ])),
-            'manual_flow' => array_values(array_filter([
-                ($metadata['manual_dispatch'] ?? false) === true ? 'Relance globale' : null,
-                isset($metadata['dispatched_feeds']) ? 'Flux : '.$metadata['dispatched_feeds'] : null,
-                isset($metadata['dispatched_items']) ? 'Items : '.$metadata['dispatched_items'] : null,
-                isset($metadata['proposal_count']) ? 'Idées : '.$metadata['proposal_count'] : null,
-                isset($metadata['generation_dispatched']) ? 'Génération : '.($metadata['generation_dispatched'] ? 'lancée' : 'impossible') : null,
-                ($metadata['waiting_for_enrichment'] ?? false) === true ? 'En attente des enrichissements' : null,
-                isset($metadata['cluster_id']) && ! empty($metadata['cluster_id']) ? 'Cluster : '.$metadata['cluster_id'] : null,
-            ])),
-            'cleanup' => array_values(array_filter([
-                ! empty($metadata['command']) ? 'Commande : '.$metadata['command'] : null,
-                isset($metadata['hours']) ? 'Fenêtre : '.$metadata['hours'].'h' : null,
-            ])),
+            'cleanup' => match ($metadata['manual_action'] ?? null) {
+                'selection' => array_values(array_filter([
+                    ($metadata['manual_dispatch'] ?? false) === true ? 'Lancement manuel' : null,
+                    isset($metadata['proposal_count']) ? 'Idées disponibles : '.$metadata['proposal_count'] : null,
+                ])),
+                'full_flow' => array_values(array_filter([
+                    ($metadata['manual_dispatch'] ?? false) === true ? 'Relance globale' : null,
+                    isset($metadata['dispatched_feeds']) ? 'Flux : '.$metadata['dispatched_feeds'] : null,
+                    isset($metadata['dispatched_items']) ? 'Items : '.$metadata['dispatched_items'] : null,
+                    isset($metadata['proposal_count']) ? 'Idées : '.$metadata['proposal_count'] : null,
+                    isset($metadata['generation_dispatched']) ? 'Génération : '.($metadata['generation_dispatched'] ? 'lancée' : 'impossible') : null,
+                    ($metadata['waiting_for_enrichment'] ?? false) === true ? 'En attente des enrichissements' : null,
+                    isset($metadata['cluster_id']) && ! empty($metadata['cluster_id']) ? 'Cluster : '.$metadata['cluster_id'] : null,
+                ])),
+                default => array_values(array_filter([
+                    ! empty($metadata['command']) ? 'Commande : '.$metadata['command'] : null,
+                    isset($metadata['hours']) ? 'Fenêtre : '.$metadata['hours'].'h' : null,
+                ])),
+            },
             default => [],
         };
     }

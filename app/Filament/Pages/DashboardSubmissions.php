@@ -82,7 +82,7 @@ class DashboardSubmissions extends Page
                         ? number_format($submission->payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($submission->payment->currency)
                         : null,
                     'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
-                    'moderate_url' => DashboardSubmissionView::getUrl(['record' => $submission]),
+                    'moderate_url' => SubmissionResource::getUrl('view', ['record' => $submission]),
                 ];
             })
             ->toArray();

@@ -218,8 +218,9 @@ class PipelineDailyAutomation extends Page
     public function rerunSelectionStage(): void
     {
         $count = $this->countAvailableProposals();
-        $this->recordManualAction('selection', [
+        $this->recordManualAction('cleanup', [
             'manual_dispatch' => true,
+            'manual_action' => 'selection',
             'proposal_count' => $count,
         ]);
         $this->startProgressOverlay('select', $count);
@@ -257,8 +258,9 @@ class PipelineDailyAutomation extends Page
         $proposalCount = $this->countAvailableProposals();
         $this->startProgressOverlay('full', $items->count());
         $generated = $proposalCount > 0 ? $this->dispatchGenerationFromBestProposal() : false;
-        $this->recordManualAction('manual_flow', [
+        $this->recordManualAction('cleanup', [
             'manual_dispatch' => true,
+            'manual_action' => 'full_flow',
             'dispatched_feeds' => $feeds->count(),
             'dispatched_items' => $items->count(),
             'proposal_count' => $proposalCount,

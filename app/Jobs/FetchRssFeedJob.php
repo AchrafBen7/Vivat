@@ -49,11 +49,22 @@ class FetchRssFeedJob implements ShouldQueue
         try {
             Log::info("Fetching RSS feed: {$this->feed->feed_url}");
 
-            $response = Http::timeout(30)
+            $curlOptions = [];
+            if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
+                $curlOptions[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
+            }
+
+            $response = Http::connectTimeout(20)
+                ->timeout(45)
+                ->retry(2, 1500, throw: false)
                 ->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (compatible; ContentBot/1.0)',
                     'Accept' => 'application/rss+xml, application/xml, text/xml, */*',
                 ])
+                ->withOptions(array_filter([
+                    'allow_redirects' => true,
+                    'curl' => $curlOptions !== [] ? $curlOptions : null,
+                ]))
                 ->get($this->feed->feed_url);
 
             if ($response->failed()) {
