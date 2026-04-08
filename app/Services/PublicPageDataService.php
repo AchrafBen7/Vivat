@@ -5,49 +5,57 @@ namespace App\Services;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Données pour les pages publiques (site HTML).
- * Réutilise la même logique / cache que l'API pour cohérence.
- * Toutes les listes d'articles sont filtrées par langue (fr ou nl).
- */
 class PublicPageDataService
 {
+    public function __construct(
+        private readonly PublicCacheService $cache,
+    ) {}
+
     public function getArticlesIndexData(string $locale = 'fr'): array
     {
-        $articles = Article::published()
-            ->forLocale($locale)
-            ->with('category')
-            ->orderByDesc('published_at')
-            ->paginate(12);
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 12;
+        $ttl = $this->ttl();
+
+        $payload = $this->cache->remember('articles-index', $locale, 'page:' . $page, $ttl, function () use ($locale, $page, $perPage): array {
+            $query = Article::published()
+                ->forLocale($locale)
+                ->with('category')
+                ->orderByDesc('published_at');
+
+            $total = (clone $query)->count();
+            $articles = (clone $query)
+                ->forPage($page, $perPage)
+                ->get()
+                ->map(fn (Article $article): array => $this->articleToArray($article))
+                ->all();
+
+            return [
+                'articles' => $articles,
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+            ];
+        });
 
         return [
-            'articles' => $articles->getCollection()->map(fn ($a) => $this->articleToArray($a))->all(),
-            'pagination' => $articles,
+            'articles' => $payload['articles'],
+            'pagination' => $this->makePaginator($payload['articles'], $payload['total'], $payload['per_page'], $payload['page']),
         ];
     }
 
-    /**
-     * Données pour la page de recherche.
-     * Si le terme correspond à une catégorie (nom ou slug), filtre par cette catégorie.
-     * Sinon, recherche full-text dans title, excerpt, meta_description.
-     */
     public function getSearchData(string $locale = 'fr', string $q = ''): array
     {
-        $query = Article::published()
-            ->forLocale($locale)
-            ->with('category');
-
-        $matchedCategory = null;
+        $page = LengthAwarePaginator::resolveCurrentPage();
         $normalized = strtolower(trim($q));
 
-        // Sans terme de recherche, ne rien retourner
         if ($normalized === '') {
             return [
                 'articles' => [],
-                'pagination' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                'pagination' => $this->makePaginator([], 0, 10, 1),
                 'search_term' => $q,
                 'matched_category' => null,
                 'search_mosaic_padded' => false,
@@ -55,113 +63,93 @@ class PublicPageDataService
             ];
         }
 
-        // Si le terme correspond à une catégorie (nom ou slug), filtrer par cette catégorie
-        $matchedCategory = Category::where('name', $normalized)
-            ->orWhere('slug', $normalized)
-            ->first();
+        $ttl = $this->ttl();
+        $signature = 'q:' . md5($normalized) . ':page:' . $page;
 
-        if ($matchedCategory) {
-            $query->where('category_id', $matchedCategory->id);
-        } elseif ($q !== '') {
-            // Recherche textuelle dans les articles
-            if (DB::getDriverName() === 'mysql' && strlen($q) >= 2) {
-                $query->where(function ($builder) use ($q) {
-                    $builder->whereFullText(['title', 'excerpt'], $q)
-                        ->orWhere('meta_description', 'LIKE', '%'.addcslashes($q, '%_\\').'%');
-                });
+        $payload = $this->cache->remember('search', $locale, $signature, $ttl, function () use ($locale, $q, $normalized, $page): array {
+            $perPage = 10;
+            $query = Article::published()
+                ->forLocale($locale)
+                ->with('category');
+
+            $matchedCategory = Category::where('name', $normalized)
+                ->orWhere('slug', $normalized)
+                ->first();
+
+            if ($matchedCategory) {
+                $query->where('category_id', $matchedCategory->id);
             } else {
-                $query->where(function ($builder) use ($q) {
-                    $esc = addcslashes($q, '%_\\');
-                    $builder->where('title', 'LIKE', "%{$esc}%")
-                        ->orWhere('excerpt', 'LIKE', "%{$esc}%")
-                        ->orWhere('meta_description', 'LIKE', "%{$esc}%");
-                });
+                if (DB::getDriverName() === 'mysql' && strlen($q) >= 2) {
+                    $query->where(function ($builder) use ($q) {
+                        $builder->whereFullText(['title', 'excerpt'], $q)
+                            ->orWhere('meta_description', 'LIKE', '%' . addcslashes($q, '%_\\') . '%');
+                    });
+                } else {
+                    $query->where(function ($builder) use ($q) {
+                        $escaped = addcslashes($q, '%_\\');
+                        $builder->where('title', 'LIKE', "%{$escaped}%")
+                            ->orWhere('excerpt', 'LIKE', "%{$escaped}%")
+                            ->orWhere('meta_description', 'LIKE', "%{$escaped}%");
+                    });
+                }
             }
-        }
 
-        $articles = $query->orderByDesc('published_at')->paginate(10);
-        $currentArticles = $articles->getCollection();
+            $total = (clone $query)->count();
+            $pageHits = (clone $query)
+                ->orderByDesc('published_at')
+                ->forPage($page, $perPage)
+                ->get()
+                ->map(fn (Article $article): array => $this->articleToArray($article))
+                ->values()
+                ->all();
 
-        /** @var array<int, array<string, mixed>> $pageHits */
-        $pageHits = $currentArticles->map(fn ($a) => $this->articleToArray($a))->values()->all();
+            $mosaicTarget = 10;
+            $mosaicArticles = $this->padSearchMosaicArticles($locale, $pageHits, $mosaicTarget);
+            $mosaicPadded = count($pageHits) > 0 && count($mosaicArticles) > count($pageHits);
 
-        /** Mosaïque 10 cartes (ordre séquentiel) : compléter si la page en contient moins de 10. */
-        $mosaicTarget = 10;
-        $mosaicArticles = $this->padSearchMosaicArticles($locale, $pageHits, $mosaicTarget);
-        $mosaicPadded = count($pageHits) > 0 && count($mosaicArticles) > count($pageHits);
+            $excludeIds = collect($mosaicArticles)->pluck('id')->filter()->unique()->values()->all();
 
-        /** @var array<int, string> $excludeIds */
-        $excludeIds = collect($mosaicArticles)->pluck('id')->filter()->unique()->values()->all();
+            $continueReadingArticles = Article::published()
+                ->forLocale($locale)
+                ->with('category')
+                ->when($excludeIds !== [], fn ($builder) => $builder->whereNotIn('id', $excludeIds))
+                ->orderByDesc('published_at')
+                ->limit(20)
+                ->get()
+                ->map(fn (Article $article): array => $this->articleToArray($article))
+                ->values()
+                ->all();
 
-        /** @var array<int, array<string, mixed>> $continueReadingArticles */
-        $continueReadingArticles = Article::published()
-            ->forLocale($locale)
-            ->with('category')
-            ->when($excludeIds !== [], fn ($query) => $query->whereNotIn('id', $excludeIds))
-            ->orderByDesc('published_at')
-            ->limit(20)
-            ->get()
-            ->map(fn (Article $a) => $this->articleToArray($a))
-            ->values()
-            ->all();
+            return [
+                'articles' => $mosaicArticles,
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+                'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory) : null,
+                'search_mosaic_padded' => $mosaicPadded,
+                'continue_reading_articles' => $continueReadingArticles,
+            ];
+        });
 
         return [
-            'articles' => $mosaicArticles,
-            'pagination' => $articles,
+            'articles' => $payload['articles'],
+            'pagination' => $this->makePaginator($payload['articles'], $payload['total'], $payload['per_page'], $payload['page']),
             'search_term' => $q,
-            'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory) : null,
-            'search_mosaic_padded' => $mosaicPadded,
-            'continue_reading_articles' => $continueReadingArticles,
+            'matched_category' => $payload['matched_category'],
+            'search_mosaic_padded' => $payload['search_mosaic_padded'],
+            'continue_reading_articles' => $payload['continue_reading_articles'],
         ];
-    }
-
-    /**
-     * Complète la liste d’articles (page courante) jusqu’à $target pour remplir la mosaïque recherche (10 cartes).
-     *
-     * @param  array<int, array<string, mixed>>  $pageHits
-     * @return array<int, array<string, mixed>>
-     */
-    private function padSearchMosaicArticles(string $locale, array $pageHits, int $target): array
-    {
-        if ($pageHits === [] || count($pageHits) >= $target) {
-            return $pageHits;
-        }
-
-        $existingIds = collect($pageHits)->pluck('id')->filter()->unique()->values()->all();
-        $needed = $target - count($pageHits);
-
-        $referenceCategoryId = $pageHits[0]['category']['id'] ?? null;
-
-        $fillQuery = Article::published()
-            ->forLocale($locale)
-            ->with('category')
-            ->whereNotIn('id', $existingIds);
-
-        if ($referenceCategoryId) {
-            $fillQuery->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$referenceCategoryId]);
-        }
-
-        $fill = $fillQuery
-            ->orderByDesc('published_at')
-            ->limit($needed)
-            ->get()
-            ->map(fn (Article $a) => $this->articleToArray($a))
-            ->all();
-
-        return array_merge($pageHits, $fill);
     }
 
     public function getHomeData(string $locale = 'fr'): array
     {
-        $cacheKey = config('vivat.home_cache_key_prefix', 'vivat.home.v2').'.'.$locale;
-        $cacheTtl = (int) config('vivat.home_cache_ttl', 300);
-        $closure = function () use ($locale) {
-            $highlightSize = 5;
-            $featuredLimit = (int) config('vivat.home_featured_count', 4);
-            $latestLimit = (int) config('vivat.home_latest_count', 12);
-            $categoriesLimit = (int) config('vivat.home_categories_count', 9);
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $ttl = $this->ttl();
+        $latestLimit = (int) config('vivat.home_latest_count', 12);
 
-            // Highlight = 5 emplacements : d'abord hot_news (jusqu'à 5), puis avec image, puis n'importe quel publié
+        $highlightPayload = $this->cache->remember('home-highlight', $locale, 'main', $ttl, function () use ($locale): array {
+            $highlightSize = 5;
+
             $hotNewsForHighlight = Article::published()
                 ->forLocale($locale)
                 ->where('article_type', 'hot_news')
@@ -179,14 +167,16 @@ class PublicPageDataService
                     ->forLocale($locale)
                     ->with('category')
                     ->whereNotIn('id', $highlightIds)
-                    ->where(fn ($q) => $q->where('article_type', 'hot_news')->orWhereNotNull('cover_image_url'))
+                    ->where(fn ($query) => $query->where('article_type', 'hot_news')->orWhereNotNull('cover_image_url'))
                     ->orderByDesc('published_at')
                     ->limit($remaining)
                     ->get();
+
                 $highlight = $highlight->merge($featuredFill)->take($highlightSize);
                 $highlightIds = $highlight->pluck('id')->all();
                 $remaining = $highlightSize - $highlight->count();
             }
+
             if ($remaining > 0) {
                 $fallbackFill = Article::published()
                     ->forLocale($locale)
@@ -195,13 +185,13 @@ class PublicPageDataService
                     ->orderByDesc('published_at')
                     ->limit($remaining)
                     ->get();
+
                 $highlight = $highlight->merge($fallbackFill)->take($highlightSize);
             }
 
             $highlight = $highlight->unique('id')->values()->take($highlightSize);
-
-            // Premier slot (h0) = grande carte : privilégier un article avec image si possible
             $highlightItems = $highlight->values()->all();
+
             if (count($highlightItems) > 0 && empty($highlightItems[0]->cover_image_url)) {
                 for ($i = 1; $i < count($highlightItems); $i++) {
                     if (! empty($highlightItems[$i]->cover_image_url)) {
@@ -211,107 +201,95 @@ class PublicPageDataService
                         break;
                     }
                 }
+
                 $highlight = collect($highlightItems);
             }
 
-            $highlightIds = $highlight->pluck('id')->unique()->values()->all();
+            return [
+                'ids' => $highlight->pluck('id')->unique()->values()->all(),
+                'items' => $highlight->map(fn (Article $article): array => $this->articleToArray($article))->values()->all(),
+                'top_news' => $highlight->first() ? $this->articleToArray($highlight->first()) : null,
+            ];
+        });
 
-            // "Dernières actualités" = les plus récents (published_at desc) déjà exclus des 5 highlight, sans doublon (id, slug, titre).
-            // L'ordre est conservé après déduplication pour que la vue affiche bien du plus récent au moins récent.
-            $fetchLatest = $latestLimit + 30;
-            $latest = Article::published()
-                ->forLocale($locale)
-                ->with('category')
-                ->whereNotIn('id', $highlightIds)
-                ->orderByDesc('published_at')
-                ->limit($fetchLatest)
-                ->get()
-                ->filter(fn ($a) => ! in_array($a->id, $highlightIds, true))
-                ->filter(fn ($a) => $a->language === $locale || ($a->language === null && $locale === 'fr'))
-                ->unique('id')
-                ->values();
-            $featured = collect();
+        $categoriesPayload = $this->cache->remember('home-categories', $locale, 'main', $ttl, function () use ($locale): array {
+            $categoriesLimit = (int) config('vivat.home_categories_count', 9);
 
-            $categories = Category::query()
-                ->withCount(['articles as published_articles_count' => fn ($q) => $q->where('status', 'published')->where('language', $locale)])
+            return Category::query()
+                ->withCount(['articles as published_articles_count' => fn ($query) => $query->where('status', 'published')->where('language', $locale)])
                 ->orderedForHome()
                 ->limit($categoriesLimit)
-                ->get();
+                ->get()
+                ->map(fn (Category $category): array => $this->categoryToArray($category))
+                ->all();
+        });
+
+        $latestPayload = $this->cache->remember('home-latest', $locale, 'page:' . $page, $ttl, function () use ($locale, $page, $latestLimit, $highlightPayload): array {
+            $query = Article::published()
+                ->forLocale($locale)
+                ->with('category')
+                ->whereNotIn('id', $highlightPayload['ids'])
+                ->orderByDesc('published_at');
+
+            $total = (clone $query)->count();
+            $latest = (clone $query)
+                ->forPage($page, $latestLimit)
+                ->get()
+                ->map(fn (Article $article): array => $this->articleToArray($article))
+                ->all();
+
+            $latest = $this->dedupeArticlesByIdAndExclude($latest, $highlightPayload['ids']);
+            $latest = $this->dedupeArticlesBySlug($latest);
+            $latest = $this->dedupeArticlesByTitle($latest);
+            $latest = array_values(array_filter($latest, function (array $row) use ($locale): bool {
+                $lang = $row['language'] ?? 'fr';
+
+                return $lang === $locale || ($lang === null && $locale === 'fr');
+            }));
 
             return [
-                'highlight' => $highlight,
-                'top_news' => $highlight->first(),
-                'featured' => $featured,
-                'latest' => $latest,
-                'categories' => $categories,
+                'articles' => $latest,
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $latestLimit,
             ];
-        };
-        $data = config('vivat.disable_page_cache') ? $closure() : Cache::remember($cacheKey, $cacheTtl, $closure);
+        });
 
-        $highlightCollection = EloquentCollection::make($data['highlight'] ?? []);
-        $highlightCollection->load('category');
-        $highlightArray = $highlightCollection
-            ->filter(fn ($a) => $a->language === $locale || ($a->language === null && $locale === 'fr'))
-            ->map(fn ($a) => $this->articleToArray($a))
-            ->values()
-            ->all();
+        $highlightArray = $highlightPayload['items'];
         while (count($highlightArray) < 5) {
             $highlightArray[] = null;
         }
-        $highlightArray = array_slice($highlightArray, 0, 5);
-
-        $topNews = $data['top_news'] ?? $highlightCollection->first();
-        $featuredCollection = EloquentCollection::make($data['featured'] ?? []);
-        $featuredCollection->load('category');
-
-        $highlightIdsForLatest = $highlightCollection->pluck('id')->unique()->all();
-        $latestLimit = (int) config('vivat.home_latest_count', 12);
-        $latestPaginator = Article::published()
-            ->forLocale($locale)
-            ->with('category')
-            ->whereNotIn('id', $highlightIdsForLatest)
-            ->orderByDesc('published_at')
-            ->paginate($latestLimit);
-
-        $latestAsArray = $latestPaginator->getCollection()
-            ->map(fn ($article) => $this->articleToArray($article))
-            ->all();
-        $latestAsArray = $this->dedupeArticlesByIdAndExclude($latestAsArray, $highlightIdsForLatest);
-        $latestAsArray = $this->dedupeArticlesBySlug($latestAsArray);
-        $latestAsArray = $this->dedupeArticlesByTitle($latestAsArray);
-        $latestAsArray = array_values(array_filter($latestAsArray, function ($row) use ($locale) {
-            $lang = $row['language'] ?? 'fr';
-
-            return $lang === $locale || ($lang === null && $locale === 'fr');
-        }));
-        $latestPaginator->setCollection(collect($latestAsArray));
 
         return [
-            'highlight' => $highlightArray,
-            'top_news' => $topNews instanceof Article ? $this->articleToArray($topNews) : null,
-            'featured' => $featuredCollection->map(fn ($a) => $this->articleToArray($a))->all(),
-            'latest' => $latestAsArray,
-            'pagination' => $latestPaginator,
-            'categories' => ($data['categories'] ?? collect())->map(fn ($c) => $this->categoryToArray($c))->all(),
+            'highlight' => array_slice($highlightArray, 0, 5),
+            'top_news' => $highlightPayload['top_news'],
+            'featured' => [],
+            'latest' => $latestPayload['articles'],
+            'pagination' => $this->makePaginator($latestPayload['articles'], $latestPayload['total'], $latestPayload['per_page'], $latestPayload['page']),
+            'categories' => $categoriesPayload,
         ];
     }
 
     public function getCategoryHubData(string $categorySlug, array $subCategorySlugs = [], string $locale = 'fr', int $page = 1): array
     {
-        $category = Category::where('slug', $categorySlug)->firstOrFail();
         $normalizedSubCategorySlugs = array_values(array_unique(array_filter(
             array_map(static fn (mixed $slug): string => trim((string) $slug), $subCategorySlugs),
             static fn (string $slug): bool => $slug !== ''
         )));
-        $cacheKey = 'vivat.hub.'.$category->slug.($normalizedSubCategorySlugs !== [] ? '.'.implode('-', $normalizedSubCategorySlugs) : '').'.'.$locale.'.page.'.$page;
-        $closure = function () use ($category, $normalizedSubCategorySlugs, $locale, $page) {
-            // Sous-catégories = termes extraits de la description (ex. "Innovation, tech, numérique" → Innovation, tech, numérique)
+
+        $signature = $categorySlug
+            . '|sub:' . ($normalizedSubCategorySlugs !== [] ? implode('-', $normalizedSubCategorySlugs) : 'none')
+            . '|page:' . $page;
+
+        $payload = $this->cache->remember('category-hub', $locale, $signature, $this->ttl(), function () use ($categorySlug, $normalizedSubCategorySlugs, $locale, $page): array {
+            $category = Category::where('slug', $categorySlug)->firstOrFail();
             $subCategories = $category->getDescriptionSubCategories();
             $availableSubCategorySlugs = collect($subCategories)
                 ->pluck('slug')
                 ->filter(static fn (mixed $slug): bool => is_string($slug) && trim($slug) !== '')
                 ->values()
                 ->all();
+
             $activeSubCategorySlugs = array_values(array_filter(
                 $normalizedSubCategorySlugs,
                 static fn (string $slug): bool => in_array($slug, $availableSubCategorySlugs, true)
@@ -330,10 +308,10 @@ class PublicPageDataService
                     ->values();
 
                 if ($selectedTerms->isNotEmpty()) {
-                    $query->where(function ($q) use ($selectedTerms) {
+                    $query->where(function ($builder) use ($selectedTerms): void {
                         foreach ($selectedTerms as $searchTerm) {
-                            $like = '%'.addcslashes($searchTerm, '%_\\').'%';
-                            $q->orWhere(function ($termQuery) use ($like) {
+                            $like = '%' . addcslashes($searchTerm, '%_\\') . '%';
+                            $builder->orWhere(function ($termQuery) use ($like): void {
                                 $termQuery->where('title', 'like', $like)
                                     ->orWhere('content', 'like', $like)
                                     ->orWhere('excerpt', 'like', $like)
@@ -347,52 +325,134 @@ class PublicPageDataService
             }
 
             $totalPublished = (clone $query)->count();
+            $perPage = 24;
             $articles = (clone $query)
                 ->orderByDesc('published_at')
-                ->paginate(24, ['*'], 'page', $page);
+                ->forPage($page, $perPage)
+                ->get()
+                ->map(fn (Article $article): array => $this->articleToArray($article))
+                ->all();
 
             return [
-                'category' => $category,
+                'category' => $this->categoryToArray($category),
                 'description' => $category->description,
                 'total_published' => $totalPublished,
                 'active_sub_category_slugs' => $activeSubCategorySlugs,
                 'sub_categories' => $subCategories,
                 'articles' => $articles,
+                'page' => $page,
+                'per_page' => $perPage,
             ];
-        };
-        $data = config('vivat.disable_page_cache') ? $closure() : Cache::remember($cacheKey, 900, $closure);
+        });
 
-        $articlesPaginator = $data['articles'];
-        $articlesCollection = $articlesPaginator->getCollection();
-        $articlesCollection->load(['category', 'subCategory']);
-
-        // sub_categories = termes extraits de la description (name + slug)
-        $subCategories = $data['sub_categories'] ?? [];
-        $activeSubCategorySlugs = $data['active_sub_category_slugs'] ?? [];
-        $currentSubNames = collect($subCategories)
-            ->whereIn('slug', $activeSubCategorySlugs)
+        $currentSubNames = collect($payload['sub_categories'])
+            ->whereIn('slug', $payload['active_sub_category_slugs'])
             ->pluck('name')
             ->filter(static fn (mixed $name): bool => is_string($name) && trim($name) !== '')
             ->values()
             ->all();
 
         return [
-            'category' => $this->categoryToArray($data['category']),
-            'description' => $data['description'],
-            'total_published' => $data['total_published'],
-            'current_sub_category_slug' => $activeSubCategorySlugs[0] ?? null,
+            'category' => $payload['category'],
+            'description' => $payload['description'],
+            'total_published' => $payload['total_published'],
+            'current_sub_category_slug' => $payload['active_sub_category_slugs'][0] ?? null,
             'current_sub_category_name' => count($currentSubNames) === 1 ? $currentSubNames[0] : null,
-            'current_sub_category_slugs' => $activeSubCategorySlugs,
+            'current_sub_category_slugs' => $payload['active_sub_category_slugs'],
             'current_sub_category_names' => $currentSubNames,
-            'sub_categories' => $subCategories,
-            'pagination' => $articlesPaginator->withQueryString(),
-            'articles' => $articlesCollection->map(fn ($a) => $this->articleToArray($a))->all(),
+            'sub_categories' => $payload['sub_categories'],
+            'pagination' => $this->makePaginator($payload['articles'], $payload['total_published'], $payload['per_page'], $payload['page'])->withQueryString(),
+            'articles' => $payload['articles'],
         ];
     }
 
+    public function getRelatedArticlesData(Article $article, string $locale, int $target = 4): array
+    {
+        $signature = $article->id . ':target:' . $target;
+
+        return $this->cache->remember('related-articles', $locale, $signature, $this->ttl(), function () use ($article, $locale, $target): array {
+            $category = $article->category_id ? Category::find($article->category_id) : null;
+
+            $primaryRelated = Article::published()
+                ->forLocale($locale)
+                ->with('category')
+                ->where('id', '!=', $article->id)
+                ->when($article->category_id, fn ($query) => $query->where('category_id', $article->category_id))
+                ->orderByDesc('published_at')
+                ->limit($target)
+                ->get();
+
+            $selectedIds = $primaryRelated->pluck('id')->prepend($article->id)->all();
+            $missingCount = max(0, $target - $primaryRelated->count());
+
+            $fallbackRelated = collect();
+            if ($missingCount > 0) {
+                $fallbackRelated = Article::published()
+                    ->forLocale($locale)
+                    ->with('category')
+                    ->whereNotIn('id', $selectedIds)
+                    ->orderByDesc('published_at')
+                    ->limit($missingCount)
+                    ->get();
+            }
+
+            return $primaryRelated
+                ->concat($fallbackRelated)
+                ->take($target)
+                ->map(fn (Article $related) => [
+                    'title' => $related->title,
+                    'slug' => $related->slug,
+                    'reading_time' => $related->reading_time,
+                    'category' => $related->category?->name ?? '',
+                    'published_at_display' => $related->published_at?->locale($locale)->isoFormat('D MMMM YYYY'),
+                    'image' => $this->articleCoverOrFallback($related, $related->category),
+                    'fallback' => vivat_category_fallback_image(
+                        $related->category?->slug ?? $category?->slug,
+                        760,
+                        520,
+                        (string) $related->id,
+                        'also'
+                    ),
+                ])
+                ->values()
+                ->all();
+        });
+    }
+
     /**
-     * Retourne une liste d'articles (tableaux assoc) sans doublon d'id et en excluant les ids donnés.
-     *
+     * @param  array<int, array<string, mixed>>  $pageHits
+     * @return array<int, array<string, mixed>>
+     */
+    private function padSearchMosaicArticles(string $locale, array $pageHits, int $target): array
+    {
+        if ($pageHits === [] || count($pageHits) >= $target) {
+            return $pageHits;
+        }
+
+        $existingIds = collect($pageHits)->pluck('id')->filter()->unique()->values()->all();
+        $needed = $target - count($pageHits);
+        $referenceCategoryId = $pageHits[0]['category']['id'] ?? null;
+
+        $fillQuery = Article::published()
+            ->forLocale($locale)
+            ->with('category')
+            ->whereNotIn('id', $existingIds);
+
+        if ($referenceCategoryId) {
+            $fillQuery->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$referenceCategoryId]);
+        }
+
+        $fill = $fillQuery
+            ->orderByDesc('published_at')
+            ->limit($needed)
+            ->get()
+            ->map(fn (Article $article): array => $this->articleToArray($article))
+            ->all();
+
+        return array_merge($pageHits, $fill);
+    }
+
+    /**
      * @param  array<int, array<string, mixed>>  $articles
      * @param  array<string>  $excludeIds
      * @return array<int, array<string, mixed>>
@@ -401,11 +461,13 @@ class PublicPageDataService
     {
         $seen = array_fill_keys($excludeIds, true);
         $out = [];
+
         foreach ($articles as $row) {
             $id = $row['id'] ?? null;
             if ($id === null || ! empty($seen[$id])) {
                 continue;
             }
+
             $seen[$id] = true;
             $out[] = $row;
         }
@@ -414,8 +476,6 @@ class PublicPageDataService
     }
 
     /**
-     * Garde une seule occurrence par slug (évite le même article affiché 2 fois si 2 lignes en base).
-     *
      * @param  array<int, array<string, mixed>>  $articles
      * @return array<int, array<string, mixed>>
      */
@@ -423,11 +483,13 @@ class PublicPageDataService
     {
         $seenSlug = [];
         $out = [];
+
         foreach ($articles as $row) {
             $slug = $row['slug'] ?? null;
             if ($slug === null || $slug === '' || ! empty($seenSlug[$slug])) {
                 continue;
             }
+
             $seenSlug[$slug] = true;
             $out[] = $row;
         }
@@ -436,8 +498,6 @@ class PublicPageDataService
     }
 
     /**
-     * Garde une seule occurrence par titre normalisé (évite deux articles avec le même titre dans "Dernières actualités").
-     *
      * @param  array<int, array<string, mixed>>  $articles
      * @return array<int, array<string, mixed>>
      */
@@ -445,12 +505,15 @@ class PublicPageDataService
     {
         $seenTitle = [];
         $out = [];
+
         foreach ($articles as $row) {
             $title = $row['title'] ?? '';
             $key = mb_strtolower(trim((string) $title));
+
             if ($key === '' || ! empty($seenTitle[$key])) {
                 continue;
             }
+
             $seenTitle[$key] = true;
             $out[] = $row;
         }
@@ -458,61 +521,67 @@ class PublicPageDataService
         return array_values($out);
     }
 
-    private function articleToArray(Article $a): array
+    private function articleToArray(Article $article): array
     {
-        // Toujours résoudre la catégorie depuis la DB via category_id pour garantir la cohérence (éviter affichage mauvaise catégorie)
         $category = null;
-        if ($a->category_id) {
-            $resolved = Category::find($a->category_id);
+        if ($article->category_id) {
+            $resolved = Category::find($article->category_id);
             $category = $resolved ? $this->categoryToArray($resolved) : null;
         }
 
-        $cover = $a->cover_image_url;
+        $cover = $article->cover_image_url;
         $useFallback = empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
             || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'));
 
         return [
-            'id' => $a->id,
-            'title' => $a->title,
-            'slug' => $a->slug,
-            'excerpt' => $a->excerpt,
-            'content' => $a->content,
-            'meta_title' => $a->meta_title,
-            'meta_description' => $a->meta_description,
-            'reading_time' => $a->reading_time,
-            'published_at' => $a->published_at?->format('d/m/Y'),
+            'id' => $article->id,
+            'title' => $article->title,
+            'slug' => $article->slug,
+            'excerpt' => $article->excerpt,
+            'content' => $article->content,
+            'meta_title' => $article->meta_title,
+            'meta_description' => $article->meta_description,
+            'reading_time' => $article->reading_time,
+            'published_at' => $article->published_at?->format('d/m/Y'),
             'cover_image_url' => $useFallback
-                ? vivat_category_fallback_image(
-                    $category['slug'] ?? null,
-                    800,
-                    450,
-                    (string) $a->id,
-                    'page'
-                )
+                ? vivat_category_fallback_image($category['slug'] ?? null, 800, 450, (string) $article->id, 'page')
                 : $cover,
-            'cover_video_url' => $a->cover_video_url,
+            'cover_video_url' => $article->cover_video_url,
             'uses_auto_image' => $useFallback,
-            'article_type' => $a->article_type,
-            'language' => $a->language ?? 'fr',
+            'article_type' => $article->article_type,
+            'language' => $article->language ?? 'fr',
             'category' => $category,
-            'keywords' => is_array($a->keywords) ? $a->keywords : [],
-            'sub_category' => $a->relationLoaded('subCategory') && $a->subCategory
+            'keywords' => is_array($article->keywords) ? $article->keywords : [],
+            'sub_category' => $article->relationLoaded('subCategory') && $article->subCategory
                 ? [
-                    'name' => $a->subCategory->name,
-                    'slug' => $a->subCategory->slug,
+                    'name' => $article->subCategory->name,
+                    'slug' => $article->subCategory->slug,
                 ]
                 : null,
         ];
     }
 
-    private function categoryToArray(Category $c): array
+    private function articleCoverOrFallback(Article $article, ?Category $category): string
     {
-        // Médias rubrique : accepte un chemin local public/ ou une URL externe explicite (Cloudinary, CDN, etc.).
-        $fromDb = $c->image_url;
+        $cover = $article->cover_image_url;
+
+        if (empty($cover)
+            || (is_string($cover) && stripos($cover, 'picsum') !== false)
+            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'))) {
+            return vivat_category_fallback_image($category?->slug, 800, 450, (string) $article->id, 'cover');
+        }
+
+        return $cover;
+    }
+
+    private function categoryToArray(Category $category): array
+    {
+        $fromDb = $category->image_url;
         $trimmed = is_string($fromDb) ? trim($fromDb) : '';
-        $public = vivat_category_public_media_url($c->slug);
+        $public = vivat_category_public_media_url($category->slug);
         $imageUrl = null;
+
         if ($trimmed !== '' && str_starts_with($trimmed, '/') && ! str_starts_with($trimmed, '//')) {
             $imageUrl = $trimmed;
         } elseif ($trimmed !== '' && filter_var($trimmed, FILTER_VALIDATE_URL)) {
@@ -522,12 +591,34 @@ class PublicPageDataService
         }
 
         return [
-            'id' => $c->id,
-            'name' => $c->name,
-            'slug' => $c->slug,
-            'description' => $c->description,
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'description' => $category->description,
             'image_url' => $imageUrl,
-            'published_articles_count' => $c->published_articles_count ?? null,
+            'published_articles_count' => $category->published_articles_count ?? null,
         ];
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    private function makePaginator(array $items, int $total, int $perPage, int $page): LengthAwarePaginator
+    {
+        return new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => request()?->url(),
+                'pageName' => 'page',
+            ],
+        );
+    }
+
+    private function ttl(): int
+    {
+        return (int) config('vivat.public_cache_ttl', 900);
     }
 }

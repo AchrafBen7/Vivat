@@ -1,8 +1,11 @@
 <?php
 
 return [
-    // Désactivation du cache : chaque refresh lit la DB (home, hubs, catégories). Remettre env('VIVAT_DISABLE_PAGE_CACHE', true) pour réactiver le cache via .env
-    'disable_page_cache' => true,
+    // Mettre à true dans .env pour bypass le cache public pendant un debug local.
+    'disable_page_cache' => (bool) env('VIVAT_DISABLE_PAGE_CACHE', false),
+    'public_cache_prefix' => (string) env('VIVAT_PUBLIC_CACHE_PREFIX', 'vivat.public'),
+    'public_cache_ttl' => (int) env('VIVAT_PUBLIC_CACHE_TTL', 900),
+    'admin_alert_email' => (string) env('VIVAT_ADMIN_ALERT_EMAIL', env('MAIL_FROM_ADDRESS', 'info@mediaa.be')),
 
     /**
      * Images Pexels de repli par catégorie (articles sans photo).

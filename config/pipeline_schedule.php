@@ -41,4 +41,14 @@ return [
         'cadence' => 'Chaque jour',
         'hours' => 168,
     ],
+
+    'monitoring' => [
+        'enabled' => true,
+        'label' => 'Surveillance pipeline',
+        'description' => 'Contrôle régulier du silence pipeline et de la fraîcheur Horizon.',
+        'cadence' => 'Toutes les 2 heures',
+        'enrichment_silence_hours' => 4,
+        'alert_cooldown_hours' => 4,
+        'horizon_stale_minutes' => 15,
+    ],
 ];

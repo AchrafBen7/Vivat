@@ -19,7 +19,7 @@
         .vp-tip h4 { font-size:14px; font-weight:700; color:#004241; }
         .vp-tip p { margin-top:4px; font-size:13px; line-height:1.55; color:rgba(0,66,65,0.68); }
 
-        .vp-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+        .vp-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
         .vp-stat { border-radius:16px; padding:20px; }
         .vp-stat-val { font-size:30px; font-weight:700; }
         .vp-stat-label { margin-top:4px; font-size:12px; font-weight:500; }
@@ -69,14 +69,15 @@
             </div>
             <div>
                 <h4>Ce qu’il se passe ici</h4>
-                <p>Tu peux filtrer les soumissions, ouvrir leur aperçu, puis passer à la modération détaillée pour les approuver ou les refuser.</p>
+                <p>Tu peux suivre chaque soumission depuis sa réception jusqu’au paiement puis à la publication, avec un passage clair par la revue éditoriale et la proposition de prix.</p>
             </div>
         </div>
 
         <div class="vp-stats">
             @foreach ([
-                ['label' => 'En attente', 'value' => $stats['pending'], 'bg' => '#FFF0B6', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
-                ['label' => 'Approuvées', 'value' => $stats['approved'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
+                ['label' => 'À relire', 'value' => $stats['submitted'], 'bg' => '#FFF0B6', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
+                ['label' => 'En revue', 'value' => $stats['review'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
+                ['label' => 'Paiement à suivre', 'value' => $stats['awaiting_payment'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => 'Rejetées', 'value' => $stats['rejected'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => "Aujourd'hui", 'value' => $stats['today'], 'bg' => '#004241', 'color' => '#fff', 'sub' => 'rgba(255,255,255,0.6)'],
             ] as $card)
@@ -91,8 +92,18 @@
             <input type="text" wire:model.live.debounce.300ms="search" class="vp-input" placeholder="Rechercher une soumission..." />
             <select wire:model.live="status" class="vp-select">
                 <option value="">Tous les statuts</option>
-                <option value="pending">En attente</option>
-                <option value="approved">Approuvée</option>
+                <option value="submitted">Soumise</option>
+                <option value="pending">Soumise (ancien)</option>
+                <option value="under_review">En revue</option>
+                <option value="changes_requested">Corrections demandées</option>
+                <option value="price_proposed">Prix proposé</option>
+                <option value="awaiting_payment">En attente de paiement</option>
+                <option value="payment_pending">Paiement en cours</option>
+                <option value="payment_succeeded">Paiement reçu</option>
+                <option value="payment_failed">Paiement échoué</option>
+                <option value="payment_expired">Offre expirée</option>
+                <option value="payment_canceled">Paiement annulé</option>
+                <option value="published">Publiée</option>
                 <option value="rejected">Rejetée</option>
             </select>
         </div>
@@ -103,18 +114,8 @@
             <div class="vp-grid">
                 @foreach ($submissions as $submission)
                     @php
-                        $status = match($submission['status']) {
-                            'approved' => ['label' => 'Approuvée', 'bg' => '#ecfdf5', 'text' => '#065f46'],
-                            'rejected' => ['label' => 'Rejetée', 'bg' => '#fef2f2', 'text' => '#991b1b'],
-                            default => ['label' => 'En attente', 'bg' => '#fffbeb', 'text' => '#92400e'],
-                        };
-                        $paymentLabel = match($submission['payment_status']) {
-                            'paid' => 'Payé',
-                            'pending' => 'Paiement en attente',
-                            'refunded' => 'Remboursé',
-                            'failed' => 'Échoué',
-                            default => null,
-                        };
+                        $statusMeta = \App\Filament\Pages\DashboardSubmissions::statusMeta($submission['status']);
+                        $paymentMeta = \App\Filament\Pages\DashboardSubmissions::paymentMeta($submission['payment_status']);
                     @endphp
                     <section class="vp-card">
                         @if (!empty($submission['cover']))
@@ -122,10 +123,13 @@
                         @endif
                         <div class="vp-card-body">
                             <div class="vp-badges">
-                                <span class="vp-badge" style="background:{{ $status['bg'] }};color:{{ $status['text'] }}">{{ $status['label'] }}</span>
+                                <span class="vp-badge" style="background:{{ $statusMeta['bg'] }};color:{{ $statusMeta['text'] }}">{{ $statusMeta['label'] }}</span>
                                 <span class="vp-badge" style="background:#EBF1EF;color:#004241;font-weight:600">{{ $submission['category'] }}</span>
-                                @if ($paymentLabel)
-                                    <span class="vp-badge" style="background:#EBF1EF;color:#004241">{{ $paymentLabel }}</span>
+                                @if ($paymentMeta)
+                                    <span class="vp-badge" style="background:{{ $paymentMeta['bg'] }};color:{{ $paymentMeta['text'] }}">{{ $paymentMeta['label'] }}</span>
+                                @endif
+                                @if ($submission['quote_amount'])
+                                    <span class="vp-badge" style="background:#EBF1EF;color:#004241">{{ $submission['quote_amount'] }}</span>
                                 @endif
                             </div>
                             <h3 class="vp-title">{{ $submission['title'] }}</h3>
@@ -144,8 +148,19 @@
                                 @if ($submission['author_email'])
                                     <span> · {{ $submission['author_email'] }}</span>
                                 @endif
+                                @if ($submission['quote_amount'])
+                                    <div style="margin-top:4px;color:rgba(0,66,65,0.55)">
+                                        Demande : {{ $submission['quote_amount'] }}
+                                        @if ($submission['quote_label'])
+                                            · {{ $submission['quote_label'] }}
+                                        @endif
+                                        @if ($submission['quote_expires_at'])
+                                            · expire le {{ $submission['quote_expires_at'] }}
+                                        @endif
+                                    </div>
+                                @endif
                                 @if ($submission['payment_amount'])
-                                    <div style="margin-top:4px;color:rgba(0,66,65,0.55)">Paiement : {{ $submission['payment_amount'] }}</div>
+                                    <div style="margin-top:4px;color:rgba(0,66,65,0.55)">Paiement lié : {{ $submission['payment_amount'] }}</div>
                                 @endif
                             </div>
                             <div class="vp-actions">

@@ -34,7 +34,6 @@
             @foreach ([
                 ['label' => 'Payés', 'value' => $stats['paid'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => 'Remboursés', 'value' => $stats['refunded'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
-                ['label' => 'En attente', 'value' => $stats['pending'], 'bg' => '#FFF0B6', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => "Aujourd'hui", 'value' => $stats['today'], 'bg' => '#004241', 'color' => '#fff', 'sub' => 'rgba(255,255,255,0.6)'],
             ] as $card)
                 <div class="vp-stat" style="background:{{ $card['bg'] }}">

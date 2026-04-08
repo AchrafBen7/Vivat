@@ -1,8 +1,10 @@
 <?php
 
 use App\Jobs\EnrichContentJob;
+use App\Jobs\ExpirePublicationQuotesJob;
 use App\Jobs\FetchRssFeedJob;
 use App\Jobs\GenerateArticleJob;
+use App\Console\Commands\CheckPipelineHealthCommand;
 use App\Models\PipelineJob;
 use App\Models\RssFeed;
 use App\Models\RssItem;
@@ -147,6 +149,12 @@ return Application::configure(basePath: dirname(__DIR__))
             })->everyFiveMinutes()->name('pipeline:horizon-snapshot');
         }
 
+        // Expiration des quotes de publication — toutes les heures
+        $schedule->job(ExpirePublicationQuotesJob::class)
+            ->hourly()
+            ->name('submissions:expire-quotes')
+            ->withoutOverlapping();
+
         // Digest newsletter hebdomadaire — chaque lundi à 8h00
         $schedule->command('newsletter:send-digest')
             ->weeklyOn(1, '08:00')
@@ -166,6 +174,13 @@ return Application::configure(basePath: dirname(__DIR__))
                     ];
                 });
             })->daily()->name('pipeline:prune-failed');
+        }
+
+        if (data_get($pipelineSchedule, 'monitoring.enabled', true)) {
+            $schedule->command(CheckPipelineHealthCommand::class)
+                ->everyTwoHours()
+                ->name('pipeline:health-check')
+                ->withoutOverlapping();
         }
     })
     ->withExceptions(function (Exceptions $exceptions): void {

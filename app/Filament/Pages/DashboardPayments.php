@@ -32,7 +32,6 @@ class DashboardPayments extends Page
         return [
             'paid' => Payment::where('status', 'paid')->count(),
             'refunded' => Payment::where('status', 'refunded')->count(),
-            'pending' => Payment::where('status', 'pending')->count(),
             'today' => Payment::whereDate('created_at', today())->count(),
         ];
     }

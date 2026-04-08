@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\PublicPageDataService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -58,35 +59,11 @@ class ArticleController extends Controller
         // Catégorie toujours résolue via category_id pour cohérence avec la DB
         $category = $article->category_id ? Category::find($article->category_id) : null;
 
-        $primaryRelated = Article::published()
-            ->forLocale($locale)
-            ->with('category')
-            ->where('id', '!=', $article->id)
-            ->when($article->category_id, fn ($q) => $q->where('category_id', $article->category_id))
-            ->orderByDesc('published_at')
-            ->limit(self::RELATED_ARTICLES_TARGET)
-            ->get();
-
-        $selectedIds = $primaryRelated->pluck('id')->prepend($article->id)->all();
-        $missingCount = max(0, self::RELATED_ARTICLES_TARGET - $primaryRelated->count());
-
-        $fallbackRelated = collect();
-        if ($missingCount > 0) {
-            $fallbackRelated = Article::published()
-                ->forLocale($locale)
-                ->with('category')
-                ->whereNotIn('id', $selectedIds)
-                ->orderByDesc('published_at')
-                ->limit($missingCount)
-                ->get();
-        }
-
-        $relatedArticles = $primaryRelated
-            ->concat($fallbackRelated)
-            ->take(self::RELATED_ARTICLES_TARGET)
-            ->map(fn (Article $a) => $this->mapRelatedArticle($a, $category, $locale))
-            ->values()
-            ->all();
+        $relatedArticles = app(PublicPageDataService::class)->getRelatedArticlesData(
+            $article,
+            $locale,
+            self::RELATED_ARTICLES_TARGET,
+        );
 
         $data = [
             'article' => [
@@ -161,24 +138,5 @@ class ArticleController extends Controller
         }
 
         return $cover;
-    }
-
-    private function mapRelatedArticle(Article $article, ?Category $currentCategory, string $locale): array
-    {
-        return [
-            'title' => $article->title,
-            'slug' => $article->slug,
-            'reading_time' => $article->reading_time,
-            'category' => $article->category?->name ?? '',
-            'published_at_display' => $article->published_at?->locale($locale)->isoFormat('D MMMM YYYY'),
-            'image' => $this->articleCoverOrFallback($article, $article->category),
-            'fallback' => vivat_category_fallback_image(
-                $article->category?->slug ?? $currentCategory?->slug,
-                760,
-                520,
-                (string) $article->id,
-                'also'
-            ),
-        ];
     }
 }

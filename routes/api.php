@@ -99,6 +99,11 @@ Route::middleware(['auth:sanctum', 'role:contributor|admin'])->prefix('contribut
     Route::put('submissions/{submission}', [App\Http\Controllers\Api\ContributorSubmissionController::class, 'update'])->name('contributor.submissions.update');
     Route::delete('submissions/{submission}', [App\Http\Controllers\Api\ContributorSubmissionController::class, 'destroy'])->name('contributor.submissions.destroy');
 
+    // Paiement (nouveau workflow quote-then-pay)
+    Route::post('submissions/{submission}/checkout', [App\Http\Controllers\Api\SubmissionCheckoutController::class, 'createSession'])->middleware('throttle:6,1')->name('contributor.submissions.checkout');
+    Route::get('submissions/{submission}/payment/success', [App\Http\Controllers\Api\SubmissionCheckoutController::class, 'success'])->name('contributor.submissions.payment.success');
+    Route::get('submissions/{submission}/payment/cancel', [App\Http\Controllers\Api\SubmissionCheckoutController::class, 'cancel'])->name('contributor.submissions.payment.cancel');
+
     // Paiements (contributeur)
     Route::post('payments/create-intent', [PaymentController::class, 'createIntent'])->name('contributor.payments.create-intent');
     Route::post('payments/confirm', [PaymentController::class, 'confirm'])->name('contributor.payments.confirm');
@@ -159,6 +164,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::prefix('submissions')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
         Route::get('{submission}', [App\Http\Controllers\Api\AdminSubmissionController::class, 'show'])->name('admin.submissions.show');
+        Route::post('{submission}/start-review', [App\Http\Controllers\Api\AdminSubmissionController::class, 'startReview'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.start-review');
+        Route::post('{submission}/request-changes', [App\Http\Controllers\Api\AdminSubmissionController::class, 'requestChanges'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.request-changes');
+        Route::post('{submission}/propose-price', [App\Http\Controllers\Api\AdminSubmissionController::class, 'proposePrice'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.propose-price');
         Route::post('{submission}/approve', [App\Http\Controllers\Api\AdminSubmissionController::class, 'approve'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.approve');
         Route::post('{submission}/reject', [App\Http\Controllers\Api\AdminSubmissionController::class, 'reject'])->middleware('throttle:admin-moderation-actions')->name('admin.submissions.reject');
     });

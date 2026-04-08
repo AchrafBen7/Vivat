@@ -13,6 +13,41 @@ class Category extends Model
 {
     use HasUuids;
 
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            if (! app()->bound(\App\Services\PublicCacheService::class)) {
+                return;
+            }
+
+            app(\App\Services\PublicCacheService::class)->bumpDomains([
+                'home-categories',
+                'home-highlight',
+                'home-latest',
+                'articles-index',
+                'search',
+                'category-hub',
+                'related-articles',
+            ], ['fr', 'nl']);
+        });
+
+        static::deleted(function (): void {
+            if (! app()->bound(\App\Services\PublicCacheService::class)) {
+                return;
+            }
+
+            app(\App\Services\PublicCacheService::class)->bumpDomains([
+                'home-categories',
+                'home-highlight',
+                'home-latest',
+                'articles-index',
+                'search',
+                'category-hub',
+                'related-articles',
+            ], ['fr', 'nl']);
+        });
+    }
+
     public $timestamps = false;
 
     const CREATED_AT = 'created_at';

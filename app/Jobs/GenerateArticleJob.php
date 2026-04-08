@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +39,11 @@ class GenerateArticleJob implements ShouldQueue
         public ?string $clusterId = null
     ) {
         $this->onQueue('generation');
+    }
+
+    public function middleware(): array
+    {
+        return [new RateLimited('openai')];
     }
 
     public function handle(ArticleGeneratorService $generator): void

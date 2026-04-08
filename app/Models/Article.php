@@ -12,6 +12,17 @@ class Article extends Model
 {
     use HasUuids;
 
+    protected static function booted(): void
+    {
+        static::saved(function (Article $article): void {
+            $article->invalidatePublicCaches();
+        });
+
+        static::deleted(function (Article $article): void {
+            $article->invalidatePublicCaches();
+        });
+    }
+
     protected $fillable = [
         'title',
         'slug',
@@ -133,5 +144,28 @@ class Article extends Model
 
             return true;
         });
+    }
+
+    public function invalidatePublicCaches(): void
+    {
+        if (! app()->bound(\App\Services\PublicCacheService::class)) {
+            return;
+        }
+
+        $locales = ['fr', 'nl'];
+        $language = strtolower((string) ($this->language ?? 'fr'));
+        if (in_array($language, ['fr', 'nl'], true)) {
+            $locales = [$language];
+        }
+
+        app(\App\Services\PublicCacheService::class)->bumpDomains([
+            'home-highlight',
+            'home-categories',
+            'home-latest',
+            'articles-index',
+            'search',
+            'category-hub',
+            'related-articles',
+        ], $locales);
     }
 }

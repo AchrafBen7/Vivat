@@ -120,12 +120,12 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by((string) ($request->user()?->id ?: $request->ip()));
         });
 
-        // Rate limiter for OpenAI API calls via queues
+        // Shared rate limiter for OpenAI queue jobs (enrichment + generation).
+        // The bucket must be global, not per item/job, otherwise bursts still pass through.
         RateLimiter::for('openai', function (object $job) {
-            $key = property_exists($job, 'item') && $job->item !== null
-                ? $job->item->id
-                : ($job->job ?? 'default');
-            return Limit::perMinute(50)->by($key);
+            $rpm = max(1, (int) env('OPENAI_QUEUE_RPM', 4));
+
+            return Limit::perMinute($rpm)->by('openai:queue:shared');
         });
 
         // Rate limiter for public API

@@ -14,6 +14,7 @@ use App\Http\Controllers\Web\HomeController as WebHomeController;
 use App\Http\Controllers\Web\NewsletterController as WebNewsletterController;
 use App\Http\Controllers\Web\SearchController as WebSearchController;
 use App\Http\Controllers\Api\PaymentController as ApiPaymentController;
+use App\Http\Controllers\Api\HealthController as ApiHealthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/sitemap.xml', WebSitemapController::class)->name('sitemap');
 Route::get('/feed.xml', WebPublicFeedController::class)->name('feed.rss');
+Route::get('/health', ApiHealthController::class)->name('health.json');
 Route::get('/', WebHomeController::class)->name('home');
 Route::get('/devenir-redacteur', [WebAuthController::class, 'showBecomeContributor'])->name('become.contributor');
 Route::get('/register', [WebAuthController::class, 'showRegisterForm'])->name('register');

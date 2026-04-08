@@ -25,13 +25,46 @@ class DashboardSubmissions extends Page
 
     public string $search = '';
 
-    public string $status = 'pending';
+    public string $status = '';
+
+    public static function statusMeta(string $status): array
+    {
+        return match ($status) {
+            'submitted', 'pending' => ['label' => 'Soumise', 'bg' => '#fffbeb', 'text' => '#92400e'],
+            'under_review' => ['label' => 'En revue', 'bg' => '#eff6ff', 'text' => '#1d4ed8'],
+            'changes_requested' => ['label' => 'Corrections demandées', 'bg' => '#fff7ed', 'text' => '#c2410c'],
+            'price_proposed' => ['label' => 'Prix proposé', 'bg' => '#ecfeff', 'text' => '#0f766e'],
+            'awaiting_payment' => ['label' => 'En attente de paiement', 'bg' => '#fef3c7', 'text' => '#92400e'],
+            'payment_pending' => ['label' => 'Paiement en cours', 'bg' => '#fff7ed', 'text' => '#c2410c'],
+            'payment_succeeded' => ['label' => 'Paiement reçu', 'bg' => '#ecfdf5', 'text' => '#065f46'],
+            'payment_failed' => ['label' => 'Paiement échoué', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'payment_expired' => ['label' => 'Offre expirée', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'payment_canceled' => ['label' => 'Paiement annulé', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'published', 'approved' => ['label' => 'Publiée', 'bg' => '#ecfdf5', 'text' => '#065f46'],
+            'rejected' => ['label' => 'Rejetée', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            default => ['label' => ucfirst($status), 'bg' => '#EBF1EF', 'text' => '#004241'],
+        };
+    }
+
+    public static function paymentMeta(?string $status): ?array
+    {
+        return match ($status) {
+            'pending' => ['label' => 'Paiement créé', 'bg' => '#fff7ed', 'text' => '#c2410c'],
+            'processing' => ['label' => 'Paiement en cours', 'bg' => '#fff7ed', 'text' => '#c2410c'],
+            'succeeded' => ['label' => 'Paiement réussi', 'bg' => '#ecfdf5', 'text' => '#065f46'],
+            'failed' => ['label' => 'Paiement échoué', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'canceled' => ['label' => 'Paiement annulé', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'refunded' => ['label' => 'Remboursé', 'bg' => '#f3f4f6', 'text' => '#374151'],
+            default => null,
+        };
+    }
 
     public function getStats(): array
     {
         return [
-            'pending' => Submission::where('status', 'pending')->count(),
-            'approved' => Submission::where('status', 'approved')->count(),
+            'submitted' => Submission::whereIn('status', ['submitted', 'pending'])->count(),
+            'review' => Submission::where('status', 'under_review')->count(),
+            'awaiting_payment' => Submission::whereIn('status', ['price_proposed', 'awaiting_payment', 'payment_pending', 'payment_failed'])->count(),
             'rejected' => Submission::where('status', 'rejected')->count(),
             'today' => Submission::whereDate('created_at', today())->count(),
         ];
@@ -40,8 +73,8 @@ class DashboardSubmissions extends Page
     public function getSubmissions(): array
     {
         return Submission::query()
-            ->with(['user', 'category', 'payment', 'reviewer'])
-            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->with(['user', 'category', 'reviewer', 'quote.preset', 'latestSubmissionPayment'])
+            ->whereNotIn('status', ['draft'])
             ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
             ->when($this->search !== '', function ($query) {
                 $search = trim($this->search);
@@ -77,10 +110,11 @@ class DashboardSubmissions extends Page
                         ->stripTags()
                         ->squish()
                         ->limit(150),
-                    'payment_status' => $submission->payment?->status,
-                    'payment_amount' => $submission->payment
-                        ? number_format($submission->payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($submission->payment->currency)
-                        : null,
+                    'quote_amount' => $submission->quote?->formatted_amount,
+                    'quote_expires_at' => $submission->quote?->expires_at?->format('d/m/Y à H:i'),
+                    'quote_label' => $submission->quote?->preset?->label,
+                    'payment_status' => $submission->latestSubmissionPayment?->status,
+                    'payment_amount' => $submission->latestSubmissionPayment?->formatted_amount,
                     'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
                     'moderate_url' => SubmissionResource::getUrl('view', ['record' => $submission]),
                 ];

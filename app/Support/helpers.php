@@ -286,6 +286,10 @@ if (! function_exists('get_layout_categories')) {
      */
     function get_layout_categories(): array
     {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('categories')) {
+            return [];
+        }
+
         $limit = (int) config('vivat.home_categories_count', 9);
         $categories = \App\Models\Category::query()
             ->orderedForHome()

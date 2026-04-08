@@ -20,8 +20,8 @@ class SubmissionPublishingService
     public function approveAndPublish(Submission $submission, array $data, ?User $reviewer = null): Article
     {
         $article = DB::transaction(function () use ($submission, $data, $reviewer): Article {
-            if ($submission->status !== 'pending') {
-                throw new \RuntimeException('Only pending submissions can be approved and published.');
+            if (! in_array($submission->status, ['pending', 'submitted', 'under_review', 'payment_succeeded', 'approved'], true)) {
+                throw new \RuntimeException('Only reviewable or paid submissions can be published.');
             }
 
             $submission->loadMissing(['user', 'category', 'publishedArticle']);
@@ -78,11 +78,19 @@ class SubmissionPublishingService
                 ]);
             }
 
-            $submission->approve(
-                reviewerId: $reviewerId,
-                notes: $notes,
-                reviewedAt: $reviewedAt,
-            );
+            if ($submission->status !== 'payment_succeeded') {
+                $submission->approve(
+                    reviewerId: $reviewerId,
+                    notes: $notes,
+                    reviewedAt: $reviewedAt,
+                );
+            } else {
+                $submission->update([
+                    'reviewed_by' => $reviewerId,
+                    'reviewed_at' => $reviewedAt,
+                    'reviewer_notes' => $notes,
+                ]);
+            }
 
             $submission->update([
                 'published_article_id' => $article->id,

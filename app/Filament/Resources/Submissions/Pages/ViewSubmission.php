@@ -3,14 +3,16 @@
 namespace App\Filament\Resources\Submissions\Pages;
 
 use App\Filament\Resources\Submissions\SubmissionResource;
-use App\Models\Category;
+use App\Models\PricePreset;
 use App\Models\User;
-use App\Services\PaymentRefundService;
-use App\Services\SubmissionPublishingService;
+use App\Services\PublicationQuoteService;
+use App\Services\SubmissionWorkflowService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Resources\Pages\ViewRecord;
@@ -22,8 +24,14 @@ class ViewSubmission extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('preview')
+                ->label('Aperçu')
+                ->icon(Heroicon::OutlinedEye)
+                ->color('gray')
+                ->url(fn (): string => route('contributor.articles.show', ['submission' => $this->record->slug]))
+                ->openUrlInNewTab(),
             Action::make('updateReview')
-                ->label('Mettre a jour la revue')
+                ->label('Mettre à jour la revue')
                 ->icon(Heroicon::OutlinedClipboardDocumentCheck)
                 ->color('gray')
                 ->form([
@@ -32,19 +40,19 @@ class ViewSubmission extends ViewRecord
                         ->options(fn (): array => User::query()->role('admin')->orderBy('name')->pluck('name', 'id')->all())
                         ->default(fn (): ?string => $this->record->reviewed_by ?: auth()->id())
                         ->searchable()
-                        ->helperText('Sélectionnez la personne qui a relu ou validé cette soumission.')
+                        ->helperText('Sélectionnez la personne qui suit cette soumission.')
                         ->required(),
                     DateTimePicker::make('reviewed_at')
                         ->label('Relue le')
                         ->seconds(false)
                         ->default(fn () => $this->record->reviewed_at ?: now())
-                        ->helperText('Indiquez la date réelle de relecture si nécessaire.')
+                        ->helperText('Ajustez la date réelle de review si nécessaire.')
                         ->required(),
                     Textarea::make('reviewer_notes')
-                        ->label('Note admin')
+                        ->label('Notes admin')
                         ->rows(5)
                         ->default(fn (): ?string => $this->record->reviewer_notes)
-                        ->helperText('Ajoutez un retour utile pour le suivi éditorial.')
+                        ->helperText('Notes internes ou retour éditorial pour l’historique.')
                         ->maxLength(2000),
                 ])
                 ->action(function (array $data): void {
@@ -60,56 +68,133 @@ class ViewSubmission extends ViewRecord
                     fn () => Notification::make()
                         ->success()
                         ->title('Revue mise à jour')
-                        ->body('Les informations de relecture ont bien été enregistrées.')
+                        ->body('Les informations de modération ont bien été enregistrées.')
                 ),
-            Action::make('approve')
-                ->label('Approuver et publier')
-                ->icon(Heroicon::OutlinedCheckCircle)
-                ->color('success')
-                ->visible(fn (): bool => $this->record->status === 'pending')
+            Action::make('startReview')
+                ->label('Démarrer la revue')
+                ->icon(Heroicon::OutlinedEye)
+                ->color('info')
+                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'pending'], true))
+                ->action(function (): void {
+                    app(SubmissionWorkflowService::class)->startReview($this->record, auth()->user());
+                    $this->record->refresh();
+                })
+                ->successNotification(
+                    fn () => Notification::make()
+                        ->info()
+                        ->title('Revue démarrée')
+                        ->body('La soumission est maintenant en cours de revue.')
+                ),
+            Action::make('requestChanges')
+                ->label('Demander des corrections')
+                ->icon(Heroicon::OutlinedPencil)
+                ->color('warning')
+                ->visible(fn (): bool => $this->record->status === 'under_review')
                 ->form([
-                    Select::make('category_id')
-                        ->label('Catégorie de publication')
-                        ->options(fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all())
-                        ->default(fn (): ?string => $this->record->category_id)
-                        ->searchable()
-                        ->helperText('Choisissez la rubrique dans laquelle l’article apparaîtra.')
-                        ->required(),
-                    Select::make('article_type')
-                        ->label("Type d'article")
-                        ->options([
-                            'hot_news' => 'Hot news',
-                            'standard' => 'Standard',
-                            'long_form' => 'Long form',
-                        ])
-                        ->default('standard')
-                        ->helperText('Ce choix influence le style et la mise en avant sur la home.')
-                        ->required(),
-                    Select::make('reviewed_by')
-                        ->label('Relue par')
-                        ->options(fn (): array => User::query()->role('admin')->orderBy('name')->pluck('name', 'id')->all())
-                        ->default(fn (): ?string => $this->record->reviewed_by ?: auth()->id())
-                        ->searchable()
-                        ->helperText('Sélectionnez l’admin responsable de la décision.')
-                        ->required(),
-                    DateTimePicker::make('reviewed_at')
-                        ->label('Relue le')
-                        ->seconds(false)
-                        ->default(fn () => $this->record->reviewed_at ?: now())
-                        ->helperText('Vous pouvez ajuster la date si la validation a eu lieu plus tôt.')
-                        ->required(),
-                    Textarea::make('reviewer_notes')
-                        ->label('Note admin')
-                        ->rows(4)
-                        ->default(fn (): ?string => $this->record->reviewer_notes)
-                        ->helperText('Optionnel. Ajoutez un contexte éditorial ou un retour à garder dans l’historique.')
-                        ->maxLength(2000),
+                    Textarea::make('note')
+                        ->label('Message au rédacteur')
+                        ->rows(5)
+                        ->required()
+                        ->maxLength(3000)
+                        ->helperText('Expliquez précisément les points à corriger avant un nouvel envoi.'),
                 ])
                 ->action(function (array $data): void {
-                    app(SubmissionPublishingService::class)->approveAndPublish(
+                    app(SubmissionWorkflowService::class)->requestChanges(
+                        $this->record,
+                        auth()->user(),
+                        $data['note'],
+                    );
+
+                    $this->record->refresh();
+                })
+                ->successNotification(
+                    fn () => Notification::make()
+                        ->warning()
+                        ->title('Corrections demandées')
+                        ->body('Le rédacteur a été notifié et peut renvoyer sa soumission.')
+                ),
+            Action::make('proposePrice')
+                ->label('Proposer un prix')
+                ->icon(Heroicon::OutlinedCurrencyEuro)
+                ->color('success')
+                ->visible(fn (): bool => $this->record->status === 'under_review')
+                ->form(function (): array {
+                    $presets = PricePreset::active()->get();
+                    $defaultPreset = $presets->first();
+
+                    return [
+                        Radio::make('price_mode')
+                            ->label('Type de tarif')
+                            ->options([
+                                'preset' => 'Tarif prédéfini',
+                                'custom' => 'Montant libre',
+                            ])
+                            ->default($defaultPreset ? 'preset' : 'custom')
+                            ->reactive(),
+                        Radio::make('price_preset_id')
+                            ->label('Tarifs fixes')
+                            ->options($presets->mapWithKeys(fn (PricePreset $preset): array => [
+                                $preset->id => $preset->label . ' — ' . $preset->formatted_amount . ($preset->description ? ' · ' . $preset->description : ''),
+                            ])->all())
+                            ->default($defaultPreset?->id)
+                            ->required(fn ($get): bool => $get('price_mode') === 'preset')
+                            ->visible(fn ($get): bool => $get('price_mode') === 'preset')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, $set) use ($presets): void {
+                                $preset = $presets->firstWhere('id', $state);
+
+                                if ($preset) {
+                                    $set('amount_eur', number_format($preset->amount_cents / 100, 2, '.', ''));
+                                }
+                            }),
+                        TextInput::make('amount_eur')
+                            ->label('Montant')
+                            ->prefix('€')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->step('0.01')
+                            ->default($defaultPreset ? number_format($defaultPreset->amount_cents / 100, 2, '.', '') : null)
+                            ->helperText('Le montant payé par le rédacteur avant publication.')
+                            ->visible(fn ($get): bool => $get('price_mode') === 'custom')
+                            ->afterStateHydrated(function ($state, $set) use ($defaultPreset): void {
+                                if ($state !== null || ! $defaultPreset) {
+                                    return;
+                                }
+
+                                $set('amount_eur', number_format($defaultPreset->amount_cents / 100, 2, '.', ''));
+                            }),
+                        Select::make('expiry_days')
+                            ->label('Validité de la demande')
+                            ->options([
+                                3 => '3 jours',
+                                7 => '7 jours',
+                                14 => '14 jours',
+                            ])
+                            ->default(7)
+                            ->required(),
+                        Textarea::make('note_to_author')
+                            ->label('Message au rédacteur')
+                            ->rows(4)
+                            ->maxLength(2000)
+                            ->helperText('Ce message sera inclus dans l’email de demande de paiement.'),
+                    ];
+                })
+                ->action(function (array $data): void {
+                    $amountCents = (int) round(((float) ($data['amount_eur'] ?? 0)) * 100);
+
+                    if (($data['price_mode'] ?? 'preset') === 'preset' && isset($data['price_preset_id'])) {
+                        $preset = PricePreset::find($data['price_preset_id']);
+                        $amountCents = $preset?->amount_cents ?? $amountCents;
+                    }
+
+                    app(PublicationQuoteService::class)->propose(
                         submission: $this->record,
-                        data: array_merge($data, ['notes' => $data['reviewer_notes'] ?? null]),
-                        reviewer: auth()->user(),
+                        moderator: auth()->user(),
+                        amountCents: $amountCents,
+                        pricePresetId: $data['price_preset_id'] ?? null,
+                        noteToAuthor: $data['note_to_author'] ?? null,
+                        expiryDays: (int) ($data['expiry_days'] ?? 7),
                     );
 
                     $this->record->refresh();
@@ -117,41 +202,35 @@ class ViewSubmission extends ViewRecord
                 ->successNotification(
                     fn () => Notification::make()
                         ->success()
-                        ->title('Article publié')
-                        ->body('La soumission a été approuvée et l’article est maintenant visible sur le site.')
+                        ->title('Prix proposé')
+                        ->body('La demande de paiement a bien été envoyée au rédacteur.')
                 ),
             Action::make('reject')
                 ->label('Rejeter')
                 ->icon(Heroicon::OutlinedXCircle)
                 ->color('danger')
-                ->visible(fn (): bool => $this->record->status === 'pending')
+                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'pending', 'under_review', 'price_proposed', 'changes_requested'], true))
                 ->form([
-                    Select::make('reviewed_by')
-                        ->label('Relue par')
-                        ->options(fn (): array => User::query()->role('admin')->orderBy('name')->pluck('name', 'id')->all())
-                        ->default(fn (): ?string => $this->record->reviewed_by ?: auth()->id())
-                        ->searchable()
-                        ->helperText('Sélectionnez l’admin qui envoie ce retour.')
-                        ->required(),
-                    DateTimePicker::make('reviewed_at')
-                        ->label('Relue le')
-                        ->seconds(false)
-                        ->default(fn () => $this->record->reviewed_at ?: now())
-                        ->helperText('Ajustez la date si besoin.')
-                        ->required(),
-                    Textarea::make('reviewer_notes')
-                        ->label('Note admin / motif du rejet')
+                    Textarea::make('reason')
+                        ->label('Motif du rejet')
                         ->rows(4)
                         ->required()
-                        ->default(fn (): ?string => $this->record->reviewer_notes)
-                        ->helperText('Expliquez clairement au rédacteur ce qui doit être corrigé avant un nouvel envoi.')
-                        ->maxLength(2000),
+                        ->maxLength(2000)
+                        ->helperText('Ce message sera envoyé au rédacteur.'),
                 ])
+                ->requiresConfirmation()
+                ->modalHeading('Rejeter cette soumission ?')
+                ->modalDescription('Le rédacteur recevra un email avec le motif du refus.')
                 ->action(function (array $data): void {
-                    app(SubmissionPublishingService::class)->reject(
-                        submission: $this->record,
-                        data: array_merge($data, ['notes' => $data['reviewer_notes'] ?? null]),
-                        reviewer: auth()->user(),
+                    if (in_array($this->record->status, ['submitted', 'pending'], true)) {
+                        app(SubmissionWorkflowService::class)->startReview($this->record, auth()->user());
+                        $this->record->refresh();
+                    }
+
+                    app(SubmissionWorkflowService::class)->reject(
+                        $this->record,
+                        auth()->user(),
+                        $data['reason'],
                     );
 
                     $this->record->refresh();
@@ -160,37 +239,7 @@ class ViewSubmission extends ViewRecord
                     fn () => Notification::make()
                         ->success()
                         ->title('Soumission rejetée')
-                        ->body('Le retour éditorial a bien été enregistré. Le rédacteur peut corriger puis renvoyer sa soumission.')
-                ),
-            Action::make('refund')
-                ->label('Rembourser')
-                ->icon(Heroicon::OutlinedArrowUturnLeft)
-                ->color('danger')
-                ->visible(fn (): bool => (bool) $this->record->payment?->isRefundable())
-                ->form([
-                    Textarea::make('reason')
-                        ->label('Motif du remboursement')
-                        ->rows(4)
-                        ->default('Article refusé')
-                        ->helperText('Ce message sera inclus dans l’email de remboursement envoyé au rédacteur.')
-                        ->maxLength(255),
-                ])
-                ->requiresConfirmation()
-                ->modalHeading('Rembourser ce paiement ?')
-                ->modalDescription('Le paiement Stripe sera remboursé immédiatement si la transaction est éligible.')
-                ->action(function (array $data): void {
-                    app(PaymentRefundService::class)->refund(
-                        $this->record->payment,
-                        $data['reason'] ?? 'Article refusé',
-                    );
-
-                    $this->record->refresh();
-                })
-                ->successNotification(
-                    fn () => Notification::make()
-                        ->success()
-                        ->title('Paiement remboursé')
-                        ->body('Le remboursement a été traité et un email a été envoyé au rédacteur.')
+                        ->body('Le refus a été enregistré et le rédacteur a été notifié.')
                 ),
         ];
     }
