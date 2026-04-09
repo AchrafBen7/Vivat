@@ -33,6 +33,7 @@ $writerCtaIconBtn = 'pointer-events-none absolute bottom-[18px] right-[18px] z-[
 /** CTA pleine largeur (mobile → lg) : sans tags pastilles, typo un peu au-dessus du base */
 $writerCtaTitleLarge = $writerCtaTitle.' text-lg leading-snug sm:text-xl sm:leading-snug';
 $writerCtaSubtitleLarge = $writerCtaSubtitle.' mt-1 text-sm leading-snug sm:text-base';
+$writerCtaFocusReset = 'vivat-writer-cta-link outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0';
 
 // -- Design tokens & blocs Tailwind réutilisables (Vivat)
 $cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
@@ -158,6 +159,17 @@ foreach ($tabletCategoryPairs as $pair) {
     ];
 }
 ?>
+<style>
+    .vivat-writer-cta-link,
+    .vivat-writer-cta-link:focus,
+    .vivat-writer-cta-link:focus-visible,
+    .vivat-writer-cta-link:active {
+        outline: none !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        -webkit-tap-highlight-color: transparent;
+    }
+</style>
 
 <!-- Bandeau pub tablette uniquement (md) -->
 <div class="hidden md:block lg:hidden w-full mb-6">
@@ -371,7 +383,7 @@ foreach ($tabletCategoryPairs as $pair) {
 
         <!-- CTA rédacteur : pleine largeur sous le bloc hero (lg / 1024px seulement même variante que mobile / tablette) -->
         <div class="<?= $writerCtaBanner ?> hidden w-full items-center lg:col-span-12 lg:row-start-3 lg:flex xl:hidden">
-            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px] <?= $writerCtaFocusReset ?>" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
             <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
                 <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                 <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
@@ -389,7 +401,7 @@ foreach ($tabletCategoryPairs as $pair) {
             <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm w-full xl:max-w-[300px] h-[600px] items-center justify-center">
                 Espace publicitaire
             </div>
-            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBannerSidebar ?> relative">
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBannerSidebar ?> relative <?= $writerCtaFocusReset ?>">
                 <div class="<?= $writerCtaTextWrap ?>">
                     <p class="<?= $writerCtaTitle ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                     <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
@@ -405,7 +417,7 @@ foreach ($tabletCategoryPairs as $pair) {
 
         <!-- CTA rédacteur mobile (même variante typo que tablette / lg) -->
         <div class="<?= $writerCtaBanner ?> relative w-full lg:hidden">
-            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px] <?= $writerCtaFocusReset ?>" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
             <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
                 <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                 <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>

@@ -11,7 +11,7 @@ $paginationView = $pagination ? $pagination->withQueryString() : null;
 $locale = content_locale();
 $t = $locale === 'nl'
     ? ['badge' => 'Redactionele stroom', 'title' => 'Alle actualiteit', 'lead' => 'Doorzoek de volledige Vivat-stroom in een lay-out die gemaakt is om snel te scannen, relevante onderwerpen te vinden en zonder frictie in artikels te duiken.', 'article' => 'artikel', 'articles' => 'artikels', 'page' => 'Pagina', 'of' => 'van', 'empty_badge' => 'Lege stroom', 'empty_title' => 'Nog geen actualiteit', 'empty_text' => 'Nieuwe publicaties verschijnen hier. Kom later terug om de nieuwe Vivat-content te ontdekken.', 'pagination' => 'Paginering van actualiteit', 'previous' => 'Vorige', 'next' => 'Volgende']
-    : ['badge' => 'Flux editorial', 'title' => 'Toutes les actualités', 'lead' => 'Parcourez l'ensemble du flux Vivat dans une mise en page pensée pour scanner vite, repérer les sujets qui comptent et entrer dans les articles sans friction.', 'article' => 'article', 'articles' => 'articles', 'page' => 'Page', 'of' => 'sur', 'empty_badge' => 'Flux vide', 'empty_title' => 'Aucune actualite pour le moment', 'empty_text' => 'Les prochaines publications apparaitront ici. Revenez un peu plus tard pour decouvrir les nouveaux contenus Vivat.', 'pagination' => 'Pagination des actualités', 'previous' => 'Précédent', 'next' => 'Suivant'];
+    : ['badge' => 'Flux editorial', 'title' => 'Toutes les actualités', 'lead' => "Parcourez l'ensemble du flux Vivat dans une mise en page pensée pour scanner vite, repérer les sujets qui comptent et entrer dans les articles sans friction.", 'article' => 'article', 'articles' => 'articles', 'page' => 'Page', 'of' => 'sur', 'empty_badge' => 'Flux vide', 'empty_title' => 'Aucune actualite pour le moment', 'empty_text' => 'Les prochaines publications apparaitront ici. Revenez un peu plus tard pour decouvrir les nouveaux contenus Vivat.', 'pagination' => 'Pagination des actualités', 'previous' => 'Précédent', 'next' => 'Suivant'];
 
 $tagBase = 'inline-flex w-fit items-center justify-center rounded-full px-3 py-1.5 text-[12px] font-medium tracking-[0.02em]';
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
@@ -73,7 +73,7 @@ $resolveImage = static function (array $article, int $width, int $height, string
             <?php if ($variant === 0) { ?>
             <a
                 href="/articles/<?= htmlspecialchars($article['slug']) ?>"
-                class="<?= $articleImageZoom ?> relative min-h-[390px] overflow-hidden rounded-[30px] shadow-[0_18px_40px_rgba(0,66,65,0.08)]"
+                class="<?= $articleImageZoom ?> relative min-h-[340px] overflow-hidden rounded-[30px] shadow-[0_18px_40px_rgba(0,66,65,0.08)] md:min-h-[360px]"
             >
                 <img
                     src="<?= htmlspecialchars($imageSrc) ?>"
@@ -100,7 +100,7 @@ $resolveImage = static function (array $article, int $width, int $height, string
             <?php } elseif ($variant === 1) { ?>
             <a
                 href="/articles/<?= htmlspecialchars($article['slug']) ?>"
-                class="group flex min-h-[390px] flex-col overflow-hidden rounded-[30px] border border-[#D8E3DF] bg-white p-6 shadow-[0_18px_40px_rgba(0,66,65,0.05)] transition-transform duration-300 hover:-translate-y-1"
+                class="group flex min-h-[340px] flex-col overflow-hidden rounded-[30px] border border-[#D8E3DF] bg-white p-6 shadow-[0_18px_40px_rgba(0,66,65,0.05)] transition-transform duration-300 hover:-translate-y-1 md:min-h-[360px]"
             >
                 <div class="flex min-h-0 flex-1 flex-col">
                     <?php if (! empty($article['category'])) { ?>
@@ -119,7 +119,7 @@ $resolveImage = static function (array $article, int $width, int $height, string
                     </p>
                 </div>
 
-                <div class="relative mt-6 h-[190px] overflow-hidden rounded-[24px] bg-[#F6FAF8]">
+                <div class="relative mt-6 h-[150px] overflow-hidden rounded-[24px] bg-[#F6FAF8] md:h-[165px]">
                     <img
                         src="<?= htmlspecialchars($imageSrc) ?>"
                         data-fallback-url="<?= htmlspecialchars($imageFallback) ?>"

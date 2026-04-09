@@ -35,8 +35,8 @@ $faqGroups = $locale === 'nl'
         [
             'title' => 'Lire sur Vivat',
             'items' => [
-                ['question' => 'Quel type de contenus trouve-t-on sur Vivat ?', 'answer' => 'Vivat propose des articles autour du quotidien, de la santé, de la technologie, de la finance, du voyage, de la maison et d'autres sujets pratiques ou inspirants à lire simplement.'],
-                ['question' => 'Dois-je créer un compte pour consulter les articles ?', 'answer' => 'Non. Les articles publics sont consultables librement. Aucun compte lecteur n'est nécessaire pour parcourir les rubriques, utiliser la recherche ou lire les contenus.'],
+                ['question' => 'Quel type de contenus trouve-t-on sur Vivat ?', 'answer' => "Vivat propose des articles autour du quotidien, de la santé, de la technologie, de la finance, du voyage, de la maison et d'autres sujets pratiques ou inspirants à lire simplement."],
+                ['question' => 'Dois-je créer un compte pour consulter les articles ?', 'answer' => "Non. Les articles publics sont consultables librement. Aucun compte lecteur n'est nécessaire pour parcourir les rubriques, utiliser la recherche ou lire les contenus."],
                 ['question' => 'Comment retrouver un sujet précis ?', 'answer' => 'Vous pouvez passer par les rubriques du site ou utiliser la recherche pour retrouver un mot-clé, une thématique ou un article plus rapidement.'],
                 ['question' => 'Les articles sont-ils classés par rubrique ?', 'answer' => 'Oui. Les contenus sont organisés par catégories pour rendre la navigation plus claire et vous permettre de retrouver plus facilement les sujets qui vous intéressent.'],
             ],
@@ -44,26 +44,26 @@ $faqGroups = $locale === 'nl'
         [
             'title' => 'Rédaction et contribution',
             'items' => [
-                ['question' => 'Puis-je proposer un article à Vivat ?', 'answer' => 'Oui. Si vous souhaitez contribuer, vous pouvez passer par l'espace rédacteur prévu sur le site et suivre le parcours d'inscription ou de soumission disponible.'],
-                ['question' => 'Tous les contenus proposés sont-ils publiés automatiquement ?', 'answer' => 'Non. Les contenus peuvent faire l'objet d'une vérification ou d'un traitement éditorial avant publication afin de préserver la cohérence et la qualité du site.'],
-                ['question' => 'Comment accéder à mon espace rédacteur ?', 'answer' => 'Si vous disposez d'un compte auteur ou contributeur, vous pouvez vous connecter puis accéder à votre espace dédié pour gérer vos contenus et vos informations.'],
-                ['question' => 'Puis-je modifier un article après l'avoir soumis ?', 'answer' => 'Selon votre statut et l'état du contenu, certaines modifications peuvent être faites depuis l'espace contributeur. Si besoin, vous pouvez aussi contacter l'équipe.'],
+                ['question' => 'Puis-je proposer un article à Vivat ?', 'answer' => "Oui. Si vous souhaitez contribuer, vous pouvez passer par l'espace rédacteur prévu sur le site et suivre le parcours d'inscription ou de soumission disponible."],
+                ['question' => 'Tous les contenus proposés sont-ils publiés automatiquement ?', 'answer' => "Non. Les contenus peuvent faire l'objet d'une vérification ou d'un traitement éditorial avant publication afin de préserver la cohérence et la qualité du site."],
+                ['question' => 'Comment accéder à mon espace rédacteur ?', 'answer' => "Si vous disposez d'un compte auteur ou contributeur, vous pouvez vous connecter puis accéder à votre espace dédié pour gérer vos contenus et vos informations."],
+                ['question' => "Puis-je modifier un article après l'avoir soumis ?", 'answer' => "Selon votre statut et l'état du contenu, certaines modifications peuvent être faites depuis l'espace contributeur. Si besoin, vous pouvez aussi contacter l'équipe."],
             ],
         ],
         [
             'title' => 'Newsletter et contact',
             'items' => [
-                ['question' => 'Que contient la newsletter Vivat ?', 'answer' => 'La newsletter rassemble une sélection d'articles récents, des contenus mis en avant et des idées de lecture envoyées directement par e-mail.'],
+                ['question' => 'Que contient la newsletter Vivat ?', 'answer' => "La newsletter rassemble une sélection d'articles récents, des contenus mis en avant et des idées de lecture envoyées directement par e-mail."],
                 ['question' => 'Puis-je me désabonner facilement de la newsletter ?', 'answer' => 'Oui. Chaque envoi doit permettre de gérer votre abonnement ou de vous désinscrire simplement.'],
-                ['question' => 'Comment contacter l'équipe Vivat ?', 'answer' => 'Vous pouvez utiliser la page contact pour poser une question générale, faire un retour sur un article, demander un renseignement ou prendre contact avec l'équipe.'],
-                ['question' => 'Comment signaler un contenu problématique ?', 'answer' => 'Si un contenu vous semble erroné, sensible ou inapproprié, vous pouvez le signaler à l'équipe via la page contact afin qu'il soit examiné rapidement.'],
-                ['question' => 'Que fait Vivat avec mes données ?', 'answer' => 'Les données éventuellement collectées via le site ou ses services sont traitées dans le cadre de l'utilisation du site, de la communication et de l'amélioration des services, conformément à la politique de vie privée.'],
+                ['question' => "Comment contacter l'équipe Vivat ?", 'answer' => "Vous pouvez utiliser la page contact pour poser une question générale, faire un retour sur un article, demander un renseignement ou prendre contact avec l'équipe."],
+                ['question' => 'Comment signaler un contenu problématique ?', 'answer' => "Si un contenu vous semble erroné, sensible ou inapproprié, vous pouvez le signaler à l'équipe via la page contact afin qu'il soit examiné rapidement."],
+                ['question' => 'Que fait Vivat avec mes données ?', 'answer' => "Les données éventuellement collectées via le site ou ses services sont traitées dans le cadre de l'utilisation du site, de la communication et de l'amélioration des services, conformément à la politique de vie privée."],
             ],
         ],
     ];
 $faqIntro = $locale === 'nl'
     ? ['badge' => 'Wegwijzers', 'title' => 'Nuttige antwoorden, op één plek.', 'text' => 'Deze FAQ bundelt de meest gestelde vragen over het lezen van artikels, bijdragen aan de site, de newsletter en de contactmogelijkheden.', 'contact' => 'Contacteer het team', 'search' => 'Zoek een artikel']
-    : ['badge' => 'Repères', 'title' => 'Les réponses utiles, au même endroit.', 'text' => 'Cette FAQ reprend les questions les plus fréquentes sur la lecture des articles, la contribution au site, la newsletter et les moyens de contact.', 'contact' => 'Contacter l'équipe', 'search' => 'Rechercher un article'];
+    : ['badge' => 'Repères', 'title' => 'Les réponses utiles, au même endroit.', 'text' => 'Cette FAQ reprend les questions les plus fréquentes sur la lecture des articles, la contribution au site, la newsletter et les moyens de contact.', 'contact' => "Contacter l'équipe", 'search' => 'Rechercher un article'];
 ?>
 <div class="mx-auto flex w-full max-w-[1280px] flex-col" style="gap: 24px;">
     <section class="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -72,13 +72,13 @@ $faqIntro = $locale === 'nl'
             <h2 class="font-medium text-[#004241]" style="font-size: 32px; line-height: 1.05;"><?= htmlspecialchars($faqIntro['title']) ?></h2>
             <p class="text-[#004241]/75" style="font-size: 17px; line-height: 1.45;"><?= htmlspecialchars($faqIntro['text']) ?></p>
             <div class="grid grid-cols-1 gap-3">
-                <a href="/contact" class="inline-flex items-center justify-between rounded-[24px] bg-[#FFF0B6] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#FBE9A3]">
+                <a href="/contact" class="group inline-flex items-center justify-between rounded-[24px] bg-[#FFF0B6] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#FBE9A3]">
                     <span class="font-medium"><?= htmlspecialchars($faqIntro['contact']) ?></span>
-                    <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <svg class="mr-2 block h-6 w-6 flex-shrink-0 translate-y-0 transition-transform duration-300 ease-out will-change-transform group-hover:translate-x-[14px] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
-                <a href="/search" class="inline-flex items-center justify-between rounded-[24px] bg-[#FFF0B6] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#FBE9A3]">
+                <a href="/search" class="group inline-flex items-center justify-between rounded-[24px] bg-[#FFF0B6] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#FBE9A3]">
                     <span class="font-medium"><?= htmlspecialchars($faqIntro['search']) ?></span>
-                    <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <svg class="mr-2 block h-6 w-6 flex-shrink-0 translate-y-0 transition-transform duration-300 ease-out will-change-transform group-hover:translate-x-[14px] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
             </div>
         </div>
