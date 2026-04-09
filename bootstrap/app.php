@@ -4,6 +4,7 @@ use App\Jobs\EnrichContentJob;
 use App\Jobs\ExpirePublicationQuotesJob;
 use App\Jobs\FetchRssFeedJob;
 use App\Jobs\GenerateArticleJob;
+use App\Jobs\PruneEnrichedItemTextJob;
 use App\Console\Commands\CheckPipelineHealthCommand;
 use App\Models\PipelineJob;
 use App\Models\RssFeed;
@@ -148,6 +149,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 });
             })->everyFiveMinutes()->name('pipeline:horizon-snapshot');
         }
+
+        // Purge du texte extrait brut des sources (conformité copyright) — hebdomadaire
+        $schedule->job(PruneEnrichedItemTextJob::class)
+            ->weekly()
+            ->name('pipeline:prune-extracted-text')
+            ->withoutOverlapping();
 
         // Expiration des quotes de publication — toutes les heures
         $schedule->job(ExpirePublicationQuotesJob::class)

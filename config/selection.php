@@ -119,7 +119,7 @@ return [
     'clustering' => [
         'min_items_per_topic' => 2,
         'max_items_per_topic' => 5,
-        'similarity_threshold' => 0.20,  // Jaccard >= 20% = même sujet
+        'similarity_threshold' => 0.08,  // Jaccard >= 8% = même sujet (permissif pour maximiser les clusters à 2+ sources)
     ],
 
 ];

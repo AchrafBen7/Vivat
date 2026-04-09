@@ -83,8 +83,8 @@ class PipelineDailyAutomation extends Page
                 'key' => 'fetch',
                 'label' => 'Collecte des sources',
                 'description' => $todayFetchJobs->count() > 0
-                    ? $todayFetchJobs->count() . ' fetch(s) lancés aujourd’hui, ' . $newItemsToday . ' article(s) repérés.'
-                    : 'Aucun fetch effectué aujourd’hui pour le moment.',
+                    ? $todayFetchJobs->count() . " fetch(s) lancés aujourd'hui, " . $newItemsToday . " article(s) repérés."
+                    : "Aucun fetch effectué aujourd'hui pour le moment.",
                 'status' => $this->resolveStageStatus(
                     hasSuccess: $todayFetchJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayFetchJobs->where('status', 'running')->isNotEmpty(),
@@ -97,8 +97,8 @@ class PipelineDailyAutomation extends Page
                 'key' => 'enrich',
                 'label' => 'Analyse IA',
                 'description' => $enrichedToday > 0
-                    ? $enrichedToday . ' contenu(s) enrichi(s) aujourd’hui.'
-                    : 'Aucun enrichissement terminé aujourd’hui pour le moment.',
+                    ? $enrichedToday . " contenu(s) enrichi(s) aujourd'hui."
+                    : "Aucun enrichissement terminé aujourd'hui pour le moment.",
                 'status' => $this->resolveStageStatus(
                     hasSuccess: $todayEnrichJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayEnrichJobs->where('status', 'running')->isNotEmpty(),
@@ -111,8 +111,8 @@ class PipelineDailyAutomation extends Page
                 'key' => 'select',
                 'label' => 'Sélection du sujet',
                 'description' => $proposalCount > 0
-                    ? $proposalCount . ' idée(s) d’article actuellement disponible(s).'
-                    : 'Aucune idée d’article prête pour le moment.',
+                    ? $proposalCount . " idée(s) d'article actuellement disponible(s)."
+                    : "Aucune idée d'article prête pour le moment.",
                 'status' => $proposalCount > 0 ? 'done' : 'idle',
                 'action' => 'rerunSelectionStage',
                 'action_label' => 'Recalculer',
@@ -121,10 +121,10 @@ class PipelineDailyAutomation extends Page
                 'key' => 'generate',
                 'label' => 'Génération du brouillon',
                 'description' => $generatedArticle
-                    ? 'Un brouillon a déjà été créé aujourd’hui : ' . $generatedArticle->title
+                    ? "Un brouillon a déjà été créé aujourd'hui : " . $generatedArticle->title
                     : ($latestGenerateJob?->status === 'failed'
-                        ? 'La dernière génération a échoué aujourd’hui.'
-                        : 'Aucun brouillon généré aujourd’hui pour le moment.'),
+                        ? "La dernière génération a échoué aujourd'hui."
+                        : "Aucun brouillon généré aujourd'hui pour le moment."),
                 'status' => $this->resolveStageStatus(
                     hasSuccess: $generatedArticle !== null || $todayGenerateJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayGenerateJobs->where('status', 'running')->isNotEmpty(),
@@ -178,7 +178,7 @@ class PipelineDailyAutomation extends Page
     {
         return [
             Action::make('history')
-                ->label('Voir l’historique')
+                ->label("Voir l'historique")
                 ->icon(Heroicon::OutlinedClock)
                 ->color('gray')
                 ->url(PipelineCronJobs::getUrl()),
@@ -233,12 +233,12 @@ class PipelineDailyAutomation extends Page
                 'generate',
                 ['manual_dispatch' => true, 'outcome' => 'no_proposal'],
                 'failed',
-                'Aucune idée d’article exploitable n’est disponible pour le moment.'
+                "Aucune idée d'article exploitable n'est disponible pour le moment."
             );
             Notification::make()
                 ->warning()
                 ->title('Génération impossible')
-                ->body('Aucune idée d’article exploitable n’est disponible pour le moment.')
+                ->body("Aucune idée d'article exploitable n'est disponible pour le moment.")
                 ->send();
 
             return;
@@ -333,65 +333,86 @@ class PipelineDailyAutomation extends Page
             ->latest('created_at')
             ->first();
 
+        $generationSteps = [
+            ['key' => 'queue',   'label' => "Job en file d'attente",               'detail' => "Le job de generation attend un worker disponible."],
+            ['key' => 'select',  'label' => "Selection des sources",               'detail' => "Chargement des articles RSS enrichis a synthetiser."],
+            ['key' => 'prompt',  'label' => "Construction du prompt editorial",    'detail' => "Assemblage des sources, mots-cles SEO et instructions redactionnelles."],
+            ['key' => 'openai',  'label' => "Redaction par GPT-4o",                'detail' => "Appel OpenAI en cours — cela prend generalement 30 a 90 secondes."],
+            ['key' => 'process', 'label' => "Traitement du contenu",               'detail' => "Nettoyage HTML, calcul du temps de lecture, score qualite."],
+            ['key' => 'cover',   'label' => "Generation de l'image de couverture", 'detail' => "Creation de l'image via BFL / DALL-E 3 et upload sur Cloudinary."],
+            ['key' => 'done',    'label' => "Brouillon cree",                      'detail' => "L'article est pret a etre relu dans l'espace editorial."],
+        ];
+
         if ($article) {
+            $stepsWithStatus = array_map(fn ($s) => array_merge($s, ['status' => 'done']), $generationSteps);
+
             return [
                 'visible' => true,
-                'eyebrow' => 'Création du brouillon',
+                'eyebrow' => 'Génération du brouillon',
                 'progress' => 100,
                 'label' => '100%',
                 'headline' => 'Le brouillon est prêt.',
+                'current_detail' => 'Article créé : « ' . $article->title . ' »',
                 'article_preview_url' => $article->status === 'published'
                     ? url('/articles/' . $article->slug)
                     : url('/admin-preview/articles/' . $article->slug),
                 'is_finished' => true,
                 'is_failed' => false,
+                'steps' => $stepsWithStatus,
             ];
         }
 
-        $status = $cluster?->status ?? 'pending';
+        if ($cluster?->status === 'failed') {
+            $stepsWithStatus = array_map(fn ($s) => array_merge($s, ['status' => 'failed']), $generationSteps);
 
-        return match ($status) {
-            'processing' => [
+            return [
                 'visible' => true,
-                'eyebrow' => 'Création du brouillon',
-                'progress' => 68,
-                'label' => '68%',
-                'headline' => 'L’article est en cours de rédaction.',
-                'article_preview_url' => null,
-                'is_finished' => false,
-                'is_failed' => false,
-            ],
-            'failed' => [
-                'visible' => true,
-                'eyebrow' => 'Création du brouillon',
+                'eyebrow' => 'Génération du brouillon',
                 'progress' => 100,
                 'label' => 'Échec',
                 'headline' => 'La génération a échoué.',
+                'current_detail' => 'Vérifie les logs Horizon pour plus de détails. Tu peux relancer depuis l\'étape 4.',
                 'article_preview_url' => null,
                 'is_finished' => true,
                 'is_failed' => true,
-            ],
-            'generated' => [
-                'visible' => true,
-                'eyebrow' => 'Création du brouillon',
-                'progress' => 100,
-                'label' => '100%',
-                'headline' => 'Le brouillon est prêt.',
-                'article_preview_url' => null,
-                'is_finished' => true,
-                'is_failed' => false,
-            ],
-            default => [
-                'visible' => true,
-                'eyebrow' => 'Création du brouillon',
-                'progress' => 18,
-                'label' => '18%',
-                'headline' => 'Préparation de la génération en cours.',
-                'article_preview_url' => null,
-                'is_finished' => false,
-                'is_failed' => false,
-            ],
+                'steps' => $stepsWithStatus,
+            ];
+        }
+
+        // Estimer l'étape actuelle par temps écoulé depuis le dispatch
+        $startedAt = $this->parseProgressStartedAt();
+        $elapsedSeconds = $startedAt ? now()->diffInSeconds($startedAt) : 0;
+
+        [$currentStepIndex, $progress] = match (true) {
+            $elapsedSeconds < 10  => [0, 8],
+            $elapsedSeconds < 25  => [1, 18],
+            $elapsedSeconds < 45  => [2, 30],
+            $elapsedSeconds < 120 => [3, max(40, min(75, 30 + (int) round(($elapsedSeconds - 45) * 0.58)))],
+            $elapsedSeconds < 150 => [4, 80],
+            $elapsedSeconds < 180 => [5, 90],
+            default               => [5, 95],
         };
+
+        $stepsWithStatus = array_map(function (array $step, int $idx) use ($currentStepIndex): array {
+            return array_merge($step, [
+                'status' => $idx < $currentStepIndex ? 'done' : ($idx === $currentStepIndex ? 'active' : 'waiting'),
+            ]);
+        }, $generationSteps, array_keys($generationSteps));
+
+        $currentStep = $generationSteps[$currentStepIndex] ?? $generationSteps[3];
+
+        return [
+            'visible' => true,
+            'eyebrow' => 'Génération du brouillon',
+            'progress' => $progress,
+            'label' => $progress . '%',
+            'headline' => $currentStep['label'] . '…',
+            'current_detail' => $currentStep['detail'],
+            'article_preview_url' => null,
+            'is_finished' => false,
+            'is_failed' => false,
+            'steps' => $stepsWithStatus,
+        ];
     }
 
     private function buildFetchOverlayState(): array
@@ -411,12 +432,17 @@ class PipelineDailyAutomation extends Page
             'eyebrow' => 'Collecte des sources',
             'progress' => $finished ? 100 : $progress,
             'label' => ($finished ? 100 : $progress) . '%',
-            'headline' => $finished
-                ? 'La collecte des sources est terminée.'
-                : 'Collecte des sources en cours.',
+            'headline' => $finished ? 'La collecte des sources est terminée.' : 'Collecte des sources en cours.',
+            'current_detail' => $finished
+                ? "{$completed} feed(s) traité(s). Les nouveaux articles sont en base."
+                : "Récupération des flux RSS actifs ({$completed} / {$target} terminés).",
             'article_preview_url' => null,
             'is_finished' => $finished,
             'is_failed' => false,
+            'steps' => [
+                ['key' => 'fetch', 'label' => 'Récupération des flux RSS', 'detail' => "{$completed} / {$target} feeds traités", 'status' => $finished ? 'done' : 'active'],
+                ['key' => 'parse', 'label' => 'Parsing et déduplication des articles', 'detail' => 'Filtrage des doublons et mise en base.', 'status' => $finished ? 'done' : 'waiting'],
+            ],
         ];
     }
 
@@ -437,32 +463,49 @@ class PipelineDailyAutomation extends Page
             'eyebrow' => 'Analyse IA',
             'progress' => $finished ? 100 : $progress,
             'label' => ($finished ? 100 : $progress) . '%',
-            'headline' => $finished
-                ? 'Les analyses IA sont terminées.'
-                : 'Les contenus sont en cours d’analyse.',
+            'headline' => $finished ? 'Les analyses IA sont terminées.' : 'Enrichissement des articles en cours…',
+            'current_detail' => $finished
+                ? "{$completed} article(s) analysé(s) — lead, points clés, mots-clés SEO extraits."
+                : "Appels OpenAI en cours ({$completed} / {$target} articles traités). Chaque appel prend ~10 secondes.",
             'article_preview_url' => null,
             'is_finished' => $finished,
             'is_failed' => false,
+            'steps' => [
+                ['key' => 'extract', 'label' => 'Extraction du texte brut', 'detail' => 'Récupération du contenu depuis les URLs RSS.', 'status' => $completed > 0 ? 'done' : 'active'],
+                ['key' => 'openai',  'label' => 'Analyse par OpenAI (GPT-4o)', 'detail' => "{$completed} / {$target} analysés — lead, key_points, seo_keywords.", 'status' => $finished ? 'done' : 'active'],
+                ['key' => 'store',   'label' => 'Sauvegarde des enrichissements', 'detail' => 'Mise à jour du statut des RssItems → enriched.', 'status' => $finished ? 'done' : 'waiting'],
+            ],
         ];
     }
 
     private function buildSelectionOverlayState(): array
     {
+        $count = $this->countAvailableProposals();
+
         return [
             'visible' => true,
             'eyebrow' => 'Sélection des sujets',
             'progress' => 100,
             'label' => '100%',
-            'headline' => 'La sélection des sujets est prête.',
+            'headline' => $count > 0 ? "{$count} idée(s) d'article disponible(s)." : 'Aucune idée disponible — enrichissement requis.',
+            'current_detail' => $count > 0
+                ? "Les sujets ont été clustérisés par similarité thématique. Le meilleur sera sélectionné pour la génération."
+                : "Pas assez d'articles enrichis pour former un cluster de 2 sources minimum.",
             'article_preview_url' => null,
             'is_finished' => true,
             'is_failed' => false,
+            'steps' => [
+                ['key' => 'cluster', 'label' => 'Clustering thématique (Jaccard)', 'detail' => 'Regroupement des articles par similarité de mots-clés (seuil 8%).', 'status' => 'done'],
+                ['key' => 'score',   'label' => 'Scoring des clusters', 'detail' => 'Qualité, fraîcheur, SEO, diversité des sources.', 'status' => 'done'],
+                ['key' => 'select',  'label' => 'Sélection finale', 'detail' => $count > 0 ? "{$count} idée(s) retenue(s)." : 'Aucun cluster valide (min. 2 sources requises).', 'status' => $count > 0 ? 'done' : 'failed'],
+            ],
         ];
     }
 
     private function buildFullFlowOverlayState(): array
     {
         $startedAt = $this->parseProgressStartedAt();
+        $activeFeedCount = max(1, RssFeed::query()->where('is_active', true)->count());
         $fetchCount = PipelineJob::query()
             ->where('job_type', 'fetch_rss')
             ->when($startedAt, fn ($query) => $query->where('created_at', '>=', $startedAt))
@@ -472,37 +515,76 @@ class PipelineDailyAutomation extends Page
             ->when($startedAt, fn ($query) => $query->where('created_at', '>=', $startedAt))
             ->count();
 
-        $fetchDone = $fetchCount >= max(1, RssFeed::query()->where('is_active', true)->count());
+        $fetchDone = $fetchCount >= $activeFeedCount;
         $enrichDone = $enrichCount >= max(1, $this->progressTargetCount);
-        $proposalReady = $this->countAvailableProposals() > 0;
+        $proposalCount = $this->countAvailableProposals();
+        $proposalReady = $proposalCount > 0;
         $generationState = $this->buildGenerationOverlayState();
+        $generationFinished = (bool) ($generationState['is_finished'] ?? false);
+        $generationFailed = (bool) ($generationState['is_failed'] ?? false);
+        $finished = $generationFinished && ! $generationFailed;
 
-        $progress = 10
-            + ($fetchDone ? 20 : 0)
-            + ($enrichDone ? 25 : 0)
-            + ($proposalReady ? 15 : 0)
-            + (int) round(($generationState['progress'] ?? 0) * 0.3);
-
+        $progress = 5
+            + ($fetchDone ? 15 : min(14, (int) round($fetchCount / $activeFeedCount * 15)))
+            + ($enrichDone ? 20 : 0)
+            + ($proposalReady ? 10 : 0)
+            + (int) round(($generationState['progress'] ?? 0) * 0.5);
         $progress = min(100, $progress);
-        $finished = (bool) ($generationState['is_finished'] ?? false) && ! ($generationState['is_failed'] ?? false);
 
         $headline = match (true) {
-            $finished => 'Le flux complet a terminé son cycle.',
-            ! $fetchDone => 'Collecte des sources en cours.',
-            ! $enrichDone => 'Analyse IA en cours.',
-            ! $proposalReady => 'Sélection des sujets en cours.',
-            default => $generationState['headline'] ?? 'Génération du brouillon en cours.',
+            $finished        => 'Le flux complet a terminé son cycle.',
+            $generationFailed => 'La génération a échoué.',
+            ! $fetchDone     => 'Collecte des sources RSS en cours…',
+            ! $enrichDone    => 'Analyse IA des articles en cours…',
+            ! $proposalReady => 'Sélection du meilleur sujet…',
+            default          => $generationState['headline'] ?? 'Génération du brouillon en cours…',
         };
 
+        $flowSteps = [
+            [
+                'key'    => 'fetch',
+                'label'  => 'Collecte RSS',
+                'detail' => $fetchDone
+                    ? "{$fetchCount} feed(s) collecté(s)"
+                    : "{$fetchCount} / {$activeFeedCount} feeds lancés",
+                'status' => $fetchDone ? 'done' : (! $fetchDone && $fetchCount > 0 ? 'active' : 'active'),
+            ],
+            [
+                'key'    => 'enrich',
+                'label'  => 'Analyse IA',
+                'detail' => $enrichDone
+                    ? "{$enrichCount} article(s) enrichi(s)"
+                    : ($enrichCount > 0 ? "{$enrichCount} enrichi(s), traitement en cours…" : 'En attente des fetches…'),
+                'status' => $enrichDone ? 'done' : ($fetchDone ? 'active' : 'waiting'),
+            ],
+            [
+                'key'    => 'select',
+                'label'  => 'Sélection du sujet',
+                'detail' => $proposalReady
+                    ? "{$proposalCount} idée(s) disponible(s), meilleure sélectionnée"
+                    : 'Calcul des clusters thématiques…',
+                'status' => $proposalReady ? 'done' : ($enrichDone ? 'active' : 'waiting'),
+            ],
+            [
+                'key'    => 'generate',
+                'label'  => 'Génération du brouillon',
+                'detail' => $generationState['current_detail'] ?? ($proposalReady ? 'En file d\'attente…' : 'En attente de la sélection…'),
+                'status' => $finished ? 'done' : ($generationFailed ? 'failed' : ($proposalReady ? 'active' : 'waiting')),
+                'sub_steps' => $generationState['steps'] ?? [],
+            ],
+        ];
+
         return [
-            'visible' => true,
-            'eyebrow' => 'Relance complète du flux',
-            'progress' => $finished ? 100 : $progress,
-            'label' => ($finished ? 100 : $progress) . '%',
-            'headline' => $headline,
-            'article_preview_url' => $generationState['article_preview_url'] ?? null,
-            'is_finished' => $finished,
-            'is_failed' => (bool) ($generationState['is_failed'] ?? false),
+            'visible'            => true,
+            'eyebrow'            => 'Relance complète du flux',
+            'progress'           => $finished ? 100 : $progress,
+            'label'              => ($finished ? 100 : $progress) . '%',
+            'headline'           => $headline,
+            'current_detail'     => $generationState['current_detail'] ?? null,
+            'article_preview_url'=> $generationState['article_preview_url'] ?? null,
+            'is_finished'        => $finished,
+            'is_failed'          => $generationFailed,
+            'steps'              => $flowSteps,
         ];
     }
 
@@ -634,9 +716,11 @@ class PipelineDailyAutomation extends Page
             'progress' => 0,
             'label' => '',
             'headline' => '',
+            'current_detail' => null,
             'article_preview_url' => null,
             'is_finished' => false,
             'is_failed' => false,
+            'steps' => [],
         ];
     }
 

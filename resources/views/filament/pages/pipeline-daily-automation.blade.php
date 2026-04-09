@@ -43,16 +43,36 @@
         .vp-journey-highlight-main { margin-top:8px; font-size:16px; font-weight:700; color:#004241; }
         .vp-journey-highlight-sub { margin-top:4px; font-size:12px; color:rgba(0,66,65,0.62); }
         .vp-journey-link { margin-top:12px; display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:#004241; font-size:12px; font-weight:700; }
-        .vp-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.96); }
-        .vp-overlay-close { position:absolute; top:24px; left:24px; width:44px; height:44px; border:none; border-radius:999px; background:#EBF1EF; color:#004241; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-        .vp-overlay-card { width:min(640px, calc(100vw - 48px)); text-align:center; }
-        .vp-overlay-label { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(0,66,65,.45); }
-        .vp-overlay-title { margin-top:16px; font-size:32px; font-weight:700; line-height:1.15; color:#004241; }
-        .vp-overlay-progress { margin:28px auto 0; width:100%; height:16px; border-radius:999px; background:#EBF1EF; overflow:hidden; }
-        .vp-overlay-progress-fill { height:100%; border-radius:999px; background:#004241; transition:width .35s ease; }
-        .vp-overlay-percent { margin-top:16px; font-size:28px; font-weight:700; color:#004241; }
-        .vp-overlay-sub { margin-top:10px; font-size:14px; line-height:1.6; color:rgba(0,66,65,.62); }
-        .vp-overlay-link { margin-top:18px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-size:13px; font-weight:700; color:#004241; }
+        .vp-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(0,66,65,.55); backdrop-filter:blur(6px); padding:24px; }
+        .vp-overlay-close { position:absolute; top:20px; right:20px; width:40px; height:40px; border:none; border-radius:999px; background:rgba(255,255,255,.15); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+        .vp-overlay-close:hover { background:rgba(255,255,255,.25); }
+        .vp-overlay-card { position:relative; width:min(680px, 100%); background:#fff; border-radius:28px; padding:32px; box-shadow:0 32px 80px rgba(0,66,65,.25); max-height:calc(100vh - 48px); overflow-y:auto; }
+        .vp-overlay-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(0,66,65,.45); }
+        .vp-overlay-title { margin-top:8px; font-size:26px; font-weight:700; line-height:1.2; color:#004241; }
+        .vp-overlay-detail { margin-top:6px; font-size:13px; line-height:1.6; color:rgba(0,66,65,.62); min-height:20px; }
+        .vp-overlay-progress { margin:20px 0 0; width:100%; height:10px; border-radius:999px; background:#EBF1EF; overflow:hidden; }
+        .vp-overlay-progress-fill { height:100%; border-radius:999px; background:#004241; transition:width .5s ease; }
+        .vp-overlay-percent { margin-top:8px; font-size:13px; font-weight:700; color:rgba(0,66,65,.5); }
+        .vp-ov-steps { margin-top:24px; display:flex; flex-direction:column; gap:0; border:1px solid #E5EDEB; border-radius:18px; overflow:hidden; }
+        .vp-ov-step { display:flex; align-items:flex-start; gap:14px; padding:14px 18px; background:#fff; border-bottom:1px solid #E5EDEB; transition:background .15s; }
+        .vp-ov-step:last-child { border-bottom:none; }
+        .vp-ov-step.is-active { background:#F4FAF9; }
+        .vp-ov-step.is-done { opacity:.7; }
+        .vp-ov-step.is-waiting { opacity:.4; }
+        .vp-ov-step-dot { width:28px; height:28px; border-radius:999px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; font-size:13px; }
+        .vp-ov-step-dot.done { background:#D1FAE5; color:#065F46; }
+        .vp-ov-step-dot.active { background:#004241; color:#fff; }
+        .vp-ov-step-dot.waiting { background:#EBF1EF; color:rgba(0,66,65,.4); }
+        .vp-ov-step-dot.failed { background:#FEE2E2; color:#991B1B; }
+        .vp-ov-step-body { flex:1; min-width:0; }
+        .vp-ov-step-label { font-size:13px; font-weight:700; color:#004241; }
+        .vp-ov-step-detail { margin-top:2px; font-size:12px; line-height:1.5; color:rgba(0,66,65,.6); }
+        .vp-ov-sub-steps { margin-top:10px; display:flex; flex-direction:column; gap:4px; padding-left:4px; border-left:2px solid #E5EDEB; }
+        .vp-ov-sub-step { display:flex; align-items:center; gap:8px; font-size:11px; color:rgba(0,66,65,.55); padding:3px 0 3px 10px; }
+        .vp-ov-sub-step.sub-done { color:#065F46; }
+        .vp-ov-sub-step.sub-active { color:#004241; font-weight:700; }
+        .vp-overlay-link { margin-top:20px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-size:13px; font-weight:700; color:#004241; border:1.5px solid #004241; border-radius:999px; padding:10px 20px; transition:background .15s; }
+        .vp-overlay-link:hover { background:#EBF1EF; }
         @media(max-width:1024px) { .vp-journey { grid-template-columns:1fr; } }
     </style>
 
@@ -191,35 +211,108 @@
         </div>
     </div>
 
-    @if ($generationOverlay['visible'])
-        <div class="vp-overlay">
-            <button type="button" wire:click="closeGenerationOverlay" class="vp-overlay-close" aria-label="Annuler l’affichage">
-                <svg style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-
+    @if ($generationOverlay[‘visible’])
+        <div class="vp-overlay" wire:poll.3s>
             <div class="vp-overlay-card">
-                <div class="vp-overlay-label">{{ $generationOverlay['eyebrow'] }}</div>
-                <div class="vp-overlay-title">{{ $generationOverlay['headline'] }}</div>
+                <button type="button" wire:click="closeGenerationOverlay" class="vp-overlay-close" aria-label="Fermer">
+                    <svg style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="vp-overlay-label">{{ $generationOverlay[‘eyebrow’] }}</div>
+                <div class="vp-overlay-title">{{ $generationOverlay[‘headline’] }}</div>
+
+                @if (!empty($generationOverlay[‘current_detail’]))
+                    <div class="vp-overlay-detail">{{ $generationOverlay[‘current_detail’] }}</div>
+                @endif
+
                 <div class="vp-overlay-progress">
-                    <div class="vp-overlay-progress-fill" style="width: {{ max(0, min(100, (int) $generationOverlay['progress'])) }}%"></div>
+                    <div class="vp-overlay-progress-fill" style="width: {{ max(0, min(100, (int) $generationOverlay[‘progress’])) }}%"></div>
                 </div>
-                <div class="vp-overlay-percent">{{ $generationOverlay['label'] }}</div>
-                <div class="vp-overlay-sub">
-                    @if ($generationOverlay['is_failed'])
-                        Tu peux fermer cet écran puis relancer la génération si nécessaire.
-                    @elseif ($generationOverlay['is_finished'])
-                        La création est terminée. Tu peux ouvrir l’aperçu ou fermer cet écran.
-                    @else
-                        L’écran se met à jour automatiquement jusqu’à la fin de la génération.
+                <div class="vp-overlay-percent">
+                    {{ $generationOverlay[‘label’] }}
+                    @if (!$generationOverlay[‘is_finished’] && !$generationOverlay[‘is_failed’])
+                        &nbsp;— mise à jour toutes les 3 secondes
                     @endif
                 </div>
 
-                @if (!empty($generationOverlay['article_preview_url']))
-                    <a href="{{ $generationOverlay['article_preview_url'] }}" target="_blank" class="vp-overlay-link">
-                        Ouvrir l’aperçu
-                        <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                    </a>
+                @if (!empty($generationOverlay[‘steps’]))
+                    <div class="vp-ov-steps">
+                        @foreach ($generationOverlay[‘steps’] as $step)
+                            @php
+                                $stepStatus = $step[‘status’] ?? ‘waiting’;
+                                $stepClass = match($stepStatus) {
+                                    ‘done’    => ‘is-done’,
+                                    ‘active’  => ‘is-active’,
+                                    ‘failed’  => ‘is-active’,
+                                    default   => ‘is-waiting’,
+                                };
+                                $dotClass = match($stepStatus) {
+                                    ‘done’   => ‘done’,
+                                    ‘active’ => ‘active’,
+                                    ‘failed’ => ‘failed’,
+                                    default  => ‘waiting’,
+                                };
+                                $dotIcon = match($stepStatus) {
+                                    ‘done’   => ‘✓’,
+                                    ‘active’ => ‘…’,
+                                    ‘failed’ => ‘✕’,
+                                    default  => ‘○’,
+                                };
+                            @endphp
+                            <div class="vp-ov-step {{ $stepClass }}">
+                                <div class="vp-ov-step-dot {{ $dotClass }}">{{ $dotIcon }}</div>
+                                <div class="vp-ov-step-body">
+                                    <div class="vp-ov-step-label">{{ $step[‘label’] }}</div>
+                                    @if (!empty($step[‘detail’]))
+                                        <div class="vp-ov-step-detail">{{ $step[‘detail’] }}</div>
+                                    @endif
+
+                                    {{-- Sous-étapes de génération affichées seulement si actif --}}
+                                    @if (!empty($step[‘sub_steps’]) && $stepStatus === ‘active’)
+                                        <div class="vp-ov-sub-steps">
+                                            @foreach ($step[‘sub_steps’] as $sub)
+                                                @php
+                                                    $subStatus = $sub[‘status’] ?? ‘waiting’;
+                                                    $subClass = match($subStatus) {
+                                                        ‘done’   => ‘sub-done’,
+                                                        ‘active’ => ‘sub-active’,
+                                                        default  => ‘’,
+                                                    };
+                                                    $subIcon = match($subStatus) {
+                                                        ‘done’   => ‘✓’,
+                                                        ‘active’ => ‘→’,
+                                                        default  => ‘·’,
+                                                    };
+                                                @endphp
+                                                <div class="vp-ov-sub-step {{ $subClass }}">
+                                                    <span>{{ $subIcon }}</span>
+                                                    <span>{{ $sub[‘label’] }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 @endif
+
+                <div style="margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                    @if ($generationOverlay[‘is_failed’])
+                        <p style="font-size:13px; color:#991B1B;">Vérifie les logs Horizon ou relance depuis l’étape concernée.</p>
+                    @elseif ($generationOverlay[‘is_finished’])
+                        <p style="font-size:13px; color:#065F46; font-weight:600;">✓ Terminé — tu peux fermer cet écran.</p>
+                    @else
+                        <p style="font-size:12px; color:rgba(0,66,65,.45);">Cet écran se met à jour automatiquement.</p>
+                    @endif
+
+                    @if (!empty($generationOverlay[‘article_preview_url’]))
+                        <a href="{{ $generationOverlay[‘article_preview_url’] }}" target="_blank" class="vp-overlay-link">
+                            Ouvrir l’aperçu
+                            <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     @endif

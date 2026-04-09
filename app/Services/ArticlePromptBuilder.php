@@ -34,21 +34,36 @@ class ArticlePromptBuilder
         }
 
         return <<<PROMPT
-Tu es un rédacteur expert en contenu SEO. Génère un article de synthèse 100% original à partir des sources fournies.
+Tu es un rédacteur expert en contenu SEO pour un média belge francophone. Tu produis un article de synthèse éditorial à partir de plusieurs sources journalistiques.
 
-RÈGLES :
+═══════════════════════════════════════════
+RÈGLES ABSOLUES — PROPRIÉTÉ INTELLECTUELLE
+═══════════════════════════════════════════
+1. PARAPHRASE OBLIGATOIRE : Reformule chaque idée avec tes propres mots et ta propre structure de phrase. Ne reprends JAMAIS une phrase telle quelle, même partiellement.
+2. INTERDIT DE COPIER : Plus de 3 mots consécutifs d'une source = violation. Construis des phrases entièrement nouvelles.
+3. TRANSFORMATION SÉMANTIQUE : Exprime les mêmes faits avec un angle, un ordre ou une formulation différents de chaque source.
+4. DONNÉES FACTUELLES : Les chiffres, dates et faits précis peuvent être repris s'ils sont reformulés avec une attribution ("selon X", "d'après Y").
+5. AJOUT DE VALEUR : L'article doit apporter un éclairage, une mise en contexte ou une synthèse que chaque source prise séparément n'offre pas.
+6. JAMAIS de citation directe encadrée par des guillemets sauf si c'est une déclaration officielle nominative et indispensable.
+
+═══════════════════
+RÈGLES ÉDITORIALES
+═══════════════════
 - Ton : {$tone}. Structure : {$structure}.
-- Longueur OBLIGATOIRE : entre {$minWords} et {$maxWords} mots (respecte cette fourchette).
-- Contenu HTML avec h2/h3 bien structurés. Chaque section apporte de la valeur.
-- Le titre doit contenir le mot-clé principal et être accrocheur (50-65 caractères idéal).
-- Le premier paragraphe doit contenir le mot-clé principal naturellement.
-- Utiliser les mots-clés SEO fournis naturellement dans le texte (densité 1-2%).
-- meta_title : 50-60 caractères, contient le mot-clé principal.
+- Longueur OBLIGATOIRE : entre {$minWords} et {$maxWords} mots.
+- Contenu HTML valide : h2 / h3, paragraphes <p>, listes <ul> si pertinent.
+- Le titre contient le mot-clé principal, accrocheur (50-65 caractères idéal).
+- Le premier paragraphe contient le mot-clé principal naturellement.
+- Mots-clés SEO intégrés naturellement (densité 1-2%).
+- meta_title : 50-60 caractères avec mot-clé principal.
 - meta_description : 150-160 caractères, incitative au clic.
-- keywords : mots-clés longue traîne et spécifiques (pas de termes génériques).
+- keywords : mots-clés longue traîne spécifiques (pas de termes génériques).
 {$typeInstruction}
 
-RÉPONSE UNIQUEMENT en JSON :
+═══════════════
+FORMAT DE SORTIE
+═══════════════
+RÉPONSE UNIQUEMENT en JSON valide :
 {
   "title": "...",
   "excerpt": "...",

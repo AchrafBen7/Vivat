@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Payment;
+use App\Models\Submission;
 use App\Services\PaymentRefundService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -38,53 +39,78 @@ class DashboardPayments extends Page
 
     public function getPayments(): array
     {
-        return Payment::query()
-            ->with(['user', 'submission'])
-            ->where(function ($innerQuery) {
-                $innerQuery
-                    ->where('status', '!=', 'pending')
-                    ->orWhereHas('submission', fn ($submissionQuery) => $submissionQuery->where('status', '!=', 'draft'));
+        return Submission::query()
+            ->with([
+                'user',
+                'quote.preset',
+                'latestSubmissionPayment',
+                'payment',
+            ])
+            ->where('status', '!=', 'draft')
+            ->when($this->status !== '', function ($query) {
+                $status = $this->status;
+
+                $query->where(function ($innerQuery) use ($status): void {
+                    $innerQuery
+                        ->whereHas('latestSubmissionPayment', fn ($paymentQuery) => $paymentQuery->where('status', $status))
+                        ->orWhereHas('payment', fn ($paymentQuery) => $paymentQuery->where('status', $status));
+                });
             })
-            ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
             ->when($this->search !== '', function ($query) {
                 $search = trim($this->search);
 
                 $query->where(function ($subQuery) use ($search): void {
                     $subQuery
-                        ->whereHas('submission', fn ($submissionQuery) => $submissionQuery->where('title', 'like', '%' . $search . '%'))
+                        ->where('title', 'like', '%' . $search . '%')
                         ->orWhereHas('user', fn ($userQuery) => $userQuery
                             ->where('name', 'like', '%' . $search . '%')
                             ->orWhere('email', 'like', '%' . $search . '%'));
                 });
             })
-            ->orderByRaw('CASE WHEN submission_id IS NULL THEN 1 ELSE 0 END')
-            ->orderByRaw("FIELD(status, 'pending', 'paid', 'refunded', 'failed', 'abandoned')")
+            ->orderByRaw("FIELD(status, 'awaiting_payment', 'payment_pending', 'payment_failed', 'payment_succeeded', 'published', 'rejected')")
             ->orderByDesc('created_at')
             ->limit(24)
             ->get()
-            ->map(function (Payment $payment): array {
-                $submissionStatus = match ($payment->submission?->status) {
-                    'draft' => 'Brouillon',
-                    'pending' => 'En attente',
-                    'approved' => 'Approuvée',
+            ->map(function (Submission $submission): array {
+                $legacyPayment = $submission->payment;
+                $workflowPayment = $submission->latestSubmissionPayment;
+                $quote = $submission->quote;
+
+                $paymentStatus = $workflowPayment?->status ?? $legacyPayment?->status ?? 'pending';
+
+                $submissionStatus = match ($submission->status) {
+                    'submitted' => 'Soumise',
+                    'under_review' => 'En revue',
+                    'changes_requested' => 'Corrections demandées',
+                    'price_proposed' => 'Prix proposé',
+                    'awaiting_payment' => 'En attente de paiement',
+                    'payment_pending' => 'Paiement en cours',
+                    'payment_failed' => 'Paiement échoué',
+                    'payment_succeeded' => 'Paiement confirmé',
+                    'published' => 'Publiée',
                     'rejected' => 'Rejetée',
-                    default => $payment->submission?->status ?? 'Aucune soumission',
+                    'approved' => 'Approuvée',
+                    'pending' => 'En attente',
+                    default => $submission->status ?: 'Aucune soumission',
                 };
 
+                $displayAmount = $workflowPayment?->formatted_amount
+                    ?? $quote?->formatted_amount
+                    ?? ($legacyPayment ? number_format($legacyPayment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($legacyPayment->currency) : '—');
+
                 return [
-                    'id' => $payment->id,
-                    'title' => $payment->submission?->title ?? 'Paiement abandonné ou non relié',
-                    'author' => $payment->user?->name ?? 'Utilisateur inconnu',
-                    'author_email' => $payment->user?->email ?? '',
-                    'amount' => number_format($payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($payment->currency),
-                    'status' => $payment->status,
+                    'id' => $workflowPayment?->id ?? $legacyPayment?->id ?? $submission->id,
+                    'title' => $submission->title ?? 'Soumission sans titre',
+                    'author' => $submission->user?->name ?? 'Utilisateur inconnu',
+                    'author_email' => $submission->user?->email ?? '',
+                    'amount' => $displayAmount,
+                    'status' => $paymentStatus,
                     'submission_status' => $submissionStatus,
-                    'refund_reason' => $payment->refund_reason,
-                    'created_at' => $payment->created_at?->format('d/m/Y à H:i') ?? 'Date inconnue',
-                    'submission_url' => $payment->submission
-                        ? \App\Filament\Resources\Submissions\SubmissionResource::getUrl('view', ['record' => $payment->submission])
-                        : null,
-                    'can_refund' => $payment->isRefundable(),
+                    'refund_reason' => $legacyPayment?->refund_reason,
+                    'created_at' => ($workflowPayment?->created_at ?? $quote?->created_at ?? $legacyPayment?->created_at ?? $submission->created_at)?->format('d/m/Y à H:i') ?? 'Date inconnue',
+                    'submission_url' => \App\Filament\Resources\Submissions\SubmissionResource::getUrl('view', ['record' => $submission]),
+                    'can_refund' => $legacyPayment?->isRefundable() ?? false,
+                    'legacy_payment_id' => $legacyPayment?->id,
                 ];
             })
             ->toArray();

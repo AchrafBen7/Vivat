@@ -6,51 +6,30 @@ $t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) 
 $submission = $submission ?? null;
 $formAction = $form_action ?? url('/contributor/new');
 $isEditing = (bool) ($is_editing ?? false);
-$stripeKey = $stripe_key ?? '';
-$publicationPrice = (int) ($publication_price ?? 1500);
-$paymentCreateUrl = $payment_create_url ?? '';
-$paymentConfirmUrl = $payment_confirm_url ?? '';
 $canBypassPayment = (bool) ($can_bypass_payment ?? false);
-$publicationPriceLabel = number_format($publicationPrice / 100, 2, ',', ' ') . ' EUR';
 $jsTranslations = [
     'saving_draft' => $t('site.js_saving_draft', 'Sauvegarde du brouillon…'),
     'draft_saved_at' => $t('site.js_draft_saved_at', 'Brouillon sauvegardé à'),
     'autosave_failed' => $t('site.js_autosave_failed', 'La sauvegarde automatique a échoué.'),
     'unsaved_changes' => $t('site.js_unsaved_changes', 'Modifications non enregistrées…'),
-    'sending_in_progress_title' => $t('site.js_sending_in_progress_title', 'Transmission en cours...'),
-    'sending_in_progress_text' => $t('site.js_sending_in_progress_text', 'Nous envoyons votre article à l’espace rédacteur. Vous pouvez patienter quelques instants.'),
+    'sending_in_progress_title' => $t('site.js_sending_in_progress_title', 'Envoi en vérification...'),
+    'sending_in_progress_text' => $t('site.js_sending_in_progress_text', "Nous envoyons votre article à l'équipe éditoriale. Un prix vous sera proposé après relecture."),
     'continue' => $t('site.got_it', 'Continuer'),
     'action_interrupted' => $t('site.js_action_interrupted', 'Action interrompue'),
     'draft_saved_auto' => $t('site.js_draft_saved_auto', 'Brouillon sauvegardé automatiquement'),
     'session_expired' => $t('site.js_session_expired', 'Votre session a expiré. Rechargez la page puis réessayez.'),
     'server_problem' => $t('site.js_server_problem', 'Le serveur a rencontré un problème. Réessayez dans quelques instants.'),
     'unexpected_response' => $t('site.js_unexpected_response', 'Le serveur a renvoyé une réponse inattendue.'),
-    'stripe_key_missing' => $t('site.js_stripe_key_missing', 'La clé Stripe publishable est absente.'),
-    'preparing_submission_title' => $t('site.js_preparing_submission_title', 'Préparation de votre soumission...'),
-    'preparing_payment_text' => $t('site.js_preparing_payment_text', 'Votre brouillon est enregistré. Nous préparons maintenant le paiement de :amount pour l’envoyer en validation éditoriale.'),
-    'payment_prepare_failed' => $t('site.js_payment_prepare_failed', 'Impossible de preparer le paiement pour le moment.'),
-    'payment_prepare_stripe_failed' => $t('site.js_payment_prepare_stripe_failed', 'Impossible de preparer le paiement Stripe.'),
-    'stripe_load_failed' => $t('site.js_stripe_load_failed', 'Stripe.js n’a pas pu etre charge.'),
-    'payment_form_not_ready' => $t('site.js_payment_form_not_ready', 'Le formulaire de paiement n’est pas prêt.'),
-    'payment_refused' => $t('site.js_payment_refused', 'Le paiement a ete refuse. Verifiez vos donnees puis reessayez.'),
-    'payment_validated_title' => $t('site.js_payment_validated_title', 'Paiement validé...'),
-    'payment_validated_text' => $t('site.js_payment_validated_text', 'Votre règlement a bien été accepté. Nous transmettons maintenant votre article à l’équipe éditoriale.'),
-    'payment_confirm_failed' => $t('site.js_payment_confirm_failed', 'La confirmation du paiement n’a pas pu être finalisée pour le moment.'),
-    'payment_done_but_local_failed' => $t('site.js_payment_done_but_local_failed', 'Le paiement a ete effectue, mais la confirmation locale a echoue. Verifiez le tableau de bord dans quelques instants.'),
-    'article_sent' => $t('site.js_article_sent', 'Article transmis'),
-    'article_sent_text' => $t('site.js_article_sent_text', 'Votre article a bien ete envoye en validation.'),
-    'payment_interrupted' => $t('site.js_payment_interrupted', 'Paiement interrompu'),
-    'payment_finalize_failed' => $t('site.js_payment_finalize_failed', 'Le paiement n’a pas pu etre finalise.'),
+    'article_sent' => $t('site.js_article_sent', 'Article envoyé en vérification'),
+    'article_sent_text' => $t('site.js_article_sent_text', "Votre article a été transmis à notre équipe. Vous serez notifié lorsqu'un prix vous sera proposé."),
     'image_too_large' => $t('site.js_image_too_large', 'Cette image dépasse la limite PHP locale actuelle (:limit). Choisissez un fichier plus léger.'),
     'saving_before_publish' => $t('site.js_saving_before_publish', 'Enregistrement du brouillon...'),
     'saving_before_direct_publish' => $t('site.js_saving_before_direct_publish', 'Nous sauvegardons votre article avant publication directe.'),
-    'saving_before_payment' => $t('site.js_saving_before_payment', 'Nous sauvegardons votre article avant de lancer le paiement.'),
     'saving_draft_text' => $t('site.js_saving_draft_text', 'Nous enregistrons votre brouillon pour que vous puissiez le reprendre à tout moment.'),
-    'draft_save_failed' => $t('site.js_draft_save_failed', 'Le brouillon n’a pas pu être enregistré. Vérifiez les champs puis réessayez.'),
-    'submit_prepare_failed' => $t('site.js_submit_prepare_failed', 'Votre article n’a pas pu être préparé pour l’envoi. Vérifiez les champs puis réessayez.'),
+    'draft_save_failed' => $t('site.js_draft_save_failed', "Le brouillon n'a pas pu être enregistré. Vérifiez les champs puis réessayez."),
+    'submit_prepare_failed' => $t('site.js_submit_prepare_failed', "Votre article n'a pas pu être préparé pour l'envoi. Vérifiez les champs puis réessayez."),
     'draft_not_saved' => $t('site.js_draft_not_saved', 'Brouillon non enregistré'),
     'send_impossible' => $t('site.js_send_impossible', 'Envoi impossible'),
-    'submission_not_ready_for_stripe' => $t('site.js_submission_not_ready_for_stripe', 'La soumission n’a pas pu etre preparee pour Stripe.'),
     'draft_saved' => $t('site.js_draft_saved', 'Brouillon enregistré'),
     'draft_saved_text' => $t('site.js_draft_saved_text', 'Votre brouillon a bien été enregistré. Vous pourrez le reprendre plus tard.'),
 ];
@@ -119,10 +98,6 @@ $uploadMaxBytes = (function (string $value): int {
     method="post"
     enctype="multipart/form-data"
     class="flex flex-col gap-6"
-    data-stripe-key="<?= htmlspecialchars($stripeKey) ?>"
-    data-payment-create-url="<?= htmlspecialchars($paymentCreateUrl) ?>"
-    data-payment-confirm-url="<?= htmlspecialchars($paymentConfirmUrl) ?>"
-    data-publication-price-label="<?= htmlspecialchars($publicationPriceLabel) ?>"
     data-is-editing="<?= $isEditing ? '1' : '0' ?>"
     data-can-bypass-payment="<?= $canBypassPayment ? '1' : '0' ?>"
 >
@@ -269,45 +244,6 @@ $uploadMaxBytes = (function (string $value): int {
     </div>
 </div>
 
-<div id="stripe-payment-overlay" class="fixed inset-0 z-[130] hidden overflow-y-auto bg-[#004241]/35 px-4 py-6 md:items-center md:justify-center">
-    <div class="mx-auto w-full max-w-xl rounded-[28px] border border-[#DED8CE] bg-white p-6 shadow-[0_24px_60px_rgba(0,66,65,0.18)] md:my-0">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#004241]/48">Validation éditoriale</p>
-                <h2 class="mt-2 text-[24px] font-semibold leading-8 text-[#1B4B3B]">Votre article est prêt à être soumis</h2>
-                <p class="mt-2 text-sm leading-6 text-[#004241]/80">
-                    Votre brouillon est bien enregistré. Réglez maintenant <span id="stripe-payment-price-label" class="font-semibold text-[#004241]"><?= htmlspecialchars($publicationPriceLabel) ?></span> pour l’envoyer à notre équipe éditoriale et passer à l’étape de validation.
-                </p>
-            </div>
-            <button type="button" id="stripe-payment-close" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#DED8CE] text-[#004241] transition hover:bg-white" aria-label="Fermer le paiement">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="mt-6 rounded-[24px] border border-[#DED8CE] bg-white p-5 shadow-[0_12px_28px_rgba(0,66,65,0.06)]">
-            <div id="stripe-payment-element"></div>
-            <p id="stripe-payment-error" class="mt-4 hidden text-sm text-red-600"></p>
-        </div>
-
-        <div class="mt-6 flex items-center justify-between gap-4">
-            <p class="text-xs leading-5 text-[#004241]/58">Une fois le paiement confirmé, votre article part en relecture. Si la soumission n’est pas retenue, l’équipe pourra ensuite gérer un remboursement.</p>
-            <div class="flex gap-3">
-                <button type="button" id="stripe-payment-cancel" class="h-11 rounded-full border border-[#DED8CE] bg-white px-5 text-sm font-medium text-[#004241] transition hover:bg-[#F1F6F5]">
-                    Plus tard
-                </button>
-                <button type="button" id="stripe-payment-submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-[#F8F6F2] transition hover:bg-[#003535] disabled:cursor-not-allowed disabled:opacity-60">
-                    Payer
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php if ($stripeKey !== ''): ?>
-<script src="https://js.stripe.com/v3/"></script>
-<?php endif; ?>
 
 <script>
 (() => {
@@ -330,31 +266,17 @@ $uploadMaxBytes = (function (string $value): int {
     const spinner = document.getElementById('publish-feedback-spinner');
     const check = document.getElementById('publish-feedback-check');
     const errorIcon = document.getElementById('publish-feedback-error-icon');
-    const paymentOverlay = document.getElementById('stripe-payment-overlay');
-    const paymentCloseButton = document.getElementById('stripe-payment-close');
-    const paymentCancelButton = document.getElementById('stripe-payment-cancel');
-    const paymentSubmitButton = document.getElementById('stripe-payment-submit');
-    const paymentError = document.getElementById('stripe-payment-error');
-    const paymentElementHost = document.getElementById('stripe-payment-element');
     const autosaveStatus = document.getElementById('draft-autosave-status');
 
-    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !draftButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !paymentOverlay || !paymentCloseButton || !paymentCancelButton || !paymentSubmitButton || !paymentError || !paymentElementHost || !autosaveStatus) {
+    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !draftButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !autosaveStatus) {
         return;
     }
 
-    const stripeKey = form.dataset.stripeKey || '';
-    const paymentCreateUrl = form.dataset.paymentCreateUrl || '';
-    const paymentConfirmUrl = form.dataset.paymentConfirmUrl || '';
-    const publicationPriceLabel = form.dataset.publicationPriceLabel || '';
     const canBypassPayment = form.dataset.canBypassPayment === '1';
     const csrfToken = form.querySelector('input[name="_token"]')?.value || '';
 
     let previewUrl = null;
     let pendingRedirectUrl = null;
-    let stripe = null;
-    let elements = null;
-    let paymentElement = null;
-    let currentPaymentId = null;
     let autosaveTimeout = null;
     let autosaveDirty = false;
     let autosaveInFlight = false;
@@ -628,45 +550,6 @@ $uploadMaxBytes = (function (string $value): int {
         setButtonsDisabled(false);
     }
 
-    function resetPaymentElement() {
-        if (paymentElement) {
-            paymentElement.unmount();
-            paymentElement = null;
-        }
-
-        elements = null;
-        currentPaymentId = null;
-        paymentElementHost.innerHTML = '';
-        paymentError.textContent = '';
-        paymentError.classList.add('hidden');
-        paymentSubmitButton.disabled = false;
-    }
-
-    function closePaymentOverlay() {
-        paymentOverlay.classList.add('hidden');
-        paymentOverlay.classList.remove('flex');
-        document.body.style.overflow = '';
-        resetPaymentElement();
-        setButtonsDisabled(false);
-        isPublishing = false;
-        setAutosaveStatus(i18n.draft_saved_auto);
-    }
-
-    function openPaymentOverlay() {
-        paymentOverlay.classList.remove('hidden');
-        paymentOverlay.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-        paymentError.textContent = '';
-        paymentError.classList.add('hidden');
-        paymentSubmitButton.disabled = false;
-    }
-
-    function showPaymentError(message) {
-        paymentError.textContent = message;
-        paymentError.classList.remove('hidden');
-        paymentSubmitButton.disabled = false;
-    }
-
     function fallbackMessageForResponse(response, fallback) {
         if (response.status === 419) {
             return i18n.session_expired;
@@ -690,115 +573,6 @@ $uploadMaxBytes = (function (string $value): int {
         return response.json();
     }
 
-    async function preparePayment(submissionId) {
-        if (!stripeKey) {
-            throw new Error(i18n.stripe_key_missing);
-        }
-
-        showOverlayProgress(i18n.preparing_submission_title, i18n.preparing_payment_text.replace(':amount', publicationPriceLabel));
-
-        const response = await fetch(paymentCreateUrl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ submission_id: submissionId }),
-        });
-
-        const data = await readJsonResponse(response, i18n.payment_prepare_failed);
-
-        if (!response.ok) {
-            throw new Error(normalizeMessage(data.message, i18n.payment_prepare_stripe_failed));
-        }
-
-        if (!window.Stripe) {
-            throw new Error(i18n.stripe_load_failed);
-        }
-
-        if (!stripe) {
-            stripe = window.Stripe(stripeKey);
-        }
-
-        resetPaymentElement();
-        currentPaymentId = data.payment_id;
-        elements = stripe.elements({
-            clientSecret: data.client_secret,
-            appearance: {
-                theme: 'stripe',
-                variables: {
-                    colorPrimary: '#004241',
-                    colorBackground: '#ffffff',
-                    colorText: '#1B4B3B',
-                    borderRadius: '18px',
-                },
-            },
-        });
-
-        paymentElement = elements.create('payment');
-        paymentElement.mount('#stripe-payment-element');
-
-        overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-        openPaymentOverlay();
-    }
-
-    async function confirmSubmissionPayment() {
-        if (!stripe || !elements || !currentPaymentId) {
-            showPaymentError(i18n.payment_form_not_ready);
-            return;
-        }
-
-        paymentSubmitButton.disabled = true;
-        paymentError.textContent = '';
-        paymentError.classList.add('hidden');
-
-        const stripeResult = await stripe.confirmPayment({
-            elements,
-            redirect: 'if_required',
-        });
-
-        if (stripeResult.error) {
-            showPaymentError(normalizeMessage(stripeResult.error.message, i18n.payment_refused));
-            return;
-        }
-
-        paymentOverlay.classList.add('hidden');
-        paymentOverlay.classList.remove('flex');
-        document.body.style.overflow = '';
-        showOverlayProgress(i18n.payment_validated_title, i18n.payment_validated_text);
-
-        const response = await fetch(paymentConfirmUrl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ payment_id: currentPaymentId }),
-        });
-
-        const data = await readJsonResponse(response, i18n.payment_confirm_failed);
-
-        if (!response.ok) {
-            setButtonsDisabled(false);
-            setOverlayError(normalizeMessage(data.message, i18n.payment_done_but_local_failed));
-            return;
-        }
-
-        setButtonsDisabled(false);
-        setOverlaySuccess(
-            i18n.article_sent,
-            normalizeMessage(data.message, i18n.article_sent_text),
-            window.location.origin + '/contributor/dashboard'
-        );
-    }
-
     overlayButton.addEventListener('click', () => {
         if (pendingRedirectUrl) {
             window.location.href = pendingRedirectUrl;
@@ -808,22 +582,6 @@ $uploadMaxBytes = (function (string $value): int {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
         setButtonsDisabled(false);
-    });
-
-    [paymentCloseButton, paymentCancelButton].forEach((button) => {
-        button.addEventListener('click', closePaymentOverlay);
-    });
-
-    paymentSubmitButton.addEventListener('click', async () => {
-        try {
-            await confirmSubmissionPayment();
-        } catch (error) {
-            setButtonsDisabled(false);
-            setOverlayError(
-                normalizeMessage(error.message, i18n.payment_finalize_failed),
-                i18n.payment_interrupted
-            );
-        }
     });
 
     input.addEventListener('change', () => {
@@ -903,9 +661,7 @@ $uploadMaxBytes = (function (string $value): int {
         showOverlayProgress(
             i18n.saving_before_publish,
             isPublishAction
-                ? (canBypassPayment
-                    ? i18n.saving_before_direct_publish
-                    : i18n.saving_before_payment)
+                ? (canBypassPayment ? i18n.saving_before_direct_publish : i18n.sending_in_progress_text)
                 : i18n.saving_draft_text
         );
 
@@ -931,15 +687,6 @@ $uploadMaxBytes = (function (string $value): int {
 
                 if (!response.ok) {
                     throw new Error(extractErrorMessage(data, responseFallback));
-                }
-
-                if (data.requires_payment) {
-                    if (!data.submission_id) {
-                        throw new Error(i18n.submission_not_ready_for_stripe);
-                    }
-
-                    await preparePayment(data.submission_id);
-                    return;
                 }
 
                 if (isDraftAction) {

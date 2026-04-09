@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\AuthController as WebAuthController;
 use App\Http\Controllers\Web\CategoryController as WebCategoryController;
 use App\Http\Controllers\Web\ContactController as WebContactController;
 use App\Http\Controllers\Web\ContributorController as WebContributorController;
+use App\Http\Controllers\Web\ContributorCheckoutController as WebContributorCheckoutController;
 use App\Http\Controllers\Web\FaqController as WebFaqController;
 use App\Http\Controllers\Web\HomeController as WebHomeController;
 use App\Http\Controllers\Web\NewsletterController as WebNewsletterController;
@@ -63,6 +64,9 @@ Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->gr
     Route::post('/articles/{submission:slug}/request-unpublish', [WebContributorController::class, 'requestUnpublish'])->name('contributor.articles.request-unpublish');
     Route::delete('/articles/{submission:slug}', [WebContributorController::class, 'destroySubmission'])->name('contributor.articles.destroy');
     Route::match(['get', 'post'], '/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
+    Route::post('/submissions/{submission}/checkout', [WebContributorCheckoutController::class, 'redirectToStripe'])->middleware('throttle:6,1')->name('contributor.checkout.create');
+    Route::get('/submissions/{submission}/payment/success', [WebContributorCheckoutController::class, 'success'])->name('contributor.checkout.success');
+    Route::get('/submissions/{submission}/payment/cancel', [WebContributorCheckoutController::class, 'cancel'])->name('contributor.checkout.cancel');
 });
 Route::middleware(['auth', 'role:admin'])->get('/admin-preview/articles/{article:slug}', [WebArticleController::class, 'preview'])->name('articles.preview.admin');
 Route::get('/categories/{slug}', [WebCategoryController::class, 'hub'])->name('categories.hub');

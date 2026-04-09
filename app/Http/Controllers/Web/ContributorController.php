@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Payment;
+use App\Models\PublicationQuote;
 use App\Models\Submission;
 use App\Services\AccountDeletionService;
 use App\Services\SubmissionPublishingService;
 use App\Services\SubmissionImageStorageService;
+use App\Services\SubmissionWorkflowService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,6 +25,7 @@ class ContributorController extends Controller
         private readonly AccountDeletionService $accountDeletionService,
         private readonly SubmissionPublishingService $submissionPublishingService,
         private readonly SubmissionImageStorageService $submissionImageStorage,
+        private readonly SubmissionWorkflowService $submissionWorkflow,
     ) {}
 
     private function publicationPrice(): int
@@ -57,11 +60,11 @@ class ContributorController extends Controller
     {
         return [
             'ok' => true,
-            'status' => 'pending',
+            'status' => 'submitted',
             'redirect_url' => $redirectUrl,
             'notice' => [
-                'title' => 'Article transmis',
-                'message' => 'Votre article va etre verifie par notre equipe et sera publie automatiquement apres acceptation.',
+                'title' => 'Article envoyé en vérification',
+                'message' => 'Votre article a été transmis à notre équipe éditoriale. Après relecture, un prix vous sera proposé et vous pourrez alors finaliser la publication.',
             ],
         ];
     }
@@ -262,6 +265,7 @@ class ContributorController extends Controller
         $wrapper = render_php_view('site.contributor.wrapper', [
             'activeTab' => $activeTab,
             'contributorContent' => $content,
+            'pending_quotes_count' => $data['pending_quotes_count'] ?? 0,
         ]);
         $html = render_php_view('site.layout', [
             'content' => $wrapper,
@@ -342,6 +346,12 @@ class ContributorController extends Controller
     public function dashboard(Request $request): Response
     {
         $user = $request->user();
+
+        $pendingQuotesCount = PublicationQuote::query()
+            ->whereHas('submission', fn ($q) => $q->where('user_id', $user->id)->whereNotIn('status', ['published', 'payment_succeeded']))
+            ->whereIn('status', ['pending', 'sent'])
+            ->count();
+
         $submissionsPaginator = Submission::where('user_id', $user->id)
             ->with(['category', 'reviewer', 'payment', 'publishedArticle'])
             ->orderByDesc('created_at')
@@ -359,9 +369,17 @@ class ContributorController extends Controller
                 'status' => $s->status,
                 'status_label' => match ($s->status) {
                     'draft' => 'Brouillon',
+                    'submitted' => 'En vérification',
                     'pending' => 'En attente',
-                    'approved' => 'Approuvé',
-                    'rejected' => 'Rejeté',
+                    'under_review' => 'En relecture',
+                    'changes_requested' => 'Corrections demandées',
+                    'price_proposed', 'awaiting_payment' => 'Prix proposé — paiement requis',
+                    'payment_pending' => 'Paiement en cours',
+                    'payment_succeeded' => 'Paiement confirmé',
+                    'payment_failed' => 'Paiement échoué',
+                    'payment_expired' => 'Offre expirée',
+                    'approved' => 'Publié',
+                    'rejected' => 'Refusé',
                     default => ucfirst((string) $s->status),
                 },
                 'created_at' => $s->created_at?->format('d/m/Y'),
@@ -404,6 +422,7 @@ class ContributorController extends Controller
             'user' => $user,
             'submissions' => $submissionsPaginator->items(),
             'pagination' => $submissionsPaginator,
+            'pending_quotes_count' => $pendingQuotesCount,
         ]);
     }
 
@@ -428,6 +447,41 @@ class ContributorController extends Controller
     public function paymentsHistory(Request $request): Response
     {
         $user = $request->user();
+
+        // Charger les quotes en attente de paiement (nouveau workflow)
+        $pendingQuotes = PublicationQuote::query()
+            ->whereHas('submission', fn ($q) => $q->where('user_id', $user->id)->whereNotIn('status', ['published', 'payment_succeeded']))
+            ->with(['submission.category'])
+            ->whereIn('status', ['pending', 'sent'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $pendingQuoteItems = $pendingQuotes->map(function (PublicationQuote $quote): array {
+            $submission = $quote->submission;
+
+            return [
+                'type' => 'quote',
+                'id' => $quote->id,
+                'title' => $submission?->title ?: 'Article sans titre',
+                'amount_label' => number_format($quote->amount_cents / 100, 2, ',', ' ') . ' ' . strtoupper($quote->currency ?? 'EUR'),
+                'status' => 'awaiting_payment',
+                'status_label' => 'Paiement requis',
+                'status_color' => 'amber',
+                'status_description' => 'Notre équipe a évalué votre article et vous propose ce montant. Procédez au paiement pour déclencher la publication.',
+                'note_to_author' => $quote->note_to_author,
+                'expires_at' => $quote->expires_at?->format('d/m/Y à H:i'),
+                'created_at' => $quote->created_at?->format('d/m/Y à H:i'),
+                'category_name' => $submission?->category?->name,
+                'submission_preview_url' => $submission?->slug ? route('contributor.articles.show', ['submission' => $submission->slug]) : null,
+                'checkout_url' => $submission ? route('contributor.checkout.create', ['submission' => $submission->id]) : null,
+                'submission_status_label' => 'En attente de paiement',
+                'refund_reason' => null,
+                'refund_receipt_url' => null,
+                'submission_edit_url' => null,
+                'published_article_url' => null,
+            ];
+        })->all();
+
         $paymentsPaginator = Payment::query()
             ->where('user_id', $user->id)
             ->with(['submission.category', 'submission.publishedArticle'])
@@ -470,9 +524,13 @@ class ContributorController extends Controller
 
         $paymentsPaginator->setCollection(collect($payments));
 
+        // Fusionner quotes en attente (affichées en premier) + paiements historiques
+        $allItems = array_merge($pendingQuoteItems, $paymentsPaginator->items());
+
         return $this->renderContributorPage('payments', 'site.contributor.payments', [
             'user' => $user,
-            'payments' => $paymentsPaginator->items(),
+            'payments' => $allItems,
+            'pending_quotes_count' => count($pendingQuoteItems),
             'pagination' => $paymentsPaginator,
         ]);
     }
@@ -512,8 +570,8 @@ class ContributorController extends Controller
                 $submission = $this->createRevisionDraftFromRejected($submission, $request->user()->id);
             }
 
-            $hasFreePublishedRevision = filled($submission->published_article_id);
-            $status = $shouldSubmit && ($this->hasPaidPublication($submission) || $hasFreePublishedRevision || $canBypassPayment) ? 'pending' : 'draft';
+            // Nouveau flux : on accepte la soumission sans paiement (le modérateur proposera un prix)
+            $status = $shouldSubmit && $canBypassPayment ? 'pending' : ($shouldSubmit ? 'submitted' : 'draft');
             $coverImageUrl = $submission->cover_image_url;
 
             if ($request->hasFile('cover_image')) {
@@ -551,25 +609,21 @@ class ContributorController extends Controller
                 'category_id' => $validated['category_id'] ?? null,
                 'language' => $validated['language'] ?? ($submission->language ?? 'fr'),
                 'reading_time' => $validated['reading_time'] ?? 5,
-                'status' => $status,
+                'status' => $status === 'submitted' ? $submission->status : $status, // ne pas modifier le statut ici si on soumet
                 'cover_image_url' => $coverImageUrl,
                 'reviewer_notes' => $status === 'pending' ? null : $submission->reviewer_notes,
                 'reviewed_by' => $status === 'pending' ? null : $submission->reviewed_by,
                 'reviewed_at' => $status === 'pending' ? null : $submission->reviewed_at,
             ]);
 
-            if ($isAutosave) {
-                return response()->json($this->autosavePayload($submission->fresh(['category', 'reviewer'])));
+            // Si soumission (non-admin) : utiliser le workflow service pour logguer et notifier
+            if ($status === 'submitted') {
+                $this->submissionWorkflow->submit($submission->fresh(), $request->user());
+                $submission->refresh();
             }
 
-            if ($shouldSubmit && $status !== 'pending') {
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json($this->paymentRequiredPayload($submission));
-                }
-
-                return redirect()
-                    ->route('contributor.articles.edit', ['submission' => $submission->slug])
-                    ->with('info', 'Le paiement Stripe est requis avant envoi en validation.');
+            if ($isAutosave) {
+                return response()->json($this->autosavePayload($submission->fresh(['category', 'reviewer'])));
             }
 
             if ($shouldSubmit && ($request->expectsJson() || $request->ajax())) {
@@ -606,6 +660,12 @@ class ContributorController extends Controller
                 return redirect()
                     ->to(url('/articles/' . $article->slug))
                     ->with('success', 'Article publié directement.');
+            }
+
+            if ($shouldSubmit) {
+                return redirect()
+                    ->route('contributor.dashboard')
+                    ->with('success', 'Votre article a été envoyé en vérification. Vous serez notifié lorsqu\'un prix vous sera proposé.');
             }
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -659,10 +719,6 @@ class ContributorController extends Controller
             ],
             'form_action' => route('contributor.articles.edit', ['submission' => $submission->slug]),
             'is_editing' => true,
-            'stripe_key' => (string) config('services.stripe.key'),
-            'publication_price' => $this->publicationPrice(),
-            'payment_create_url' => route('contributor.web-payments.create-intent'),
-            'payment_confirm_url' => route('contributor.web-payments.confirm'),
             'can_bypass_payment' => $this->canBypassPublicationPayment($request),
         ]);
     }
@@ -725,13 +781,16 @@ class ContributorController extends Controller
                         ->with('success', 'Article publié directement.');
                 }
 
+                // Nouveau flux : soumettre sans paiement → le modérateur proposera un prix ensuite
+                $this->submissionWorkflow->submit($submission->fresh(), $request->user());
+
                 if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json($this->paymentRequiredPayload($submission));
+                    return response()->json($this->submissionAcceptedPayload(route('contributor.dashboard')));
                 }
 
                 return redirect()
-                    ->route('contributor.articles.edit', ['submission' => $submission->slug])
-                    ->with('info', 'Le paiement Stripe est requis avant envoi en validation.');
+                    ->route('contributor.dashboard')
+                    ->with('success', 'Votre article a été envoyé en vérification. Vous serez notifié lorsqu\'un prix vous sera proposé.');
             }
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -776,10 +835,6 @@ class ContributorController extends Controller
             'submission' => null,
             'form_action' => url('/contributor/new'),
             'is_editing' => false,
-            'stripe_key' => (string) config('services.stripe.key'),
-            'publication_price' => $this->publicationPrice(),
-            'payment_create_url' => route('contributor.web-payments.create-intent'),
-            'payment_confirm_url' => route('contributor.web-payments.confirm'),
             'can_bypass_payment' => $this->canBypassPublicationPayment($request),
         ]);
     }

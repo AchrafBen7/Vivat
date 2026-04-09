@@ -80,8 +80,8 @@ class StripeCheckoutService
                     'quantity' => 1,
                 ]],
                 'customer_email'        => $author->email,
-                'success_url'           => route('contributor.submissions.payment.success', $submission) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url'            => route('contributor.submissions.payment.cancel', $submission),
+                'success_url'           => route('contributor.checkout.success', $submission) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'            => route('contributor.checkout.cancel', $submission),
                 'expires_at'            => now()->addMinutes(30)->timestamp,
                 'metadata'              => [
                     'submission_id'  => $submission->id,

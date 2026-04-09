@@ -57,6 +57,18 @@
         .vp-btn-publish { display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:10px; padding:8px 12px; font-size:12px; font-weight:600; color:#fff; background:#004241; cursor:pointer; transition:background 0.15s; }
         .vp-btn-publish:hover { background:#003130; }
         .vp-btn-publish[disabled] { opacity:0.7; cursor:wait; }
+        .vp-btn-secondary { display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; color:#004241; background:#EBF1EF; cursor:pointer; transition:background 0.15s; }
+        .vp-btn-secondary:hover { background:#DEE7E4; }
+        .vp-modal-backdrop { position:fixed; inset:0; background:rgba(4,20,20,0.48); z-index:70; display:flex; align-items:center; justify-content:center; padding:24px; }
+        .vp-modal { width:min(560px, 100%); border-radius:22px; background:#fff; border:1px solid #D6E1DD; box-shadow:0 24px 70px rgba(0,0,0,0.14); overflow:hidden; }
+        .vp-modal-head { padding:22px 24px 14px; }
+        .vp-modal-title { font-size:20px; font-weight:700; color:#004241; }
+        .vp-modal-sub { margin-top:6px; font-size:14px; line-height:1.6; color:rgba(0,66,65,0.65); }
+        .vp-modal-body { padding:0 24px 24px; display:flex; flex-direction:column; gap:16px; }
+        .vp-field-label { display:block; font-size:13px; font-weight:700; color:#004241; margin-bottom:8px; }
+        .vp-select { width:100%; border-radius:12px; border:1px solid #D6E1DD; padding:12px 14px; font-size:14px; color:#004241; background:#fff; }
+        .vp-note { border-radius:14px; background:#F7FAF9; border:1px solid #D6E1DD; padding:14px 16px; font-size:13px; line-height:1.6; color:rgba(0,66,65,0.72); }
+        .vp-modal-actions { padding:18px 24px 24px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #EBF1EF; }
 
         .vp-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
         @media(max-width:1024px) { .vp-cols { grid-template-columns:1fr; } }
@@ -173,10 +185,11 @@
                                 <a href="{{ $draft['edit_url'] }}" class="vp-btn-link">Modifier</a>
                                 <button
                                     type="button"
-                                    wire:click.prevent="publishDraft('{{ $draft['id'] }}')"
+                                    wire:click.prevent="openPublishModal('{{ $draft['id'] }}')"
                                     wire:loading.attr="disabled"
-                                    wire:target="publishDraft('{{ $draft['id'] }}')"
+                                    wire:target="openPublishModal('{{ $draft['id'] }}')"
                                     class="vp-btn-publish"
+                                    @disabled(! $draft['is_publishable'])
                                 >
                                     Publier
                                 </button>
@@ -249,4 +262,44 @@
         </div>
 
     </div>
+
+    @if ($this->publishModalOpen)
+        <div class="vp-modal-backdrop" wire:keydown.escape="closePublishModal" tabindex="0">
+            <div class="vp-modal">
+                <div class="vp-modal-head">
+                    <div class="vp-modal-title">Confirmer la publication</div>
+                    <div class="vp-modal-sub">Le brouillon ne sera pas publié immédiatement après le clic. Vérifie d’abord la catégorie, puis confirme explicitement la mise en ligne.</div>
+                </div>
+
+                <div class="vp-modal-body">
+                    <div>
+                        <label class="vp-field-label" for="publish-category">Catégorie</label>
+                        <select id="publish-category" class="vp-select" wire:model="publishCategoryId">
+                            <option value="">Choisir une catégorie</option>
+                            @foreach ($this->getCategoryOptions() as $categoryId => $categoryName)
+                                <option value="{{ $categoryId }}">{{ $categoryName }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="vp-note">
+                        Si le brouillon n’a pas encore de catégorie, tu peux l’ajouter ici avant publication. Tu peux aussi en profiter pour corriger la catégorie proposée par l’IA.
+                    </div>
+                </div>
+
+                <div class="vp-modal-actions">
+                    <button type="button" class="vp-btn-secondary" wire:click="closePublishModal">Annuler</button>
+                    <button
+                        type="button"
+                        class="vp-btn-publish"
+                        wire:click="confirmPublishDraft"
+                        wire:loading.attr="disabled"
+                        wire:target="confirmPublishDraft"
+                    >
+                        Confirmer la publication
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </x-filament-panels::page>

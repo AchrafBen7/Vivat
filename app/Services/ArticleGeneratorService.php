@@ -87,6 +87,9 @@ class ArticleGeneratorService
         $metaDescription = $articlePayload['meta_description'];
         $keywords = $articlePayload['keywords'];
 
+        // Injecter la section sources en bas de l'article (attribution éditoriale)
+        $content = $content . $this->buildSourcesSection($items);
+
         $readingTime = $this->contentProcessor->calculateReadingTime($content);
         $qualityScore = $this->contentProcessor->assessQuality($title, $content, $keywords);
 
@@ -151,6 +154,33 @@ class ArticleGeneratorService
         }
 
         return $article->load('articleSources');
+    }
+
+    /**
+     * Construit la section "Sources" HTML injectée en bas de chaque article généré.
+     * Garantit l'attribution éditoriale et la conformité copyright.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, RssItem>  $items
+     */
+    private function buildSourcesSection($items): string
+    {
+        $sourceLines = $items->map(function (RssItem $item): string {
+            $sourceName = e($item->rssFeed?->source?->name ?? 'Source externe');
+            $title = e($item->title);
+            $url = e($item->url);
+            return "<li><a href=\"{$url}\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">{$title}</a> — {$sourceName}</li>";
+        })->implode("\n");
+
+        return <<<HTML
+
+<div class="article-sources">
+<h3>Sources</h3>
+<ul>
+{$sourceLines}
+</ul>
+<p class="article-sources__disclaimer">Cet article est une synthèse éditoriale rédigée à partir des sources ci-dessus. Les informations ont été reformulées et mises en contexte par la rédaction de Vivat.</p>
+</div>
+HTML;
     }
 
     /**

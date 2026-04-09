@@ -7,6 +7,7 @@ use App\Jobs\EnrichContentJob;
 use App\Jobs\FetchRssFeedJob;
 use App\Jobs\GenerateArticleJob;
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\Cluster;
 use App\Models\ClusterItem;
 use App\Models\EnrichedItem;
@@ -32,6 +33,12 @@ class PipelineStep3 extends Page
     protected static ?string $title = '';
 
     protected string $view = 'filament.pages.pipeline-step3';
+
+    public bool $publishModalOpen = false;
+
+    public ?string $publishArticleId = null;
+
+    public ?string $publishCategoryId = null;
 
     public function getStats(): array
     {
@@ -60,8 +67,17 @@ class PipelineStep3 extends Page
                 'created_at' => $a->created_at?->diffForHumans(),
                 'edit_url' => ArticleResource::getUrl('edit', ['record' => $a]),
                 'preview_url' => url('/admin-preview/articles/' . $a->slug),
+                'is_publishable' => $a->isPublishable(),
             ])
             ->toArray();
+    }
+
+    public function getCategoryOptions(): array
+    {
+        return Category::query()
+            ->orderedForHome()
+            ->pluck('name', 'id')
+            ->all();
     }
 
     public function getRecentPublished(): array
@@ -380,9 +396,48 @@ class PipelineStep3 extends Page
         return 'idle';
     }
 
-    public function publishDraft(string $articleId): void
+    public function openPublishModal(string $articleId): void
     {
         $article = Article::query()->findOrFail($articleId);
+
+        $this->publishArticleId = $article->id;
+        $this->publishCategoryId = $article->category_id;
+        $this->publishModalOpen = true;
+    }
+
+    public function closePublishModal(): void
+    {
+        $this->publishModalOpen = false;
+        $this->publishArticleId = null;
+        $this->publishCategoryId = null;
+    }
+
+    public function confirmPublishDraft(): void
+    {
+        if (! $this->publishArticleId) {
+            $this->closePublishModal();
+
+            return;
+        }
+
+        $article = Article::query()->findOrFail($this->publishArticleId);
+
+        if (! $article->category_id && ! $this->publishCategoryId) {
+            Notification::make()
+                ->warning()
+                ->title('Catégorie requise')
+                ->body("Choisis une catégorie avant de publier ce brouillon.")
+                ->send();
+
+            return;
+        }
+
+        if ($this->publishCategoryId) {
+            $article->update([
+                'category_id' => $this->publishCategoryId,
+            ]);
+            $article->refresh();
+        }
 
         if (! $article->publish()) {
             Notification::make()
@@ -390,6 +445,8 @@ class PipelineStep3 extends Page
                 ->title('Publication impossible')
                 ->body("Le brouillon ne remplit pas encore les conditions nécessaires pour être publié.")
                 ->send();
+
+            $this->closePublishModal();
 
             return;
         }
@@ -399,5 +456,7 @@ class PipelineStep3 extends Page
             ->title('Article publié')
             ->body("Le brouillon a été publié et est maintenant visible sur le site.")
             ->send();
+
+        $this->closePublishModal();
     }
 }

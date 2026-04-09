@@ -53,10 +53,11 @@ class ArticleSelectionService
 
         $topics = $this->topicScorer->clusterByTopic($scoredItems);
         $totalPoolSize = $items->count();
+        $minItems = $this->getClusteringConfig()['min_items_per_topic'];
 
         $scoredTopics = collect($topics)
-            ->map(fn (Collection $group): array => $this->scoreTopic($group, $totalPoolSize))
-            ->filter(fn (array $topic): bool => $topic['category'] !== null);
+            ->filter(fn (Collection $group): bool => $group->count() >= $minItems)
+            ->map(fn (Collection $group): array => $this->scoreTopic($group, $totalPoolSize));
 
         return $scoredTopics
             ->sortByDesc('score')
@@ -82,7 +83,7 @@ class ArticleSelectionService
     private function getClusteringConfig(): array
     {
         return array_merge([
-            'min_items_per_topic' => 1,
+            'min_items_per_topic' => 2,
             'max_items_per_topic' => 6,
             'similarity_threshold' => 0.12,
         ], config('selection.clustering', []));
