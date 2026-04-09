@@ -15,7 +15,7 @@
                     <div class="vp-hero-box-title">Paiements</div>
                 </div>
                 <div class="vp-hero-text" style="flex:1">
-                    <p>Retrouve ici les paiements utiles à l'équipe éditoriale, avec un accès rapide aux remboursements et aux soumissions liées.</p>
+                    <p>Retrouve ici les derniers articles effectivement payés, avec leur montant et leur statut de publication.</p>
                 </div>
             </div>
         </div>
@@ -26,14 +26,14 @@
             </div>
             <div>
                 <h4>Ce qu'il se passe ici</h4>
-                <p>Tu peux rechercher une transaction, voir son état, ouvrir la soumission associée et rembourser rapidement un paiement si l'article a été refusé.</p>
+                <p>Ce tab sert à suivre les articles payés récemment. Les demandes encore en attente de revue ou de paiement restent dans les autres tabs.</p>
             </div>
         </div>
 
         <div class="vp-stats">
             @foreach ([
                 ['label' => 'Payés', 'value' => $stats['paid'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
-                ['label' => 'Remboursés', 'value' => $stats['refunded'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
+                ['label' => 'Publiés', 'value' => $stats['published'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => "Aujourd'hui", 'value' => $stats['today'], 'bg' => '#004241', 'color' => '#fff', 'sub' => 'rgba(255,255,255,0.6)'],
             ] as $card)
                 <div class="vp-stat" style="background:{{ $card['bg'] }}">
@@ -44,14 +44,11 @@
         </div>
 
         <div class="vp-filters">
-            <input type="text" wire:model.live.debounce.300ms="search" class="vp-input" placeholder="Rechercher un paiement..." />
+            <input type="text" wire:model.live.debounce.300ms="search" class="vp-input" placeholder="Rechercher un article payé..." />
             <select wire:model.live="status" class="vp-select">
-                <option value="">Tous les statuts</option>
-                <option value="pending">En attente</option>
-                <option value="paid">Payé</option>
-                <option value="refunded">Remboursé</option>
-                <option value="failed">Échoué</option>
-                <option value="abandoned">Abandonné</option>
+                <option value="">Tous les articles payés</option>
+                <option value="payment_succeeded">Payés non encore publiés</option>
+                <option value="published">Publiés</option>
             </select>
         </div>
 
@@ -62,11 +59,8 @@
                 @foreach ($payments as $payment)
                     @php
                         $status = match($payment['status']) {
-                            'paid' => ['label' => 'Payé', 'bg' => '#ecfdf5', 'text' => '#065f46'],
-                            'refunded' => ['label' => 'Remboursé', 'bg' => '#f3f4f6', 'text' => '#4b5563'],
-                            'failed' => ['label' => 'Échoué', 'bg' => '#fef2f2', 'text' => '#991b1b'],
-                            'abandoned' => ['label' => 'Abandonné', 'bg' => '#f3f4f6', 'text' => '#4b5563'],
-                            default => ['label' => 'En attente', 'bg' => '#fffbeb', 'text' => '#92400e'],
+                            'succeeded', 'paid' => ['label' => 'Payé', 'bg' => '#ecfdf5', 'text' => '#065f46'],
+                            default => ['label' => 'Payé', 'bg' => '#ecfdf5', 'text' => '#065f46'],
                         };
                     @endphp
                     <section class="vp-card">
@@ -74,6 +68,7 @@
                             <div class="vp-badges">
                                 <span class="vp-badge" style="background:{{ $status['bg'] }};color:{{ $status['text'] }}">{{ $status['label'] }}</span>
                                 <span class="vp-badge" style="background:#EBF1EF;color:#004241">{{ $payment['submission_status'] }}</span>
+                                <span class="vp-badge" style="background:#EBF1EF;color:#004241">{{ $payment['category'] }}</span>
                                 <span class="vp-badge" style="background:#FFF0B6;color:#6b5200">{{ $payment['amount'] }}</span>
                             </div>
                             <h3 class="vp-title">{{ $payment['title'] }}</h3>
@@ -87,6 +82,9 @@
                             <div class="vp-actions">
                                 @if ($payment['submission_url'])
                                     <a href="{{ $payment['submission_url'] }}" class="vp-btn vp-btn-secondary">Voir la soumission</a>
+                                @endif
+                                @if ($payment['article_url'])
+                                    <a href="{{ $payment['article_url'] }}" target="_blank" class="vp-btn vp-btn-primary">Voir l'article</a>
                                 @endif
                                 @if ($payment['can_refund'])
                                     <button

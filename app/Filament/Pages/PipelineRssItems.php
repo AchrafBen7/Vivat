@@ -13,7 +13,7 @@ class PipelineRssItems extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentMagnifyingGlass;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Brouillons IA manuels';
 
     protected static ?int $navigationSort = 3;
 

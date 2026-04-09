@@ -18,9 +18,9 @@ class PipelineStep2 extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedCpuChip;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Brouillons IA manuels';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 11;
 
     protected static ?string $navigationLabel = 'Analyse des sujets';
 
@@ -37,11 +37,13 @@ class PipelineStep2 extends Page
 
     public function getStats(): array
     {
+        $groupedTopics = count(app(ArticleSelectionService::class)->selectBestTopics(12));
+
         return [
             'enriched' => EnrichedItem::count(),
             'pending' => RssItem::where('status', 'new')->count(),
             'avg_quality' => round(EnrichedItem::avg('quality_score') ?? 0),
-            'clusters' => Cluster::count(),
+            'clusters' => $groupedTopics,
         ];
     }
 

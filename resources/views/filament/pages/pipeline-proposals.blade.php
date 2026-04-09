@@ -3,7 +3,7 @@
         .vp-wrap { display:flex; flex-direction:column; gap:20px; }
         .vp-hero { position:relative; overflow:hidden; border-radius:24px; padding:24px; color:#fff; background:linear-gradient(135deg,#004241 0%,#185B58 58%,#4C807C 100%); }
         .vp-hero-inner { position:relative; display:flex; align-items:center; gap:16px; }
-        .vp-hero-box { flex-shrink:0; min-width:180px; padding:12px 16px; border-radius:16px; background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); }
+        .vp-hero-box { flex-shrink:0; min-width:0; padding:0; border-radius:0; background:transparent; backdrop-filter:none; }
         .vp-hero-box-step { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.72); }
         .vp-hero-box-title { margin-top:4px; font-size:18px; font-weight:700; line-height:1.1; }
         .vp-hero-text p { margin-top:4px; font-size:14px; color:rgba(255,255,255,0.68); }
@@ -40,6 +40,9 @@
         .vp-section-label { margin-bottom:8px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(0,66,65,0.4); }
         .vp-keywords { display:flex; flex-wrap:wrap; gap:6px; }
         .vp-keyword { display:inline-flex; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; background:#FFF0B6; color:#6b5200; }
+        .vp-grouped-note { margin-top:10px; border-radius:12px; padding:10px 12px; background:#F7FAF9; border:1px solid #EBF1EF; }
+        .vp-grouped-note-title { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(0,66,65,0.4); }
+        .vp-grouped-note-text { margin-top:6px; font-size:12px; line-height:1.55; color:rgba(0,66,65,0.62); }
 
         .vp-sources { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
         .vp-source { display:flex; align-items:center; gap:12px; border-radius:12px; border:1px solid #EBF1EF; background:#F7FAF9; padding:10px 12px; }
@@ -118,6 +121,14 @@
                                     </div>
                                     <h3 class="vp-title">{{ $proposal['topic'] ?? 'Sujet sans titre' }}</h3>
                                     <p class="vp-text">{{ \Illuminate\Support\Str::limit($proposal['reasoning'] ?? '', 150) }}</p>
+                                    @if (!empty($proposal['items']))
+                                        <div class="vp-grouped-note">
+                                            <div class="vp-grouped-note-title">Sujet formé à partir de ces contenus</div>
+                                            <div class="vp-grouped-note-text">
+                                                {{ collect($proposal['items'])->pluck('title')->filter()->take(3)->implode(' · ') }}
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <button
@@ -163,7 +174,7 @@
 
                             @if (!empty($proposal['items']))
                                 <div class="vp-section">
-                                    <div class="vp-section-label">{{ count($proposal['items']) }} source(s) utilisées</div>
+                                    <div class="vp-section-label">{{ count($proposal['items']) }} contenu(s) regroupé(s)</div>
                                     <div class="vp-sources">
                                         @foreach ($proposal['items'] as $item)
                                             @php

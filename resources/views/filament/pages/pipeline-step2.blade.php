@@ -8,7 +8,7 @@
         .vp-wrap { display:flex; flex-direction:column; gap:20px; }
         .vp-hero { position:relative; overflow:hidden; border-radius:24px; padding:24px; color:#fff; background:linear-gradient(135deg,#004241 0%,#185B58 58%,#4C807C 100%); }
         .vp-hero-inner { position:relative; display:flex; align-items:center; gap:16px; }
-        .vp-hero-box { flex-shrink:0; min-width:180px; padding:12px 16px; border-radius:16px; background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); }
+        .vp-hero-box { flex-shrink:0; min-width:0; padding:0; border-radius:0; background:transparent; backdrop-filter:none; }
         .vp-hero-box-step { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.72); }
         .vp-hero-box-title { margin-top:4px; font-size:18px; font-weight:700; line-height:1.1; }
         .vp-hero-text h2 { font-size:20px; font-weight:700; letter-spacing:-0.02em; }
@@ -54,6 +54,11 @@
         .vp-badge { display:inline-flex; align-items:center; border-radius:8px; padding:2px 8px; font-size:12px; }
         .vp-proposal-title { margin-top:8px; font-size:14px; font-weight:700; color:#004241; }
         .vp-proposal-text { margin-top:4px; font-size:12px; color:rgba(0,66,65,0.5); line-height:1.5; }
+        .vp-proposal-group { margin-top:10px; border-radius:12px; padding:10px 12px; background:#F7FAF9; border:1px solid #EBF1EF; }
+        .vp-proposal-group-label { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(0,66,65,0.42); }
+        .vp-proposal-group-list { margin-top:6px; display:flex; flex-direction:column; gap:5px; }
+        .vp-proposal-group-item { font-size:12px; line-height:1.45; color:#004241; }
+        .vp-proposal-group-item span { color:rgba(0,66,65,0.45); }
         .vp-btn { margin-top:12px; display:inline-flex; align-items:center; gap:6px; border:none; border-radius:12px; padding:8px 14px; font-size:12px; font-weight:600; color:#fff; background:#004241; cursor:pointer; transition:background 0.15s; }
         .vp-btn:hover { background:#003130; }
         .vp-btn[disabled] { opacity:0.7; cursor:wait; }
@@ -111,7 +116,7 @@
                 ['label' => 'Items enrichis', 'value' => $stats['enriched'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)', 'help' => null],
                 ['label' => 'En attente', 'value' => $stats['pending'], 'bg' => '#FFF0B6', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)', 'help' => null],
                 ['label' => 'Qualité moyenne', 'value' => $stats['avg_quality'].'/100', 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)', 'help' => null],
-                ['label' => 'Sujets regroupés', 'value' => $stats['clusters'], 'bg' => '#004241', 'color' => '#fff', 'sub' => 'rgba(255,255,255,0.6)', 'help' => 'Les contenus sont rapprochés selon leur sujet, leurs mots-clés et leurs titres proches.'],
+                ['label' => 'Sujets regroupés', 'value' => $stats['clusters'], 'bg' => '#004241', 'color' => '#fff', 'sub' => 'rgba(255,255,255,0.6)', 'help' => 'Chaque sujet visible ci-dessous correspond à un regroupement d’articles proches par thème, mots-clés et titres.'],
             ] as $card)
                 <div class="vp-stat" style="background:{{ $card['bg'] }}">
                     <div class="vp-stat-val" style="color:{{ $card['color'] }}">{{ $card['value'] }}</div>
@@ -196,6 +201,21 @@
                                 </div>
                                 <h4 class="vp-proposal-title">{{ $proposal['topic'] ?? 'Sans titre' }}</h4>
                                 <p class="vp-proposal-text">{{ \Illuminate\Support\Str::limit($proposal['reasoning'] ?? '', 100) }}</p>
+                                @if (!empty($proposal['items']))
+                                    <div class="vp-proposal-group">
+                                        <div class="vp-proposal-group-label">Articles regroupés dans ce sujet</div>
+                                        <div class="vp-proposal-group-list">
+                                            @foreach (array_slice($proposal['items'], 0, 3) as $item)
+                                                <div class="vp-proposal-group-item">
+                                                    {{ $item['title'] ?? 'Sans titre' }}
+                                                    @if (!empty($item['source']))
+                                                        <span>· {{ $item['source'] }}</span>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                                 <button
                                     type="button"
                                     wire:click="generateProposal({{ $index }})"

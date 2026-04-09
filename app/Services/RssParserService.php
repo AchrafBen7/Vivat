@@ -67,7 +67,7 @@ class RssParserService
                     'title' => $title,
                     'link' => $link,
                     'description' => $description ?? '',
-                    'pubDate' => $pubDate,
+                    'pubDate' => $this->normalizePubDate($pubDate),
                     'guid' => $guid,
                 ];
             }
@@ -95,7 +95,7 @@ class RssParserService
                     'title' => $title,
                     'link' => $link,
                     'description' => $description ?? '',
-                    'pubDate' => $updated,
+                    'pubDate' => $this->normalizePubDate($updated),
                     'guid' => $id,
                 ];
             }
@@ -137,5 +137,52 @@ class RssParserService
     {
         $raw = $guid !== null && $guid !== '' ? $guid : ($link . $title);
         return substr(hash('sha256', $raw), 0, 32);
+    }
+
+    public function normalizePubDate(?string $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        $normalized = mb_strtolower($value, 'UTF-8');
+        $normalized = str_replace(
+            ['é', 'è', 'ê', 'ë', 'à', 'â', 'î', 'ï', 'ô', 'ö', 'ù', 'û', 'ü', 'ç'],
+            ['e', 'e', 'e', 'e', 'a', 'a', 'i', 'i', 'o', 'o', 'u', 'u', 'u', 'c'],
+            $normalized
+        );
+
+        $map = [
+            'lun.' => 'Mon', 'lundi' => 'Mon',
+            'mar.' => 'Tue', 'mardi' => 'Tue',
+            'mer.' => 'Wed', 'mercredi' => 'Wed',
+            'jeu.' => 'Thu', 'jeudi' => 'Thu',
+            'ven.' => 'Fri', 'vendredi' => 'Fri',
+            'sam.' => 'Sat', 'samedi' => 'Sat',
+            'dim.' => 'Sun', 'dimanche' => 'Sun',
+            'janv.' => 'Jan', 'janvier' => 'Jan',
+            'fevr.' => 'Feb', 'fevrier' => 'Feb',
+            'févr.' => 'Feb', 'fev.' => 'Feb',
+            'mars' => 'Mar',
+            'avr.' => 'Apr', 'avril' => 'Apr',
+            'mai' => 'May',
+            'juin' => 'Jun',
+            'juil.' => 'Jul', 'juillet' => 'Jul',
+            'aout' => 'Aug', 'août' => 'Aug',
+            'sept.' => 'Sep', 'septembre' => 'Sep',
+            'oct.' => 'Oct', 'octobre' => 'Oct',
+            'nov.' => 'Nov', 'novembre' => 'Nov',
+            'dec.' => 'Dec', 'déc.' => 'Dec', 'decembre' => 'Dec', 'décembre' => 'Dec',
+        ];
+
+        $normalized = strtr($normalized, $map);
+        $normalized = preg_replace('/\s+/', ' ', $normalized) ?? $normalized;
+
+        return trim($normalized);
     }
 }

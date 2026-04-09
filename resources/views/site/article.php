@@ -9,6 +9,8 @@ $published_at_iso = $article['published_at_iso'] ?? null;
 $reading_time = $article['reading_time'] ?? null;
 $category = $article['category'] ?? null;
 $cover_image_url = $article['cover_image_url'] ?? null;
+$has_generated_cover = (bool) ($article['has_generated_cover'] ?? false);
+$cover_status_label = $article['cover_status_label'] ?? null;
 $content = $article['content'] ?? '';
 $excerpt = $article['excerpt'] ?? '';
 $relatedCategoryName = $category['name'] ?? $t('site.featured', 'À la une');
@@ -114,6 +116,7 @@ if (is_string($content) && trim($content) !== '' && ! preg_match('/<\s*\/?\s*[a-
 
 if (is_string($content) && trim($content) !== '') {
     $content = vivat_normalize_article_html($content);
+    $content = preg_replace('/<div class="article-sources">.*?<\/div>\s*$/is', '', $content) ?? $content;
 }
 
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
@@ -129,11 +132,19 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
 ?>
 <div class="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
     <?php if ($isPreview) { ?>
-    <div class="mb-6 flex items-center justify-center">
+    <div class="mb-6 flex flex-wrap items-center justify-center gap-3">
         <div class="inline-flex items-center gap-3 rounded-full border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-3 text-sm font-medium text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
             <span><?= htmlspecialchars($t('site.article_preview_notice', "Ceci est un aperçu de votre article. Il n'est pas encore affiché publiquement comme version finale.")) ?></span>
         </div>
+        <?php if ($cover_status_label) { ?>
+        <div class="inline-flex items-center gap-3 rounded-full border px-5 py-3 text-sm font-medium shadow-[0_10px_24px_rgba(0,66,65,0.05)] <?= $has_generated_cover ? 'border-[#CFE7DD] bg-[#ECFDF5] text-[#065F46]' : 'border-[#F3D4D4] bg-[#FEF2F2] text-[#991B1B]' ?>">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full <?= $has_generated_cover ? 'bg-[#065F46] text-white' : 'bg-[#991B1B] text-white' ?>">
+                <?= $has_generated_cover ? '✓' : '!' ?>
+            </span>
+            <span><?= htmlspecialchars($cover_status_label) ?></span>
+        </div>
+        <?php } ?>
     </div>
     <?php } ?>
 
@@ -180,6 +191,12 @@ $shareLinks = [
 .article-body a:hover { opacity: 0.8; }
 .article-body ul, .article-body ol { margin: 1rem 0; padding-left: 1.5rem; }
 .article-body li { margin-bottom: 0.5rem; line-height: 1.65; }
+.article-body .article-sources { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(0, 66, 65, 0.1); }
+.article-body .article-sources h3 { margin: 0 0 0.75rem; font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(0, 66, 65, 0.5); }
+.article-body .article-sources ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+.article-body .article-sources li { margin: 0; font-size: 0.88rem; line-height: 1.45; display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: baseline; }
+.article-body .article-sources li a { text-decoration: none; color: #004241; max-width: min(100%, 540px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; }
+.article-body .article-sources li span { font-size: 0.78rem; color: rgba(0, 66, 65, 0.45); white-space: nowrap; }
 </style>
 <div class="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col items-center">

@@ -122,4 +122,29 @@ return [
         'similarity_threshold' => 0.08,  // Jaccard >= 8% = même sujet (permissif pour maximiser les clusters à 2+ sources)
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Filtres éditoriaux
+    |--------------------------------------------------------------------------
+    */
+    'editorial' => [
+        'single_source_fallback_min_score' => 70,
+        'single_source_min_alignment' => 0.35,
+        'alignment_bonus_strong' => 12,
+        'alignment_bonus_medium' => 6,
+        'alignment_penalty_low' => 12,
+        'weak_topic_penalty' => 18,
+        'impact_terms' => [
+            'alerte', 'risque', 'danger', 'interdit', 'rappel', 'pollution', 'climat', 'carbone',
+            'énergie', 'energie', 'logement', 'maison', 'facture', 'budget', 'épargne', 'epargne',
+            'santé', 'sante', 'éducation', 'education', 'travail', 'emploi', 'famille', 'enfant',
+            'réforme', 'reforme', 'loi', 'étude', 'etude', 'coût', 'cout', 'pouvoir d\'achat',
+            'sécurité', 'securite', 'prévention', 'prevention', 'transport', 'immobilier',
+        ],
+        'weak_topic_terms' => [
+            'carottes râpées', 'carottes rapees', 'insolite', 'fascine', 'buzz', 'viral',
+            'improbable', 'incroyable', 'surprenant', 'record', 'chance sur', 'rarete',
+        ],
+    ],
+
 ];

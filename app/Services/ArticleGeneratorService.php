@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ArticleGeneratorService
 {
@@ -57,16 +58,14 @@ class ArticleGeneratorService
             }
         }
 
-        $alreadyLinkedItemIds = ArticleSource::query()
-            ->whereIn('rss_item_id', $items->pluck('id'))
-            ->whereHas('article', fn ($query) => $query->whereIn('status', ['draft', 'review', 'published']))
-            ->pluck('rss_item_id')
-            ->unique()
-            ->values()
-            ->all();
+        $existingArticle = $this->findExistingArticleForItems($items);
+        if ($existingArticle !== null) {
+            Log::info('Article generation reused existing article for overlapping sources.', [
+                'article_id' => $existingArticle->id,
+                'item_ids' => $items->pluck('id')->values()->all(),
+            ]);
 
-        if ($alreadyLinkedItemIds !== []) {
-            throw new \RuntimeException('Une génération existe déjà pour une partie de ces sources. Vérifiez les brouillons IA avant de relancer.');
+            return $existingArticle->loadMissing('articleSources');
         }
 
         $template = null;
@@ -86,9 +85,6 @@ class ArticleGeneratorService
         $metaTitle = $articlePayload['meta_title'];
         $metaDescription = $articlePayload['meta_description'];
         $keywords = $articlePayload['keywords'];
-
-        // Injecter la section sources en bas de l'article (attribution éditoriale)
-        $content = $content . $this->buildSourcesSection($items);
 
         $readingTime = $this->contentProcessor->calculateReadingTime($content);
         $qualityScore = $this->contentProcessor->assessQuality($title, $content, $keywords);
@@ -143,44 +139,45 @@ class ArticleGeneratorService
         if (config('services.openai.generate_cover_images', true)) {
             try {
                 $coverUrl = $this->coverImageService->generate($title, $excerpt, $categoryId);
-                if ($coverUrl !== null) {
-                    $article->update(['cover_image_url' => $coverUrl]);
-                }
             } catch (\Throwable $e) {
                 Log::warning('Cover image generation failed: ' . $e->getMessage(), [
                     'article_id' => $article->id,
                 ]);
+
+                throw new \RuntimeException("Le brouillon texte a été créé, mais la cover IA n'a pas pu être générée correctement.");
             }
+
+            if ($coverUrl === null) {
+                throw new \RuntimeException("Le brouillon texte a été créé, mais aucune cover IA valide n'a pu être générée.");
+            }
+
+            $article->update(['cover_image_url' => $coverUrl]);
         }
 
         return $article->load('articleSources');
     }
 
     /**
-     * Construit la section "Sources" HTML injectée en bas de chaque article généré.
-     * Garantit l'attribution éditoriale et la conformité copyright.
-     *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, RssItem>  $items
+     * @param  EloquentCollection<int, RssItem>  $items
      */
-    private function buildSourcesSection($items): string
+    private function findExistingArticleForItems(EloquentCollection $items): ?Article
     {
-        $sourceLines = $items->map(function (RssItem $item): string {
-            $sourceName = e($item->rssFeed?->source?->name ?? 'Source externe');
-            $title = e($item->title);
-            $url = e($item->url);
-            return "<li><a href=\"{$url}\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">{$title}</a> {$sourceName}</li>";
-        })->implode("\n");
+        $existingArticleId = ArticleSource::query()
+            ->select('article_id')
+            ->selectRaw('COUNT(*) as matched_sources')
+            ->whereIn('rss_item_id', $items->pluck('id'))
+            ->whereHas('article', fn ($query) => $query->whereIn('status', ['draft', 'review', 'published']))
+            ->groupBy('article_id')
+            ->orderByDesc('matched_sources')
+            ->value('article_id');
 
-        return <<<HTML
+        if (! $existingArticleId) {
+            return null;
+        }
 
-<div class="article-sources">
-<h3>Sources</h3>
-<ul>
-{$sourceLines}
-</ul>
-<p class="article-sources__disclaimer">Cet article est une synthèse éditoriale rédigée à partir des sources ci-dessus. Les informations ont été reformulées et mises en contexte par la rédaction de Vivat.</p>
-</div>
-HTML;
+        return Article::query()
+            ->with('articleSources')
+            ->find($existingArticleId);
     }
 
     /**

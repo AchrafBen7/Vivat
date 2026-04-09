@@ -79,6 +79,10 @@ class ArticleController extends Controller
                 'published_at_display' => $article->published_at?->locale('fr')->isoFormat('D MMMM YYYY'),
                 'published_at_iso' => $article->published_at?->toIso8601String(),
                 'cover_image_url' => $this->articleCoverOrFallback($article, $category),
+                'has_generated_cover' => ! empty($article->cover_image_url),
+                'cover_status_label' => ! empty($article->cover_image_url)
+                    ? 'Cover IA générée'
+                    : 'Fallback visuel affiché',
                 'cover_video_url' => $article->cover_video_url,
                 'is_preview' => $isPreview,
                 'category' => $category ? [

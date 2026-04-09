@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('local') && function_exists('opcache_reset')) {
+            @opcache_reset();
+        }
+
         RateLimiter::for('auth-login', function (Request $request) {
             $email = mb_strtolower((string) $request->input('email', ''));
             $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();

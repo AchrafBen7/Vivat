@@ -8,7 +8,7 @@
         .vp-wrap { display:flex; flex-direction:column; gap:20px; }
         .vp-hero { position:relative; overflow:hidden; border-radius:24px; padding:24px; color:#fff; background:#004241; }
         .vp-hero-inner { position:relative; display:flex; align-items:center; gap:16px; }
-        .vp-hero-box { flex-shrink:0; min-width:180px; padding:12px 16px; border-radius:16px; background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); }
+        .vp-hero-box { flex-shrink:0; min-width:0; padding:0; border-radius:0; background:transparent; backdrop-filter:none; }
         .vp-hero-box-step { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.72); }
         .vp-hero-box-title { margin-top:4px; font-size:18px; font-weight:700; line-height:1.1; }
         .vp-hero-text p { margin-top:4px; font-size:14px; color:rgba(255,255,255,0.68); }
@@ -58,7 +58,7 @@
                     <div class="vp-hero-box-title">Soumissions</div>
                 </div>
                 <div class="vp-hero-text" style="flex:1">
-                    <p>Retrouve ici les articles envoyés par les rédacteurs avant validation, refus ou publication finale.</p>
+                    <p>Retrouve ici uniquement les articles qui doivent encore être relus ou corrigés avant toute décision finale.</p>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
             </div>
             <div>
                 <h4>Ce qu'il se passe ici</h4>
-                <p>Tu peux suivre chaque soumission depuis sa réception jusqu'au paiement puis à la publication, avec un passage clair par la revue éditoriale et la proposition de prix.</p>
+                <p>Ce tab sert à la vérification éditoriale. Dès qu'un article sort de la phase de revue, il n'apparaît plus ici.</p>
             </div>
         </div>
 
@@ -77,8 +77,8 @@
             @foreach ([
                 ['label' => 'À relire', 'value' => $stats['submitted'], 'bg' => '#FFF0B6', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => 'En revue', 'value' => $stats['review'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
-                ['label' => 'Paiement à suivre', 'value' => $stats['awaiting_payment'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
-                ['label' => 'Rejetées', 'value' => $stats['rejected'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
+                ['label' => 'Corrections demandées', 'value' => $stats['changes_requested'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
+                ['label' => 'À traiter', 'value' => $stats['total_to_review'], 'bg' => '#EBF1EF', 'color' => '#004241', 'sub' => 'rgba(0,66,65,0.5)'],
                 ['label' => "Aujourd'hui", 'value' => $stats['today'], 'bg' => '#004241', 'color' => '#fff', 'sub' => 'rgba(255,255,255,0.6)'],
             ] as $card)
                 <div class="vp-stat" style="background:{{ $card['bg'] }}">
@@ -96,15 +96,6 @@
                 <option value="pending">Soumise (ancien)</option>
                 <option value="under_review">En revue</option>
                 <option value="changes_requested">Corrections demandées</option>
-                <option value="price_proposed">Prix proposé</option>
-                <option value="awaiting_payment">En attente de paiement</option>
-                <option value="payment_pending">Paiement en cours</option>
-                <option value="payment_succeeded">Paiement reçu</option>
-                <option value="payment_failed">Paiement échoué</option>
-                <option value="payment_expired">Offre expirée</option>
-                <option value="payment_canceled">Paiement annulé</option>
-                <option value="published">Publiée</option>
-                <option value="rejected">Rejetée</option>
             </select>
         </div>
 

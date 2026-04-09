@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Article;
 use App\Models\Category;
 use App\Models\RssItem;
 use Illuminate\Support\Collection;
@@ -26,6 +27,9 @@ class ArticleSelectionService
     {
         $query = RssItem::query()
             ->where('status', 'enriched')
+            ->whereDoesntHave('articleSources', function ($query): void {
+                $query->whereHas('article', fn ($articleQuery) => $articleQuery->whereIn('status', ['draft', 'review', 'published']));
+            })
             ->whereHas('enrichedItem')
             ->with(['enrichedItem', 'rssFeed.source', 'category']);
 
@@ -55,9 +59,40 @@ class ArticleSelectionService
         $totalPoolSize = $items->count();
         $minItems = $this->getClusteringConfig()['min_items_per_topic'];
 
+        // Compte d'articles récents (48h) par catégorie pour la diversité
+        $recentCountByCategory = Article::whereIn('status', ['draft', 'published'])
+            ->where('created_at', '>=', now()->subHours(48))
+            ->whereNotNull('category_id')
+            ->selectRaw('category_id, count(*) as cnt')
+            ->groupBy('category_id')
+            ->pluck('cnt', 'category_id')
+            ->all();
+
+        $maxRecentCount = ! empty($recentCountByCategory) ? max($recentCountByCategory) : 0;
+
         $scoredTopics = collect($topics)
-            ->filter(fn (Collection $group): bool => $group->count() >= $minItems)
+            ->filter(function (Collection $group) use ($minItems, $recentCountByCategory, $maxRecentCount): bool {
+                // Accepter 1 seul item pour les catégories peu représentées vs la catégorie dominante
+                $categoryId = collect($group->pluck('item')->pluck('category_id')->filter())->mode()[0] ?? null;
+                $categoryRecentCount = $categoryId ? ($recentCountByCategory[$categoryId] ?? 0) : $minItems;
+                $effectiveMin = ($maxRecentCount > 0 && $categoryRecentCount < ($maxRecentCount / 2)) ? 1 : $minItems;
+                return $group->count() >= $effectiveMin;
+            })
             ->map(fn (Collection $group): array => $this->scoreTopic($group, $totalPoolSize));
+
+        if ($scoredTopics->isEmpty() && $scoredItems->isNotEmpty()) {
+            $bestSingleItem = $scoredItems
+                ->sortByDesc('score')
+                ->values()
+                ->first();
+
+            if (is_array($bestSingleItem) && $this->canUseSingleSourceFallback($bestSingleItem)) {
+                $fallbackTopic = $this->scoreTopic(collect([$bestSingleItem]), $totalPoolSize);
+                $fallbackTopic['reasoning'] .= ' Fallback activé : meilleur sujet disponible retenu malgré une seule source enrichie.';
+                $fallbackTopic['selection_mode'] = 'single_source_fallback';
+                $scoredTopics = collect([$fallbackTopic]);
+            }
+        }
 
         return $scoredTopics
             ->sortByDesc('score')
@@ -132,6 +167,19 @@ class ArticleSelectionService
             $category = $this->topicScorer->inferCategoryFromKeywords($consolidatedKeywords);
         }
 
+        $categoryAlignment = $category ? $this->estimateCategoryAlignment($items, $category, $consolidatedKeywords) : 0.0;
+        $editorialConfig = config('selection.editorial', []);
+        $alignmentBonus = match (true) {
+            $categoryAlignment >= 0.72 => (int) ($editorialConfig['alignment_bonus_strong'] ?? 12),
+            $categoryAlignment >= 0.50 => (int) ($editorialConfig['alignment_bonus_medium'] ?? 6),
+            $categoryAlignment > 0 && $categoryAlignment < 0.22 => -1 * (int) ($editorialConfig['alignment_penalty_low'] ?? 12),
+            default => 0,
+        };
+
+        $weakTopicPenalty = $this->isWeakEditorialTopic($items, $consolidatedKeywords)
+            ? (int) ($editorialConfig['weak_topic_penalty'] ?? 18)
+            : 0;
+
         $avgQuality = $items->map(fn ($item) => $item->enrichedItem?->quality_score ?? 0)->avg();
         $newestDate = $items->max(fn ($item) => $item->published_at ?? $item->fetched_at);
         $hotNewsHours = (int) (config('selection.freshness.hot_news_hours') ?? 48);
@@ -142,6 +190,25 @@ class ArticleSelectionService
         $articleTypesConfig = config('selection.article_types', []);
         $typeConfig = $articleTypesConfig[$suggestedArticleType] ?? $articleTypesConfig['standard'] ?? [];
 
+        // Pénalité si cette catégorie a déjà un brouillon récent (diversité éditoriale)
+        $recentCategoryPenalty = 0;
+        if ($category) {
+            $recentCount = Article::where('category_id', $category->id)
+                ->whereIn('status', ['draft', 'published'])
+                ->where('created_at', '>=', now()->subHours(48))
+                ->count();
+            if ($recentCount >= 3) {
+                $recentCategoryPenalty = 30;
+            } elseif ($recentCount >= 2) {
+                $recentCategoryPenalty = 20;
+            } elseif ($recentCount >= 1) {
+                $recentCategoryPenalty = 10;
+            }
+        }
+
+        $topicScore = (int) round($avgItemScore + $diversityBonus + $multiSourceBonus + $topicFrequencyBonus + $alignmentBonus - $weakTopicPenalty - $recentCategoryPenalty);
+        $topicScore = min(100, max(0, $topicScore));
+
         $reasoning = $this->buildReasoning(
             $items,
             $sourceCount,
@@ -150,6 +217,8 @@ class ArticleSelectionService
             $avgItemScore,
             $totalPoolSize,
             $topicFrequencyBonus,
+            $categoryAlignment,
+            $weakTopicPenalty > 0,
         );
 
         $contextPriority = $totalPoolSize > 0 && $topicFrequencyBonus > 0
@@ -181,6 +250,7 @@ class ArticleSelectionService
             ])->values()->toArray(),
             'source_count' => $sourceCount,
             'avg_quality' => round($avgQuality, 1),
+            'category_alignment' => round($categoryAlignment, 2),
             'suggested_article_type' => $suggestedArticleType,
             'suggested_min_words' => $typeConfig['min_words'] ?? 800,
             'suggested_max_words' => $typeConfig['max_words'] ?? 1200,
@@ -244,7 +314,9 @@ class ArticleSelectionService
         float $avgQuality,
         float $avgItemScore,
         int $totalPoolSize = 0,
-        int $topicFrequencyBonus = 0
+        int $topicFrequencyBonus = 0,
+        float $categoryAlignment = 0.0,
+        bool $isWeakTopic = false,
     ): string {
         $reasons = [];
 
@@ -270,6 +342,14 @@ class ArticleSelectionService
             $reasons[] = sprintf('Qualité correcte (%.0f/100)', $avgQuality);
         }
 
+        if ($categoryAlignment >= 0.72) {
+            $reasons[] = 'Très bon alignement avec la catégorie éditoriale et ses sous-thèmes';
+        } elseif ($categoryAlignment >= 0.50) {
+            $reasons[] = 'Sujet cohérent avec la catégorie éditoriale ciblée';
+        } elseif ($categoryAlignment > 0 && $categoryAlignment < 0.22) {
+            $reasons[] = 'Sujet faiblement aligné avec les catégories éditoriales';
+        }
+
         $topKeywords = array_slice(array_column($keywords, 'word'), 0, 5);
         if (! empty($topKeywords)) {
             $keywordList = implode(', ', $topKeywords);
@@ -293,7 +373,115 @@ class ArticleSelectionService
             $reasons[] = $items->count() . ' articles sources permettent une synthèse approfondie';
         }
 
+        if ($isWeakTopic) {
+            $reasons[] = 'Sujet affaibli car trop anecdotique ou trop étroit pour devenir une vraie priorité éditoriale';
+        }
+
         return implode('. ', $reasons) . '.';
+    }
+
+    private function estimateCategoryAlignment(Collection $items, Category $category, array $keywords): float
+    {
+        $terms = collect([
+            $category->name,
+            $category->slug,
+            ...$category->subCategories->pluck('name')->all(),
+            ...$category->subCategories->pluck('slug')->all(),
+        ])->filter()
+            ->map(fn (string $term): string => Str::of($term)->lower()->ascii()->replace('-', ' ')->value())
+            ->unique()
+            ->values();
+
+        if ($terms->isEmpty()) {
+            return 0.0;
+        }
+
+        $text = Str::of(implode(' ', array_filter([
+            $items->pluck('title')->implode(' '),
+            $items->map(fn (RssItem $item) => $item->enrichedItem?->lead ?? '')->implode(' '),
+            implode(' ', array_column($keywords, 'word')),
+        ])))->lower()->ascii()->replace('-', ' ')->value();
+
+        $matches = 0.0;
+        foreach ($terms as $term) {
+            if ($term === '') {
+                continue;
+            }
+
+            if (str_contains($text, $term)) {
+                $matches += 1;
+                continue;
+            }
+
+            foreach (explode(' ', $term) as $part) {
+                if ($part !== '' && str_contains($text, $part)) {
+                    $matches += 0.35;
+                }
+            }
+        }
+
+        return min(1.0, $matches / max(1, $terms->count() * 0.75));
+    }
+
+    private function isWeakEditorialTopic(Collection $items, array $keywords): bool
+    {
+        $editorialConfig = config('selection.editorial', []);
+        $weakTerms = array_map('mb_strtolower', $editorialConfig['weak_topic_terms'] ?? []);
+        $impactTerms = array_map('mb_strtolower', $editorialConfig['impact_terms'] ?? []);
+
+        $text = mb_strtolower(implode(' ', array_filter([
+            $items->pluck('title')->implode(' '),
+            $items->map(fn (RssItem $item) => $item->enrichedItem?->lead ?? '')->implode(' '),
+            implode(' ', array_column($keywords, 'word')),
+        ])));
+
+        $hasWeakSignal = false;
+        foreach ($weakTerms as $term) {
+            if ($term !== '' && str_contains($text, $term)) {
+                $hasWeakSignal = true;
+                break;
+            }
+        }
+
+        if (! $hasWeakSignal) {
+            return false;
+        }
+
+        foreach ($impactTerms as $term) {
+            if ($term !== '' && str_contains($text, $term)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function canUseSingleSourceFallback(array $bestSingleItem): bool
+    {
+        $item = $bestSingleItem['item'] ?? null;
+
+        if (! $item instanceof RssItem) {
+            return false;
+        }
+
+        $score = (int) ($bestSingleItem['score'] ?? 0);
+        $keywords = is_array($bestSingleItem['keywords'] ?? null) ? $bestSingleItem['keywords'] : [];
+        $editorialConfig = config('selection.editorial', []);
+        $minScore = (int) ($editorialConfig['single_source_fallback_min_score'] ?? 70);
+        $minAlignment = (float) ($editorialConfig['single_source_min_alignment'] ?? 0.35);
+
+        if ($score < $minScore) {
+            return false;
+        }
+
+        $category = $item->category ?: $this->topicScorer->inferCategoryFromKeywords($keywords);
+        $alignment = $category ? $this->estimateCategoryAlignment(collect([$item]), $category, $keywords) : 0.0;
+
+        if ($alignment < $minAlignment) {
+            return false;
+        }
+
+        return ! $this->isWeakEditorialTopic(collect([$item]), $keywords);
     }
 
     private function isOffTopic(RssItem $item): bool

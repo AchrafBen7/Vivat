@@ -10,7 +10,7 @@
         .vp-wrap { display:flex; flex-direction:column; gap:20px; }
         .vp-hero { position:relative; overflow:hidden; border-radius:24px; padding:24px; color:#fff; background:#004241; }
         .vp-hero-inner { position:relative; display:flex; align-items:center; gap:16px; }
-        .vp-hero-box { flex-shrink:0; min-width:180px; padding:12px 16px; border-radius:16px; background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); }
+        .vp-hero-box { flex-shrink:0; min-width:0; padding:0; border-radius:0; background:transparent; backdrop-filter:none; }
         .vp-hero-box-step { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.72); }
         .vp-hero-box-title { margin-top:4px; font-size:18px; font-weight:700; line-height:1.1; }
         .vp-hero-text h2 { font-size:20px; font-weight:700; letter-spacing:-0.02em; }
@@ -183,6 +183,16 @@
                             </a>
                             <div class="vp-actions" onclick="event.stopPropagation()">
                                 <a href="{{ $draft['edit_url'] }}" class="vp-btn-link">Modifier</a>
+                                <button
+                                    type="button"
+                                    wire:click.prevent="deleteDraft('{{ $draft['id'] }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="deleteDraft('{{ $draft['id'] }}')"
+                                    onclick="if(!confirm('Supprimer ce brouillon ?')){ event.stopImmediatePropagation(); return false; }"
+                                    class="vp-btn-link"
+                                >
+                                    Supprimer
+                                </button>
                                 <button
                                     type="button"
                                     wire:click.prevent="openPublishModal('{{ $draft['id'] }}')"

@@ -6,23 +6,20 @@
 
     <style>
         .vp-wrap { display:flex; flex-direction:column; gap:20px; }
-        .vp-hero { position:relative; overflow:hidden; border-radius:24px; padding:24px; color:#fff; background:#004241; }
-        .vp-hero-inner { position:relative; display:flex; align-items:center; gap:16px; }
-        .vp-hero-box { flex-shrink:0; min-width:180px; padding:12px 16px; border-radius:16px; background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); }
-        .vp-hero-box-step { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.72); }
-        .vp-hero-box-title { margin-top:4px; font-size:18px; font-weight:700; line-height:1.1; }
-        .vp-hero-text p { margin-top:4px; font-size:14px; color:rgba(255,255,255,0.65); }
-        .vp-hero-circle { position:absolute; border-radius:50%; background:rgba(255,255,255,0.05); pointer-events:none; }
-        .vp-tip { display:grid; grid-template-columns:42px 1fr; gap:14px; align-items:flex-start; border-radius:16px; padding:18px 20px; background:#F7FAF9; border:1px solid #D6E1DD; }
-        .vp-tip-icon { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:14px; background:#FFF0B6; color:#004241; flex-shrink:0; }
-        .vp-tip h4 { font-size:14px; font-weight:700; color:#004241; }
-        .vp-tip p { margin-top:4px; font-size:13px; line-height:1.55; color:rgba(0,66,65,0.68); }
         .vp-journey { display:grid; grid-template-columns:1.1fr .9fr; gap:20px; }
         .vp-journey-box { border-radius:16px; border:1px solid #D6E1DD; background:#fff; padding:20px; }
         .vp-journey-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
-        .vp-journey-head-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .vp-journey-top { display:flex; flex-direction:column; gap:14px; }
+        .vp-journey-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .vp-journey-head-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-start; }
         .vp-journey-title { font-size:15px; font-weight:700; color:#004241; }
         .vp-journey-sub { margin-top:4px; font-size:13px; color:rgba(0,66,65,0.58); }
+        .vp-primary-btn { display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:11px 16px; font-size:13px; font-weight:700; color:#fff; background:#004241; cursor:pointer; transition:opacity .15s, transform .15s; white-space:nowrap; }
+        .vp-primary-btn:hover { opacity:.92; }
+        .vp-primary-btn[disabled] { opacity:.72; cursor:wait; transform:none; }
+        .vp-secondary-btn { display:inline-flex; align-items:center; justify-content:center; border:1px solid #D6E1DD; border-radius:12px; padding:11px 16px; font-size:13px; font-weight:700; color:#004241; background:#fff; cursor:pointer; transition:background .15s; white-space:nowrap; }
+        .vp-secondary-btn:hover { background:#F7FAF9; }
+        .vp-secondary-btn[disabled] { opacity:.72; cursor:wait; }
         .vp-journey-steps { margin-top:18px; display:flex; flex-direction:column; gap:12px; }
         .vp-journey-step { display:flex; align-items:flex-start; gap:12px; border-radius:14px; background:#F7FAF9; padding:14px; }
         .vp-journey-dot { width:28px; height:28px; border-radius:999px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px; font-weight:700; }
@@ -30,6 +27,8 @@
         .vp-journey-step-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
         .vp-journey-step-title { font-size:13px; font-weight:700; color:#004241; }
         .vp-journey-step-text { margin-top:3px; font-size:12px; line-height:1.55; color:rgba(0,66,65,0.62); }
+        .vp-journey-step-foot { margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .vp-journey-step-time { font-size:11px; color:rgba(0,66,65,0.5); white-space:nowrap; text-align:right; }
         .vp-status-badge { display:inline-flex; align-items:center; border-radius:999px; padding:6px 10px; font-size:11px; font-weight:700; white-space:nowrap; }
         .vp-mini-btn { display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:10px; padding:7px 10px; font-size:11px; font-weight:700; color:#004241; background:#EBF1EF; cursor:pointer; transition:background .15s; white-space:nowrap; }
         .vp-mini-btn:hover { background:#DEE7E4; }
@@ -44,11 +43,11 @@
         .vp-journey-highlight-sub { margin-top:4px; font-size:12px; color:rgba(0,66,65,0.62); }
         .vp-journey-link { margin-top:12px; display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:#004241; font-size:12px; font-weight:700; }
         .vp-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(0,66,65,.55); backdrop-filter:blur(6px); padding:24px; }
-        .vp-overlay-close { position:absolute; top:20px; right:20px; width:40px; height:40px; border:none; border-radius:999px; background:rgba(255,255,255,.15); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
-        .vp-overlay-close:hover { background:rgba(255,255,255,.25); }
+        .vp-overlay-close { position:absolute; top:18px; right:18px; width:42px; height:42px; border:1px solid #D6E1DD; border-radius:999px; background:#fff; color:#004241; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s,border-color .15s; box-shadow:0 10px 24px rgba(0,66,65,.08); z-index:2; }
+        .vp-overlay-close:hover { background:#F7FAF9; border-color:#BFD1CC; }
         .vp-overlay-card { position:relative; width:min(680px, 100%); background:#fff; border-radius:28px; padding:32px; box-shadow:0 32px 80px rgba(0,66,65,.25); max-height:calc(100vh 48px); overflow-y:auto; }
         .vp-overlay-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(0,66,65,.45); }
-        .vp-overlay-title { margin-top:8px; font-size:26px; font-weight:700; line-height:1.2; color:#004241; }
+        .vp-overlay-title { margin-top:8px; padding-left:58px; font-size:26px; font-weight:700; line-height:1.2; color:#004241; }
         .vp-overlay-detail { margin-top:6px; font-size:13px; line-height:1.6; color:rgba(0,66,65,.62); min-height:20px; }
         .vp-overlay-progress { margin:20px 0 0; width:100%; height:10px; border-radius:999px; background:#EBF1EF; overflow:hidden; }
         .vp-overlay-progress-fill { height:100%; border-radius:999px; background:#004241; transition:width .5s ease; }
@@ -77,29 +76,6 @@
     </style>
 
     <div class="vp-wrap" wire:poll.5s>
-        <div class="vp-hero">
-            <div class="vp-hero-circle" style="width:160px;height:160px;top:-32px;right:-32px"></div>
-            <div class="vp-hero-inner">
-                <div class="vp-hero-box">
-                    <div class="vp-hero-box-step">Assistant IA</div>
-                    <div class="vp-hero-box-title">Suivi du jour</div>
-                </div>
-                <div class="vp-hero-text" style="flex:1">
-                    <p>Visualise ici l'état de l'automatisation du jour et relance une étape si nécessaire.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="vp-tip">
-            <div class="vp-tip-icon">
-                <svg style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
-            </div>
-            <div>
-                <h4>Ce qu'il se passe ici</h4>
-                <p>Cette page sert de monitoring quotidien. Elle te dit immédiatement si l'article du jour a bien été généré et où la chaîne s'est éventuellement arrêtée.</p>
-            </div>
-        </div>
-
         <div class="vp-journey">
             <div class="vp-journey-box">
                 @php
@@ -111,21 +87,25 @@
                         default => ['label' => 'En attente', 'bg' => '#EBF1EF', 'text' => '#004241'],
                     };
                 @endphp
-                <div class="vp-journey-head">
-                    <div>
-                        <div class="vp-journey-title">Automatisation du jour</div>
-                        <div class="vp-journey-sub">Vue synthétique des étapes automatiques de la journée.</div>
+                <div class="vp-journey-top">
+                    <div class="vp-journey-head">
+                        <div>
+                            <div class="vp-journey-title">Automatisation du jour</div>
+                            <div class="vp-journey-sub">Chaque étape indique immédiatement si le flux a avancé, s'il reste bloqué ou s'il peut repartir depuis les contenus déjà récupérés aujourd'hui.</div>
+                        </div>
+                        <div class="vp-journey-head-actions">
+                            <span class="vp-status-badge" style="background:{{ $globalColors['bg'] }}; color:{{ $globalColors['text'] }}">{{ $globalColors['label'] }}</span>
+                        </div>
                     </div>
-                    <div class="vp-journey-head-actions">
-                        <button type="button" wire:click="rerunFullFlow" wire:loading.attr="disabled" wire:target="rerunFullFlow" class="vp-mini-btn">
-                            Relancer tout le flux
+                    <div class="vp-journey-actions">
+                        <button type="button" wire:click="rerunFullFlow" wire:loading.attr="disabled" wire:target="rerunFullFlow" class="vp-primary-btn">
+                            Créer un article IA
                         </button>
                         @if ($todayAutomation['summary']['automation_paused'])
-                            <button type="button" wire:click="resumeAutomation" wire:loading.attr="disabled" wire:target="resumeAutomation" class="vp-mini-btn">Reprendre</button>
+                            <button type="button" wire:click="resumeAutomation" wire:loading.attr="disabled" wire:target="resumeAutomation" class="vp-secondary-btn">Reprendre l'automatisation</button>
                         @else
-                            <button type="button" wire:click="pauseAutomation" wire:loading.attr="disabled" wire:target="pauseAutomation" class="vp-mini-btn">Pauser l'automatisation</button>
+                            <button type="button" wire:click="pauseAutomation" wire:loading.attr="disabled" wire:target="pauseAutomation" class="vp-secondary-btn">Pauser l'automatisation</button>
                         @endif
-                        <span class="vp-status-badge" style="background:{{ $globalColors['bg'] }}; color:{{ $globalColors['text'] }}">{{ $globalColors['label'] }}</span>
                     </div>
                 </div>
 
@@ -153,8 +133,11 @@
                                     <span class="vp-status-badge" style="background:{{ $stepBadge['bg'] }}; color:{{ $stepBadge['text'] }}">{{ $stepBadge['label'] }}</span>
                                 </div>
                                 <div class="vp-journey-step-text">{{ $step['description'] }}</div>
-                                <div style="margin-top:10px">
+                                <div class="vp-journey-step-foot">
                                     <button type="button" wire:click="{{ $step['action'] }}" wire:loading.attr="disabled" wire:target="{{ $step['action'] }}" class="vp-mini-btn">{{ $step['action_label'] }}</button>
+                                    @if (!empty($step['last_run_time']))
+                                        <div class="vp-journey-step-time">Dernière exécution aujourd'hui à {{ $step['last_run_time'] }}</div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -163,48 +146,27 @@
             </div>
 
             <div class="vp-journey-box">
-                <div class="vp-journey-title">Résumé rapide</div>
-                <div class="vp-journey-sub">
-                    @if (!empty($todayAutomation['summary']['last_update']))
-                        Dernière mise à jour {{ $todayAutomation['summary']['last_update'] }}.
-                    @else
-                        Aucune activité enregistrée aujourd'hui pour le moment.
-                    @endif
-                </div>
-
-                <div class="vp-journey-kpis">
-                    <div class="vp-journey-kpi">
-                        <div class="vp-journey-kpi-value">{{ $todayAutomation['summary']['new_items'] }}</div>
-                        <div class="vp-journey-kpi-label">Articles repérés</div>
-                    </div>
-                    <div class="vp-journey-kpi">
-                        <div class="vp-journey-kpi-value">{{ $todayAutomation['summary']['enriched_items'] }}</div>
-                        <div class="vp-journey-kpi-label">Analyses IA</div>
-                    </div>
-                    <div class="vp-journey-kpi">
-                        <div class="vp-journey-kpi-value">{{ $todayAutomation['summary']['proposal_count'] }}</div>
-                        <div class="vp-journey-kpi-label">Idées prêtes</div>
-                    </div>
-                    <div class="vp-journey-kpi">
-                        <div class="vp-journey-kpi-value">{{ $todayAutomation['summary']['generate_runs'] }}</div>
-                        <div class="vp-journey-kpi-label">Générations</div>
-                    </div>
-                </div>
-
                 <div class="vp-journey-highlight">
-                    <div class="vp-journey-highlight-title">Article du jour</div>
+                    <div class="vp-journey-highlight-title">Créations du jour</div>
                     @if ($todayAutomation['summary']['article_generated'])
-                        <div class="vp-journey-highlight-main">{{ $todayAutomation['summary']['article_title'] }}</div>
-                        <div class="vp-journey-highlight-sub">Statut : {{ $todayAutomation['summary']['article_status'] === 'published' ? 'Publié' : 'Brouillon' }}</div>
-                        @if (!empty($todayAutomation['summary']['article_preview_url']))
-                            <a href="{{ $todayAutomation['summary']['article_preview_url'] }}" target="_blank" class="vp-journey-link">
-                                Ouvrir l'aperçu
-                                <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                            </a>
-                        @endif
+                        <div class="vp-journey-highlight-main">{{ $todayAutomation['summary']['generated_articles_count'] }} brouillon(s) ou article(s) créés aujourd'hui par l'automatisation</div>
+                        <div class="vp-journey-highlight-sub">Cette liste montre uniquement les créations issues du flux IA automatique ou d'une relance depuis cette page.</div>
+                        <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+                            @foreach ($todayAutomation['summary']['generated_articles'] as $article)
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:12px; background:#fff;">
+                                    <div style="min-width:0;">
+                                        <div style="font-size:13px; font-weight:700; color:#004241; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $article['title'] }}</div>
+                                        <div style="margin-top:2px; font-size:11px; color:rgba(0,66,65,.55);">Statut : {{ $article['status'] === 'published' ? 'Publié' : 'Brouillon' }}</div>
+                                    </div>
+                                    <a href="{{ $article['preview_url'] }}" target="_blank" class="vp-journey-link" style="margin-top:0; flex-shrink:0;">
+                                        Ouvrir
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
                     @else
-                        <div class="vp-journey-highlight-main">Aucun brouillon généré aujourd'hui</div>
-                        <div class="vp-journey-highlight-sub">La chaîne n'est pas encore allée jusqu'à la dernière étape.</div>
+                        <div class="vp-journey-highlight-main">Aucune création automatique aujourd'hui</div>
+                        <div class="vp-journey-highlight-sub">Tu peux lancer un nouvel article IA sans refaire de collecte si les contenus du jour ont déjà été repérés.</div>
                     @endif
                 </div>
             </div>
@@ -301,7 +263,7 @@
                     @if ($generationOverlay['is_failed'])
                         <p style="font-size:13px; color:#991B1B;">Vérifie les logs Horizon ou relance depuis l'étape concernée.</p>
                     @elseif ($generationOverlay['is_finished'])
-                        <p style="font-size:13px; color:#065F46; font-weight:600;">✓ Terminé tu peux fermer cet écran.</p>
+                        <p style="font-size:13px; color:#065F46; font-weight:600;">✓ Terminé. Tu peux fermer cet écran.</p>
                     @else
                         <p style="font-size:12px; color:rgba(0,66,65,.45);">Cet écran se met à jour automatiquement.</p>
                     @endif

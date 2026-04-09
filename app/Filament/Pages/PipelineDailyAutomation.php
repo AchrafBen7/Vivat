@@ -6,6 +6,7 @@ use App\Jobs\EnrichContentJob;
 use App\Jobs\FetchRssFeedJob;
 use App\Jobs\GenerateArticleJob;
 use App\Models\Article;
+use App\Models\ArticleSource;
 use App\Models\Cluster;
 use App\Models\ClusterItem;
 use App\Models\EnrichedItem;
@@ -24,13 +25,13 @@ class PipelineDailyAutomation extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = "Création auto d'articles brouillons IA";
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationLabel = 'Suivi du jour';
+    protected static ?string $navigationLabel = 'Création auto IA';
 
-    protected static ?string $title = 'Suivi du jour';
+    protected static ?string $title = 'Création auto IA';
 
     protected string $view = 'filament.pages.pipeline-daily-automation';
 
@@ -61,6 +62,12 @@ class PipelineDailyAutomation extends Page
             ->where('job_type', 'generate')
             ->get();
 
+        $todaySelectionJobs = PipelineJob::query()
+            ->whereDate('created_at', today())
+            ->where('job_type', 'cleanup')
+            ->get()
+            ->filter(fn (PipelineJob $job): bool => ($job->metadata['manual_action'] ?? null) === 'selection');
+
         $newItemsToday = RssItem::query()
             ->whereDate('fetched_at', today())
             ->count();
@@ -71,10 +78,12 @@ class PipelineDailyAutomation extends Page
 
         $proposalCount = count(app(ArticleSelectionService::class)->selectBestTopics(3));
 
-        $generatedArticle = Article::query()
+        $generatedArticles = Article::query()
             ->whereDate('created_at', today())
+            ->whereNotNull('cluster_id')
             ->latest('created_at')
-            ->first();
+            ->get();
+        $latestGeneratedArticle = $generatedArticles->first();
 
         $latestGenerateJob = $todayGenerateJobs->sortByDesc('created_at')->first();
 
@@ -90,6 +99,9 @@ class PipelineDailyAutomation extends Page
                     hasRunning: $todayFetchJobs->where('status', 'running')->isNotEmpty(),
                     hasFailure: $todayFetchJobs->where('status', 'failed')->isNotEmpty(),
                 ),
+                'last_run_time' => $this->formatStageTime(
+                    $todayFetchJobs->max('completed_at') ?: $todayFetchJobs->max('created_at')
+                ),
                 'action' => 'rerunFetchStage',
                 'action_label' => 'Relancer',
             ],
@@ -104,6 +116,9 @@ class PipelineDailyAutomation extends Page
                     hasRunning: $todayEnrichJobs->where('status', 'running')->isNotEmpty(),
                     hasFailure: $todayEnrichJobs->where('status', 'failed')->isNotEmpty(),
                 ),
+                'last_run_time' => $this->formatStageTime(
+                    $todayEnrichJobs->max('completed_at') ?: $todayEnrichJobs->max('created_at') ?: EnrichedItem::query()->whereDate('enriched_at', today())->max('enriched_at')
+                ),
                 'action' => 'rerunEnrichmentStage',
                 'action_label' => 'Relancer',
             ],
@@ -114,24 +129,32 @@ class PipelineDailyAutomation extends Page
                     ? $proposalCount . " idée(s) d'article actuellement disponible(s)."
                     : "Aucune idée d'article prête pour le moment.",
                 'status' => $proposalCount > 0 ? 'done' : 'idle',
+                'last_run_time' => $this->formatStageTime(
+                    $todaySelectionJobs->max('completed_at')
+                    ?: $todaySelectionJobs->max('created_at')
+                    ?: $todayGenerateJobs->max('created_at')
+                ),
                 'action' => 'rerunSelectionStage',
                 'action_label' => 'Recalculer',
             ],
             [
                 'key' => 'generate',
                 'label' => 'Génération du brouillon',
-                'description' => $generatedArticle
-                    ? "Un brouillon a déjà été créé aujourd'hui : " . $generatedArticle->title
+                'description' => $generatedArticles->isNotEmpty()
+                    ? $generatedArticles->count() . " brouillon(s) ou article(s) créé(s) aujourd'hui."
                     : ($latestGenerateJob?->status === 'failed'
                         ? "La dernière génération a échoué aujourd'hui."
                         : "Aucun brouillon généré aujourd'hui pour le moment."),
                 'status' => $this->resolveStageStatus(
-                    hasSuccess: $generatedArticle !== null || $todayGenerateJobs->where('status', 'completed')->isNotEmpty(),
+                    hasSuccess: $generatedArticles->isNotEmpty() || $todayGenerateJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayGenerateJobs->where('status', 'running')->isNotEmpty(),
                     hasFailure: $todayGenerateJobs->where('status', 'failed')->isNotEmpty(),
                 ),
+                'last_run_time' => $this->formatStageTime(
+                    $generatedArticles->max('created_at') ?: $todayGenerateJobs->max('completed_at') ?: $todayGenerateJobs->max('created_at')
+                ),
                 'action' => 'rerunGenerationStage',
-                'action_label' => 'Relancer',
+                'action_label' => 'Créer un article IA',
             ],
         ];
 
@@ -139,7 +162,7 @@ class PipelineDailyAutomation extends Page
             ? 'failed'
             : (collect($steps)->contains(fn (array $step): bool => $step['status'] === 'running')
                 ? 'running'
-                : ($generatedArticle !== null ? 'done' : 'idle'));
+                : ($generatedArticles->isNotEmpty() ? 'done' : 'idle'));
 
         $automationPaused = app(PipelineAutomationState::class)->isPaused();
 
@@ -154,13 +177,23 @@ class PipelineDailyAutomation extends Page
                 'enriched_items' => $enrichedToday,
                 'proposal_count' => $proposalCount,
                 'generate_runs' => $todayGenerateJobs->count(),
-                'article_generated' => $generatedArticle !== null,
-                'article_title' => $generatedArticle?->title,
-                'article_status' => $generatedArticle?->status,
-                'article_preview_url' => $generatedArticle
-                    ? ($generatedArticle->status === 'published'
-                        ? url('/articles/' . $generatedArticle->slug)
-                        : url('/admin-preview/articles/' . $generatedArticle->slug))
+                'article_generated' => $generatedArticles->isNotEmpty(),
+                'generated_articles_count' => $generatedArticles->count(),
+                'generated_articles' => $generatedArticles->take(4)->map(function (Article $article): array {
+                    return [
+                        'title' => $article->title,
+                        'status' => $article->status,
+                        'preview_url' => $article->status === 'published'
+                            ? url('/articles/' . $article->slug)
+                            : url('/admin-preview/articles/' . $article->slug),
+                    ];
+                })->values()->all(),
+                'article_title' => $latestGeneratedArticle?->title,
+                'article_status' => $latestGeneratedArticle?->status,
+                'article_preview_url' => $latestGeneratedArticle
+                    ? ($latestGeneratedArticle->status === 'published'
+                        ? url('/articles/' . $latestGeneratedArticle->slug)
+                        : url('/admin-preview/articles/' . $latestGeneratedArticle->slug))
                     : null,
                 'last_update' => collect([
                     $todayFetchJobs->max('created_at'),
@@ -172,6 +205,19 @@ class PipelineDailyAutomation extends Page
             ],
             'steps' => $steps,
         ];
+    }
+
+    protected function formatStageTime(mixed $value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        $date = $value instanceof Carbon ? $value : Carbon::parse($value);
+
+        return $date
+            ->timezone(config('app.timezone', 'Europe/Brussels'))
+            ->format('H:i');
     }
 
     protected function getHeaderActions(): array
@@ -253,7 +299,8 @@ class PipelineDailyAutomation extends Page
 
     public function rerunFullFlow(): void
     {
-        $feeds = $this->dispatchFetchJobs();
+        $fetchAlreadyDoneToday = $this->hasSuccessfulFetchToday();
+        $feeds = $fetchAlreadyDoneToday ? collect() : $this->dispatchFetchJobs();
         $items = $this->dispatchEnrichmentJobs();
         $proposalCount = $this->countAvailableProposals();
         $this->startProgressOverlay('full', $items->count());
@@ -262,6 +309,7 @@ class PipelineDailyAutomation extends Page
             'manual_dispatch' => true,
             'manual_action' => 'full_flow',
             'dispatched_feeds' => $feeds->count(),
+            'fetch_skipped_today' => $fetchAlreadyDoneToday,
             'dispatched_items' => $items->count(),
             'proposal_count' => $proposalCount,
             'generation_dispatched' => $generated,
@@ -328,10 +376,22 @@ class PipelineDailyAutomation extends Page
         }
 
         $cluster = Cluster::query()->find($this->generationTrackingClusterId);
+        $generationJob = PipelineJob::query()
+            ->where('job_type', 'generate')
+            ->where('metadata->cluster_id', $this->generationTrackingClusterId)
+            ->latest('created_at')
+            ->first();
         $article = Article::query()
             ->where('cluster_id', $this->generationTrackingClusterId)
             ->latest('created_at')
             ->first();
+
+        if (! $article && ! empty($generationJob?->metadata['article_id'])) {
+            $article = Article::query()->find($generationJob->metadata['article_id']);
+        }
+
+        $coverRequired = (bool) config('services.openai.generate_cover_images', true);
+        $coverReady = ! $coverRequired || ! empty($article?->cover_image_url);
 
         $generationSteps = [
             ['key' => 'queue',   'label' => "Job en file d'attente",               'detail' => "Le job de generation attend un worker disponible."],
@@ -343,7 +403,7 @@ class PipelineDailyAutomation extends Page
             ['key' => 'done',    'label' => "Brouillon cree",                      'detail' => "L'article est pret a etre relu dans l'espace editorial."],
         ];
 
-        if ($article) {
+        if ($article && $coverReady) {
             $stepsWithStatus = array_map(fn ($s) => array_merge($s, ['status' => 'done']), $generationSteps);
 
             return [
@@ -351,7 +411,7 @@ class PipelineDailyAutomation extends Page
                 'eyebrow' => 'Génération du brouillon',
                 'progress' => 100,
                 'label' => '100%',
-                'headline' => 'Le brouillon est prêt.',
+                'headline' => "Le brouillon est prêt.",
                 'current_detail' => 'Article créé : « ' . $article->title . ' »',
                 'article_preview_url' => $article->status === 'published'
                     ? url('/articles/' . $article->slug)
@@ -362,7 +422,28 @@ class PipelineDailyAutomation extends Page
             ];
         }
 
-        if ($cluster?->status === 'failed') {
+        if ($article && ! $coverReady && ($generationJob?->status !== 'failed') && $cluster?->status !== 'failed') {
+            $stepsWithStatus = array_map(function (array $step, int $idx): array {
+                return array_merge($step, [
+                    'status' => $idx < 5 ? 'done' : ($idx === 5 ? 'active' : 'waiting'),
+                ]);
+            }, $generationSteps, array_keys($generationSteps));
+
+            return [
+                'visible' => true,
+                'eyebrow' => 'Génération du brouillon',
+                'progress' => 92,
+                'label' => '92%',
+                'headline' => "Vérification finale de la cover IA…",
+                'current_detail' => "Le texte a été créé, mais la cover IA n'a pas encore été validée.",
+                'article_preview_url' => null,
+                'is_finished' => false,
+                'is_failed' => false,
+                'steps' => $stepsWithStatus,
+            ];
+        }
+
+        if (($generationJob?->status === 'failed') || $cluster?->status === 'failed') {
             $stepsWithStatus = array_map(fn ($s) => array_merge($s, ['status' => 'failed']), $generationSteps);
 
             return [
@@ -371,7 +452,7 @@ class PipelineDailyAutomation extends Page
                 'progress' => 100,
                 'label' => 'Échec',
                 'headline' => 'La génération a échoué.',
-                'current_detail' => 'Vérifie les logs Horizon pour plus de détails. Tu peux relancer depuis l\'étape 4.',
+                'current_detail' => $generationJob?->error_message ?: 'Vérifie les logs Horizon pour plus de détails. Tu peux relancer depuis l\'étape 4.',
                 'article_preview_url' => null,
                 'is_finished' => true,
                 'is_failed' => true,
@@ -432,7 +513,7 @@ class PipelineDailyAutomation extends Page
             'eyebrow' => 'Collecte des sources',
             'progress' => $finished ? 100 : $progress,
             'label' => ($finished ? 100 : $progress) . '%',
-            'headline' => $finished ? 'La collecte des sources est terminée.' : 'Collecte des sources en cours.',
+                'headline' => $finished ? 'Collecte des sources terminée.' : 'Collecte des sources en cours.',
             'current_detail' => $finished
                 ? "{$completed} feed(s) traité(s). Les nouveaux articles sont en base."
                 : "Récupération des flux RSS actifs ({$completed} / {$target} terminés).",
@@ -463,7 +544,7 @@ class PipelineDailyAutomation extends Page
             'eyebrow' => 'Analyse IA',
             'progress' => $finished ? 100 : $progress,
             'label' => ($finished ? 100 : $progress) . '%',
-            'headline' => $finished ? 'Les analyses IA sont terminées.' : 'Enrichissement des articles en cours…',
+                'headline' => $finished ? 'Analyses IA terminées.' : 'Enrichissement des articles en cours…',
             'current_detail' => $finished
                 ? "{$completed} article(s) analysé(s) lead, points clés, mots-clés SEO extraits."
                 : "Appels OpenAI en cours ({$completed} / {$target} articles traités). Chaque appel prend ~10 secondes.",
@@ -490,14 +571,14 @@ class PipelineDailyAutomation extends Page
             'headline' => $count > 0 ? "{$count} idée(s) d'article disponible(s)." : 'Aucune idée disponible enrichissement requis.',
             'current_detail' => $count > 0
                 ? "Les sujets ont été clustérisés par similarité thématique. Le meilleur sera sélectionné pour la génération."
-                : "Pas assez d'articles enrichis pour former un cluster de 2 sources minimum.",
+                : "Aucun sujet enrichi exploitable pour le moment.",
             'article_preview_url' => null,
             'is_finished' => true,
             'is_failed' => false,
             'steps' => [
                 ['key' => 'cluster', 'label' => 'Clustering thématique (Jaccard)', 'detail' => 'Regroupement des articles par similarité de mots-clés (seuil 8%).', 'status' => 'done'],
                 ['key' => 'score',   'label' => 'Scoring des clusters', 'detail' => 'Qualité, fraîcheur, SEO, diversité des sources.', 'status' => 'done'],
-                ['key' => 'select',  'label' => 'Sélection finale', 'detail' => $count > 0 ? "{$count} idée(s) retenue(s)." : 'Aucun cluster valide (min. 2 sources requises).', 'status' => $count > 0 ? 'done' : 'failed'],
+                ['key' => 'select',  'label' => 'Sélection finale', 'detail' => $count > 0 ? "{$count} idée(s) retenue(s)." : 'Aucun sujet final retenu pour le moment.', 'status' => $count > 0 ? 'done' : 'failed'],
             ],
         ];
     }
@@ -505,24 +586,53 @@ class PipelineDailyAutomation extends Page
     private function buildFullFlowOverlayState(): array
     {
         $startedAt = $this->parseProgressStartedAt();
+        $manualFlowJob = PipelineJob::query()
+            ->where('job_type', 'cleanup')
+            ->where('metadata->manual_action', 'full_flow')
+            ->when($startedAt, fn ($query) => $query->where('created_at', '>=', $startedAt))
+            ->latest('created_at')
+            ->first();
+        $fetchSkippedToday = (bool) ($manualFlowJob?->metadata['fetch_skipped_today'] ?? false);
         $activeFeedCount = max(1, RssFeed::query()->where('is_active', true)->count());
         $fetchCount = PipelineJob::query()
             ->where('job_type', 'fetch_rss')
             ->when($startedAt, fn ($query) => $query->where('created_at', '>=', $startedAt))
             ->count();
+        $todayFetchSuccessCount = PipelineJob::query()
+            ->whereDate('created_at', today())
+            ->where('job_type', 'fetch_rss')
+            ->where('status', 'completed')
+            ->count();
         $enrichCount = PipelineJob::query()
             ->where('job_type', 'enrich')
             ->when($startedAt, fn ($query) => $query->where('created_at', '>=', $startedAt))
             ->count();
+        $todayEnrichSuccessCount = PipelineJob::query()
+            ->whereDate('created_at', today())
+            ->where('job_type', 'enrich')
+            ->where('status', 'completed')
+            ->count();
 
-        $fetchDone = $fetchCount >= $activeFeedCount;
-        $enrichDone = $enrichCount >= max(1, $this->progressTargetCount);
+        if (! $fetchSkippedToday && $fetchCount === 0 && $todayFetchSuccessCount >= $activeFeedCount) {
+            $fetchSkippedToday = true;
+        }
+
+        $fetchDone = $fetchSkippedToday || $fetchCount >= $activeFeedCount || $todayFetchSuccessCount >= $activeFeedCount;
         $proposalCount = $this->countAvailableProposals();
         $proposalReady = $proposalCount > 0;
+        $effectiveEnrichCount = $fetchSkippedToday && $enrichCount === 0
+            ? $todayEnrichSuccessCount
+            : max($enrichCount, $todayEnrichSuccessCount);
+        $enrichDone = $enrichCount >= max(1, $this->progressTargetCount)
+            || ($fetchSkippedToday && $effectiveEnrichCount > 0)
+            || ($proposalReady && $effectiveEnrichCount > 0);
         $generationState = $this->buildGenerationOverlayState();
         $generationFinished = (bool) ($generationState['is_finished'] ?? false);
         $generationFailed = (bool) ($generationState['is_failed'] ?? false);
         $finished = $generationFinished && ! $generationFailed;
+        $displayFetchCount = $fetchDone
+            ? $activeFeedCount
+            : min($activeFeedCount, max($fetchCount, $todayFetchSuccessCount));
 
         $progress = 5
             + ($fetchDone ? 15 : min(14, (int) round($fetchCount / $activeFeedCount * 15)))
@@ -532,7 +642,7 @@ class PipelineDailyAutomation extends Page
         $progress = min(100, $progress);
 
         $headline = match (true) {
-            $finished        => 'Le flux complet a terminé son cycle.',
+            $finished        => 'La création de l’article est terminée.',
             $generationFailed => 'La génération a échoué.',
             ! $fetchDone     => 'Collecte des sources RSS en cours…',
             ! $enrichDone    => 'Analyse IA des articles en cours…',
@@ -545,24 +655,36 @@ class PipelineDailyAutomation extends Page
                 'key'    => 'fetch',
                 'label'  => 'Collecte RSS',
                 'detail' => $fetchDone
-                    ? "{$fetchCount} feed(s) collecté(s)"
-                    : "{$fetchCount} / {$activeFeedCount} feeds lancés",
+                    ? ($fetchSkippedToday
+                        ? "Déjà fait aujourd'hui : {$activeFeedCount} / {$activeFeedCount} feeds collectés."
+                        : "Relance en cours : {$displayFetchCount} / {$activeFeedCount} feeds collectés.")
+                    : ($fetchCount > 0
+                        ? "Relance en cours : {$displayFetchCount} / {$activeFeedCount} feeds collectés."
+                        : "Collecte prête : {$displayFetchCount} / {$activeFeedCount} feeds déjà disponibles aujourd'hui."),
                 'status' => $fetchDone ? 'done' : (! $fetchDone && $fetchCount > 0 ? 'active' : 'active'),
             ],
             [
                 'key'    => 'enrich',
                 'label'  => 'Analyse IA',
                 'detail' => $enrichDone
-                    ? "{$enrichCount} article(s) enrichi(s)"
-                    : ($enrichCount > 0 ? "{$enrichCount} enrichi(s), traitement en cours…" : 'En attente des fetches…'),
+                    ? ($fetchSkippedToday && $enrichCount === 0
+                        ? "Déjà faite aujourd'hui : {$effectiveEnrichCount} article(s) enrichi(s)."
+                        : "Analyse du jour terminée : {$effectiveEnrichCount} article(s) enrichi(s).")
+                    : ($enrichCount > 0
+                        ? "Relance en cours : {$enrichCount} article(s) enrichi(s), traitement encore actif."
+                        : ($fetchSkippedToday
+                            ? 'Prête à être relancée à partir des contenus déjà récupérés aujourd’hui.'
+                            : 'En attente de la collecte du jour.')),
                 'status' => $enrichDone ? 'done' : ($fetchDone ? 'active' : 'waiting'),
             ],
             [
                 'key'    => 'select',
                 'label'  => 'Sélection du sujet',
                 'detail' => $proposalReady
-                    ? "{$proposalCount} idée(s) disponible(s), meilleure sélectionnée"
-                    : 'Calcul des clusters thématiques…',
+                    ? "Terminé : {$proposalCount} idée(s) disponible(s), meilleure sélectionnée."
+                    : ($enrichDone
+                        ? 'En cours : calcul des clusters thématiques et du meilleur sujet.'
+                        : 'En attente des analyses IA.'),
                 'status' => $proposalReady ? 'done' : ($enrichDone ? 'active' : 'waiting'),
             ],
             [
@@ -576,7 +698,7 @@ class PipelineDailyAutomation extends Page
 
         return [
             'visible'            => true,
-            'eyebrow'            => 'Relance complète du flux',
+            'eyebrow'            => 'Création d\'un article IA',
             'progress'           => $finished ? 100 : $progress,
             'label'              => ($finished ? 100 : $progress) . '%',
             'headline'           => $headline,
@@ -613,6 +735,15 @@ class PipelineDailyAutomation extends Page
         return $feeds;
     }
 
+    private function hasSuccessfulFetchToday(): bool
+    {
+        return PipelineJob::query()
+            ->whereDate('created_at', today())
+            ->where('job_type', 'fetch_rss')
+            ->where('status', 'completed')
+            ->exists();
+    }
+
     private function dispatchEnrichmentJobs()
     {
         $limit = max(1, (int) config('pipeline_schedule.enrich_items.limit', 3));
@@ -641,7 +772,12 @@ class PipelineDailyAutomation extends Page
 
     private function dispatchGenerationFromBestProposal(): bool
     {
-        $proposal = app(ArticleSelectionService::class)->selectBestTopics(1)[0] ?? null;
+        $proposal = collect(app(ArticleSelectionService::class)->selectBestTopics(8))
+            ->first(fn (array $candidate): bool => ! $this->proposalAlreadyUsed($candidate));
+
+        if (! is_array($proposal)) {
+            $proposal = app(ArticleSelectionService::class)->selectBestTopics(1)[0] ?? null;
+        }
 
         if (! is_array($proposal) || empty($proposal['items'])) {
             return false;
@@ -689,6 +825,20 @@ class PipelineDailyAutomation extends Page
         }
 
         return true;
+    }
+
+    private function proposalAlreadyUsed(array $proposal): bool
+    {
+        $itemIds = collect($proposal['items'] ?? [])->pluck('id')->filter()->values()->all();
+
+        if ($itemIds === []) {
+            return false;
+        }
+
+        return ArticleSource::query()
+            ->whereIn('rss_item_id', $itemIds)
+            ->whereHas('article', fn ($query) => $query->whereIn('status', ['draft', 'review', 'published']))
+            ->exists();
     }
 
     private function startProgressOverlay(string $mode, int $targetCount = 0): void

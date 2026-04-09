@@ -64,8 +64,8 @@ class DashboardSubmissions extends Page
         return [
             'submitted' => Submission::whereIn('status', ['submitted', 'pending'])->count(),
             'review' => Submission::where('status', 'under_review')->count(),
-            'awaiting_payment' => Submission::whereIn('status', ['price_proposed', 'awaiting_payment', 'payment_pending', 'payment_failed'])->count(),
-            'rejected' => Submission::where('status', 'rejected')->count(),
+            'changes_requested' => Submission::where('status', 'changes_requested')->count(),
+            'total_to_review' => Submission::whereIn('status', ['submitted', 'pending', 'under_review', 'changes_requested'])->count(),
             'today' => Submission::whereDate('created_at', today())->count(),
         ];
     }
@@ -74,7 +74,7 @@ class DashboardSubmissions extends Page
     {
         return Submission::query()
             ->with(['user', 'category', 'reviewer', 'quote.preset', 'latestSubmissionPayment'])
-            ->whereNotIn('status', ['draft'])
+            ->whereIn('status', ['submitted', 'pending', 'under_review', 'changes_requested'])
             ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
             ->when($this->search !== '', function ($query) {
                 $search = trim($this->search);
@@ -89,7 +89,7 @@ class DashboardSubmissions extends Page
                         ->orWhere('email', 'like', '%' . $search . '%');
                 });
             })
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+            ->orderByRaw("FIELD(status, 'submitted', 'pending', 'under_review', 'changes_requested')")
             ->orderByDesc('created_at')
             ->limit(24)
             ->get()

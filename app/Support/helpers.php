@@ -38,30 +38,42 @@ if (! function_exists('vivat_category_fallback_image')) {
      */
     function vivat_category_fallback_image(?string $categorySlug, int $width = 800, int $height = 600, ?string $articleIdentifier = null, ?string $contextSeed = null): string
     {
-        static $usedBaseUrls = [];
         $map = config('vivat.pexels_fallback_urls', []);
-        $allUrls = [];
-        foreach ($map as $categoryUrls) {
-            if (is_array($categoryUrls)) {
-                foreach ($categoryUrls as $u) {
+        $categoryKey = strtolower(trim((string) $categorySlug));
+        $categoryUrls = $map[$categoryKey] ?? null;
+        $candidateUrls = [];
+
+        if (is_array($categoryUrls)) {
+            foreach ($categoryUrls as $u) {
+                $base = preg_replace('#\?.*$#', '', (string) $u);
+                if ($base !== '' && ! in_array($base, $candidateUrls, true)) {
+                    $candidateUrls[] = $base;
+                }
+            }
+        }
+
+        if (empty($candidateUrls)) {
+            foreach ($map as $fallbackCategoryUrls) {
+                if (! is_array($fallbackCategoryUrls)) {
+                    continue;
+                }
+
+                foreach ($fallbackCategoryUrls as $u) {
                     $base = preg_replace('#\?.*$#', '', (string) $u);
-                    if ($base !== '' && ! in_array($base, $allUrls, true)) {
-                        $allUrls[] = $base;
+                    if ($base !== '' && ! in_array($base, $candidateUrls, true)) {
+                        $candidateUrls[] = $base;
                     }
                 }
             }
         }
-        if (empty($allUrls)) {
-            $allUrls = ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
+
+        if (empty($candidateUrls)) {
+            $candidateUrls = ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
         }
-        $available = array_values(array_diff($allUrls, $usedBaseUrls));
-        if (empty($available)) {
-            $usedBaseUrls = [];
-            $available = $allUrls;
-        }
+
         $seed = (string) ($articleIdentifier ?? '') . ($contextSeed ? '-' . $contextSeed : '');
-        $baseUrl = $available[abs(crc32($seed)) % count($available)];
-        $usedBaseUrls[] = $baseUrl;
+        $seed = $seed !== '' ? $seed : ($categoryKey !== '' ? $categoryKey : 'vivat-fallback');
+        $baseUrl = $candidateUrls[abs(crc32($seed)) % count($candidateUrls)];
         $w = max(1, $width);
         $h = max(1, $height);
 

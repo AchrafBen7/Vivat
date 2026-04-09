@@ -31,9 +31,11 @@ class DashboardPayments extends Page
     public function getStats(): array
     {
         return [
-            'paid' => Payment::where('status', 'paid')->count(),
-            'refunded' => Payment::where('status', 'refunded')->count(),
-            'today' => Payment::whereDate('created_at', today())->count(),
+            'paid' => Submission::whereIn('status', ['payment_succeeded', 'published', 'approved'])->count(),
+            'published' => Submission::whereIn('status', ['published', 'approved'])->count(),
+            'today' => Submission::whereDate('updated_at', today())
+                ->whereIn('status', ['payment_succeeded', 'published', 'approved'])
+                ->count(),
         ];
     }
 
@@ -42,19 +44,23 @@ class DashboardPayments extends Page
         return Submission::query()
             ->with([
                 'user',
+                'category',
+                'publishedArticle',
                 'quote.preset',
                 'latestSubmissionPayment',
                 'payment',
             ])
-            ->where('status', '!=', 'draft')
+            ->whereIn('status', ['payment_succeeded', 'published', 'approved'])
             ->when($this->status !== '', function ($query) {
                 $status = $this->status;
-
-                $query->where(function ($innerQuery) use ($status): void {
-                    $innerQuery
-                        ->whereHas('latestSubmissionPayment', fn ($paymentQuery) => $paymentQuery->where('status', $status))
-                        ->orWhereHas('payment', fn ($paymentQuery) => $paymentQuery->where('status', $status));
-                });
+                if ($status === 'published') {
+                    $query->whereIn('status', ['published', 'approved']);
+                    return;
+                }
+                if ($status === 'payment_succeeded') {
+                    $query->where('status', 'payment_succeeded');
+                    return;
+                }
             })
             ->when($this->search !== '', function ($query) {
                 $search = trim($this->search);
@@ -67,8 +73,8 @@ class DashboardPayments extends Page
                             ->orWhere('email', 'like', '%' . $search . '%'));
                 });
             })
-            ->orderByRaw("FIELD(status, 'awaiting_payment', 'payment_pending', 'payment_failed', 'payment_succeeded', 'published', 'rejected')")
-            ->orderByDesc('created_at')
+            ->orderByRaw("FIELD(status, 'payment_succeeded', 'published', 'approved')")
+            ->orderByDesc('updated_at')
             ->limit(24)
             ->get()
             ->map(function (Submission $submission): array {
@@ -76,21 +82,11 @@ class DashboardPayments extends Page
                 $workflowPayment = $submission->latestSubmissionPayment;
                 $quote = $submission->quote;
 
-                $paymentStatus = $workflowPayment?->status ?? $legacyPayment?->status ?? 'pending';
+                $paymentStatus = $workflowPayment?->status ?? $legacyPayment?->status ?? 'succeeded';
 
                 $submissionStatus = match ($submission->status) {
-                    'submitted' => 'Soumise',
-                    'under_review' => 'En revue',
-                    'changes_requested' => 'Corrections demandées',
-                    'price_proposed' => 'Prix proposé',
-                    'awaiting_payment' => 'En attente de paiement',
-                    'payment_pending' => 'Paiement en cours',
-                    'payment_failed' => 'Paiement échoué',
-                    'payment_succeeded' => 'Paiement confirmé',
-                    'published' => 'Publiée',
-                    'rejected' => 'Rejetée',
-                    'approved' => 'Approuvée',
-                    'pending' => 'En attente',
+                    'payment_succeeded' => 'Payé, publication en cours',
+                    'published', 'approved' => 'Publié',
                     default => $submission->status ?: 'Aucune soumission',
                 };
 
@@ -103,12 +99,14 @@ class DashboardPayments extends Page
                     'title' => $submission->title ?? 'Soumission sans titre',
                     'author' => $submission->user?->name ?? 'Utilisateur inconnu',
                     'author_email' => $submission->user?->email ?? '',
+                    'category' => $submission->category?->name ?? 'Sans catégorie',
                     'amount' => $displayAmount,
                     'status' => $paymentStatus,
                     'submission_status' => $submissionStatus,
                     'refund_reason' => $legacyPayment?->refund_reason,
-                    'created_at' => ($workflowPayment?->created_at ?? $quote?->created_at ?? $legacyPayment?->created_at ?? $submission->created_at)?->format('d/m/Y à H:i') ?? 'Date inconnue',
+                    'created_at' => ($workflowPayment?->updated_at ?? $workflowPayment?->created_at ?? $quote?->created_at ?? $legacyPayment?->updated_at ?? $legacyPayment?->created_at ?? $submission->updated_at ?? $submission->created_at)?->format('d/m/Y à H:i') ?? 'Date inconnue',
                     'submission_url' => \App\Filament\Resources\Submissions\SubmissionResource::getUrl('view', ['record' => $submission]),
+                    'article_url' => $submission->publishedArticle?->slug ? url('/articles/' . $submission->publishedArticle->slug) : null,
                     'can_refund' => $legacyPayment?->isRefundable() ?? false,
                     'legacy_payment_id' => $legacyPayment?->id,
                 ];

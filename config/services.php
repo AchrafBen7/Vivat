@@ -42,8 +42,15 @@ return [
         'generate_cover_images' => filter_var(env('OPENAI_GENERATE_COVER_IMAGES', true), FILTER_VALIDATE_BOOL),
     ],
 
+    'pexels' => [
+        'api_key' => env('PEXELS_API_KEY', ''),
+    ],
+
     'image_generation' => [
-        'provider' => env('IMAGE_GENERATION_PROVIDER', 'bfl'),
+        'provider'       => env('IMAGE_GENERATION_PROVIDER', 'bfl'),
+        'max_attempts'   => (int) env('IMAGE_GENERATION_MAX_ATTEMPTS', 3),
+        'vision_check'   => filter_var(env('IMAGE_GENERATION_VISION_CHECK', true), FILTER_VALIDATE_BOOL),
+        'style_ref_urls' => env('COVER_STYLE_REF_URLS', ''),
     ],
 
     'bfl' => [

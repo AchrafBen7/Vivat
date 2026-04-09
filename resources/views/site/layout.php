@@ -14,6 +14,9 @@ $sessionErrors = session()->get('errors');
 $sessionErrorMessages = $sessionErrors ? $sessionErrors->getBag('default')->getMessages() : [];
 $newsletterEmailError = $sessionErrorMessages['newsletter_email'][0] ?? null;
 $newsletterOldEmail = old('newsletter_email', '');
+$viteManifestPath = public_path('build/manifest.json');
+$viteHotPath = public_path('hot');
+$canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath);
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($content_locale) ?>">
@@ -44,7 +47,9 @@ $newsletterOldEmail = old('newsletter_email', '');
     <?php if (! empty($og_image)) { ?>
     <meta name="twitter:image" content="<?= htmlspecialchars($og_image) ?>">
     <?php } ?>
+    <?php if ($canLoadViteAssets) { ?>
     <?= app(\Illuminate\Foundation\Vite::class)(['resources/js/app.js']) ?>
+    <?php } ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {

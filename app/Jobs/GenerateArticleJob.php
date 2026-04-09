@@ -69,7 +69,7 @@ class GenerateArticleJob implements ShouldQueue
                 'max_words' => $this->maxWords,
                 'context_priority' => $this->contextPriority,
             ],
-            'retry_count' => max(0, $this->attempts() 1),
+            'retry_count' => max(0, $this->attempts() - 1),
         ]);
 
         try {
@@ -105,6 +105,7 @@ class GenerateArticleJob implements ShouldQueue
                     'article_id' => $article->id,
                     'article_slug' => $article->slug,
                     'article_status' => $article->status,
+                    'cover_generated' => ! empty($article->cover_image_url),
                 ]),
             ]);
 
@@ -120,7 +121,7 @@ class GenerateArticleJob implements ShouldQueue
                 'status' => 'failed',
                 'completed_at' => now(),
                 'error_message' => $e->getMessage(),
-                'retry_count' => max(0, $this->attempts() 1),
+                'retry_count' => max(0, $this->attempts() - 1),
             ]);
 
             throw $e;

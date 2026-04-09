@@ -8,7 +8,7 @@
         .vp-wrap { display:flex; flex-direction:column; gap:20px; }
         .vp-hero { position:relative; overflow:hidden; border-radius:24px; padding:24px; color:#fff; background:linear-gradient(135deg,#004241 0%,#185B58 58%,#4C807C 100%); }
         .vp-hero-inner { position:relative; display:flex; align-items:center; gap:16px; }
-        .vp-hero-box { flex-shrink:0; min-width:180px; padding:12px 16px; border-radius:16px; background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); }
+        .vp-hero-box { flex-shrink:0; min-width:0; padding:0; border-radius:0; background:transparent; backdrop-filter:none; }
         .vp-hero-box-step { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.72); }
         .vp-hero-box-title { margin-top:4px; font-size:18px; font-weight:700; line-height:1.1; }
         .vp-hero-text p { margin-top:4px; font-size:14px; color:rgba(255,255,255,0.68); }

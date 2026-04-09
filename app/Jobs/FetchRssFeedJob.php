@@ -43,7 +43,7 @@ class FetchRssFeedJob implements ShouldQueue
                 'source' => $this->feed->source?->name,
                 'category' => $this->feed->category?->name,
             ],
-            'retry_count' => max(0, $this->attempts() 1),
+            'retry_count' => max(0, $this->attempts() - 1),
         ]);
 
         try {
@@ -80,6 +80,7 @@ class FetchRssFeedJob implements ShouldQueue
                     $item['link'],
                     $item['title']
                 );
+                $normalizedPubDate = $parser->normalizePubDate($item['pubDate'] ?? null);
                 if (RssItem::where('dedup_hash', $hash)->exists()) {
                     continue;
                 }
@@ -91,8 +92,8 @@ class FetchRssFeedJob implements ShouldQueue
                     'description' => mb_substr($item['description'] ?? '', 0, 1000),
                     'guid' => $item['guid'] ?? null,
                     'dedup_hash' => $hash,
-                    'published_at' => isset($item['pubDate']) && $item['pubDate']
-                        ? \Illuminate\Support\Carbon::parse($item['pubDate'])
+                    'published_at' => $normalizedPubDate
+                        ? \Illuminate\Support\Carbon::parse($normalizedPubDate)
                         : null,
                     'fetched_at' => now(),
                     'status' => 'new',
@@ -117,7 +118,7 @@ class FetchRssFeedJob implements ShouldQueue
                 'status' => 'failed',
                 'completed_at' => now(),
                 'error_message' => $e->getMessage(),
-                'retry_count' => max(0, $this->attempts() 1),
+                'retry_count' => max(0, $this->attempts() - 1),
             ]);
 
             throw $e;

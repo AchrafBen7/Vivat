@@ -13,7 +13,7 @@ class PipelineRssFeeds extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedRss;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Brouillons IA manuels';
 
     protected static ?int $navigationSort = 2;
 

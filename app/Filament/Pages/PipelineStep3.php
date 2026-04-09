@@ -24,9 +24,9 @@ class PipelineStep3 extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Brouillons IA manuels';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 12;
 
     protected static ?string $navigationLabel = 'Brouillons IA';
 
@@ -92,6 +92,30 @@ class PipelineStep3 extends Page
             ->orderedForHome()
             ->pluck('name', 'id')
             ->all();
+    }
+
+    public function deleteDraft(string $articleId): void
+    {
+        $article = Article::query()->find($articleId);
+
+        if (! $article || $article->status !== 'draft') {
+            Notification::make()
+                ->danger()
+                ->title('Suppression impossible')
+                ->body('Seuls les brouillons peuvent être supprimés depuis cette page.')
+                ->send();
+
+            return;
+        }
+
+        $article->articleSources()->delete();
+        $article->delete();
+
+        Notification::make()
+            ->success()
+            ->title('Brouillon supprimé')
+            ->body("Le brouillon a bien été retiré.")
+            ->send();
     }
 
     public function getRecentPublished(): array

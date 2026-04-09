@@ -17,9 +17,9 @@ class PipelineCronJobs extends Page
 
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = "Création auto d'articles brouillons IA";
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $navigationLabel = 'Historique automatique';
 

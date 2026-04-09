@@ -16,9 +16,9 @@ class PipelineStep1 extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedRss;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Assistant IA';
+    protected static string|\UnitEnum|null $navigationGroup = 'Brouillons IA manuels';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationLabel = 'Sources & repérage';
 
