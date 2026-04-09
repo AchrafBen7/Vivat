@@ -19,7 +19,7 @@ class FaqController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => $locale,
-            'title' => 'FAQ — Vivat',
+            'title' => 'FAQ Vivat',
             'meta_description' => 'Questions fréquentes sur Vivat, la lecture des articles, la newsletter et la contribution au site.',
             'canonical_url' => url('/faq'),
         ]);

@@ -50,7 +50,7 @@ class PipelineProposals extends Page
                     Notification::make()
                         ->success()
                         ->title('Propositions actualisées')
-                        ->body('Le classement des meilleurs sujets IA vient d’être recalculé.')
+                        ->body("Le classement des meilleurs sujets IA vient d'être recalculé.")
                         ->send();
                 }),
         ];
@@ -64,7 +64,7 @@ class PipelineProposals extends Page
             Notification::make()
                 ->danger()
                 ->title('Proposition introuvable')
-                ->body('Cette proposition n’est plus disponible.')
+                ->body("Cette proposition n'est plus disponible.")
                 ->send();
 
             return;

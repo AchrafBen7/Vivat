@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivat — Stack Technique Backend</title>
+<title>Vivat  Stack Technique Backend</title>
 <style>
   @page {
     size: A4;
@@ -143,11 +143,11 @@
 </style>
 </head>
 <body>
-<h1>Vivat — Rapport complet du travail realise</h1>
+<h1>Vivat  Rapport complet du travail realise</h1>
 <blockquote>
-<p><strong>Projet</strong> : Vivat — Plateforme media automatisee
+<p><strong>Projet</strong> : Vivat  Plateforme media automatisee
 <strong>Developpeur Backend</strong> : Achraf Ben Ali
-<strong>Periode</strong> : Janvier — Fevrier 2026
+<strong>Periode</strong> : Janvier  Fevrier 2026
 <strong>Technologie</strong> : Laravel 12, PHP 8.3, MySQL 8, Redis, Docker, OpenAI GPT-4o, Stripe</p>
 </blockquote>
 <hr>
@@ -155,8 +155,8 @@
 <p>Ce document presente de maniere detaillee tout le travail effectue sur le backend du projet Vivat, de la premiere ligne de documentation jusqu&#39;a l&#39;API complete avec 94 endpoints. Il est destine au chef de projet pour avoir une vue claire de l&#39;avancement, des choix techniques et de ce qui reste a faire.</p>
 <p>Le projet Vivat est une plateforme media qui repose sur un moteur d&#39;acquisition de contenu automatise : le systeme recupere automatiquement des articles depuis des flux RSS de medias francophones, les analyse par intelligence artificielle, puis genere des articles originaux optimises pour le referencement (SEO).</p>
 <hr>
-<h2>PHASE 1 — Fondations du projet</h2>
-<h3>Etape 1 — Documentation technique prealable</h3>
+<h2>PHASE 1  Fondations du projet</h2>
+<h3>Etape 1  Documentation technique prealable</h3>
 <p><strong>Objectif</strong> : Ne pas coder a l&#39;aveugle. Poser les bases avant de commencer.</p>
 <p>Avant d&#39;ecrire la moindre ligne de code, j&#39;ai redige 5 documents de reference :</p>
 <table>
@@ -189,7 +189,7 @@
 </tbody></table>
 <p><strong>Pourquoi c&#39;est important</strong> : Ces documents servent de feuille de route. Chaque decision est documentee avant l&#39;implementation. Un nouveau developpeur peut lire ces fichiers et comprendre le projet en 30 minutes.</p>
 <hr>
-<h3>Etape 2 — Creation du projet Laravel 12</h3>
+<h3>Etape 2  Creation du projet Laravel 12</h3>
 <p><strong>Objectif</strong> : Initialiser le projet avec le framework.</p>
 <ul>
 <li>Installation de Laravel 12, la derniere version du framework PHP le plus utilise au monde</li>
@@ -198,7 +198,7 @@
 </ul>
 <p><strong>Resultat</strong> : Un projet Laravel vierge mais structure, pret a recevoir du code.</p>
 <hr>
-<h3>Etape 3 — Configuration de la base de donnees</h3>
+<h3>Etape 3  Configuration de la base de donnees</h3>
 <p><strong>Objectif</strong> : Utiliser MySQL au lieu de SQLite (la base par defaut de Laravel).</p>
 <ul>
 <li>Configuration de MySQL 8 comme base de donnees principale</li>
@@ -207,7 +207,7 @@
 </ul>
 <p><strong>Pourquoi MySQL et pas SQLite</strong> : MySQL est une base de donnees production-ready, plus performante, avec support du full-text search (recherche par mots-cles dans les articles) et des triggers (mises a jour automatiques).</p>
 <hr>
-<h3>Etape 4 — Dockerisation complete de l&#39;environnement</h3>
+<h3>Etape 4  Dockerisation complete de l&#39;environnement</h3>
 <p><strong>Objectif</strong> : Que n&#39;importe quel developpeur puisse lancer le projet en une seule commande.</p>
 <p>J&#39;ai cree un environnement Docker complet avec 4 services :</p>
 <table>
@@ -257,7 +257,7 @@ docker compose exec app bash  ← entre dans le container
 </code></pre>
 <p><strong>Pourquoi Docker</strong> : L&#39;environnement est identique en local, en staging et en production. Plus de &quot;ca marche chez moi mais pas chez toi&quot;. Un seul <code>docker compose up -d</code> et tout est pret.</p>
 <hr>
-<h2>PHASE 2 — Le moteur d&#39;acquisition de contenu (fonctionnalite principale)</h2>
+<h2>PHASE 2  Le moteur d&#39;acquisition de contenu (fonctionnalite principale)</h2>
 <p>C&#39;est le coeur du projet. Un pipeline automatise en 5 etapes qui transforme des flux RSS en articles originaux.</p>
 <h3>Comment ca marche (vue simplifiee)</h3>
 <pre><code>Medias (Reporterre, Futura Sciences, Novethic...)
@@ -278,13 +278,13 @@ docker compose exec app bash  ← entre dans le container
   [5] PUBLICATION : l&#39;article passe en review puis est publie
 </code></pre>
 <hr>
-<h3>Etape 5 — Schema de base de donnees (12 migrations, 11 tables)</h3>
+<h3>Etape 5  Schema de base de donnees (12 migrations, 11 tables)</h3>
 <p><strong>Objectif</strong> : Creer toutes les tables necessaires au fonctionnement du pipeline.</p>
 <p>J&#39;ai ecrit <strong>12 fichiers de migration</strong> (des scripts PHP qui creent les tables automatiquement). Chaque migration est numerotee pour s&#39;executer dans le bon ordre, car certaines tables dependent d&#39;autres (un flux RSS est lie a une source, donc la table <code>sources</code> doit exister avant <code>rss_feeds</code>).</p>
 <p><strong>Choix technique important</strong> : Toutes les tables utilisent des <strong>UUID</strong> comme identifiant (ex: <code>019c413d-f29d-71b9-b289-0ff1bd1ac7ad</code>) au lieu de nombres (1, 2, 3...). Avantages : impossible de deviner un ID dans l&#39;URL, pas de collision si on fusionne des bases, compatible avec une architecture distribuee.</p>
 <p>Voici le detail de chaque table creee, avec ses colonnes et son role :</p>
 <hr>
-<h4>Table 1 — <code>sources</code> (les medias surveilles)</h4>
+<h4>Table 1  <code>sources</code> (les medias surveilles)</h4>
 <p>Chaque source represente un media qu&#39;on surveille (Reporterre, Futura Sciences, Novethic...).</p>
 <table>
 <thead>
@@ -332,7 +332,7 @@ docker compose exec app bash  ← entre dans le container
 </tbody></table>
 <p><strong>Index</strong> : sur <code>is_active</code> et <code>language</code> pour filtrer rapidement les sources actives.</p>
 <hr>
-<h4>Table 2 — <code>categories</code> (les 14 categories thematiques)</h4>
+<h4>Table 2  <code>categories</code> (les 14 categories thematiques)</h4>
 <p>Les categories editoriales du site (Environnement, Sante, Energie, Alimentation...).</p>
 <table>
 <thead>
@@ -355,7 +355,7 @@ docker compose exec app bash  ← entre dans le container
 <tr>
 <td><code>slug</code></td>
 <td>string, unique</td>
-<td>Version URL-friendly (&quot;environnement&quot;) — utilisee dans les URLs</td>
+<td>Version URL-friendly (&quot;environnement&quot;)  utilisee dans les URLs</td>
 </tr>
 <tr>
 <td><code>description</code></td>
@@ -375,7 +375,7 @@ docker compose exec app bash  ← entre dans le container
 </tbody></table>
 <p><strong>Index unique</strong> sur <code>slug</code> : deux categories ne peuvent pas avoir le meme slug.</p>
 <hr>
-<h4>Table 3 — <code>rss_feeds</code> (les flux RSS a recuperer)</h4>
+<h4>Table 3  <code>rss_feeds</code> (les flux RSS a recuperer)</h4>
 <p>Chaque flux RSS est lie a une source et a une categorie. Le systeme sait quand il doit les recuperer.</p>
 <table>
 <thead>
@@ -429,7 +429,7 @@ docker compose exec app bash  ← entre dans le container
 <p><strong>Index composite</strong> <code>idx_feeds_due_fetch</code> sur (<code>is_active</code>, <code>last_fetched_at</code>) : permet de trouver instantanement les flux qui doivent etre recuperes.</p>
 <p><strong>Cles etrangeres</strong> : si on supprime une source, le <code>source_id</code> passe a NULL (l&#39;article n&#39;est pas supprime).</p>
 <hr>
-<h4>Table 4 — <code>rss_items</code> (les articles bruts decouverts)</h4>
+<h4>Table 4  <code>rss_items</code> (les articles bruts decouverts)</h4>
 <p>Chaque item est un article decouvert dans un flux RSS. C&#39;est la matiere premiere du pipeline.</p>
 <table>
 <thead>
@@ -492,7 +492,7 @@ docker compose exec app bash  ← entre dans le container
 <tr>
 <td><code>dedup_hash</code></td>
 <td>string(64), unique</td>
-<td>Hash SHA-256 de l&#39;URL+titre — empeche les doublons</td>
+<td>Hash SHA-256 de l&#39;URL+titre  empeche les doublons</td>
 </tr>
 <tr>
 <td><code>created_at</code></td>
@@ -512,7 +512,7 @@ docker compose exec app bash  ← entre dans le container
 <p><strong>Index full-text</strong> sur (<code>title</code>, <code>description</code>) : permet la recherche par mots-cles dans les items.</p>
 <p><strong>Deduplication</strong> : le hash <code>dedup_hash</code> empeche d&#39;inserer deux fois le meme article, meme s&#39;il apparait dans plusieurs flux RSS.</p>
 <hr>
-<h4>Table 5 — <code>enriched_items</code> (l&#39;analyse IA de chaque article)</h4>
+<h4>Table 5  <code>enriched_items</code> (l&#39;analyse IA de chaque article)</h4>
 <p>Chaque item enrichi est le resultat de l&#39;analyse IA d&#39;un article brut. Relation 1:1 avec <code>rss_items</code>.</p>
 <table>
 <thead>
@@ -584,9 +584,9 @@ docker compose exec app bash  ← entre dans le container
 </tr>
 </tbody></table>
 <p><strong>Contrainte unique</strong> sur <code>rss_item_id</code> : un item RSS n&#39;a qu&#39;un seul enrichissement.</p>
-<p><strong>Les champs JSON</strong> (<code>headings</code>, <code>key_points</code>, <code>seo_keywords</code>) sont stockes au format JSON natif MySQL — ca permet de stocker des listes sans creer de tables supplementaires.</p>
+<p><strong>Les champs JSON</strong> (<code>headings</code>, <code>key_points</code>, <code>seo_keywords</code>) sont stockes au format JSON natif MySQL  ca permet de stocker des listes sans creer de tables supplementaires.</p>
 <hr>
-<h4>Table 6 — <code>clusters</code> (groupes d&#39;articles par sujet)</h4>
+<h4>Table 6  <code>clusters</code> (groupes d&#39;articles par sujet)</h4>
 <p>Les clusters regroupent des items RSS qui parlent du meme sujet (ex: 3 articles de 3 medias sur &quot;la transition energetique&quot; forment 1 cluster).</p>
 <table>
 <thead>
@@ -628,7 +628,7 @@ docker compose exec app bash  ← entre dans le container
 </tr>
 </tbody></table>
 <hr>
-<h4>Table 7 — <code>cluster_items</code> (table pivot cluster ↔ item RSS)</h4>
+<h4>Table 7  <code>cluster_items</code> (table pivot cluster ↔ item RSS)</h4>
 <p>Table de liaison qui dit &quot;cet item RSS fait partie de ce cluster&quot;. Relation N:N.</p>
 <table>
 <thead>
@@ -657,7 +657,7 @@ docker compose exec app bash  ← entre dans le container
 <p><strong>Contrainte unique</strong> sur (<code>cluster_id</code>, <code>rss_item_id</code>) : un item ne peut etre qu&#39;une fois dans un cluster.</p>
 <p><strong>Suppression en cascade</strong> : si on supprime un cluster, toutes ses liaisons sont supprimees automatiquement.</p>
 <hr>
-<h4>Table 8 — <code>articles</code> (les articles generes par l&#39;IA)</h4>
+<h4>Table 8  <code>articles</code> (les articles generes par l&#39;IA)</h4>
 <p>C&#39;est la table la plus importante : les articles finaux publies sur le site.</p>
 <table>
 <thead>
@@ -759,7 +759,7 @@ docker compose exec app bash  ← entre dans le container
 <p><strong>Index full-text</strong> sur (<code>title</code>, <code>excerpt</code>) : permet la recherche par mots-cles sur le site.</p>
 <p><strong>Index composite</strong> <code>idx_articles_published</code> sur (<code>status</code>, <code>published_at</code>) : optimise la requete &quot;afficher les articles publies tries par date&quot;, la plus frequente sur le site.</p>
 <hr>
-<h4>Table 9 — <code>article_sources</code> (tracabilite : d&#39;ou vient chaque article)</h4>
+<h4>Table 9  <code>article_sources</code> (tracabilite : d&#39;ou vient chaque article)</h4>
 <p>Permet de savoir exactement quels articles RSS ont ete utilises pour generer un article. C&#39;est l&#39;audit trail.</p>
 <table>
 <thead>
@@ -802,7 +802,7 @@ docker compose exec app bash  ← entre dans le container
 </tbody></table>
 <p><strong>Utilite</strong> : un article genere peut dire &quot;Base sur 3 sources : Reporterre (url1), Futura Sciences (url2), Novethic (url3)&quot;. C&#39;est essentiel pour la transparence et le respect des sources.</p>
 <hr>
-<h4>Table 10 — <code>category_templates</code> (regles de generation par categorie)</h4>
+<h4>Table 10  <code>category_templates</code> (regles de generation par categorie)</h4>
 <p>Chaque categorie a un template qui dicte a l&#39;IA comment ecrire. Le ton, la longueur et les regles SEO changent selon la categorie.</p>
 <table>
 <thead>
@@ -855,7 +855,7 @@ docker compose exec app bash  ← entre dans le container
 </tbody></table>
 <p><strong>Exemple concret</strong> : pour la categorie &quot;Environnement&quot;, le template dit : ton = pedagogique, 1000-1800 mots, &quot;Utiliser des donnees chiffrees et des sources scientifiques, inclure des pistes d&#39;action concretes&quot;.</p>
 <hr>
-<h4>Table 11 — <code>pipeline_jobs</code> (suivi de chaque tache)</h4>
+<h4>Table 11  <code>pipeline_jobs</code> (suivi de chaque tache)</h4>
 <p>Enregistre chaque execution du pipeline pour le monitoring et le debug.</p>
 <table>
 <thead>
@@ -913,7 +913,7 @@ docker compose exec app bash  ← entre dans le container
 </tbody></table>
 <p><strong>Index composite</strong> <code>idx_jobs_pending</code> sur (<code>status</code>, <code>created_at</code>) : permet de retrouver instantanement les jobs en attente.</p>
 <hr>
-<h4>Migration 12 — Triggers de mise a jour automatique</h4>
+<h4>Migration 12  Triggers de mise a jour automatique</h4>
 <p><strong>Contexte</strong> : En Laravel, quand un model a <code>$timestamps = true</code> (valeur par defaut), le framework met a jour automatiquement les colonnes <code>created_at</code> et <code>updated_at</code> a chaque sauvegarde. Pour les tables <code>sources</code> et <code>articles</code>, on utilise bien les timestamps, mais pour eviter tout oubli (par exemple si on modifie une ligne en SQL brut ou via un autre outil), j&#39;ai ajoute une <strong>securite au niveau de la base de donnees</strong> : un <strong>trigger MySQL</strong>.</p>
 <p><strong>Qu&#39;est-ce qu&#39;un trigger ?</strong><br>Un trigger est une regle stockee dans MySQL qui s&#39;execute automatiquement avant ou apres une action (INSERT, UPDATE, DELETE). Ici, on utilise un trigger <strong>BEFORE UPDATE</strong> : juste avant que MySQL n&#39;ecrive la ligne modifiee, il execute notre regle et met a jour la colonne <code>updated_at</code>.</p>
 <p><strong>Comment c&#39;est fait en code</strong> :<br>Fichier : <code>database/migrations/2024_01_01_000012_create_updated_at_triggers.php</code>.</p>
@@ -951,7 +951,7 @@ SET NEW.updated_at = NOW()
 </code></pre>
 <p><strong>En chiffres</strong> : 12 fichiers de migration, 11 tables, 4 cles etrangeres avec cascade, 2 index full-text (recherche), 8 index composites (performance), 2 triggers (automatisation), et chaque colonne est typee avec precision.</p>
 <hr>
-<h3>Etape 6 — phpMyAdmin</h3>
+<h3>Etape 6  phpMyAdmin</h3>
 <p><strong>Objectif</strong> : Avoir une interface graphique pour visualiser la base de donnees.</p>
 <p>J&#39;ai ajoute phpMyAdmin dans le <code>docker-compose.yml</code> :</p>
 <ul>
@@ -959,7 +959,7 @@ SET NEW.updated_at = NOW()
 <li>Connexion automatique au serveur MySQL</li>
 <li>Permet de voir les tables, les donnees, executer des requetes SQL, exporter des dumps</li>
 </ul>
-<p>C&#39;est un outil de developpement — il ne sera pas present en production. Il est utile pour :</p>
+<p>C&#39;est un outil de developpement  il ne sera pas present en production. Il est utile pour :</p>
 <ul>
 <li>Verifier que les migrations ont bien cree les tables</li>
 <li>Inspecter les donnees inserees par le pipeline</li>
@@ -967,7 +967,7 @@ SET NEW.updated_at = NOW()
 <li>Montrer la structure de la base au chef de projet</li>
 </ul>
 <hr>
-<h3>Etape 7 — Models Eloquent (11 models)</h3>
+<h3>Etape 7  Models Eloquent (11 models)</h3>
 <p><strong>Objectif</strong> : Creer la couche PHP qui represente chaque table et definit les regles metier.</p>
 <p>En Laravel, chaque table a un <strong>Model</strong> : un fichier PHP qui definit comment lire, ecrire, relier et manipuler les donnees de cette table. C&#39;est le coeur de l&#39;application.</p>
 <p>J&#39;ai cree <strong>11 models</strong> dans <code>/app/Models/</code>. Voici ce que contient chaque model :</p>
@@ -1125,7 +1125,7 @@ SET NEW.updated_at = NOW()
 <p>Table pivot entre <code>Cluster</code> et <code>RssItem</code>. Pas de logique metier, juste les liaisons.</p>
 <hr>
 <h4>Model <code>Article</code> (fichier <code>app/Models/Article.php</code>)</h4>
-<p><strong>Le model le plus important</strong> — represente un article genere par l&#39;IA et publie sur le site.</p>
+<p><strong>Le model le plus important</strong>  represente un article genere par l&#39;IA et publie sur le site.</p>
 <p><strong>Ce qu&#39;on peut faire avec</strong> :</p>
 <ul>
 <li><code>Article::published()-&gt;get()</code> → tous les articles publies</li>
@@ -1153,7 +1153,7 @@ SET NEW.updated_at = NOW()
 </tr>
 <tr>
 <td>Methode <code>isPublishable()</code></td>
-<td>Retourne <code>true</code> si <strong>quality_score &gt;= 60</strong> ET statut est <code>draft</code> ou <code>review</code>. Un article avec un score de 45 ne peut PAS etre publie — c&#39;est une regle metier qui garantit la qualite minimale.</td>
+<td>Retourne <code>true</code> si <strong>quality_score &gt;= 60</strong> ET statut est <code>draft</code> ou <code>review</code>. Un article avec un score de 45 ne peut PAS etre publie  c&#39;est une regle metier qui garantit la qualite minimale.</td>
 </tr>
 <tr>
 <td>Methode <code>publish()</code></td>
@@ -1239,7 +1239,7 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 </code></pre>
 <p><strong>En chiffres</strong> : 11 models, 23 relations definies, 8 scopes reutilisables, 7 methodes metier, tous avec UUIDs, et chaque champ JSON est automatiquement converti en tableau PHP.</p>
 <hr>
-<h3>Etape 8 — Services, Jobs, Horizon et Scheduler</h3>
+<h3>Etape 8  Services, Jobs, Horizon et Scheduler</h3>
 <p><strong>Objectif</strong> : Implementer toute la logique du pipeline.</p>
 <p>C&#39;est l&#39;etape la plus complexe. J&#39;ai separe le code en 3 couches :</p>
 <p><strong>Les Services</strong> (la logique metier pure) :</p>
@@ -1263,7 +1263,7 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 <td>Construit un prompt pour OpenAI a partir de plusieurs sources enrichies, appelle l&#39;API, parse la reponse JSON, cree l&#39;article en base avec le score qualite et les metadonnees SEO.</td>
 </tr>
 </tbody></table>
-<p><strong>Les Jobs</strong> (taches asynchrones — ne bloquent pas le serveur) :</p>
+<p><strong>Les Jobs</strong> (taches asynchrones  ne bloquent pas le serveur) :</p>
 <table>
 <thead>
 <tr>
@@ -1316,7 +1316,7 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 </tbody></table>
 <p><strong>Tout est automatise</strong> : une fois le serveur lance, le pipeline tourne tout seul sans intervention humaine.</p>
 <hr>
-<h3>Etape 9 — API REST complete</h3>
+<h3>Etape 9  API REST complete</h3>
 <p><strong>Objectif</strong> : Permettre a n&#39;importe quel client (frontend, mobile, Postman) de communiquer avec le backend.</p>
 <p>J&#39;ai cree une API REST avec :</p>
 <ul>
@@ -1327,14 +1327,14 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 </ul>
 <p>Tous les endpoints sont documentees et testables dans Postman.</p>
 <hr>
-<h3>Etape 10 — Validation et autorisations</h3>
+<h3>Etape 10  Validation et autorisations</h3>
 <p><strong>Objectif</strong> : S&#39;assurer que les donnees envoyees sont valides et que les actions sont autorisees.</p>
 <ul>
 <li><strong>7 Form Requests</strong> : chaque requete est validee avant d&#39;atteindre le code metier (ex: on verifie que l&#39;URL d&#39;un flux RSS est bien une URL valide)</li>
 <li><strong>3 Policies</strong> : des regles d&#39;autorisation par ressource (qui peut creer une source ? Qui peut publier un article ?)</li>
 </ul>
 <hr>
-<h3>Etape 11 — Commandes Artisan (CLI)</h3>
+<h3>Etape 11  Commandes Artisan (CLI)</h3>
 <p><strong>Objectif</strong> : Pouvoir declencher le pipeline manuellement en ligne de commande.</p>
 <p>4 commandes creees :</p>
 <ul>
@@ -1345,7 +1345,7 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 </ul>
 <p>Utile pour le developpement et les tests sans attendre le scheduler.</p>
 <hr>
-<h3>Etape 12 — Tests automatises</h3>
+<h3>Etape 12  Tests automatises</h3>
 <p><strong>Objectif</strong> : S&#39;assurer que le code fonctionne correctement.</p>
 <ul>
 <li><strong>12 tests</strong> avec <strong>39 assertions</strong> (PHPUnit)</li>
@@ -1354,8 +1354,8 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 <li>Compatibilite SQLite pour que les tests tournent en memoire (plus rapide)</li>
 </ul>
 <hr>
-<h2>PHASE 3 — Analyse et integration de l&#39;ancienne base de donnees</h2>
-<h3>Etape 13 — Analyse de la base existante</h3>
+<h2>PHASE 3  Analyse et integration de l&#39;ancienne base de donnees</h2>
+<h3>Etape 13  Analyse de la base existante</h3>
 <p><strong>Objectif</strong> : Comprendre la base de donnees du site existant et decider quoi reutiliser.</p>
 <p>Le chef de projet m&#39;a fourni un dump SQL de l&#39;ancienne base (<code>ID93677_vivat.sql</code>). J&#39;ai analyse chaque table en detail :</p>
 <table>
@@ -1369,17 +1369,17 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 <tbody><tr>
 <td><code>tbl_cont_pg</code></td>
 <td><strong>3 756 articles</strong> existants (titre, contenu HTML, meta SEO, date, langue)</td>
-<td><strong>A conserver</strong> — c&#39;est le contenu du site actuel</td>
+<td><strong>A conserver</strong>  c&#39;est le contenu du site actuel</td>
 </tr>
 <tr>
 <td><code>tbl_ref</code></td>
 <td><strong>71 categories/references</strong> hierarchiques (categories parentes et enfants)</td>
-<td><strong>A conserver</strong> — structure editoriale du site</td>
+<td><strong>A conserver</strong>  structure editoriale du site</td>
 </tr>
 <tr>
 <td><code>tbl_usr</code></td>
 <td><strong>3 utilisateurs</strong> (admin, editeurs)</td>
-<td><strong>A conserver</strong> — utilisateurs existants</td>
+<td><strong>A conserver</strong>  utilisateurs existants</td>
 </tr>
 <tr>
 <td><code>logs</code></td>
@@ -1399,7 +1399,7 @@ $job-&gt;fail(&quot;Timeout apres 30s&quot;); // statut → &quot;failed&quot;, 
 <li>Comment les anciennes categories correspondent aux nouvelles</li>
 </ul>
 <hr>
-<h3>Etape 14 — Import des donnees et audit complet du pipeline</h3>
+<h3>Etape 14  Import des donnees et audit complet du pipeline</h3>
 <p><strong>Objectif</strong> : Copier les donnees utiles et verifier que tout fonctionne de bout en bout.</p>
 <p><strong>Import des donnees</strong> :</p>
 <ul>
@@ -1456,15 +1456,15 @@ En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 
 <p><strong>Test complet Postman</strong> : tous les endpoints testes et fonctionnels.</p>
 <p><strong>Nouveaux endpoints ajoutes</strong> :</p>
 <ul>
-<li><code>POST /api/pipeline/fetch-rss</code> — declencher le fetch RSS</li>
-<li><code>POST /api/pipeline/enrich</code> — declencher l&#39;enrichissement</li>
-<li><code>GET /api/pipeline/select-items</code> — voir les propositions d&#39;articles</li>
-<li><code>GET /api/pipeline/status</code> — etat global du pipeline</li>
+<li><code>POST /api/pipeline/fetch-rss</code>  declencher le fetch RSS</li>
+<li><code>POST /api/pipeline/enrich</code>  declencher l&#39;enrichissement</li>
+<li><code>GET /api/pipeline/select-items</code>  voir les propositions d&#39;articles</li>
+<li><code>GET /api/pipeline/status</code>  etat global du pipeline</li>
 <li>CRUD complet pour les <code>clusters</code> et <code>category-templates</code></li>
 </ul>
 <p><strong>Donnees de depart (seeder)</strong> : j&#39;ai cree un seeder automatique qui insere 14 categories, 6 sources medias, 5 flux RSS et 14 templates de generation.</p>
 <hr>
-<h3>Etape 15 — Selection intelligente des articles et strategie SEO</h3>
+<h3>Etape 15  Selection intelligente des articles et strategie SEO</h3>
 <p><strong>Objectif</strong> : Repondre a la question &quot;Pourquoi generer CET article et pas un autre ?&quot;</p>
 <p>Quand le pipeline recupere 120 articles depuis 15 sources, il faut choisir lesquels meritent d&#39;etre generes. J&#39;ai cree un algorithme de selection intelligent :</p>
 <p><strong>Le scoring</strong> (chaque article recoit un score sur 100) :</p>
@@ -1502,8 +1502,8 @@ En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 
 <p><strong>Amelioration SEO</strong> : j&#39;ai enrichi le prompt d&#39;OpenAI pour qu&#39;il extraie des mots-cles longue traine, un sujet principal, et un score SEO (0-100). Ces donnees sont stockees dans <code>enriched_items</code> et reutilisees lors de la generation.</p>
 <p><strong>Documentation</strong> : j&#39;ai ecrit un guide complet de tests Postman (<code>TESTING_POSTMAN.md</code>) avec 37 endpoints documentes et 17 scenarios de test.</p>
 <hr>
-<h2>PHASE 4 — Fonctionnalites du site (11 features)</h2>
-<h3>Etape 16 — Audit et correction de la stack technique</h3>
+<h2>PHASE 4  Fonctionnalites du site (11 features)</h2>
+<h3>Etape 16  Audit et correction de la stack technique</h3>
 <p><strong>Objectif</strong> : Verifier que tout ce qu&#39;on annonce dans la stack est bien installe et configure.</p>
 <p>J&#39;ai compare la stack annoncee avec ce qui existait reellement dans le code :</p>
 <table>
@@ -1557,7 +1557,7 @@ En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 
 </tbody></table>
 <p><strong>Resultat</strong> : la stack annoncee correspond maintenant a 100% au code reel.</p>
 <hr>
-<h3>Etape 17 — Authentification, roles, API publique et personnalisation</h3>
+<h3>Etape 17  Authentification, roles, API publique et personnalisation</h3>
 <p><strong>Objectif</strong> : Implementer les fonctionnalites visibles cote site.</p>
 <p><strong>Authentification (Sanctum)</strong> :</p>
 <table>
@@ -1692,7 +1692,7 @@ En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 
 <p><strong>Systeme de recommandation</strong> : fonctionne meme sans compte. Le visiteur envoie un identifiant de session (cookie) et ses centres d&#39;interet. Le systeme calcule un score pour chaque article et retourne les plus pertinents.</p>
 <p><strong>Progression de lecture</strong> : quand un visiteur lit un article, le frontend peut envoyer le pourcentage lu (ex: 65%). La prochaine fois, il peut reprendre la ou il s&#39;etait arrete. Fonctionne avec un cookie (sans compte) ou avec un compte utilisateur.</p>
 <hr>
-<h3>Etape 18 — Espace contributeur, newsletter et paiement Stripe</h3>
+<h3>Etape 18  Espace contributeur, newsletter et paiement Stripe</h3>
 <p><strong>Espace contributeur</strong> :</p>
 <table>
 <thead>
@@ -1782,7 +1782,7 @@ En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 
 </ol>
 <p>Le contributeur peut suivre ses paiements via <code>GET /api/contributor/payments</code> avec les statuts : <code>en attente</code> → <code>paye</code> → <code>rembourse</code> (si rejete).</p>
 <hr>
-<h3>Etape 19 — Amelioration de la logique de selection (feedback mentor)</h3>
+<h3>Etape 19  Amelioration de la logique de selection (feedback mentor)</h3>
 <p><strong>Objectif</strong> : Repondre au feedback du mentor pour ameliorer la logique de selection et rendre les choix de l&#39;IA plus explicites et bases sur des regles predefinies.</p>
 <p><strong>Problematiques identifiees</strong> :</p>
 <ul>
@@ -2020,7 +2020,7 @@ En testant le pipeline complet du debut a la fin, j&#39;ai decouvert et corrige 
 </tr>
 </tbody></table>
 <hr>
-<p><em>Rapport complet — Achraf Ben Ali — 17 fevrier 2026</em></p>
+<p><em>Rapport complet  Achraf Ben Ali  17 fevrier 2026</em></p>
 
 </body>
 </html>

@@ -13,11 +13,11 @@ class RecommendationService
      * Generate personalized article recommendations.
      *
      * Algorithm weights:
-     * - User interests (category match)  : 40%
-     * - Reading history (avoid re-read)  : penalty
-     * - Article quality                  : 25%
-     * - Popularity (views proxy)         : 15%
-     * - Freshness                        : 20%
+     * User interests (category match)  : 40%
+     * Reading history (avoid re-read)  : penalty
+     * Article quality                  : 25%
+     * Popularity (views proxy)         : 15%
+     * Freshness                        : 20%
      *
      * @param array $interests Category slugs
      * @param string|null $userId
@@ -76,15 +76,15 @@ class RecommendationService
                 $score += 20;
             }
 
-            // Quality (25%) — normalize 0-100 to 0-25
+            // Quality (25%) normalize 0-100 to 0-25
             $score += ($article->quality_score / 100) * 25;
 
-            // Freshness (20%) — newer is better
+            // Freshness (20%) newer is better
             $daysOld = $article->published_at ? $now->diffInDays($article->published_at) : $maxAge;
-            $freshness = max(0, 1 - ($daysOld / $maxAge));
+            $freshness = max(0, 1 ($daysOld / $maxAge));
             $score += $freshness * 20;
 
-            // Popularity proxy (15%) — reading_time as engagement indicator
+            // Popularity proxy (15%) reading_time as engagement indicator
             $score += min(15, $article->reading_time * 1.5);
 
             return [

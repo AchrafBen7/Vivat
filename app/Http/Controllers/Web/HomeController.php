@@ -41,8 +41,8 @@ class HomeController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => $locale,
-            'title' => 'Vivat — Actualités',
-            'meta_description' => 'Vivat — Actualités et articles. Découvrez nos rubriques, derniers articles et actualités.',
+            'title' => 'Vivat Actualités',
+            'meta_description' => 'Vivat Actualités et articles. Découvrez nos rubriques, derniers articles et actualités.',
             'canonical_url' => url('/'),
         ]);
 

@@ -96,8 +96,8 @@ class Category extends Model
     }
 
     /**
-     * Tri pour la home et le menu : d’abord les rubriques avec `home_order`, puis les autres par nom.
-     * N’exclut pas les catégories sans `home_order` (contrairement à un simple filtre `whereNotNull`).
+     * Tri pour la home et le menu : d'abord les rubriques avec `home_order`, puis les autres par nom.
+     * N'exclut pas les catégories sans `home_order` (contrairement à un simple filtre `whereNotNull`).
      */
     public function scopeOrderedForHome(Builder $query): Builder
     {

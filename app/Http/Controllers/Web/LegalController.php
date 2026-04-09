@@ -32,7 +32,7 @@ class LegalController extends Controller
         $html = render_php_view('site.layout', [
             'content'        => $content,
             'content_locale' => $locale,
-            'title'          => $title . ' — Vivat',
+            'title'          => $title . ' Vivat',
             'meta_description' => $title . ' du site Vivat.',
             'canonical_url'  => url($canonical),
             'hide_cta_section' => true,

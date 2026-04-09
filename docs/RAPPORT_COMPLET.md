@@ -1,8 +1,8 @@
-# Vivat — Rapport complet du travail realise
+# Vivat Rapport complet du travail realise
 
-> **Projet** : Vivat — Plateforme media automatisee
+> **Projet** : Vivat Plateforme media automatisee
 > **Developpeur Backend** : Achraf Ben Ali
-> **Periode** : Janvier — Fevrier 2026
+> **Periode** : Janvier Fevrier 2026
 > **Technologie** : Laravel 12, PHP 8.3, MySQL 8, Redis, Docker, OpenAI GPT-4o, Stripe
 
 ---
@@ -15,9 +15,9 @@ Le projet Vivat est une plateforme media qui repose sur un moteur d'acquisition 
 
 ---
 
-## PHASE 1 — Fondations du projet
+## PHASE 1 Fondations du projet
 
-### Etape 1 — Documentation technique prealable
+### Etape 1 Documentation technique prealable
 
 **Objectif** : Ne pas coder a l'aveugle. Poser les bases avant de commencer.
 
@@ -35,7 +35,7 @@ Avant d'ecrire la moindre ligne de code, j'ai redige 5 documents de reference :
 
 ---
 
-### Etape 2 — Creation du projet Laravel 12
+### Etape 2 Creation du projet Laravel 12
 
 **Objectif** : Initialiser le projet avec le framework.
 
@@ -47,7 +47,7 @@ Avant d'ecrire la moindre ligne de code, j'ai redige 5 documents de reference :
 
 ---
 
-### Etape 3 — Configuration de la base de donnees
+### Etape 3 Configuration de la base de donnees
 
 **Objectif** : Utiliser MySQL au lieu de SQLite (la base par defaut de Laravel).
 
@@ -59,7 +59,7 @@ Avant d'ecrire la moindre ligne de code, j'ai redige 5 documents de reference :
 
 ---
 
-### Etape 4 — Dockerisation complete de l'environnement
+### Etape 4 Dockerisation complete de l'environnement
 
 **Objectif** : Que n'importe quel developpeur puisse lancer le projet en une seule commande.
 
@@ -88,7 +88,7 @@ docker compose exec app bash  ← entre dans le container
 
 ---
 
-## PHASE 2 — Le moteur d'acquisition de contenu (fonctionnalite principale)
+## PHASE 2 Le moteur d'acquisition de contenu (fonctionnalite principale)
 
 C'est le coeur du projet. Un pipeline automatise en 5 etapes qui transforme des flux RSS en articles originaux.
 
@@ -115,7 +115,7 @@ Medias (Reporterre, Futura Sciences, Novethic...)
 
 ---
 
-### Etape 5 — Schema de base de donnees (12 migrations, 11 tables)
+### Etape 5 Schema de base de donnees (12 migrations, 11 tables)
 
 **Objectif** : Creer toutes les tables necessaires au fonctionnement du pipeline.
 
@@ -127,7 +127,7 @@ Voici le detail de chaque table creee, avec ses colonnes et son role :
 
 ---
 
-#### Table 1 — `sources` (les medias surveilles)
+#### Table 1 `sources` (les medias surveilles)
 
 Chaque source represente un media qu'on surveille (Reporterre, Futura Sciences, Novethic...).
 
@@ -145,7 +145,7 @@ Chaque source represente un media qu'on surveille (Reporterre, Futura Sciences, 
 
 ---
 
-#### Table 2 — `categories` (les 14 categories thematiques)
+#### Table 2 `categories` (les 14 categories thematiques)
 
 Les categories editoriales du site (Environnement, Sante, Energie, Alimentation...).
 
@@ -153,7 +153,7 @@ Les categories editoriales du site (Environnement, Sante, Energie, Alimentation.
 |---|---|---|
 | `id` | UUID (cle primaire) | Identifiant unique |
 | `name` | string | Nom de la categorie ("Environnement") |
-| `slug` | string, unique | Version URL-friendly ("environnement") — utilisee dans les URLs |
+| `slug` | string, unique | Version URL-friendly ("environnement") utilisee dans les URLs |
 | `description` | text, optionnel | Description de la categorie |
 | `color` | string(7), defaut: '#3B82F6' | Couleur d'affichage (code hexadecimal) |
 | `created_at` | timestamp | Date de creation |
@@ -162,7 +162,7 @@ Les categories editoriales du site (Environnement, Sante, Energie, Alimentation.
 
 ---
 
-#### Table 3 — `rss_feeds` (les flux RSS a recuperer)
+#### Table 3 `rss_feeds` (les flux RSS a recuperer)
 
 Chaque flux RSS est lie a une source et a une categorie. Le systeme sait quand il doit les recuperer.
 
@@ -183,7 +183,7 @@ Chaque flux RSS est lie a une source et a une categorie. Le systeme sait quand i
 
 ---
 
-#### Table 4 — `rss_items` (les articles bruts decouverts)
+#### Table 4 `rss_items` (les articles bruts decouverts)
 
 Chaque item est un article decouvert dans un flux RSS. C'est la matiere premiere du pipeline.
 
@@ -199,7 +199,7 @@ Chaque item est un article decouvert dans un flux RSS. C'est la matiere premiere
 | `published_at` | timestamp, optionnel | Date de publication originale |
 | `fetched_at` | timestamp | Quand on l'a recupere |
 | `status` | enum | `new` → `enriching` → `enriched` → `used` (ou `failed`/`ignored`) |
-| `dedup_hash` | string(64), unique | Hash SHA-256 de l'URL+titre — empeche les doublons |
+| `dedup_hash` | string(64), unique | Hash SHA-256 de l'URL+titre empeche les doublons |
 | `created_at` | timestamp | Date de creation |
 
 **Statuts possibles** et leur signification :
@@ -216,7 +216,7 @@ Chaque item est un article decouvert dans un flux RSS. C'est la matiere premiere
 
 ---
 
-#### Table 5 — `enriched_items` (l'analyse IA de chaque article)
+#### Table 5 `enriched_items` (l'analyse IA de chaque article)
 
 Chaque item enrichi est le resultat de l'analyse IA d'un article brut. Relation 1:1 avec `rss_items`.
 
@@ -237,11 +237,11 @@ Chaque item enrichi est le resultat de l'analyse IA d'un article brut. Relation 
 
 **Contrainte unique** sur `rss_item_id` : un item RSS n'a qu'un seul enrichissement.
 
-**Les champs JSON** (`headings`, `key_points`, `seo_keywords`) sont stockes au format JSON natif MySQL — ca permet de stocker des listes sans creer de tables supplementaires.
+**Les champs JSON** (`headings`, `key_points`, `seo_keywords`) sont stockes au format JSON natif MySQL ca permet de stocker des listes sans creer de tables supplementaires.
 
 ---
 
-#### Table 6 — `clusters` (groupes d'articles par sujet)
+#### Table 6 `clusters` (groupes d'articles par sujet)
 
 Les clusters regroupent des items RSS qui parlent du meme sujet (ex: 3 articles de 3 medias sur "la transition energetique" forment 1 cluster).
 
@@ -256,7 +256,7 @@ Les clusters regroupent des items RSS qui parlent du meme sujet (ex: 3 articles 
 
 ---
 
-#### Table 7 — `cluster_items` (table pivot cluster ↔ item RSS)
+#### Table 7 `cluster_items` (table pivot cluster ↔ item RSS)
 
 Table de liaison qui dit "cet item RSS fait partie de ce cluster". Relation N:N.
 
@@ -272,7 +272,7 @@ Table de liaison qui dit "cet item RSS fait partie de ce cluster". Relation N:N.
 
 ---
 
-#### Table 8 — `articles` (les articles generes par l'IA)
+#### Table 8 `articles` (les articles generes par l'IA)
 
 C'est la table la plus importante : les articles finaux publies sur le site.
 
@@ -308,7 +308,7 @@ C'est la table la plus importante : les articles finaux publies sur le site.
 
 ---
 
-#### Table 9 — `article_sources` (tracabilite : d'ou vient chaque article)
+#### Table 9 `article_sources` (tracabilite : d'ou vient chaque article)
 
 Permet de savoir exactement quels articles RSS ont ete utilises pour generer un article. C'est l'audit trail.
 
@@ -325,7 +325,7 @@ Permet de savoir exactement quels articles RSS ont ete utilises pour generer un 
 
 ---
 
-#### Table 10 — `category_templates` (regles de generation par categorie)
+#### Table 10 `category_templates` (regles de generation par categorie)
 
 Chaque categorie a un template qui dicte a l'IA comment ecrire. Le ton, la longueur et les regles SEO changent selon la categorie.
 
@@ -344,7 +344,7 @@ Chaque categorie a un template qui dicte a l'IA comment ecrire. Le ton, la longu
 
 ---
 
-#### Table 11 — `pipeline_jobs` (suivi de chaque tache)
+#### Table 11 `pipeline_jobs` (suivi de chaque tache)
 
 Enregistre chaque execution du pipeline pour le monitoring et le debug.
 
@@ -364,7 +364,7 @@ Enregistre chaque execution du pipeline pour le monitoring et le debug.
 
 ---
 
-#### Migration 12 — Triggers de mise a jour automatique
+#### Migration 12 Triggers de mise a jour automatique
 
 **Contexte** : En Laravel, quand un model a `$timestamps = true` (valeur par defaut), le framework met a jour automatiquement les colonnes `created_at` et `updated_at` a chaque sauvegarde. Pour les tables `sources` et `articles`, on utilise bien les timestamps, mais pour eviter tout oubli (par exemple si on modifie une ligne en SQL brut ou via un autre outil), j'ai ajoute une **securite au niveau de la base de donnees** : un **trigger MySQL**.
 
@@ -385,10 +385,10 @@ Fichier : `database/migrations/2024_01_01_000012_create_updated_at_triggers.php`
    SET NEW.updated_at = NOW()
    ```
 
-   - **BEFORE UPDATE** : le trigger s'execute avant que la ligne soit ecrite.
-   - **ON sources** (puis **ON articles**) : uniquement quand on fait un `UPDATE` sur cette table.
-   - **FOR EACH ROW** : pour chaque ligne modifiee par la requete.
-   - **SET NEW.updated_at = NOW()** : on force la valeur qui sera ecrite : la date/heure courante. `NEW` designe la nouvelle version de la ligne en cours d'update.
+   **BEFORE UPDATE** : le trigger s'execute avant que la ligne soit ecrite.
+   **ON sources** (puis **ON articles**) : uniquement quand on fait un `UPDATE` sur cette table.
+   **FOR EACH ROW** : pour chaque ligne modifiee par la requete.
+   **SET NEW.updated_at = NOW()** : on force la valeur qui sera ecrite : la date/heure courante. `NEW` designe la nouvelle version de la ligne en cours d'update.
 
 3. **Rollback (methode `down()`)** : si on annule la migration, on supprime les triggers avec `DROP TRIGGER IF EXISTS ...` pour ne rien laisser en base.
 
@@ -414,7 +414,7 @@ sources ──→ rss_feeds ──→ rss_items ──→ enriched_items
 
 ---
 
-### Etape 6 — phpMyAdmin
+### Etape 6 phpMyAdmin
 
 **Objectif** : Avoir une interface graphique pour visualiser la base de donnees.
 
@@ -423,7 +423,7 @@ J'ai ajoute phpMyAdmin dans le `docker-compose.yml` :
 - Connexion automatique au serveur MySQL
 - Permet de voir les tables, les donnees, executer des requetes SQL, exporter des dumps
 
-C'est un outil de developpement — il ne sera pas present en production. Il est utile pour :
+C'est un outil de developpement il ne sera pas present en production. Il est utile pour :
 - Verifier que les migrations ont bien cree les tables
 - Inspecter les donnees inserees par le pipeline
 - Debugger les problemes de donnees
@@ -431,7 +431,7 @@ C'est un outil de developpement — il ne sera pas present en production. Il est
 
 ---
 
-### Etape 7 — Models Eloquent (11 models)
+### Etape 7 Models Eloquent (11 models)
 
 **Objectif** : Creer la couche PHP qui represente chaque table et definit les regles metier.
 
@@ -547,7 +547,7 @@ Table pivot entre `Cluster` et `RssItem`. Pas de logique metier, juste les liais
 
 #### Model `Article` (fichier `app/Models/Article.php`)
 
-**Le model le plus important** — represente un article genere par l'IA et publie sur le site.
+**Le model le plus important** represente un article genere par l'IA et publie sur le site.
 
 **Ce qu'on peut faire avec** :
 - `Article::published()->get()` → tous les articles publies
@@ -562,7 +562,7 @@ Table pivot entre `Cluster` et `RssItem`. Pas de logique metier, juste les liais
 |---|---|
 | Relations | `category()` : appartient a une categorie / `cluster()` : genere a partir d'un cluster / `articleSources()` : liens vers les items RSS sources / `sources()` : les medias sources (N:N via `article_sources`, avec les champs pivot `rss_item_id`, `url`, `used_at`) |
 | Scopes | `status($status)` : filtre par statut / `published()` : articles publies avec `published_at` non null / `draft()` : brouillons |
-| Methode `isPublishable()` | Retourne `true` si **quality_score >= 60** ET statut est `draft` ou `review`. Un article avec un score de 45 ne peut PAS etre publie — c'est une regle metier qui garantit la qualite minimale. |
+| Methode `isPublishable()` | Retourne `true` si **quality_score >= 60** ET statut est `draft` ou `review`. Un article avec un score de 45 ne peut PAS etre publie c'est une regle metier qui garantit la qualite minimale. |
 | Methode `publish()` | Change le statut en `published`, rempli `published_at` avec la date actuelle, et sauvegarde. Refuse de publier si `isPublishable()` est false. |
 
 **Pourquoi le seuil de 60 ?** C'est un compromis : assez haut pour filtrer les articles de mauvaise qualite, assez bas pour ne pas bloquer des articles corrects. Ce seuil est modifiable.
@@ -630,7 +630,7 @@ Source (1) ──→ (N) RssFeed (1) ──→ (N) RssItem (1) ──→ (1) Enr
 
 ---
 
-### Etape 8 — Services, Jobs, Horizon et Scheduler
+### Etape 8 Services, Jobs, Horizon et Scheduler
 
 **Objectif** : Implementer toute la logique du pipeline.
 
@@ -644,7 +644,7 @@ C'est l'etape la plus complexe. J'ai separe le code en 3 couches :
 | `ContentExtractorService` | Va sur le site original, scrape la page HTML, extrait uniquement le contenu de l'article (retire les menus, pubs, footers). Si le contenu est trop court, explore les liens internes. |
 | `ArticleGeneratorService` | Construit un prompt pour OpenAI a partir de plusieurs sources enrichies, appelle l'API, parse la reponse JSON, cree l'article en base avec le score qualite et les metadonnees SEO. |
 
-**Les Jobs** (taches asynchrones — ne bloquent pas le serveur) :
+**Les Jobs** (taches asynchrones ne bloquent pas le serveur) :
 
 | Job | Queue | Ce qu'il fait |
 |---|---|---|
@@ -667,7 +667,7 @@ C'est l'etape la plus complexe. J'ai separe le code en 3 couches :
 
 ---
 
-### Etape 9 — API REST complete
+### Etape 9 API REST complete
 
 **Objectif** : Permettre a n'importe quel client (frontend, mobile, Postman) de communiquer avec le backend.
 
@@ -681,7 +681,7 @@ Tous les endpoints sont documentees et testables dans Postman.
 
 ---
 
-### Etape 10 — Validation et autorisations
+### Etape 10 Validation et autorisations
 
 **Objectif** : S'assurer que les donnees envoyees sont valides et que les actions sont autorisees.
 
@@ -690,7 +690,7 @@ Tous les endpoints sont documentees et testables dans Postman.
 
 ---
 
-### Etape 11 — Commandes Artisan (CLI)
+### Etape 11 Commandes Artisan (CLI)
 
 **Objectif** : Pouvoir declencher le pipeline manuellement en ligne de commande.
 
@@ -704,7 +704,7 @@ Utile pour le developpement et les tests sans attendre le scheduler.
 
 ---
 
-### Etape 12 — Tests automatises
+### Etape 12 Tests automatises
 
 **Objectif** : S'assurer que le code fonctionne correctement.
 
@@ -715,9 +715,9 @@ Utile pour le developpement et les tests sans attendre le scheduler.
 
 ---
 
-## PHASE 3 — Analyse et integration de l'ancienne base de donnees
+## PHASE 3 Analyse et integration de l'ancienne base de donnees
 
-### Etape 13 — Analyse de la base existante
+### Etape 13 Analyse de la base existante
 
 **Objectif** : Comprendre la base de donnees du site existant et decider quoi reutiliser.
 
@@ -725,9 +725,9 @@ Le chef de projet m'a fourni un dump SQL de l'ancienne base (`ID93677_vivat.sql`
 
 | Table ancienne | Contenu | Decision |
 |---|---|---|
-| `tbl_cont_pg` | **3 756 articles** existants (titre, contenu HTML, meta SEO, date, langue) | **A conserver** — c'est le contenu du site actuel |
-| `tbl_ref` | **71 categories/references** hierarchiques (categories parentes et enfants) | **A conserver** — structure editoriale du site |
-| `tbl_usr` | **3 utilisateurs** (admin, editeurs) | **A conserver** — utilisateurs existants |
+| `tbl_cont_pg` | **3 756 articles** existants (titre, contenu HTML, meta SEO, date, langue) | **A conserver** c'est le contenu du site actuel |
+| `tbl_ref` | **71 categories/references** hierarchiques (categories parentes et enfants) | **A conserver** structure editoriale du site |
+| `tbl_usr` | **3 utilisateurs** (admin, editeurs) | **A conserver** utilisateurs existants |
 | `logs` | Logs d'activite | Conserve pour compatibilite (vide) |
 | `cloaked_ip` | IPs de bots | Conserve pour compatibilite (vide) |
 
@@ -738,7 +738,7 @@ J'ai redige un document complet (`SCHEMA_BASE_EXISTANTE.md`) qui explique :
 
 ---
 
-### Etape 14 — Import des donnees et audit complet du pipeline
+### Etape 14 Import des donnees et audit complet du pipeline
 
 **Objectif** : Copier les donnees utiles et verifier que tout fonctionne de bout en bout.
 
@@ -765,17 +765,17 @@ En testant le pipeline complet du debut a la fin, j'ai decouvert et corrige 9 bu
 **Test complet Postman** : tous les endpoints testes et fonctionnels.
 
 **Nouveaux endpoints ajoutes** :
-- `POST /api/pipeline/fetch-rss` — declencher le fetch RSS
-- `POST /api/pipeline/enrich` — declencher l'enrichissement
-- `GET /api/pipeline/select-items` — voir les propositions d'articles
-- `GET /api/pipeline/status` — etat global du pipeline
+- `POST /api/pipeline/fetch-rss` declencher le fetch RSS
+- `POST /api/pipeline/enrich` declencher l'enrichissement
+- `GET /api/pipeline/select-items` voir les propositions d'articles
+- `GET /api/pipeline/status` etat global du pipeline
 - CRUD complet pour les `clusters` et `category-templates`
 
 **Donnees de depart (seeder)** : j'ai cree un seeder automatique qui insere 14 categories, 6 sources medias, 5 flux RSS et 14 templates de generation.
 
 ---
 
-### Etape 15 — Selection intelligente des articles et strategie SEO
+### Etape 15 Selection intelligente des articles et strategie SEO
 
 **Objectif** : Repondre a la question "Pourquoi generer CET article et pas un autre ?"
 
@@ -800,9 +800,9 @@ Quand le pipeline recupere 120 articles depuis 15 sources, il faut choisir lesqu
 
 ---
 
-## PHASE 4 — Fonctionnalites du site (11 features)
+## PHASE 4 Fonctionnalites du site (11 features)
 
-### Etape 16 — Audit et correction de la stack technique
+### Etape 16 Audit et correction de la stack technique
 
 **Objectif** : Verifier que tout ce qu'on annonce dans la stack est bien installe et configure.
 
@@ -823,7 +823,7 @@ J'ai compare la stack annoncee avec ce qui existait reellement dans le code :
 
 ---
 
-### Etape 17 — Authentification, roles, API publique et personnalisation
+### Etape 17 Authentification, roles, API publique et personnalisation
 
 **Objectif** : Implementer les fonctionnalites visibles cote site.
 
@@ -877,7 +877,7 @@ J'ai compare la stack annoncee avec ce qui existait reellement dans le code :
 
 ---
 
-### Etape 18 — Espace contributeur, newsletter et paiement Stripe
+### Etape 18 Espace contributeur, newsletter et paiement Stripe
 
 **Espace contributeur** :
 
@@ -924,7 +924,7 @@ Le contributeur peut suivre ses paiements via `GET /api/contributor/payments` av
 
 ---
 
-### Etape 19 — Amelioration de la logique de selection (feedback mentor)
+### Etape 19 Amelioration de la logique de selection (feedback mentor)
 
 **Objectif** : Repondre au feedback du mentor pour ameliorer la logique de selection et rendre les choix de l'IA plus explicites et bases sur des regles predefinies.
 
@@ -950,10 +950,10 @@ Le contributeur peut suivre ses paiements via `GET /api/contributor/payments` av
 - Utilise les poids depuis la config (plus de constantes hardcodees)
 - Calcule le bonus "frequence du sujet" : ratio = nombre d'items du groupe / taille totale du pool. Si ratio >= seuil (ex: 10%), bonus ajoute au score
 - Retourne pour chaque proposition :
-  - **reasoning** : explication detaillee (sources, qualite, SEO, fraicheur, **priorite sujet si applicable**)
-  - **suggested_article_type** : hot_news | long_form | standard (determine automatiquement selon fraicheur et nombre de sources)
-  - **suggested_min_words** / **suggested_max_words** : longueur cible pour l'IA
-  - **context_priority** : phrase reutilisable dans le prompt (ex: "Sur 50 articles analyses, 10 portent sur ce sujet (tendance). Ce sujet est prioritaire.")
+  **reasoning** : explication detaillee (sources, qualite, SEO, fraicheur, **priorite sujet si applicable**)
+  **suggested_article_type** : hot_news | long_form | standard (determine automatiquement selon fraicheur et nombre de sources)
+  **suggested_min_words** / **suggested_max_words** : longueur cible pour l'IA
+  **context_priority** : phrase reutilisable dans le prompt (ex: "Sur 50 articles analyses, 10 portent sur ce sujet (tendance). Ce sujet est prioritaire.")
 
 **3. Generation avec contexte** (`ArticleGeneratorService`) :
 
@@ -1057,4 +1057,4 @@ Un document detaille (`docs/SCHEMA_COMPLET_TABLES.md`) qui decrit chaque table c
 
 ---
 
-*Rapport complet — Achraf Ben Ali — 17 fevrier 2026*
+*Rapport complet Achraf Ben Ali 17 fevrier 2026*

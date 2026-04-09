@@ -42,14 +42,14 @@ $resent = $resent ?? false;
                 <?php if ($user?->email): ?>
                     Un email a été envoyé à <strong><?= htmlspecialchars($user->email) ?></strong>.
                 <?php else: ?>
-                    Un email de vérification vient d’être envoyé.
+                    Un email de vérification vient d'être envoyé.
                 <?php endif; ?>
                 Cliquez sur le lien reçu pour accéder pleinement à votre tableau de bord contributeur.
             </p>
 
             <?php if ($resent): ?>
                 <div class="mt-5 rounded-2xl border border-[#CFE3DB] bg-white px-4 py-3 text-sm text-[#004241]">
-                    Un nouveau lien de vérification vient d’être envoyé.
+                    Un nouveau lien de vérification vient d'être envoyé.
                 </div>
             <?php endif; ?>
 
@@ -61,7 +61,7 @@ $resent = $resent ?? false;
             </form>
 
             <p class="mt-5 text-sm leading-6 text-[#004241]/72">
-                Vous pourrez écrire, sauvegarder et gérer vos contenus, mais certaines actions resteront bloquées tant que votre adresse n’est pas validée.
+                Vous pourrez écrire, sauvegarder et gérer vos contenus, mais certaines actions resteront bloquées tant que votre adresse n'est pas validée.
             </p>
 
             <form action="<?= route('logout') ?>" method="post" class="mt-5">

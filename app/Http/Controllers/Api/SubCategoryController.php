@@ -22,7 +22,7 @@ class SubCategoryController extends Controller
     }
 
     /**
-     * POST /api/categories/{category}/sub-categories (admin) — max 5 par catégorie
+     * POST /api/categories/{category}/sub-categories (admin) max 5 par catégorie
      */
     public function store(Request $request, Category $category): JsonResponse
     {

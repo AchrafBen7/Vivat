@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Storage;
  *
  * Usage : volume important (500-1000 articles par source, 3 sources) →
  * exporter en CSV → utiliser avec ChatGPT (prompt fort) pour identifier :
- * - connexions entre articles, corrélations, tendances
- * - meilleur sujet pour écrire un article
- * - poids à attribuer, hot news vs articles de fond (longueur en mots)
+ * connexions entre articles, corrélations, tendances
+ * meilleur sujet pour écrire un article
+ * poids à attribuer, hot news vs articles de fond (longueur en mots)
  *
  * Voir docs/WORKFLOW_MENTOR_CSV_ET_IA.md pour le workflow complet et le prompt ChatGPT.
  */
@@ -85,7 +85,7 @@ class ExportTrendsCsvCommand extends Command
             if (! empty($counts)) {
                 $this->line('Répartition des statuts en base :');
                 foreach ($counts as $s => $n) {
-                    $this->line("  - {$s} : {$n}");
+                    $this->line("  {$s} : {$n}");
                 }
                 if (($status === 'enriched' || $status === null) && empty($counts['enriched'])) {
                     $this->newLine();
@@ -146,7 +146,7 @@ class ExportTrendsCsvCommand extends Command
         fclose($handle);
 
         $this->info("Export terminé : {$path} ({$items->count()} lignes).");
-        $this->line('Utilisation : docs/WORKFLOW_MENTOR_CSV_ET_IA.md — ouvrir avec Excel, puis analyser avec ChatGPT (prompt fort : connexions, tendances, hot news vs article de fond).');
+        $this->line('Utilisation : docs/WORKFLOW_MENTOR_CSV_ET_IA.md ouvrir avec Excel, puis analyser avec ChatGPT (prompt fort : connexions, tendances, hot news vs article de fond).');
 
         return self::SUCCESS;
     }

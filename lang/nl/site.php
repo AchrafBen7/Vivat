@@ -167,7 +167,7 @@ return [
     'draft_button' => 'Concept',
     'publish_now' => 'Nu publiceren',
     'resubmit' => 'Opnieuw ter validatie sturen',
-    'publish' => 'Publiceren',
+    'publish' => 'Versturen',
     'js_saving_draft' => 'Concept wordt opgeslagen…',
     'js_draft_saved_at' => 'Concept opgeslagen om',
     'js_autosave_failed' => 'Automatisch opslaan is mislukt.',

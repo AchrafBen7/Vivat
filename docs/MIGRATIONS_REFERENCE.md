@@ -1,4 +1,4 @@
-# Migrations Laravel — Pipeline génération d’articles (Vivat)
+# Migrations Laravel Pipeline génération d’articles (Vivat)
 
 Référence des 12 migrations pour la fonctionnalité de génération d’articles. Base : **MySQL 8**, **UUID** pour les clés primaires (générées en application, pas `gen_random_uuid`).
 

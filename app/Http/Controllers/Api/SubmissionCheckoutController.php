@@ -79,7 +79,7 @@ class SubmissionCheckoutController extends Controller
 
     /**
      * GET /api/contributor/submissions/{submission}/payment/success
-     * Page de retour Stripe après paiement. NE PAS publier ici — le webhook le fait.
+     * Page de retour Stripe après paiement. NE PAS publier ici le webhook le fait.
      */
     public function success(Request $request, Submission $submission): JsonResponse
     {

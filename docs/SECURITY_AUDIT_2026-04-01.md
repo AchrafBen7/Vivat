@@ -109,11 +109,11 @@ Avant cette passe, plusieurs protections existaient déjà.
 
 - les mots de passe sont hashés côté Laravel
 - règles de mot de passe renforcées :
-  - minimum 12 caractères
-  - majuscule
-  - minuscule
-  - chiffre
-  - symbole
+  minimum 12 caractères
+  majuscule
+  minuscule
+  chiffre
+  symbole
 - changement de mot de passe ajouté dans l’espace contributeur
 - flow complet de réinitialisation du mot de passe ajouté
 

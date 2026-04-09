@@ -10,11 +10,11 @@ class GenerateDailyArticlesCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'articles:generate
-                            {--count=5 : Nombre d’articles à suggérer (ne dispatch pas automatiquement)}
-                            {--dispatch : Dispatch réel de GenerateArticleJob (nécessite item_ids manuels)}';
+    protected $signature = "articles:generate
+                            {--count=5 : Nombre d'articles à suggérer (ne dispatch pas automatiquement)}
+                            {--dispatch : Dispatch réel de GenerateArticleJob (nécessite item_ids manuels)}";
 
-    protected $description = 'Affiche des groupes d’items enrichis prêts pour la génération ; pour lancer une génération, utiliser l’API POST /api/articles/generate ou generate-async.';
+    protected $description = "Affiche des groupes d'items enrichis prêts pour la génération ; pour lancer une génération, utiliser l'API POST /api/articles/generate ou generate-async.";
 
     public function handle(): int
     {
@@ -29,7 +29,7 @@ class GenerateDailyArticlesCommand extends Command
             ->get();
 
         if ($items->isEmpty()) {
-            $this->warn('Aucun item enrichi trouvé. Lancez d’abord content:enrich puis attendez les jobs.');
+            $this->warn("Aucun item enrichi trouvé. Lancez d'abord content:enrich puis attendez les jobs.");
 
             return self::SUCCESS;
         }
@@ -43,8 +43,8 @@ class GenerateDailyArticlesCommand extends Command
             $items->take(20)->map(fn ($i) => [
                 $i->id,
                 \Illuminate\Support\Str::limit($i->title, 50),
-                $i->category?->name ?? '-',
-                $i->enrichedItem?->quality_score ?? '-',
+                $i->category?->name ?? '',
+                $i->enrichedItem?->quality_score ?? '',
             ])
         );
 

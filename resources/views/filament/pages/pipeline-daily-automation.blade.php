@@ -46,7 +46,7 @@
         .vp-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(0,66,65,.55); backdrop-filter:blur(6px); padding:24px; }
         .vp-overlay-close { position:absolute; top:20px; right:20px; width:40px; height:40px; border:none; border-radius:999px; background:rgba(255,255,255,.15); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
         .vp-overlay-close:hover { background:rgba(255,255,255,.25); }
-        .vp-overlay-card { position:relative; width:min(680px, 100%); background:#fff; border-radius:28px; padding:32px; box-shadow:0 32px 80px rgba(0,66,65,.25); max-height:calc(100vh - 48px); overflow-y:auto; }
+        .vp-overlay-card { position:relative; width:min(680px, 100%); background:#fff; border-radius:28px; padding:32px; box-shadow:0 32px 80px rgba(0,66,65,.25); max-height:calc(100vh 48px); overflow-y:auto; }
         .vp-overlay-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(0,66,65,.45); }
         .vp-overlay-title { margin-top:8px; font-size:26px; font-weight:700; line-height:1.2; color:#004241; }
         .vp-overlay-detail { margin-top:6px; font-size:13px; line-height:1.6; color:rgba(0,66,65,.62); min-height:20px; }
@@ -85,7 +85,7 @@
                     <div class="vp-hero-box-title">Suivi du jour</div>
                 </div>
                 <div class="vp-hero-text" style="flex:1">
-                    <p>Visualise ici l’état de l’automatisation du jour et relance une étape si nécessaire.</p>
+                    <p>Visualise ici l'état de l'automatisation du jour et relance une étape si nécessaire.</p>
                 </div>
             </div>
         </div>
@@ -95,8 +95,8 @@
                 <svg style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
             </div>
             <div>
-                <h4>Ce qu’il se passe ici</h4>
-                <p>Cette page sert de monitoring quotidien. Elle te dit immédiatement si l’article du jour a bien été généré et où la chaîne s’est éventuellement arrêtée.</p>
+                <h4>Ce qu'il se passe ici</h4>
+                <p>Cette page sert de monitoring quotidien. Elle te dit immédiatement si l'article du jour a bien été généré et où la chaîne s'est éventuellement arrêtée.</p>
             </div>
         </div>
 
@@ -123,7 +123,7 @@
                         @if ($todayAutomation['summary']['automation_paused'])
                             <button type="button" wire:click="resumeAutomation" wire:loading.attr="disabled" wire:target="resumeAutomation" class="vp-mini-btn">Reprendre</button>
                         @else
-                            <button type="button" wire:click="pauseAutomation" wire:loading.attr="disabled" wire:target="pauseAutomation" class="vp-mini-btn">Pauser l’automatisation</button>
+                            <button type="button" wire:click="pauseAutomation" wire:loading.attr="disabled" wire:target="pauseAutomation" class="vp-mini-btn">Pauser l'automatisation</button>
                         @endif
                         <span class="vp-status-badge" style="background:{{ $globalColors['bg'] }}; color:{{ $globalColors['text'] }}">{{ $globalColors['label'] }}</span>
                     </div>
@@ -168,7 +168,7 @@
                     @if (!empty($todayAutomation['summary']['last_update']))
                         Dernière mise à jour {{ $todayAutomation['summary']['last_update'] }}.
                     @else
-                        Aucune activité enregistrée aujourd’hui pour le moment.
+                        Aucune activité enregistrée aujourd'hui pour le moment.
                     @endif
                 </div>
 
@@ -198,95 +198,95 @@
                         <div class="vp-journey-highlight-sub">Statut : {{ $todayAutomation['summary']['article_status'] === 'published' ? 'Publié' : 'Brouillon' }}</div>
                         @if (!empty($todayAutomation['summary']['article_preview_url']))
                             <a href="{{ $todayAutomation['summary']['article_preview_url'] }}" target="_blank" class="vp-journey-link">
-                                Ouvrir l’aperçu
+                                Ouvrir l'aperçu
                                 <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                             </a>
                         @endif
                     @else
-                        <div class="vp-journey-highlight-main">Aucun brouillon généré aujourd’hui</div>
-                        <div class="vp-journey-highlight-sub">La chaîne n’est pas encore allée jusqu’à la dernière étape.</div>
+                        <div class="vp-journey-highlight-main">Aucun brouillon généré aujourd'hui</div>
+                        <div class="vp-journey-highlight-sub">La chaîne n'est pas encore allée jusqu'à la dernière étape.</div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
 
-    @if ($generationOverlay[‘visible’])
+    @if ($generationOverlay['visible'])
         <div class="vp-overlay" wire:poll.3s>
             <div class="vp-overlay-card">
                 <button type="button" wire:click="closeGenerationOverlay" class="vp-overlay-close" aria-label="Fermer">
                     <svg style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
 
-                <div class="vp-overlay-label">{{ $generationOverlay[‘eyebrow’] }}</div>
-                <div class="vp-overlay-title">{{ $generationOverlay[‘headline’] }}</div>
+                <div class="vp-overlay-label">{{ $generationOverlay['eyebrow'] }}</div>
+                <div class="vp-overlay-title">{{ $generationOverlay['headline'] }}</div>
 
-                @if (!empty($generationOverlay[‘current_detail’]))
-                    <div class="vp-overlay-detail">{{ $generationOverlay[‘current_detail’] }}</div>
+                @if (!empty($generationOverlay['current_detail']))
+                    <div class="vp-overlay-detail">{{ $generationOverlay['current_detail'] }}</div>
                 @endif
 
                 <div class="vp-overlay-progress">
-                    <div class="vp-overlay-progress-fill" style="width: {{ max(0, min(100, (int) $generationOverlay[‘progress’])) }}%"></div>
+                    <div class="vp-overlay-progress-fill" style="width: {{ max(0, min(100, (int) $generationOverlay['progress'])) }}%"></div>
                 </div>
                 <div class="vp-overlay-percent">
-                    {{ $generationOverlay[‘label’] }}
-                    @if (!$generationOverlay[‘is_finished’] && !$generationOverlay[‘is_failed’])
-                        &nbsp;— mise à jour toutes les 3 secondes
+                    {{ $generationOverlay['label'] }}
+                    @if (!$generationOverlay['is_finished'] && !$generationOverlay['is_failed'])
+                        &nbsp;- mise à jour toutes les 3 secondes
                     @endif
                 </div>
 
-                @if (!empty($generationOverlay[‘steps’]))
+                @if (!empty($generationOverlay['steps']))
                     <div class="vp-ov-steps">
-                        @foreach ($generationOverlay[‘steps’] as $step)
+                        @foreach ($generationOverlay['steps'] as $step)
                             @php
-                                $stepStatus = $step[‘status’] ?? ‘waiting’;
+                                $stepStatus = $step['status'] ?? 'waiting';
                                 $stepClass = match($stepStatus) {
-                                    ‘done’    => ‘is-done’,
-                                    ‘active’  => ‘is-active’,
-                                    ‘failed’  => ‘is-active’,
-                                    default   => ‘is-waiting’,
+                                    'done'    => 'is-done',
+                                    'active'  => 'is-active',
+                                    'failed'  => 'is-active',
+                                    default   => 'is-waiting',
                                 };
                                 $dotClass = match($stepStatus) {
-                                    ‘done’   => ‘done’,
-                                    ‘active’ => ‘active’,
-                                    ‘failed’ => ‘failed’,
-                                    default  => ‘waiting’,
+                                    'done'   => 'done',
+                                    'active' => 'active',
+                                    'failed' => 'failed',
+                                    default  => 'waiting',
                                 };
                                 $dotIcon = match($stepStatus) {
-                                    ‘done’   => ‘✓’,
-                                    ‘active’ => ‘…’,
-                                    ‘failed’ => ‘✕’,
-                                    default  => ‘○’,
+                                    'done'   => '✓',
+                                    'active' => '…',
+                                    'failed' => '✕',
+                                    default  => '○',
                                 };
                             @endphp
                             <div class="vp-ov-step {{ $stepClass }}">
                                 <div class="vp-ov-step-dot {{ $dotClass }}">{{ $dotIcon }}</div>
                                 <div class="vp-ov-step-body">
-                                    <div class="vp-ov-step-label">{{ $step[‘label’] }}</div>
-                                    @if (!empty($step[‘detail’]))
-                                        <div class="vp-ov-step-detail">{{ $step[‘detail’] }}</div>
+                                    <div class="vp-ov-step-label">{{ $step['label'] }}</div>
+                                    @if (!empty($step['detail']))
+                                        <div class="vp-ov-step-detail">{{ $step['detail'] }}</div>
                                     @endif
 
                                     {{-- Sous-étapes de génération affichées seulement si actif --}}
-                                    @if (!empty($step[‘sub_steps’]) && $stepStatus === ‘active’)
+                                    @if (!empty($step['sub_steps']) && $stepStatus === 'active')
                                         <div class="vp-ov-sub-steps">
-                                            @foreach ($step[‘sub_steps’] as $sub)
+                                            @foreach ($step['sub_steps'] as $sub)
                                                 @php
-                                                    $subStatus = $sub[‘status’] ?? ‘waiting’;
+                                                    $subStatus = $sub['status'] ?? 'waiting';
                                                     $subClass = match($subStatus) {
-                                                        ‘done’   => ‘sub-done’,
-                                                        ‘active’ => ‘sub-active’,
-                                                        default  => ‘’,
+                                                        'done'   => 'sub-done',
+                                                        'active' => 'sub-active',
+                                                        default  => '',
                                                     };
                                                     $subIcon = match($subStatus) {
-                                                        ‘done’   => ‘✓’,
-                                                        ‘active’ => ‘→’,
-                                                        default  => ‘·’,
+                                                        'done'   => '✓',
+                                                        'active' => '→',
+                                                        default  => '·',
                                                     };
                                                 @endphp
                                                 <div class="vp-ov-sub-step {{ $subClass }}">
                                                     <span>{{ $subIcon }}</span>
-                                                    <span>{{ $sub[‘label’] }}</span>
+                                                    <span>{{ $sub['label'] }}</span>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -298,17 +298,17 @@
                 @endif
 
                 <div style="margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
-                    @if ($generationOverlay[‘is_failed’])
-                        <p style="font-size:13px; color:#991B1B;">Vérifie les logs Horizon ou relance depuis l’étape concernée.</p>
-                    @elseif ($generationOverlay[‘is_finished’])
-                        <p style="font-size:13px; color:#065F46; font-weight:600;">✓ Terminé — tu peux fermer cet écran.</p>
+                    @if ($generationOverlay['is_failed'])
+                        <p style="font-size:13px; color:#991B1B;">Vérifie les logs Horizon ou relance depuis l'étape concernée.</p>
+                    @elseif ($generationOverlay['is_finished'])
+                        <p style="font-size:13px; color:#065F46; font-weight:600;">✓ Terminé tu peux fermer cet écran.</p>
                     @else
                         <p style="font-size:12px; color:rgba(0,66,65,.45);">Cet écran se met à jour automatiquement.</p>
                     @endif
 
-                    @if (!empty($generationOverlay[‘article_preview_url’]))
-                        <a href="{{ $generationOverlay[‘article_preview_url’] }}" target="_blank" class="vp-overlay-link">
-                            Ouvrir l’aperçu
+                    @if (!empty($generationOverlay['article_preview_url']))
+                        <a href="{{ $generationOverlay['article_preview_url'] }}" target="_blank" class="vp-overlay-link">
+                            Ouvrir l'aperçu
                             <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                         </a>
                     @endif

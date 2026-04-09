@@ -70,7 +70,7 @@
                     <div class="vp-hero-box-title">Sources & repérage</div>
                 </div>
                 <div class="vp-hero-text" style="flex:1">
-                    <p>Les flux RSS sont récupérés plusieurs fois par jour, puis les nouveaux contenus sont préparés pour l’analyse.</p>
+                    <p>Les flux RSS sont récupérés plusieurs fois par jour, puis les nouveaux contenus sont préparés pour l'analyse.</p>
                 </div>
                 <div class="vp-steps" style="display:none" id="vp-steps-desktop">
                     <div class="vp-step vp-step-active">1</div>
@@ -91,8 +91,8 @@
                 <svg style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
             </div>
             <div>
-                <h4>Ce qu’il se passe ici</h4>
-                <p>Le système surveille des sites définis à l’avance, récupère leurs flux RSS, puis repère les nouveaux contenus intéressants pour Vivat. Cette étape sert surtout à collecter la matière première.</p>
+                <h4>Ce qu'il se passe ici</h4>
+                <p>Le système surveille des sites définis à l'avance, récupère leurs flux RSS, puis repère les nouveaux contenus intéressants pour Vivat. Cette étape sert surtout à collecter la matière première.</p>
             </div>
         </div>
 

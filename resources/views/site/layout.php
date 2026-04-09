@@ -3,7 +3,7 @@ $content_locale = $content_locale ?? content_locale();
 $isDutchLocale = $content_locale === 'nl';
 $title = $title ?? 'Vivat';
 $categories = $categories ?? get_layout_categories();
-$meta_description = $meta_description ?? 'Vivat — Actualités et articles. Découvrez nos rubriques et derniers articles.';
+$meta_description = $meta_description ?? 'Vivat Actualités et articles. Découvrez nos rubriques et derniers articles.';
 $canonical_url = $canonical_url ?? null;
 $og_image = $og_image ?? null;
 $og_article = $og_article ?? false;
@@ -62,7 +62,7 @@ $newsletterOldEmail = old('newsletter_email', '');
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
     <style>
-        /* Espace FIXE 18px entre bordure carte et panel glass — toujours en haut, bas, gauche, droite */
+        /* Espace FIXE 18px entre bordure carte et panel glass toujours en haut, bas, gauche, droite */
         .vivat-card-overlay {
             position: absolute;
             top: 18px;
@@ -132,7 +132,7 @@ $newsletterOldEmail = old('newsletter_email', '');
             top: 0.25rem;
             bottom: 0.25rem;
             left: 0.25rem;
-            width: calc(50% - 0.375rem);
+            width: calc(50% 0.375rem);
             border-radius: 9999px;
             background: var(--vivat-lang-active-bg);
             transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.24s ease;
@@ -166,7 +166,7 @@ $newsletterOldEmail = old('newsletter_email', '');
         .vivat-lang-switch__button:active {
             transform: scale(0.97);
         }
-        /* Barre recherche header : pastille + loupe → s’étire au hover / focus / texte saisi */
+        /* Barre recherche header : pastille + loupe → s'étire au hover / focus / texte saisi */
         #header-search-form {
             display: none;
             position: relative;
@@ -195,14 +195,14 @@ $newsletterOldEmail = old('newsletter_email', '');
         #header-search-form:hover,
         #header-search-form:focus-within,
         #header-search-form.vivat-header-search--dirty {
-            width: min(calc(100vw - 2.5rem), 22rem);
+            width: min(calc(100vw 2.5rem), 22rem);
             justify-content: flex-start;
             gap: 0.375rem;
             padding-left: 0.375rem;
             padding-right: 0.75rem;
             overflow: visible;
         }
-        /* Loupe à gauche à l’ouverture ; ordre Tab = ordre DOM (champ puis bouton) */
+        /* Loupe à gauche à l'ouverture ; ordre Tab = ordre DOM (champ puis bouton) */
         #header-search-form input[name="q"] {
             order: 2;
             flex: 0 0 0;
@@ -250,7 +250,7 @@ $newsletterOldEmail = old('newsletter_email', '');
         #header-search-form button[type="submit"]:active {
             transform: scale(0.94);
         }
-        /* Croix d’effacement custom (remplace le bouton natif type=search) */
+        /* Croix d'effacement custom (remplace le bouton natif type=search) */
         #header-search-form input[name="q"]::-webkit-search-cancel-button,
         #header-search-form input[name="q"]::-webkit-search-decoration {
             -webkit-appearance: none;
@@ -284,7 +284,7 @@ $newsletterOldEmail = old('newsletter_email', '');
         }
         #header-search-suggestions {
             position: absolute;
-            top: calc(100% - 1px);
+            top: calc(100% 1px);
             left: 0;
             right: 0;
             display: none;
@@ -337,7 +337,7 @@ $newsletterOldEmail = old('newsletter_email', '');
             #header-search-form:hover,
             #header-search-form:focus-within,
             #header-search-form.vivat-header-search--dirty {
-                width: min(calc(100vw - 6rem), 24rem);
+                width: min(calc(100vw 6rem), 24rem);
             }
         }
     </style>
@@ -360,7 +360,7 @@ $newsletterOldEmail = old('newsletter_email', '');
 
                 <div class="flex-1 min-w-[16px]"></div>
 
-                <!-- Barre de recherche (pastille → s’allonge au survol / focus) -->
+                <!-- Barre de recherche (pastille → s'allonge au survol / focus) -->
                 <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
                     <input type="text" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="<?= htmlspecialchars(__('site.search_placeholder')) ?>" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="<?= htmlspecialchars(__('site.search_keyword_label')) ?>" aria-expanded="false" aria-controls="header-search-suggestions" aria-autocomplete="list">
                     <button type="submit" aria-label="Lancer la recherche">
@@ -523,13 +523,13 @@ $newsletterOldEmail = old('newsletter_email', '');
 
                         if (event.key === 'ArrowDown') {
                             event.preventDefault();
-                            setActiveSuggestion(activeIndex < currentItems.length - 1 ? activeIndex + 1 : 0);
+                            setActiveSuggestion(activeIndex < currentItems.length 1 ? activeIndex + 1 : 0);
                             return;
                         }
 
                         if (event.key === 'ArrowUp') {
                             event.preventDefault();
-                            setActiveSuggestion(activeIndex > 0 ? activeIndex - 1 : currentItems.length - 1);
+                            setActiveSuggestion(activeIndex > 0 ? activeIndex 1 : currentItems.length 1);
                             return;
                         }
 

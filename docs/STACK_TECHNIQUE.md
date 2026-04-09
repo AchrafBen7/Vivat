@@ -1,4 +1,4 @@
-# Vivat — Stack Technique Backend
+# Vivat Stack Technique Backend
 
 > **Version** : Fevrier 2026
 > **Auteur** : Equipe Backend
@@ -10,8 +10,8 @@
 
 1. [Vue d'ensemble](#1-vue-densemble)
 2. [Architecture logicielle](#2-architecture-logicielle)
-3. [Fonctionnalite 1 — Content Acquisition Engine (detail)](#3-fonctionnalite-1--content-acquisition-engine)
-4. [Fonctionnalites 2-11 — Site public et contributeurs](#4-fonctionnalites-2-11--site-public-et-contributeurs)
+3. [Fonctionnalite 1 Content Acquisition Engine (detail)](#3-fonctionnalite-1--content-acquisition-engine)
+4. [Fonctionnalites 2-11 Site public et contributeurs](#4-fonctionnalites-2-11--site-public-et-contributeurs)
 5. [Base de donnees](#5-base-de-donnees)
 6. [Authentification et securite](#6-authentification-et-securite)
 7. [Intelligence artificielle](#7-intelligence-artificielle)
@@ -40,7 +40,7 @@ Vivat est une plateforme media automatisee qui **ingere des flux RSS**, **enrich
 | **Auth API** | Laravel Sanctum | 4.3 |
 | **Roles & Permissions** | spatie/laravel-permission | 6.24 |
 | **Conteneurisation** | Docker Compose | PHP + MySQL + Redis |
-| **Queue monitoring** | Laravel Horizon | — |
+| **Queue monitoring** | Laravel Horizon | |
 
 ---
 
@@ -91,7 +91,7 @@ Requete HTTP
 
 ---
 
-## 3. Fonctionnalite 1 — Content Acquisition Engine
+## 3. Fonctionnalite 1 Content Acquisition Engine
 
 C'est la fonctionnalite principale du backend. Un **pipeline automatise en 5 etapes** qui va de la decouverte d'une information dans un flux RSS a la publication d'un article original genere par IA.
 
@@ -120,10 +120,10 @@ Sources (medias)
 [Etape 3] SELECTION INTELLIGENTE
     |   ArticleSelectionService
     |   Score multi-criteres :
-    |     - Fraicheur         25%
-    |     - Qualite contenu   25%
-    |     - Potentiel SEO     30%
-    |     - Diversite sources 20%
+    |     Fraicheur         25%
+    |     Qualite contenu   25%
+    |     Potentiel SEO     30%
+    |     Diversite sources 20%
     |   Regroupement par sujet (Jaccard >= 20%)
     |   Reasoning : "pourquoi CET article ?"
     |
@@ -144,7 +144,7 @@ Sources (medias)
 
 ### Detail de chaque etape
 
-#### Etape 1 — Ingestion RSS
+#### Etape 1 Ingestion RSS
 
 | Element | Fichier | Role |
 |---|---|---|
@@ -160,7 +160,7 @@ Sources (medias)
 - **Statuts** : chaque item commence a `new`, passe a `enriching`, puis `enriched` ou `failed`.
 - **Intervalles** : chaque flux a son propre `fetch_interval_minutes` (configurable par source).
 
-#### Etape 2 — Enrichissement IA
+#### Etape 2 Enrichissement IA
 
 | Element | Fichier | Role |
 |---|---|---|
@@ -179,7 +179,7 @@ Sources (medias)
 
 **Protection :** Rate limiter OpenAI a 50 requetes/min (`AppServiceProvider`).
 
-#### Etape 3 — Selection intelligente
+#### Etape 3 Selection intelligente
 
 | Element | Fichier | Role |
 |---|---|---|
@@ -200,9 +200,9 @@ Score total = Fraicheur (25%) + Qualite (25%) + SEO (30%) + Diversite (20%)
 
 **Regroupement par sujet :** Similarite de Jaccard sur les mots-cles (>= 20% d'intersection = meme sujet). Un article genere a partir de 3 sources sur le meme sujet est plus riche qu'un article mono-source.
 
-**Reasoning :** Chaque proposition retournee par l'API inclut un texte explicatif : *"Pourquoi generer CET article ?"* — justifie par les scores, les sources, et le potentiel SEO.
+**Reasoning :** Chaque proposition retournee par l'API inclut un texte explicatif : *"Pourquoi generer CET article ?"* justifie par les scores, les sources, et le potentiel SEO.
 
-#### Etape 4 — Generation IA
+#### Etape 4 Generation IA
 
 | Element | Fichier | Role |
 |---|---|---|
@@ -219,7 +219,7 @@ Score total = Fraicheur (25%) + Qualite (25%) + SEO (30%) + Diversite (20%)
 
 **Tracabilite complete :** La table `article_sources` lie chaque article genere a ses items RSS d'origine. On peut toujours remonter de l'article publie jusqu'a la source media.
 
-#### Etape 5 — Publication
+#### Etape 5 Publication
 
 - **Cycle de vie** : `draft` → `review` → `published` / `rejected` / `archived`
 - **Condition** : `quality_score >= 60` et status `draft` ou `review`
@@ -242,7 +242,7 @@ Score total = Fraicheur (25%) + Qualite (25%) + SEO (30%) + Diversite (20%)
 
 ---
 
-## 4. Fonctionnalites 2-11 — Site public et contributeurs
+## 4. Fonctionnalites 2-11 Site public et contributeurs
 
 ### Organisation des routes API
 
@@ -335,7 +335,7 @@ L'API est organisee en **4 niveaux d'acces** :
 | `reading_histories` | Progression de lecture (user_id ou session_id, article_id, progress 0-100) |
 | `user_preferences` | Preferences visiteurs non connectes (session_id, interests, language) |
 
-#### Legacy (5 tables — donnees importees du site existant)
+#### Legacy (5 tables donnees importees du site existant)
 
 | Table | Rows importees |
 |---|---|
@@ -368,7 +368,7 @@ Les index sont optimises pour les requetes frequentes :
 
 ## 6. Authentification et securite
 
-### Authentification API — Laravel Sanctum
+### Authentification API Laravel Sanctum
 
 | Endpoint | Role | Description |
 |---|---|---|
@@ -380,13 +380,13 @@ Les index sont optimises pour les requetes frequentes :
 
 **Strategie single-device** : a chaque login, les tokens precedents sont revoques.
 
-### Roles et permissions — spatie/laravel-permission
+### Roles et permissions spatie/laravel-permission
 
 | Role | Permissions | Cible |
 |---|---|---|
 | **admin** | Toutes (21 permissions) | Pipeline, CRUD, moderation, stats, newsletter, paiements |
 | **contributor** | `articles.view`, `submissions.create`, `submissions.view-own` | Soumission d'articles, consultation |
-| **Visiteur** (non connecte) | — | Lecture articles, recherche, preferences (cookie), newsletter |
+| **Visiteur** (non connecte) | | Lecture articles, recherche, preferences (cookie), newsletter |
 
 ### Protection des routes
 
@@ -469,7 +469,7 @@ Horizon fournit un **dashboard temps reel** pour monitorer les queues :
 
 ## 9. Paiement
 
-### Stripe — Publication ponctuelle (one-time)
+### Stripe Publication ponctuelle (one-time)
 
 **Flux de paiement :**
 
@@ -491,7 +491,7 @@ Horizon fournit un **dashboard temps reel** pour monitorer les queues :
 
 **Statuts** : `pending` → `paid` → `refunded` (si rejete) / `failed`
 
-**Dashboard contributeur** : `GET /api/contributor/payments` — historique complet (montant, statut, article associe)
+**Dashboard contributeur** : `GET /api/contributor/payments` historique complet (montant, statut, article associe)
 
 ---
 
@@ -538,7 +538,7 @@ Services :
 | Package | Version | Role | Statut |
 |---|---|---|---|
 | `laravel/sanctum` | 4.3 | Auth API par tokens Bearer | Installe et configure |
-| `laravel/horizon` | — | Monitoring et gestion des queues Redis | Installe et configure |
+| `laravel/horizon` | | Monitoring et gestion des queues Redis | Installe et configure |
 | `spatie/laravel-permission` | 6.24 | Roles (admin, contributor) et 21 permissions | Installe et configure |
 | `spatie/laravel-sluggable` | 3.7 | Slugs SEO automatiques (Submissions) | Installe et utilise |
 | `stripe/stripe-php` | 19.3 | API Stripe (PaymentIntent, Refund) | Installe et utilise |

@@ -52,7 +52,7 @@ class ViewSubmission extends ViewRecord
                         ->label('Notes admin')
                         ->rows(5)
                         ->default(fn (): ?string => $this->record->reviewer_notes)
-                        ->helperText('Notes internes ou retour éditorial pour l’historique.')
+                        ->helperText("Notes internes ou retour éditorial pour l'historique.")
                         ->maxLength(2000),
                 ])
                 ->action(function (array $data): void {
@@ -123,6 +123,16 @@ class ViewSubmission extends ViewRecord
                     $defaultPreset = $presets->first();
 
                     return [
+                        Select::make('article_type')
+                            ->label("Type d'article")
+                            ->options([
+                                'standard' => 'Standard',
+                                'hot_news' => 'Hot news',
+                                'long_form' => 'Long format',
+                            ])
+                            ->default('standard')
+                            ->required()
+                            ->helperText("Le format qui sera utilisé au moment de la publication après paiement."),
                         Radio::make('price_mode')
                             ->label('Type de tarif')
                             ->options([
@@ -134,7 +144,7 @@ class ViewSubmission extends ViewRecord
                         Radio::make('price_preset_id')
                             ->label('Tarifs fixes')
                             ->options($presets->mapWithKeys(fn (PricePreset $preset): array => [
-                                $preset->id => $preset->label . ' — ' . $preset->formatted_amount . ($preset->description ? ' · ' . $preset->description : ''),
+                                $preset->id => $preset->label . ' ' . $preset->formatted_amount . ($preset->description ? ' · ' . $preset->description : ''),
                             ])->all())
                             ->default($defaultPreset?->id)
                             ->required(fn ($get): bool => $get('price_mode') === 'preset')
@@ -177,7 +187,7 @@ class ViewSubmission extends ViewRecord
                             ->label('Message au rédacteur')
                             ->rows(4)
                             ->maxLength(2000)
-                            ->helperText('Ce message sera inclus dans l’email de demande de paiement.'),
+                            ->helperText("Ce message sera inclus dans l'email de demande de paiement."),
                     ];
                 })
                 ->action(function (array $data): void {
@@ -192,6 +202,7 @@ class ViewSubmission extends ViewRecord
                         submission: $this->record,
                         moderator: auth()->user(),
                         amountCents: $amountCents,
+                        articleType: $data['article_type'] ?? 'standard',
                         pricePresetId: $data['price_preset_id'] ?? null,
                         noteToAuthor: $data['note_to_author'] ?? null,
                         expiryDays: (int) ($data['expiry_days'] ?? 7),

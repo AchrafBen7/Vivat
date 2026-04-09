@@ -18,11 +18,11 @@ class HomeController extends Controller
      * GET /api/public/home
      *
      * Données pour la page d'accueil :
-     * - top_news : 1 article hot_news (carré grand, image bg, label "Top news")
-     * - featured : articles importants avec image (carrés moyens)
-     * - latest : section "Dernières actualités" avec display_type par article (featured | standard | secondary)
-     * - categories : les 9 rubriques pour "Découvrez vos rubriques préférées"
-     * - writer_cta : URLs pour le bouton "Rédiger un article"
+     * top_news : 1 article hot_news (carré grand, image bg, label "Top news")
+     * featured : articles importants avec image (carrés moyens)
+     * latest : section "Dernières actualités" avec display_type par article (featured | standard | secondary)
+     * categories : les 9 rubriques pour "Découvrez vos rubriques préférées"
+     * writer_cta : URLs pour le bouton "Rédiger un article"
      */
     public function index(Request $request): JsonResponse
     {
@@ -132,8 +132,8 @@ class HomeController extends Controller
 
     /**
      * URLs pour le bouton "Rédiger un article" :
-     * - non connecté → signup_url (création compte rédacteur)
-     * - connecté contributor/admin → dashboard_url (profil rédacteur / liste soumissions)
+     * non connecté → signup_url (création compte rédacteur)
+     * connecté contributor/admin → dashboard_url (profil rédacteur / liste soumissions)
      */
     private function writerCta(Request $request): array
     {

@@ -112,7 +112,7 @@ class SubmissionResource extends Resource
             'accepted' => 'Acceptée',
             'expired'  => 'Expirée',
             'canceled' => 'Annulée',
-            default    => '—',
+            default    => '',
         };
     }
 
@@ -135,7 +135,7 @@ class SubmissionResource extends Resource
             'failed' => 'Échoué',
             'canceled' => 'Annulé',
             'refunded' => 'Remboursé',
-            default => '—',
+            default => '',
         };
     }
 
@@ -153,10 +153,20 @@ class SubmissionResource extends Resource
     private static function money(?int $amountCents, string $currency = 'eur'): string
     {
         if ($amountCents === null) {
-            return '—';
+            return '';
         }
 
         return number_format($amountCents / 100, 2, ',', ' ') . ' ' . strtoupper($currency);
+    }
+
+    private static function articleTypeLabel(?string $state): string
+    {
+        return match ($state) {
+            'hot_news' => 'Hot news',
+            'long_form' => 'Long format',
+            'standard' => 'Standard',
+            default => '',
+        };
     }
 
     /* ------------------------------------------------------------------ */
@@ -193,9 +203,9 @@ class SubmissionResource extends Resource
                     TextEntry::make('reading_time')
                         ->label('Temps de lecture')
                         ->formatStateUsing(fn ($state): string => ($state ?: 5) . ' min'),
-                    TextEntry::make('submitted_at')->label('Soumis le')->dateTime('d/m/Y H:i')->placeholder('—'),
+                    TextEntry::make('submitted_at')->label('Soumis le')->dateTime('d/m/Y H:i')->placeholder(''),
                     TextEntry::make('reviewer.name')->label('Relue par')->placeholder('Pas encore'),
-                    TextEntry::make('reviewed_at')->label('Relue le')->dateTime('d/m/Y H:i')->placeholder('—'),
+                    TextEntry::make('reviewed_at')->label('Relue le')->dateTime('d/m/Y H:i')->placeholder(''),
                     TextEntry::make('reviewer_notes')->label('Notes admin')->placeholder('Aucune')->columnSpanFull(),
                 ]),
             Section::make('Proposition de prix')
@@ -207,19 +217,23 @@ class SubmissionResource extends Resource
                     TextEntry::make('quote.preset.label')
                         ->label('Tarif sélectionné')
                         ->placeholder('Prix libre'),
+                    TextEntry::make('quote.article_type')
+                        ->label("Type d'article")
+                        ->formatStateUsing(fn (?string $state): string => self::articleTypeLabel($state))
+                        ->placeholder(''),
                     TextEntry::make('quote.status')
                         ->label('Statut de la quote')
                         ->badge()
-                        ->placeholder('—')
+                        ->placeholder('')
                         ->formatStateUsing(fn (?string $state): string => self::quoteStatusLabel($state))
                         ->color(fn (?string $state): string => self::quoteStatusColor($state)),
                     TextEntry::make('quote.proposedBy.name')
                         ->label('Proposé par')
-                        ->placeholder('—'),
+                        ->placeholder(''),
                     TextEntry::make('quote.expires_at')
                         ->label('Expire le')
                         ->dateTime('d/m/Y H:i')
-                        ->placeholder('—'),
+                        ->placeholder(''),
                     TextEntry::make('quote.note_to_author')
                         ->label('Message au rédacteur')
                         ->placeholder('Aucun message')
@@ -237,11 +251,11 @@ class SubmissionResource extends Resource
                         ->badge()
                         ->formatStateUsing(fn (?string $state): string => self::paymentStatusLabel($state))
                         ->color(fn (?string $state): string => self::paymentStatusColor($state))
-                        ->placeholder('—'),
+                        ->placeholder(''),
                     TextEntry::make('latestSubmissionPayment.paid_at')
                         ->label('Payé le')
                         ->dateTime('d/m/Y H:i')
-                        ->placeholder('—'),
+                        ->placeholder(''),
                     TextEntry::make('latestSubmissionPayment.failure_message')
                         ->label('Erreur paiement')
                         ->placeholder('Aucune')
@@ -262,7 +276,7 @@ class SubmissionResource extends Resource
                             $html = '<div class="space-y-3">';
 
                             foreach ($logs as $log) {
-                                $from = $log->from_status ? self::statusLabel($log->from_status) : '—';
+                                $from = $log->from_status ? self::statusLabel($log->from_status) : '';
                                 $to = self::statusLabel($log->to_status);
                                 $by = e($log->triggeredBy?->name ?? match ($log->trigger_source) {
                                     'system' => 'Système',
@@ -270,7 +284,7 @@ class SubmissionResource extends Resource
                                     'author' => 'Rédacteur',
                                     default => 'Admin',
                                 });
-                                $date = e($log->created_at?->format('d/m/Y à H:i') ?? '—');
+                                $date = e($log->created_at?->format('d/m/Y à H:i') ?? '');
                                 $reason = $log->reason ? '<div class="mt-1 text-xs text-gray-600">' . e($log->reason) . '</div>' : '';
 
                                 $html .= '<div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">';
@@ -346,7 +360,7 @@ class SubmissionResource extends Resource
                         $author     = e($record->user?->name ?? 'Auteur inconnu');
                         $category   = e($record->category?->name ?? 'Sans catégorie');
                         $readingTime= (int) ($record->reading_time ?: 5);
-                        $date       = e($record->submitted_at?->format('d/m/Y à H:i') ?? $record->created_at?->format('d/m/Y à H:i') ?? '—');
+                        $date       = e($record->submitted_at?->format('d/m/Y à H:i') ?? $record->created_at?->format('d/m/Y à H:i') ?? '');
                         $excerpt    = e((string) str($record->excerpt ?: $record->content ?: '')
                             ->stripTags()->squish()->limit(120));
 
@@ -472,7 +486,7 @@ class SubmissionResource extends Resource
                             Radio::make('price_preset_id')
                                 ->label('Prix prédéfini')
                                 ->options($presets->mapWithKeys(fn (PricePreset $p): array => [
-                                    $p->id => $p->label . ' — ' . $p->formatted_amount . ($p->description ? ' · ' . $p->description : ''),
+                                    $p->id => $p->label . ' ' . $p->formatted_amount . ($p->description ? ' · ' . $p->description : ''),
                                 ])->all())
                                 ->required(fn ($get): bool => $get('price_mode') === 'preset')
                                 ->visible(fn ($get): bool => $get('price_mode') === 'preset')

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivat — Stack Technique Backend</title>
+<title>Vivat  Stack Technique Backend</title>
 <style>
   @page {
     size: A4;
@@ -143,7 +143,7 @@
 </style>
 </head>
 <body>
-<h1>Vivat — Schema complet de la base de donnees</h1>
+<h1>Vivat  Schema complet de la base de donnees</h1>
 <blockquote>
 <p><strong>36 tables</strong> | <strong>17 models Eloquent</strong> | <strong>UUID partout</strong> | MySQL 8.0
 Derniere mise a jour : 9 fevrier 2026</p>
@@ -175,7 +175,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </ul>
 <p>Tous les endpoints publics utilisent le scope <code>Article::published()</code> qui filtre automatiquement sur ces criteres.</p>
 <hr>
-<h3>Homepage — Liste des articles</h3>
+<h3>Homepage  Liste des articles</h3>
 <p><strong>Endpoint</strong> : <code>GET /api/public/articles</code>
 <strong>Logique</strong> : Tous les articles publies, tries par date de publication (les plus recents d&#39;abord).</p>
 <table>
@@ -208,7 +208,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <p><strong>En resume</strong> : l&#39;article le plus recent apparait en premier. Le frontend peut trier autrement (par qualite, par duree de lecture, etc.).</p>
 <hr>
-<h3>A la une — Articles mis en avant</h3>
+<h3>A la une  Articles mis en avant</h3>
 <p><strong>Endpoint</strong> : <code>GET /api/public/categories/{slug}/hub</code>
 <strong>Logique</strong> : Pour chaque categorie, les 3 articles avec le <strong>meilleur <code>quality_score</code></strong> sont &quot;a la une&quot;.</p>
 <table>
@@ -329,7 +329,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <p>Toujours limite aux articles <strong>publies</strong> uniquement.</p>
 <hr>
 <h2>Tables du pipeline</h2>
-<h3>1. sources — Medias configures</h3>
+<h3>1. sources  Medias configures</h3>
 <blockquote>
 <p>Model : <code>Source</code> | 6 enregistrements</p>
 </blockquote>
@@ -388,7 +388,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <p><strong>Index</strong> : <code>is_active</code>, <code>language</code>
 <strong>Relations</strong> : → rss_feeds (hasMany), → article_sources (hasMany)</p>
 <hr>
-<h3>2. categories — Categories thematiques</h3>
+<h3>2. categories  Categories thematiques</h3>
 <blockquote>
 <p>Model : <code>Category</code> | 14 enregistrements</p>
 </blockquote>
@@ -440,7 +440,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <p><strong>Relations</strong> : → rss_feeds, rss_items, clusters, articles (hasMany), → template (hasOne)</p>
 <hr>
-<h3>3. rss_feeds — Flux RSS configures</h3>
+<h3>3. rss_feeds  Flux RSS configures</h3>
 <blockquote>
 <p>Model : <code>RssFeed</code> | 5 enregistrements</p>
 </blockquote>
@@ -503,9 +503,9 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <p><strong>Index</strong> : <code>is_active</code>, <code>last_fetched_at</code>, composite <code>(is_active, last_fetched_at)</code>
-<strong>Scope</strong> : <code>dueForFetch()</code> — flux actifs dont le dernier fetch depasse l&#39;intervalle</p>
+<strong>Scope</strong> : <code>dueForFetch()</code>  flux actifs dont le dernier fetch depasse l&#39;intervalle</p>
 <hr>
-<h3>4. rss_items — Articles bruts decouverts</h3>
+<h3>4. rss_items  Articles bruts decouverts</h3>
 <blockquote>
 <p>Model : <code>RssItem</code> | ~120 enregistrements</p>
 </blockquote>
@@ -593,7 +593,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <p><strong>Index</strong> : <code>dedup_hash</code> (unique), <code>status</code>, <code>published_at</code>, <code>fetched_at</code>, fulltext <code>(title, description)</code></p>
 <hr>
-<h3>5. enriched_items — Contenu structure par l&#39;IA</h3>
+<h3>5. enriched_items  Contenu structure par l&#39;IA</h3>
 <blockquote>
 <p>Model : <code>EnrichedItem</code> | Relation 1:1 avec rss_items</p>
 </blockquote>
@@ -680,7 +680,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <hr>
-<h3>6. clusters — Groupes thematiques</h3>
+<h3>6. clusters  Groupes thematiques</h3>
 <blockquote>
 <p>Model : <code>Cluster</code></p>
 </blockquote>
@@ -731,7 +731,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <hr>
-<h3>7. cluster_items — Pivot cluster ↔ rss_item</h3>
+<h3>7. cluster_items  Pivot cluster ↔ rss_item</h3>
 <blockquote>
 <p>Model : <code>ClusterItem</code></p>
 </blockquote>
@@ -765,7 +765,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <p><strong>Contrainte</strong> : unique <code>(cluster_id, rss_item_id)</code></p>
 <hr>
-<h3>8. articles — Articles generes par l&#39;IA</h3>
+<h3>8. articles  Articles generes par l&#39;IA</h3>
 <blockquote>
 <p>Model : <code>Article</code> | <strong>Table centrale du site</strong></p>
 </blockquote>
@@ -854,7 +854,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <td><code>quality_score</code></td>
 <td>tinyint (0-100)</td>
 <td>Non</td>
-<td><strong>Score qualite</strong> — determine le classement &quot;a la une&quot;</td>
+<td><strong>Score qualite</strong>  determine le classement &quot;a la une&quot;</td>
 </tr>
 <tr>
 <td><code>published_at</code></td>
@@ -886,7 +886,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <li><code>keywords</code> → utilise pour la recherche et le SEO</li>
 </ul>
 <hr>
-<h3>9. article_sources — Tracabilite article → sources</h3>
+<h3>9. article_sources  Tracabilite article → sources</h3>
 <blockquote>
 <p>Model : <code>ArticleSource</code></p>
 </blockquote>
@@ -936,9 +936,9 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <td>Date d&#39;utilisation</td>
 </tr>
 </tbody></table>
-<p><strong>Contrainte</strong> : unique <code>(article_id, rss_item_id)</code> — un item ne peut etre utilise qu&#39;une fois par article.</p>
+<p><strong>Contrainte</strong> : unique <code>(article_id, rss_item_id)</code>  un item ne peut etre utilise qu&#39;une fois par article.</p>
 <hr>
-<h3>10. category_templates — Config de generation par categorie</h3>
+<h3>10. category_templates  Config de generation par categorie</h3>
 <blockquote>
 <p>Model : <code>CategoryTemplate</code> | 14 enregistrements (1 par categorie)</p>
 </blockquote>
@@ -1007,7 +1007,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <hr>
-<h3>11. pipeline_jobs — Monitoring des jobs</h3>
+<h3>11. pipeline_jobs  Monitoring des jobs</h3>
 <blockquote>
 <p>Model : <code>PipelineJob</code></p>
 </blockquote>
@@ -1077,7 +1077,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <hr>
 <h2>Tables utilisateurs et auth</h2>
-<h3>12. users — Utilisateurs</h3>
+<h3>12. users  Utilisateurs</h3>
 <blockquote>
 <p>Model : <code>User</code> | Traits : HasUuids, HasApiTokens (Sanctum), HasRoles (spatie)</p>
 </blockquote>
@@ -1165,7 +1165,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <p><strong>Roles</strong> : <code>admin</code> (21 permissions), <code>contributor</code> (3 permissions)</p>
 <hr>
-<h3>13. personal_access_tokens — Tokens API Sanctum</h3>
+<h3>13. personal_access_tokens  Tokens API Sanctum</h3>
 <table>
 <thead>
 <tr>
@@ -1247,7 +1247,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <hr>
 <h2>Tables du site public</h2>
-<h3>19. submissions — Articles soumis par les contributeurs</h3>
+<h3>19. submissions  Articles soumis par les contributeurs</h3>
 <blockquote>
 <p>Model : <code>Submission</code> | Traits : HasUuids, HasSlug (spatie)</p>
 </blockquote>
@@ -1346,7 +1346,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <hr>
-<h3>20. payments — Paiements Stripe</h3>
+<h3>20. payments  Paiements Stripe</h3>
 <blockquote>
 <p>Model : <code>Payment</code></p>
 </blockquote>
@@ -1427,7 +1427,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <hr>
-<h3>21. newsletter_subscribers — Abonnes newsletter</h3>
+<h3>21. newsletter_subscribers  Abonnes newsletter</h3>
 <blockquote>
 <p>Model : <code>NewsletterSubscriber</code></p>
 </blockquote>
@@ -1508,7 +1508,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tr>
 </tbody></table>
 <hr>
-<h3>22. reading_histories — Progression de lecture</h3>
+<h3>22. reading_histories  Progression de lecture</h3>
 <blockquote>
 <p>Model : <code>ReadingHistory</code></p>
 </blockquote>
@@ -1572,7 +1572,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <p><strong>Utilise par</strong> : <code>RecommendationService</code> (exclut les articles lus a &gt;50%), endpoint &quot;reprendre la lecture&quot;.</p>
 <hr>
-<h3>23. user_preferences — Preferences visiteurs non connectes</h3>
+<h3>23. user_preferences  Preferences visiteurs non connectes</h3>
 <blockquote>
 <p>Model : <code>UserPreference</code></p>
 </blockquote>
@@ -1624,7 +1624,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 </tbody></table>
 <hr>
 <h2>Tables legacy</h2>
-<h3>24. tbl_cont_pg — 3 756 articles importes de l&#39;ancien site</h3>
+<h3>24. tbl_cont_pg  3 756 articles importes de l&#39;ancien site</h3>
 <table>
 <thead>
 <tr>
@@ -1719,7 +1719,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <td>Timestamp publication</td>
 </tr>
 </tbody></table>
-<h3>25. tbl_ref — 71 categories/references legacy</h3>
+<h3>25. tbl_ref  71 categories/references legacy</h3>
 <table>
 <thead>
 <tr>
@@ -1759,7 +1759,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <td>SEO</td>
 </tr>
 </tbody></table>
-<h3>26. tbl_usr — 3 utilisateurs legacy</h3>
+<h3>26. tbl_usr  3 utilisateurs legacy</h3>
 <table>
 <thead>
 <tr>
@@ -1799,7 +1799,7 @@ Derniere mise a jour : 9 fevrier 2026</p>
 <td>Role (1=admin, 2=editeur)</td>
 </tr>
 </tbody></table>
-<h3>27-28. logs + cloaked_ip — Tables techniques legacy (vides)</h3>
+<h3>27-28. logs + cloaked_ip  Tables techniques legacy (vides)</h3>
 <p>Conservees pour compatibilite avec le dump. Non essentielles.</p>
 <hr>
 <h2>Tables framework</h2>
@@ -1867,7 +1867,7 @@ users ──→ submissions ──→ payments                                  
 newsletter_subscribers (independant)
 </code></pre>
 <hr>
-<p><em>Document complet — 36 tables, 17 models, logique d&#39;affichage detaillee.</em></p>
+<p><em>Document complet  36 tables, 17 models, logique d&#39;affichage detaillee.</em></p>
 
 </body>
 </html>

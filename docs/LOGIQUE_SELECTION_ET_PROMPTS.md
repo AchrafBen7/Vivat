@@ -54,16 +54,16 @@ Seuils (hot_news_hours, etc.) dans `config/selection.php` → `freshness` et `ar
    Il regroupe les items par similarité de sujet (mots-clés, Jaccard).  
    Pour chaque groupe, il ajoute le **bonus fréquence du sujet** (si le sujet représente une part significative du pool).  
    Il trie les groupes par score et retourne les N meilleures propositions avec :
-   - **reasoning** : pourquoi cet article (sources, qualité, SEO, fraîcheur, priorité sujet).
-   - **suggested_article_type** : hot_news | long_form | standard.
-   - **suggested_min_words** / **suggested_max_words** : fourchette de mots cible.
-   - **context_priority** : phrase réutilisable dans le prompt de génération (ex. “Sur 50 articles analysés, 10 portent sur ce sujet (tendance). Ce sujet est prioritaire.”).
+   **reasoning** : pourquoi cet article (sources, qualité, SEO, fraîcheur, priorité sujet).
+   **suggested_article_type** : hot_news | long_form | standard.
+   **suggested_min_words** / **suggested_max_words** : fourchette de mots cible.
+   **context_priority** : phrase réutilisable dans le prompt de génération (ex. “Sur 50 articles analysés, 10 portent sur ce sujet (tendance). Ce sujet est prioritaire.”).
 
 2. **Génération (generate)**  
    L’IA reçoit :
-   - **Contexte priorité** : `context_priority` (injecté dans le user prompt).
-   - **Type d’article** : hot_news / long_form / standard (ton + longueur dans le system prompt).
-   - **Longueur cible** : `suggested_min_words` / `suggested_max_words` (ou template catégorie) dans le system prompt.
+   **Contexte priorité** : `context_priority` (injecté dans le user prompt).
+   **Type d’article** : hot_news / long_form / standard (ton + longueur dans le system prompt).
+   **Longueur cible** : `suggested_min_words` / `suggested_max_words` (ou template catégorie) dans le system prompt.
 
 Donc le choix est explicite : règles en config, score avec bonus fréquence, type et longueur dérivés automatiquement (ou overridés par l’API).
 
@@ -86,21 +86,21 @@ Tu peux aussi créer un nouveau profil dans `config/selection.php` (ex. `trends_
 Pour être sûr que l’IA ressort ce que tu veux :
 
 1. **Sélection**  
-   - Appeler `GET /api/pipeline/select-items?count=3`.  
-   - Vérifier que les propositions ont un `reasoning` clair, un `suggested_article_type` cohérent (ex. item < 48 h → hot_news) et des `suggested_min_words` / `suggested_max_words` corrects.
+   Appeler `GET /api/pipeline/select-items?count=3`.  
+   Vérifier que les propositions ont un `reasoning` clair, un `suggested_article_type` cohérent (ex. item < 48 h → hot_news) et des `suggested_min_words` / `suggested_max_words` corrects.
 
 2. **Génération**  
-   - Choisir une proposition et noter `item_ids`, `suggested_article_type`, `suggested_min_words`, `suggested_max_words`, `context_priority`.  
-   - Appeler `POST /api/articles/generate` avec :
-     - `item_ids`
-     - `article_type` = `suggested_article_type`
-     - `suggested_min_words` / `suggested_max_words`
-     - `context_priority` (copier depuis la proposition).  
-   - Vérifier en sortie : longueur (nombre de mots), ton (brève vs analytique), présence des mots-clés et du sujet prioritaire.
+   Choisir une proposition et noter `item_ids`, `suggested_article_type`, `suggested_min_words`, `suggested_max_words`, `context_priority`.  
+   Appeler `POST /api/articles/generate` avec :
+     `item_ids`
+     `article_type` = `suggested_article_type`
+     `suggested_min_words` / `suggested_max_words`
+     `context_priority` (copier depuis la proposition).  
+   Vérifier en sortie : longueur (nombre de mots), ton (brève vs analytique), présence des mots-clés et du sujet prioritaire.
 
 3. **Tests manuels ciblés**  
-   - **Hot news** : prendre des items très récents (< 48 h), générer avec `article_type=hot_news` et 400–650 mots ; vérifier que le texte est court et percutant.  
-   - **Article de fond** : prendre 3+ sources sur le même sujet, générer avec `article_type=long_form` et 1000–1800 mots ; vérifier structure (h2/h3) et profondeur.
+   **Hot news** : prendre des items très récents (< 48 h), générer avec `article_type=hot_news` et 400–650 mots ; vérifier que le texte est court et percutant.  
+   **Article de fond** : prendre 3+ sources sur le même sujet, générer avec `article_type=long_form` et 1000–1800 mots ; vérifier structure (h2/h3) et profondeur.
 
 4. **Régression**  
    Si tu modifies les prompts dans `ArticleGeneratorService` (ou les libellés dans `config/selection.php`), refaire au moins un test de chaque type ci-dessus.

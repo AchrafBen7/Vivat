@@ -7,7 +7,7 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## Vivat — Développement local
+## Vivat Développement local
 
 ### Vider le cache (sans PHP installé en local)
 
@@ -15,7 +15,7 @@ Si le projet tourne avec **Docker** (e.g. `docker compose up`), PHP s’exécute
 
 1. Ouvrir un terminal.
 2. Aller dans le dossier du projet :  
-   `cd "/Users/manalboulahya/Documents/EHB - 3/Stage/Vivat-1"`  
+   `cd "/Users/manalboulahya/Documents/EHB 3/Stage/Vivat-1"`  
    (ou le chemin correspondant sur ta machine.)
 3. Lancer :  
    **`docker compose exec app php artisan cache:clear`**

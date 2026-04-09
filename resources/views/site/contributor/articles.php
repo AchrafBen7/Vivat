@@ -126,7 +126,7 @@ $statusStyles = [
                                         <?= htmlspecialchars($sub['payment_amount_label'] ?? 'Montant inconnu') ?>
                                         <?php if (! empty($sub['refunded_at'])) { ?> · <?= htmlspecialchars($t('site.refunded_on', 'remboursé le')) ?> <?= htmlspecialchars($sub['refunded_at']) ?><?php } ?>
                                     <?php } else { ?>
-                                        <?= htmlspecialchars($t('site.refund_not_confirmed', "L’article a été refusé, mais le remboursement n’est pas encore confirmé dans le système.")) ?>
+                                        <?= htmlspecialchars($t('site.refund_not_confirmed', "L'article a été refusé, mais le remboursement n'est pas encore confirmé dans le système.")) ?>
                                     <?php } ?>
                                 </p>
                             </div>

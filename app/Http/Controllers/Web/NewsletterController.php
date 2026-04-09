@@ -22,7 +22,7 @@ class NewsletterController extends Controller
     public function subscribe(Request $request): RedirectResponse
     {
         if ($this->honeypotTriggered($request)) {
-            return back()->with('success', 'Merci, votre demande d’inscription a bien été prise en compte.');
+            return back()->with('success', "Merci, votre demande d'inscription a bien été prise en compte.");
         }
 
         $validated = $request->validate([
@@ -75,7 +75,7 @@ class NewsletterController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale(request()),
-            'title' => $title . ' — Vivat',
+            'title' => $title . ' Vivat',
             'meta_description' => $message,
         ]);
 

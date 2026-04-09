@@ -244,7 +244,7 @@ class PaymentController extends Controller
                 $payment->markFailed();
 
                 return response()->json([
-                    'message' => 'Le paiement n’a pas abouti. Vérifiez vos informations et réessayez.',
+                    'message' => "Le paiement n'a pas abouti. Vérifiez vos informations et réessayez.",
                     'status' => 'failed',
                 ], 402);
             }
@@ -301,7 +301,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * GET /api/payments/my — historique paiements du contributeur
+     * GET /api/payments/my historique paiements du contributeur
      */
     public function myPayments(Request $request): JsonResponse
     {

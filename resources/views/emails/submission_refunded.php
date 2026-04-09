@@ -24,7 +24,7 @@
             </div>
         <?php endif; ?>
         <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#5f6d67;">
-            Selon votre banque, le délai d’apparition peut varier de quelques jours.
+            Selon votre banque, le délai d'apparition peut varier de quelques jours.
         </p>
         <p style="margin:0;">
             <a href="<?= e($dashboardUrl) ?>" style="display:inline-block;background:#0d4f4b;color:#ffffff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:700;">

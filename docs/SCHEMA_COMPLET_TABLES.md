@@ -1,4 +1,4 @@
-# Vivat — Schema complet de la base de donnees
+# Vivat Schema complet de la base de donnees
 
 > **36 tables** | **17 models Eloquent** | **UUID partout** | MySQL 8.0
 > Derniere mise a jour : 9 fevrier 2026
@@ -38,7 +38,7 @@ Tous les endpoints publics utilisent le scope `Article::published()` qui filtre 
 
 ---
 
-### Homepage — Liste des articles
+### Homepage Liste des articles
 
 **Endpoint** : `GET /api/public/articles`
 **Logique** : Tous les articles publies, tries par date de publication (les plus recents d'abord).
@@ -55,7 +55,7 @@ Tous les endpoints publics utilisent le scope `Article::published()` qui filtre 
 
 ---
 
-### A la une — Articles mis en avant
+### A la une Articles mis en avant
 
 **Endpoint** : `GET /api/public/categories/{slug}/hub`
 **Logique** : Pour chaque categorie, les 3 articles avec le **meilleur `quality_score`** sont "a la une".
@@ -135,7 +135,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ## Tables du pipeline
 
-### 1. sources — Medias configures
+### 1. sources Medias configures
 
 > Model : `Source` | 6 enregistrements
 
@@ -154,7 +154,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 2. categories — Categories thematiques
+### 2. categories Categories thematiques
 
 > Model : `Category` | 14 enregistrements
 
@@ -171,7 +171,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 3. rss_feeds — Flux RSS configures
+### 3. rss_feeds Flux RSS configures
 
 > Model : `RssFeed` | 5 enregistrements
 
@@ -187,11 +187,11 @@ Toujours limite aux articles **publies** uniquement.
 | `created_at` | timestamp | Oui | Date de creation |
 
 **Index** : `is_active`, `last_fetched_at`, composite `(is_active, last_fetched_at)`
-**Scope** : `dueForFetch()` — flux actifs dont le dernier fetch depasse l'intervalle
+**Scope** : `dueForFetch()` flux actifs dont le dernier fetch depasse l'intervalle
 
 ---
 
-### 4. rss_items — Articles bruts decouverts
+### 4. rss_items Articles bruts decouverts
 
 > Model : `RssItem` | ~120 enregistrements
 
@@ -214,7 +214,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 5. enriched_items — Contenu structure par l'IA
+### 5. enriched_items Contenu structure par l'IA
 
 > Model : `EnrichedItem` | Relation 1:1 avec rss_items
 
@@ -235,7 +235,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 6. clusters — Groupes thematiques
+### 6. clusters Groupes thematiques
 
 > Model : `Cluster`
 
@@ -250,7 +250,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 7. cluster_items — Pivot cluster ↔ rss_item
+### 7. cluster_items Pivot cluster ↔ rss_item
 
 > Model : `ClusterItem`
 
@@ -264,7 +264,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 8. articles — Articles generes par l'IA
+### 8. articles Articles generes par l'IA
 
 > Model : `Article` | **Table centrale du site**
 
@@ -282,7 +282,7 @@ Toujours limite aux articles **publies** uniquement.
 | `cluster_id` | UUID (FK → clusters) | Oui | Cluster source |
 | `reading_time` | smallint | Non | Temps de lecture en minutes (defaut: 5) |
 | `status` | enum | Non | `draft` → `review` → `published` / `archived` / `rejected` |
-| `quality_score` | tinyint (0-100) | Non | **Score qualite** — determine le classement "a la une" |
+| `quality_score` | tinyint (0-100) | Non | **Score qualite** determine le classement "a la une" |
 | `published_at` | timestamp | Oui | Date de publication |
 | `created_at` | timestamp | Oui | Date de creation |
 | `updated_at` | timestamp | Oui | Derniere modification (trigger) |
@@ -299,7 +299,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 9. article_sources — Tracabilite article → sources
+### 9. article_sources Tracabilite article → sources
 
 > Model : `ArticleSource`
 
@@ -312,11 +312,11 @@ Toujours limite aux articles **publies** uniquement.
 | `url` | text | Non | URL de la source originale |
 | `used_at` | timestamp | Oui | Date d'utilisation |
 
-**Contrainte** : unique `(article_id, rss_item_id)` — un item ne peut etre utilise qu'une fois par article.
+**Contrainte** : unique `(article_id, rss_item_id)` un item ne peut etre utilise qu'une fois par article.
 
 ---
 
-### 10. category_templates — Config de generation par categorie
+### 10. category_templates Config de generation par categorie
 
 > Model : `CategoryTemplate` | 14 enregistrements (1 par categorie)
 
@@ -334,7 +334,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 11. pipeline_jobs — Monitoring des jobs
+### 11. pipeline_jobs Monitoring des jobs
 
 > Model : `PipelineJob`
 
@@ -354,7 +354,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ## Tables utilisateurs et auth
 
-### 12. users — Utilisateurs
+### 12. users Utilisateurs
 
 > Model : `User` | Traits : HasUuids, HasApiTokens (Sanctum), HasRoles (spatie)
 
@@ -377,7 +377,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 13. personal_access_tokens — Tokens API Sanctum
+### 13. personal_access_tokens Tokens API Sanctum
 
 | Colonne | Type | Description |
 |---|---|---|
@@ -406,7 +406,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ## Tables du site public
 
-### 19. submissions — Articles soumis par les contributeurs
+### 19. submissions Articles soumis par les contributeurs
 
 > Model : `Submission` | Traits : HasUuids, HasSlug (spatie)
 
@@ -429,7 +429,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 20. payments — Paiements Stripe
+### 20. payments Paiements Stripe
 
 > Model : `Payment`
 
@@ -449,7 +449,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 21. newsletter_subscribers — Abonnes newsletter
+### 21. newsletter_subscribers Abonnes newsletter
 
 > Model : `NewsletterSubscriber`
 
@@ -469,7 +469,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 22. reading_histories — Progression de lecture
+### 22. reading_histories Progression de lecture
 
 > Model : `ReadingHistory`
 
@@ -488,7 +488,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ---
 
-### 23. user_preferences — Preferences visiteurs non connectes
+### 23. user_preferences Preferences visiteurs non connectes
 
 > Model : `UserPreference`
 
@@ -505,7 +505,7 @@ Toujours limite aux articles **publies** uniquement.
 
 ## Tables legacy
 
-### 24. tbl_cont_pg — 3 756 articles importes de l'ancien site
+### 24. tbl_cont_pg 3 756 articles importes de l'ancien site
 
 | Colonne | Type | Description |
 |---|---|---|
@@ -527,7 +527,7 @@ Toujours limite aux articles **publies** uniquement.
 | `modification` | datetime | Derniere modification |
 | `contPublishDate` | int | Timestamp publication |
 
-### 25. tbl_ref — 71 categories/references legacy
+### 25. tbl_ref 71 categories/references legacy
 
 | Colonne | Type | Description |
 |---|---|---|
@@ -538,7 +538,7 @@ Toujours limite aux articles **publies** uniquement.
 | `refUrl` | varchar(255) | URL / slug |
 | `meta_title/desc/kw` | varchar(255) | SEO |
 
-### 26. tbl_usr — 3 utilisateurs legacy
+### 26. tbl_usr 3 utilisateurs legacy
 
 | Colonne | Type | Description |
 |---|---|---|
@@ -549,7 +549,7 @@ Toujours limite aux articles **publies** uniquement.
 | `usrEmail` | varchar(255) | Email |
 | `usrType` | tinyint | Role (1=admin, 2=editeur) |
 
-### 27-28. logs + cloaked_ip — Tables techniques legacy (vides)
+### 27-28. logs + cloaked_ip Tables techniques legacy (vides)
 
 Conservees pour compatibilite avec le dump. Non essentielles.
 
@@ -597,4 +597,4 @@ newsletter_subscribers (independant)
 
 ---
 
-*Document complet — 36 tables, 17 models, logique d'affichage detaillee.*
+*Document complet 36 tables, 17 models, logique d'affichage detaillee.*

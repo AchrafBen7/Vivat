@@ -32,7 +32,7 @@ class ListRssFeeds extends ListRecords
                         ->success()
                         ->title('Fetch lancé')
                         ->body($feeds->isEmpty()
-                            ? 'Aucun flux n’était à rafraîchir.'
+                            ? "Aucun flux n'était à rafraîchir."
                             : $feeds->count() . ' flux ont été ajoutés à la queue RSS.')
                         ->send();
                 }),

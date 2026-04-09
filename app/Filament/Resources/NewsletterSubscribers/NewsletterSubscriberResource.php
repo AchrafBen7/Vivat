@@ -67,7 +67,7 @@ class NewsletterSubscriberResource extends Resource
                         }
 
                         if ($interests !== '') {
-                            $details[] = 'Centres d’interet: ' . e($interests);
+                            $details[] = "Centres d'interet: " . e($interests);
                         }
 
                         return new HtmlString(

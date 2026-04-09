@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 class ArticleController extends Controller
 {
     /* ================================================================== */
-    /*  ADMIN — all articles (any status)                                 */
+    /*  ADMIN all articles (any status)                                 */
     /* ================================================================== */
 
     public function index(Request $request): AnonymousResourceCollection
@@ -42,11 +42,11 @@ class ArticleController extends Controller
     }
 
     /* ================================================================== */
-    /*  PUBLIC — published only                                           */
+    /*  PUBLIC published only                                           */
     /* ================================================================== */
 
     /**
-     * GET /api/public/articles — liste des articles publiés
+     * GET /api/public/articles liste des articles publiés
      */
     public function published(Request $request): AnonymousResourceCollection
     {
@@ -73,7 +73,7 @@ class ArticleController extends Controller
     }
 
     /**
-     * GET /api/public/articles/{slug} — article par slug (uniquement si langue = locale requête)
+     * GET /api/public/articles/{slug} article par slug (uniquement si langue = locale requête)
      */
     public function showBySlug(Request $request, Article $article): ArticleResource
     {

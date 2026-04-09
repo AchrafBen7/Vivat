@@ -32,6 +32,20 @@ class PipelineStep3 extends Page
 
     protected static ?string $title = '';
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Article::where('status', 'draft')
+            ->whereNotNull('cluster_id')
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
     protected string $view = 'filament.pages.pipeline-step3';
 
     public bool $publishModalOpen = false;
@@ -156,8 +170,8 @@ class PipelineStep3 extends Page
                 'key' => 'fetch',
                 'label' => 'Collecte des sources',
                 'description' => $todayFetchJobs->count() > 0
-                    ? $todayFetchJobs->count() . ' fetch(s) lancés aujourd’hui, ' . $newItemsToday . ' article(s) repérés.'
-                    : 'Aucun fetch effectué aujourd’hui pour le moment.',
+                    ? $todayFetchJobs->count() . " fetch(s) lancés aujourd'hui, " . $newItemsToday . " article(s) repérés."
+                    : "Aucun fetch effectué aujourd'hui pour le moment.",
                 'status' => $this->resolveStageStatus(
                     hasSuccess: $todayFetchJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayFetchJobs->where('status', 'running')->isNotEmpty(),
@@ -170,8 +184,8 @@ class PipelineStep3 extends Page
                 'key' => 'enrich',
                 'label' => 'Analyse IA',
                 'description' => $enrichedToday > 0
-                    ? $enrichedToday . ' contenu(s) enrichi(s) aujourd’hui.'
-                    : 'Aucun enrichissement terminé aujourd’hui pour le moment.',
+                    ? $enrichedToday . " contenu(s) enrichi(s) aujourd'hui."
+                    : "Aucun enrichissement terminé aujourd'hui pour le moment.",
                 'status' => $this->resolveStageStatus(
                     hasSuccess: $todayEnrichJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayEnrichJobs->where('status', 'running')->isNotEmpty(),
@@ -184,8 +198,8 @@ class PipelineStep3 extends Page
                 'key' => 'select',
                 'label' => 'Sélection du sujet',
                 'description' => $proposalCount > 0
-                    ? $proposalCount . ' idée(s) d’article actuellement disponible(s).'
-                    : 'Aucune idée d’article prête pour le moment.',
+                    ? $proposalCount . " idée(s) d'article actuellement disponible(s)."
+                    : "Aucune idée d'article prête pour le moment.",
                 'status' => $proposalCount > 0 ? 'done' : 'idle',
                 'action' => 'rerunSelectionStage',
                 'action_label' => 'Recalculer',
@@ -194,10 +208,10 @@ class PipelineStep3 extends Page
                 'key' => 'generate',
                 'label' => 'Génération du brouillon',
                 'description' => $generatedArticle
-                    ? 'Un brouillon a déjà été créé aujourd’hui : ' . $generatedArticle->title
+                    ? "Un brouillon a déjà été créé aujourd'hui : " . $generatedArticle->title
                     : ($latestGenerateJob?->status === 'failed'
-                        ? 'La dernière génération a échoué aujourd’hui.'
-                        : 'Aucun brouillon généré aujourd’hui pour le moment.'),
+                        ? "La dernière génération a échoué aujourd'hui."
+                        : "Aucun brouillon généré aujourd'hui pour le moment."),
                 'status' => $this->resolveStageStatus(
                     hasSuccess: $generatedArticle !== null || $todayGenerateJobs->where('status', 'completed')->isNotEmpty(),
                     hasRunning: $todayGenerateJobs->where('status', 'running')->isNotEmpty(),
@@ -291,7 +305,7 @@ class PipelineStep3 extends Page
         Notification::make()
             ->success()
             ->title('Sélection recalculée')
-            ->body($count . ' idée(s) d’article sont disponibles après recalcul.')
+            ->body($count . " idée(s) d'article sont disponibles après recalcul.")
             ->send();
     }
 
@@ -303,7 +317,7 @@ class PipelineStep3 extends Page
             Notification::make()
                 ->warning()
                 ->title('Génération impossible')
-                ->body('Aucune idée d’article exploitable n’est disponible pour le moment.')
+                ->body("Aucune idée d'article exploitable n'est disponible pour le moment.")
                 ->send();
 
             return;

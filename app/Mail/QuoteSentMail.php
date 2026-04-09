@@ -23,7 +23,7 @@ class QuoteSentMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Vivat] Votre article a été accepté — paiement requis',
+            subject: '[Vivat] Votre article a été accepté paiement requis',
         );
     }
 

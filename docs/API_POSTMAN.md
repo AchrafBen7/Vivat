@@ -1,4 +1,4 @@
-# API Vivat — Tests Postman
+# API Vivat Tests Postman
 
 Base URL (local) : **http://localhost:8000/api**
 

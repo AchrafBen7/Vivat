@@ -21,8 +21,8 @@ class SearchController extends Controller
         $content = render_php_view('site.search', $data);
 
         $title = $q !== ''
-            ? sprintf('Recherche : %s — Vivat', htmlspecialchars($q))
-            : 'Recherche — Vivat';
+            ? sprintf('Recherche : %s Vivat', htmlspecialchars($q))
+            : 'Recherche Vivat';
         $metaDescription = $q !== ''
             ? sprintf('Résultats de recherche pour « %s » sur Vivat.', htmlspecialchars($q))
             : 'Recherchez des articles et actualités par mot-clé ou par catégorie.';

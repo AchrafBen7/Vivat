@@ -70,7 +70,7 @@ $uploadMaxBytes = (function (string $value): int {
         </div>
     </div>
 </div>
-<h1 class="font-medium text-[#004241] text-2xl mb-2"><?= htmlspecialchars($isEditing ? $t('site.edit_article', 'Modifier l’article') : $t('site.create_article', 'Nouvel article')) ?></h1>
+<h1 class="font-medium text-[#004241] text-2xl mb-2"><?= htmlspecialchars($isEditing ? $t('site.edit_article', "Modifier l'article") : $t('site.create_article', 'Nouvel article')) ?></h1>
 <p class="text-[#004241]/80 mb-8">
     <?= $canBypassPayment
         ? htmlspecialchars($isEditing ? $t('site.admin_edit_article_text', 'Mettez à jour votre article puis publiez-le directement depuis cet écran.') : $t('site.admin_create_article_text', 'Créez et publiez un article sans étape de paiement.'))
@@ -81,7 +81,7 @@ $uploadMaxBytes = (function (string $value): int {
 <div class="mb-6 rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
     <div class="flex items-center gap-2 text-sm font-semibold">
         <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
-        <span><?= htmlspecialchars($t('site.editorial_feedback', "Retour de l’équipe éditoriale")) ?></span>
+        <span><?= htmlspecialchars($t('site.editorial_feedback', "Retour de l'équipe éditoriale")) ?></span>
     </div>
     <p class="mt-3 text-sm leading-6 text-[#004241]/84"><?= nl2br(htmlspecialchars($submission['reviewer_notes'])) ?></p>
     <?php if (!empty($submission['reviewer_name']) || !empty($submission['reviewed_at'])): ?>
@@ -116,8 +116,8 @@ $uploadMaxBytes = (function (string $value): int {
             >
             <div id="cover-image-empty-state">
                 <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span class="text-[#004241]/70 text-sm"><?= htmlspecialchars($isEditing && !empty($submission['cover_image_url']) ? $t('site.replace_image', 'Cliquez pour remplacer l’image') : $t('site.add_image', 'Cliquez pour ajouter une image')) ?></span>
-                <span class="block text-gray-400 text-xs mt-1">JPG, PNG - max 5 Mo</span>
+                <span class="text-[#004241]/70 text-sm"><?= htmlspecialchars($isEditing && !empty($submission['cover_image_url']) ? $t('site.replace_image', "Cliquez pour remplacer l'image") : $t('site.add_image', 'Cliquez pour ajouter une image')) ?></span>
+                <span class="block text-gray-400 text-xs mt-1">JPG, PNG max 5 Mo</span>
                 <span class="block text-gray-400 text-xs mt-1"><?= htmlspecialchars($t('site.current_php_limit', 'Limite PHP locale actuelle')) ?>: <?= htmlspecialchars($uploadMaxRaw) ?></span>
             </div>
 
@@ -232,7 +232,7 @@ $uploadMaxBytes = (function (string $value): int {
             </div>
             <div class="min-w-0">
                 <h2 id="publish-feedback-title" class="text-[20px] font-semibold leading-7 text-[#1B4B3B]">Transmission en cours...</h2>
-                <p id="publish-feedback-message" class="mt-2 max-h-[160px] overflow-y-auto text-sm leading-6 text-[#004241]/80">Nous envoyons votre article à l’espace rédacteur. Vous pouvez patienter quelques instants.</p>
+                <p id="publish-feedback-message" class="mt-2 max-h-[160px] overflow-y-auto text-sm leading-6 text-[#004241]/80">Nous envoyons votre article à l'espace rédacteur. Vous pouvez patienter quelques instants.</p>
             </div>
         </div>
 

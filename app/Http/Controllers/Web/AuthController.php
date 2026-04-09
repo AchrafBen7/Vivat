@@ -58,7 +58,7 @@ class AuthController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => 'Devenir rédacteur — Vivat',
+            'title' => 'Devenir rédacteur Vivat',
             'meta_description' => 'Rédigez et publiez vos articles sur Vivat. Découvrez la participation à la publication et les avantages de devenir contributeur.',
             'hide_cta_section' => true,
             'hide_footer' => true,
@@ -78,7 +78,7 @@ class AuthController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => 'Créer votre compte — Vivat',
+            'title' => 'Créer votre compte Vivat',
             'meta_description' => 'Inscrivez-vous sur Vivat pour devenir rédacteur contributeur et publier vos articles.',
             'hide_cta_section' => true,
             'hide_footer' => true,
@@ -143,7 +143,7 @@ class AuthController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => 'Connexion — Vivat',
+            'title' => 'Connexion Vivat',
             'meta_description' => 'Connectez-vous à votre compte contributeur Vivat.',
             'hide_cta_section' => true,
             'hide_footer' => true,
@@ -188,7 +188,7 @@ class AuthController extends Controller
     public function redirectToGoogle(): RedirectResponse
     {
         if (! $this->googleOAuthConfigured()) {
-            return redirect()->route('login')->with('error', 'La connexion Google n’est pas encore configurée.');
+            return redirect()->route('login')->with('error', "La connexion Google n'est pas encore configurée.");
         }
 
         return Socialite::driver('google')
@@ -199,7 +199,7 @@ class AuthController extends Controller
     public function handleGoogleCallback(Request $request): RedirectResponse
     {
         if (! $this->googleOAuthConfigured()) {
-            return redirect()->route('login')->with('error', 'La connexion Google n’est pas encore configurée.');
+            return redirect()->route('login')->with('error', "La connexion Google n'est pas encore configurée.");
         }
 
         try {
@@ -211,7 +211,7 @@ class AuthController extends Controller
         $email = mb_strtolower(trim((string) ($googleUser->getEmail() ?? '')));
 
         if ($email === '') {
-            return redirect()->route('login')->with('error', 'Votre compte Google ne fournit pas d’adresse email exploitable.');
+            return redirect()->route('login')->with('error', "Votre compte Google ne fournit pas d'adresse email exploitable.");
         }
 
         $user = User::query()
@@ -283,7 +283,7 @@ class AuthController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => 'Mot de passe oublié — Vivat',
+            'title' => 'Mot de passe oublié Vivat',
             'meta_description' => 'Recevez un lien de réinitialisation de mot de passe pour votre compte Vivat.',
             'hide_cta_section' => true,
             'hide_footer' => true,
@@ -296,7 +296,7 @@ class AuthController extends Controller
     public function sendResetLink(Request $request): RedirectResponse
     {
         if ($this->honeypotTriggered($request)) {
-            return back()->with('status', 'Si un compte existe pour cette adresse, un lien de réinitialisation vient d’être envoyé.');
+            return back()->with('status', "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé.");
         }
 
         $validated = $request->validate([
@@ -311,11 +311,11 @@ class AuthController extends Controller
         ]);
 
         if ($status === PasswordBroker::RESET_LINK_SENT) {
-            return back()->with('status', 'Si un compte existe pour cette adresse, un lien de réinitialisation vient d’être envoyé.');
+            return back()->with('status', "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé.");
         }
 
         return back()->withErrors([
-            'email' => 'Impossible d’envoyer le lien de réinitialisation pour le moment.',
+            'email' => "Impossible d'envoyer le lien de réinitialisation pour le moment.",
         ])->onlyInput('email');
     }
 
@@ -332,7 +332,7 @@ class AuthController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => 'Réinitialiser le mot de passe — Vivat',
+            'title' => 'Réinitialiser le mot de passe Vivat',
             'meta_description' => 'Choisissez un nouveau mot de passe pour votre compte Vivat.',
             'hide_cta_section' => true,
             'hide_footer' => true,

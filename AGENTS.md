@@ -9,17 +9,17 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.5.2
-- laravel/framework (LARAVEL) - v12
-- laravel/prompts (PROMPTS) - v0
-- laravel/mcp (MCP) - v0
-- laravel/pint (PINT) - v1
-- laravel/sail (SAIL) - v1
-- phpunit/phpunit (PHPUNIT) - v11
+- php 8.5.2
+- laravel/framework (LARAVEL) v12
+- laravel/prompts (PROMPTS) v0
+- laravel/mcp (MCP) v0
+- laravel/pint (PINT) v1
+- laravel/sail (SAIL) v1
+- phpunit/phpunit (PHPUNIT) v11
 
 ## Skills Activation
 
-This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
+This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain-don't wait until you're stuck.
 
 ## Conventions
 
@@ -46,7 +46,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 ## Replies
 
-- Be concise in your explanations - focus on what's important rather than explaining obvious details.
+- Be concise in your explanations focus on what's important rather than explaining obvious details.
 
 === boost rules ===
 
@@ -70,7 +70,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 ## Reading Browser Logs With the `browser-logs` Tool
 
 - You can read browser logs, errors, and exceptions using the `browser-logs` tool from Boost.
-- Only recent browser logs will be useful - ignore old logs.
+- Only recent browser logs will be useful ignore old logs.
 
 ## Searching Documentation (Critically Important)
 
@@ -81,11 +81,11 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 ### Available Search Syntax
 
-1. Simple Word Searches with auto-stemming - query=authentication - finds 'authenticate' and 'auth'.
-2. Multiple Words (AND Logic) - query=rate limit - finds knowledge containing both "rate" AND "limit".
-3. Quoted Phrases (Exact Position) - query="infinite scroll" - words must be adjacent and in that order.
-4. Mixed Queries - query=middleware "rate limit" - "middleware" AND exact phrase "rate limit".
-5. Multiple Queries - queries=["authentication", "middleware"] - ANY of these terms.
+1. Simple Word Searches with auto-stemming query=authentication finds 'authenticate' and 'auth'.
+2. Multiple Words (AND Logic) query=rate limit finds knowledge containing both "rate" AND "limit".
+3. Quoted Phrases (Exact Position) query="infinite scroll" words must be adjacent and in that order.
+4. Mixed Queries query=middleware "rate limit" "middleware" AND exact phrase "rate limit".
+5. Multiple Queries queries=["authentication", "middleware"] ANY of these terms.
 
 === php rules ===
 
@@ -96,7 +96,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 ## Constructors
 
 - Use PHP 8 constructor property promotion in `__construct()`.
-    - <code-snippet>public function __construct(public GitHub $github) { }</code-snippet>
+    <code-snippet>public function __construct(public GitHub $github) { }</code-snippet>
 - Do not allow empty `__construct()` methods with zero parameters unless the constructor is private.
 
 ## Type Declarations
@@ -166,7 +166,7 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Configuration
 
-- Use environment variables only in configuration files - never use the `env()` function directly outside of config files. Always use `config('app.name')`, not `env('APP_NAME')`.
+- Use environment variables only in configuration files never use the `env()` function directly outside of config files. Always use `config('app.name')`, not `env('APP_NAME')`.
 
 ## Testing
 

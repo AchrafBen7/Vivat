@@ -1,4 +1,4 @@
-# Tests Home — Checklist Postman
+# Tests Home Checklist Postman
 
 Toutes les fonctionnalités de la page d’accueil à tester. **Prérequis** : 9 catégories créées + 10 articles (voir `POSTMAN_9_CATEGORIES_BODIES.md` et `POSTMAN_10_ARTICLES_HOME_BODIES.md`, ou `php artisan db:seed --class=HomeArticlesSeeder`).
 

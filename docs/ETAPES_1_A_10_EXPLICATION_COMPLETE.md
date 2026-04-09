@@ -1,4 +1,4 @@
-# Pipeline complet : étapes 1 à 10 — Explication et code
+# Pipeline complet : étapes 1 à 10 Explication et code
 
 Document de référence pour comprendre **ce qui se passe** à chaque étape du workflow Postman (connexion → fetch RSS → enrichissement → export CSV → analyse tendances → sélection → génération → publication) et **comment c’est fait dans le code**. Destiné aux développeurs et au chef de projet.
 
@@ -19,7 +19,7 @@ Document de référence pour comprendre **ce qui se passe** à chaque étape du 
 
 ---
 
-## Étape 1 — Connexion (obtenir le token)
+## Étape 1 Connexion (obtenir le token)
 
 ### Ce que tu fais
 
@@ -37,22 +37,22 @@ Document de référence pour comprendre **ce qui se passe** à chaque étape du 
 
 ---
 
-## Étape 2 — Fetch RSS (déclencher la récupération des articles)
+## Étape 2 Fetch RSS (déclencher la récupération des articles)
 
 ### Ce que tu fais
 
 - **POST** `http://localhost:8000/api/pipeline/fetch-rss`
 - **Headers** : `Authorization: Bearer {token}`, `Content-Type: application/json`
-- **Body** : `{"all": true}` — **obligatoire** pour traiter tous les flux actifs (sinon seuls les flux « dus » sont pris, et tu peux avoir « Aucun flux à traiter »).
+- **Body** : `{"all": true}` **obligatoire** pour traiter tous les flux actifs (sinon seuls les flux « dus » sont pris, et tu peux avoir « Aucun flux à traiter »).
 - **Réponse** : `{"message": "5 job(s) FetchRssFeedJob dispatché(s).", "count": 5}` (exemple).
 
 ### Ce qui se passe dans le code
 
 - **Route** : `POST /api/pipeline/fetch-rss` (middleware admin) → `PipelineController::fetchRss`.
 - **Logique** :
-  - Si `feed_id` est fourni : un seul `RssFeed` est récupéré et un job est dispatché pour ce flux.
-  - Sinon : si `all` est vrai → `RssFeed::active()->get()`, sinon → `RssFeed::dueForFetch()->get()`.
-  - Pour chaque flux, **FetchRssFeedJob** est dispatché sur la queue **`rss`**.
+  Si `feed_id` est fourni : un seul `RssFeed` est récupéré et un job est dispatché pour ce flux.
+  Sinon : si `all` est vrai → `RssFeed::active()->get()`, sinon → `RssFeed::dueForFetch()->get()`.
+  Pour chaque flux, **FetchRssFeedJob** est dispatché sur la queue **`rss`**.
 
 **Job FetchRssFeedJob** (`app/Jobs/FetchRssFeedJob.php`) :
 
@@ -68,7 +68,7 @@ Document de référence pour comprendre **ce qui se passe** à chaque étape du 
 
 ---
 
-## Étape 3 — Statut du pipeline (vérifier que des items « new » existent)
+## Étape 3 Statut du pipeline (vérifier que des items « new » existent)
 
 ### Ce que tu fais
 
@@ -85,7 +85,7 @@ Document de référence pour comprendre **ce qui se passe** à chaque étape du 
 
 ---
 
-## Étape 4 — Enrichissement (scraping + analyse IA)
+## Étape 4 Enrichissement (scraping + analyse IA)
 
 ### Ce que tu fais
 
@@ -105,17 +105,17 @@ Document de référence pour comprendre **ce qui se passe** à chaque étape du 
 2. **ContentExtractorService::extract($url)** : requête HTTP sur l’URL de l’article, extraction du contenu principal (balises article/main, nettoyage scripts/nav/footer). Retourne titre, headings, texte. Si échec ou texte trop court (< 200 caractères) → `status = 'failed'` et fin.
 3. **Appel OpenAI** avec le texte extrait (tronqué à 6000 caractères) pour obtenir une analyse structurée en JSON.
 
-**Prompt utilisé (enrichissement)** — dans le job, en dur :
+**Prompt utilisé (enrichissement)** dans le job, en dur :
 
 - **System** : *« Tu es un analyste de contenu SEO expert. Tu analyses des articles et produis une analyse structurée avec des mots-clés SEO ciblés (longue traîne, spécifiques, faible concurrence). Privilégie les termes recherchés par les utilisateurs mais peu concurrentiels. Réponds uniquement en JSON. »*
 - **User** : titre + titres de sections + contenu, puis consignes pour générer un JSON avec :
-  - `lead` (résumé 1–2 phrases)
-  - `headings` (tableau des H2/H3)
-  - `key_points` (3–7 points clés)
-  - `seo_keywords` (5–10 mots-clés SEO)
-  - `primary_topic` (sujet principal en 2–4 mots)
-  - `quality_score` (0–100)
-  - `seo_score` (0–100)
+  `lead` (résumé 1–2 phrases)
+  `headings` (tableau des H2/H3)
+  `key_points` (3–7 points clés)
+  `seo_keywords` (5–10 mots-clés SEO)
+  `primary_topic` (sujet principal en 2–4 mots)
+  `quality_score` (0–100)
+  `seo_score` (0–100)
 
 4. Création ou mise à jour d’un **EnrichedItem** (lié au `RssItem`) avec ces champs + `extracted_text`, puis `status = 'enriched'` sur le `RssItem`. En cas d’erreur OpenAI (ex. 429) : `status = 'new'` pour réessayer plus tard.
 
@@ -123,7 +123,7 @@ Document de référence pour comprendre **ce qui se passe** à chaque étape du 
 
 ---
 
-## Étape 5 — Statut (vérifier que des items sont « enriched »)
+## Étape 5 Statut (vérifier que des items sont « enriched »)
 
 ### Ce que tu fais
 
@@ -136,7 +136,7 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 
 ---
 
-## Étape 6 — Export CSV (télécharger le fichier tendances)
+## Étape 6 Export CSV (télécharger le fichier tendances)
 
 ### Ce que tu fais
 
@@ -157,13 +157,13 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 
 ---
 
-## Étape 7 — Analyser les tendances (IA lit le CSV)
+## Étape 7 Analyser les tendances (IA lit le CSV)
 
 ### Ce que tu fais
 
 - **POST** `http://localhost:8000/api/pipeline/analyze-trends`
 - **Headers** : `Authorization: Bearer {token}`, `Content-Type: application/json`
-- **Body (option A)** : `{"limit": 500}` — le CSV est généré depuis la BDD (même logique qu’étape 6) puis envoyé à l’IA.
+- **Body (option A)** : `{"limit": 500}` le CSV est généré depuis la BDD (même logique qu’étape 6) puis envoyé à l’IA.
 - **Body (option B)** : en **form-data**, clé `csv_file` (type File) = le fichier téléchargé à l’étape 6.
 - **Réponse** : `{"success": true, "analysis": "1) CONNEXIONS ENTRE ARTICLES\n\n..."}`. Si le CSV a été tronqué : `truncated: true`, `truncated_at_chars: 45000`.
 
@@ -174,8 +174,8 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 - **TrendsAnalysisService::analyze($csvContent)** :
   1. Troncation du CSV à **max_csv_chars** (config `trends_analysis.max_csv_chars`, défaut 45 000) pour tenir dans le contexte OpenAI. L’IA n’a pas besoin de tout le fichier pour identifier tendances et connexions.
   2. Chargement du **prompt** depuis **`config/trends_analysis.php`** :
-     - **system_prompt** : définit le rôle (expert analyse éditoriale, tendances, média environnement/santé/énergie/société) et le format de réponse (français, structuré).
-     - **user_prompt_template** : contient le placeholder `{csv_content}`. Le contenu tronqué du CSV y est injecté, puis les consignes demandent :
+     **system_prompt** : définit le rôle (expert analyse éditoriale, tendances, média environnement/santé/énergie/société) et le format de réponse (français, structuré).
+     **user_prompt_template** : contient le placeholder `{csv_content}`. Le contenu tronqué du CSV y est injecté, puis les consignes demandent :
        1. Connexions entre articles (groupes par sujet, sources, corrélations)
        2. Corrélations et tendances (dates, primary_topic, seo_keywords ; chaud vs de fond)
        3. Meilleur sujet pour écrire un article (justification, titre, phrase de contexte priorité)
@@ -189,13 +189,13 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 
 ---
 
-## Étape 8 — Sélection intelligente (propositions d’articles)
+## Étape 8 Sélection intelligente (propositions d’articles)
 
 ### Ce que tu fais
 
 - **GET** `http://localhost:8000/api/pipeline/select-items?count=3`
 - **Headers** : `Authorization: Bearer {token}`
-- **Réponse** : `proposals[]` — pour chaque proposition : `topic`, `score`, `reasoning`, `items` (avec `id`, `title`, `url`, `source`, `quality_score`), `suggested_article_type`, `suggested_min_words`, `suggested_max_words`, `context_priority`. Tu notes les **item_ids** pour l’étape 9.
+- **Réponse** : `proposals[]` pour chaque proposition : `topic`, `score`, `reasoning`, `items` (avec `id`, `title`, `url`, `source`, `quality_score`), `suggested_article_type`, `suggested_min_words`, `suggested_max_words`, `context_priority`. Tu notes les **item_ids** pour l’étape 9.
 
 ### Ce qui se passe dans le code
 
@@ -203,10 +203,10 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 - **ArticleSelectionService** (`app/Services/ArticleSelectionService.php`) :
   1. Récupération des **RssItem** avec `status = 'enriched'` et relation `enrichedItem`, optionnel filtre par `category_id`.
   2. **Score par item** (0–100) à partir de **config/selection.php** :
-     - **weights** (profil `default` ou `actu_focus`, etc.) : freshness, quality, seo, diversity, topic_frequency.
-     - Fraîcheur : décroissance sur 7 jours (`decay_days`), bonus si < 48 h (hot_news_hours).
-     - Qualité : `enrichedItem->quality_score`, bonus si mot count ≥ 1000.
-     - SEO : mots-clés extraits (titre, lead, key_points, headings), estimation du poids SEO (longueur, termes thématiques).
+     **weights** (profil `default` ou `actu_focus`, etc.) : freshness, quality, seo, diversity, topic_frequency.
+     Fraîcheur : décroissance sur 7 jours (`decay_days`), bonus si < 48 h (hot_news_hours).
+     Qualité : `enrichedItem->quality_score`, bonus si mot count ≥ 1000.
+     SEO : mots-clés extraits (titre, lead, key_points, headings), estimation du poids SEO (longueur, termes thématiques).
   3. **Clustering par sujet** : extraction de mots-clés (stop words FR retirés), similarité **Jaccard** entre ensembles de mots-clés. Les items dont similarité ≥ `similarity_threshold` (défaut 20 %) sont regroupés. Limite par groupe : `max_items_per_topic` (défaut 5).
   4. **Score par groupe (topic)** : moyenne des scores des items + bonus diversité (plusieurs sources) + bonus « fréquence du sujet » (config `topic_frequency` : si beaucoup d’articles sur le même thème dans le pool, bonus jusqu’à `max_bonus`).
   5. **Type d’article suggéré** : si le plus récent item du groupe a < 48 h → `hot_news`, sinon si au moins 3 items → `long_form`, sinon `standard`. Les fourchettes de mots (`suggested_min_words`, `suggested_max_words`) viennent de **config/selection.php** → `article_types` (hot_news : 400–650, long_form : 1000–1800, standard : 800–1200).
@@ -218,7 +218,7 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 
 ---
 
-## Étape 9 — Générer un article (synthèse IA)
+## Étape 9 Générer un article (synthèse IA)
 
 ### Ce que tu fais
 
@@ -245,7 +245,7 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 
 ---
 
-## Étape 10 — Publier l’article
+## Étape 10 Publier l’article
 
 ### Ce que tu fais
 
@@ -257,7 +257,7 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 
 - **Route** : `POST /api/articles/{article}/publish` → `ArticleController::publish`.
 - **Autorisation** : policy `publish` sur l’article (admin).
-- **Vérification** : `$article->isPublishable()` — le modèle **Article** exige `quality_score >= 60` et status `draft` ou `review`. Sinon réponse JSON d’erreur.
+- **Vérification** : `$article->isPublishable()` le modèle **Article** exige `quality_score >= 60` et status `draft` ou `review`. Sinon réponse JSON d’erreur.
 - Mise à jour : `status = 'published'`, `published_at = now()`.
 - **Invalidation du cache** : `Cache::forget('vivat.hub.' . $article->category->slug)` et `Cache::forget('vivat.categories.index')` pour que les pages hub et la liste des catégories reflètent le nouvel article publié.
 
@@ -282,14 +282,14 @@ Identique à l’étape 3 : `PipelineController::status`, lecture des comptes pa
 |-------|--------------------|----------------|-------------------|
 | 1 | AuthController, routes api.php | Sanctum | User |
 | 2 | PipelineController::fetchRss | FetchRssFeedJob, RssParserService | RssFeed, RssItem |
-| 3 | PipelineController::status | — | RssFeed, RssItem |
+| 3 | PipelineController::status | | RssFeed, RssItem |
 | 4 | PipelineController::enrich | EnrichContentJob, ContentExtractorService | EnrichedItem, RssItem |
-| 5 | PipelineController::status | — | — |
-| 6 | PipelineController::exportTrendsCsv | buildCsvForTrends | — |
+| 5 | PipelineController::status | | |
+| 6 | PipelineController::exportTrendsCsv | buildCsvForTrends | |
 | 7 | PipelineController::analyzeTrends | TrendsAnalysisService | config/trends_analysis.php |
 | 8 | PipelineController::selectItems | ArticleSelectionService | config/selection.php |
 | 9 | ArticleController::generate | ArticleGeneratorService | config/selection.php, CategoryTemplate, Article, ArticleSource |
-| 10 | ArticleController::publish | — | Article, cache |
+| 10 | ArticleController::publish | | Article, cache |
 
 ---
 
@@ -305,7 +305,7 @@ Cela crée `docs/ETAPES_1_A_10_EXPLICATION_COMPLETE.html`. Pour obtenir le PDF :
 
 ---
 
-## Annexe — Les deux prompts OpenAI en texte complet
+## Annexe Les deux prompts OpenAI en texte complet
 
 Les deux prompts ci-dessous sont ceux envoyés à l’API OpenAI lors des étapes 4 (enrichissement) et 7 (analyse des tendances). Ils figurent ici en intégralité pour référence dans le PDF.
 
@@ -369,12 +369,12 @@ Ta mission est de faire une analyse complète et structurée pour décider QUEL 
 
 **5) HOT NEWS vs ARTICLE DE FOND**
 - Parmi les groupes/sujets identifiés :
-  - Lesquels qualifierais-tu de "hot news" (actualité chaude, brève) ? Pour chacun : indique la fourchette de mots recommandée (ex. : 400–650 mots) et le ton (percutant, factuel).
-  - Lesquels qualifierais-tu d'article de fond (analyse, synthèse multi-sources) ? Pour chacun : indique la fourchette de mots recommandée (ex. : 1000–1800 mots) et le ton (approfondi, analytique).
+  Lesquels qualifierais-tu de "hot news" (actualité chaude, brève) ? Pour chacun : indique la fourchette de mots recommandée (ex. : 400–650 mots) et le ton (percutant, factuel).
+  Lesquels qualifierais-tu d'article de fond (analyse, synthèse multi-sources) ? Pour chacun : indique la fourchette de mots recommandée (ex. : 1000–1800 mots) et le ton (approfondi, analytique).
 - Pour le meilleur sujet que tu as choisi en (3) : précise si c'est un article "hot news" ou "de fond" et donne la fourchette de mots exacte et le ton à utiliser (contexte pour l'IA : "Ton article doit faire entre X et Y mots, [ton].").
 
 Résume à la fin en une "fiche rédactionnelle" : sujet retenu, type (hot news / de fond), nombre de mots (min–max), ton, phrase de contexte priorité, et 3–5 mots-clés SEO à intégrer.
 
 ---
 
-*Document rédigé pour le projet Vivat — Pipeline Content Acquisition.*
+*Document rédigé pour le projet Vivat Pipeline Content Acquisition.*

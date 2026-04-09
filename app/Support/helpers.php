@@ -28,7 +28,7 @@ if (! function_exists('render_php_view')) {
 
 if (! function_exists('vivat_category_fallback_image')) {
     /**
-     * URL d’image de repli par catégorie (pour cartes hot_news / featured quand pas d’image ou image cassée).
+     * URL d'image de repli par catégorie (pour cartes hot_news / featured quand pas d'image ou image cassée).
      * Image stable et cohérente avec la rubrique (seed basé sur le slug).
      *
      * @param  string|null  $categorySlug  Slug ou nom de la catégorie (ex: finance, energie)
@@ -93,7 +93,7 @@ if (! function_exists('vivat_filter_label_case')) {
 if (! function_exists('vivat_hub_article_subcategory_badge_label')) {
     /**
      * Libellé du tag sur une carte du hub rubrique : une sous-rubrique (terme), alignée sur la logique
-     * de filtrage (LIKE sur title, content, excerpt, meta_*, keywords). Permet d’afficher "Argent" vs
+     * de filtrage (LIKE sur title, content, excerpt, meta_*, keywords). Permet d'afficher "Argent" vs
      * "Finance" quand plusieurs filtres sont actifs et les articles sont mélangés.
      *
      * @param  array<string, mixed>  $article
@@ -199,8 +199,8 @@ if (! function_exists('vivat_hub_article_subcategory_badge_label')) {
 
 if (! function_exists('vivat_category_public_media_url')) {
     /**
-     * URL d’un média local (public/) pour une rubrique : même nom de fichier que le slug (ou alias config).
-     * Cherche dans l’ordre : mp4, webm, mov, jpg, jpeg, png, webp.
+     * URL d'un média local (public/) pour une rubrique : même nom de fichier que le slug (ou alias config).
+     * Cherche dans l'ordre : mp4, webm, mov, jpg, jpeg, png, webp.
      */
     function vivat_category_public_media_url(?string $categorySlug): ?string
     {

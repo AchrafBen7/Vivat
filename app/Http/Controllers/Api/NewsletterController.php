@@ -64,7 +64,7 @@ class NewsletterController extends Controller
     }
 
     /**
-     * GET /api/admin/newsletter/subscribers — admin listing (within admin group)
+     * GET /api/admin/newsletter/subscribers admin listing (within admin group)
      */
     public function subscribers(Request $request): JsonResponse
     {

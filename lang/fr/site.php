@@ -167,7 +167,7 @@ return [
     'draft_button' => 'Brouillon',
     'publish_now' => 'Publier maintenant',
     'resubmit' => 'Renvoyer en validation',
-    'publish' => 'Publier',
+    'publish' => 'Envoyer',
     'js_saving_draft' => 'Sauvegarde du brouillon…',
     'js_draft_saved_at' => 'Brouillon sauvegardé à',
     'js_autosave_failed' => 'La sauvegarde automatique a échoué.',

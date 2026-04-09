@@ -51,7 +51,7 @@ class ContributorController extends Controller
             'redirect_url' => route('contributor.dashboard'),
             'notice' => [
                 'title' => 'Paiement requis',
-                'message' => 'Votre article est enregistre comme brouillon. Finalisez maintenant le paiement pour l’envoyer en validation.',
+                'message' => "Votre article est enregistre comme brouillon. Finalisez maintenant le paiement pour l'envoyer en validation.",
             ],
         ];
     }
@@ -246,7 +246,7 @@ class ContributorController extends Controller
             'language.required' => 'Veuillez choisir la langue de votre article.',
             'language.in' => 'La langue sélectionnée est invalide.',
             'reading_time.integer' => 'Le temps de lecture doit être un nombre entier.',
-            'reading_time.min' => 'Le temps de lecture doit être d’au moins 1 minute.',
+            'reading_time.min' => "Le temps de lecture doit être d'au moins 1 minute.",
             'reading_time.max' => 'Le temps de lecture ne peut pas dépasser 120 minutes.',
             'cover_image.image' => "L'image de couverture doit être une image valide.",
             'cover_image.mimes' => "L'image de couverture doit être au format JPG ou PNG.",
@@ -270,7 +270,7 @@ class ContributorController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $wrapper,
             'content_locale' => content_locale(request()),
-            'title' => 'Espace rédacteur — Vivat',
+            'title' => 'Espace rédacteur Vivat',
             'meta_description' => 'Espace rédacteur Vivat. Gérez vos soumissions et rédigez des articles.',
             'hide_cta_section' => true,
             'hide_footer' => true,
@@ -304,7 +304,7 @@ class ContributorController extends Controller
                 'description' => match ($submissionStatus) {
                     'pending' => 'Paiement confirmé. Votre article est en cours de relecture.',
                     'approved' => 'Paiement confirmé. Votre article est publié.',
-                    'rejected' => 'Paiement confirmé. L’article a été refusé.',
+                    'rejected' => "Paiement confirmé. L'article a été refusé.",
                     default => 'Paiement confirmé.',
                 },
             ];
@@ -338,8 +338,8 @@ class ContributorController extends Controller
             'label' => $submissionStatus === 'draft' ? 'Interrompu' : 'En attente',
             'color' => $submissionStatus === 'draft' ? 'amber' : 'slate',
             'description' => $submissionStatus === 'draft'
-                ? 'Un paiement a été initié, mais il n’a pas été finalisé.'
-                : 'Le paiement existe, mais Stripe ne l’a pas encore confirmé.',
+                ? "Un paiement a été initié, mais il n'a pas été finalisé."
+                : "Le paiement existe, mais Stripe ne l'a pas encore confirmé.",
         ];
     }
 
@@ -348,7 +348,11 @@ class ContributorController extends Controller
         $user = $request->user();
 
         $pendingQuotesCount = PublicationQuote::query()
-            ->whereHas('submission', fn ($q) => $q->where('user_id', $user->id)->whereNotIn('status', ['published', 'payment_succeeded']))
+            ->whereHas('submission', function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->whereNotIn('status', ['published', 'payment_succeeded'])
+                  ->whereDoesntHave('submissionPayments', fn ($p) => $p->where('status', 'succeeded'));
+            })
             ->whereIn('status', ['pending', 'sent'])
             ->count();
 
@@ -373,7 +377,7 @@ class ContributorController extends Controller
                     'pending' => 'En attente',
                     'under_review' => 'En relecture',
                     'changes_requested' => 'Corrections demandées',
-                    'price_proposed', 'awaiting_payment' => 'Prix proposé — paiement requis',
+                    'price_proposed', 'awaiting_payment' => 'Prix proposé paiement requis',
                     'payment_pending' => 'Paiement en cours',
                     'payment_succeeded' => 'Paiement confirmé',
                     'payment_failed' => 'Paiement échoué',
@@ -450,7 +454,11 @@ class ContributorController extends Controller
 
         // Charger les quotes en attente de paiement (nouveau workflow)
         $pendingQuotes = PublicationQuote::query()
-            ->whereHas('submission', fn ($q) => $q->where('user_id', $user->id)->whereNotIn('status', ['published', 'payment_succeeded']))
+            ->whereHas('submission', function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->whereNotIn('status', ['published', 'payment_succeeded'])
+                  ->whereDoesntHave('submissionPayments', fn ($p) => $p->where('status', 'succeeded'));
+            })
             ->with(['submission.category'])
             ->whereIn('status', ['pending', 'sent'])
             ->orderByDesc('created_at')
@@ -877,7 +885,7 @@ class ContributorController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => $submission->title . ' — Preview Vivat',
+            'title' => $submission->title . ' Preview Vivat',
             'meta_description' => $submission->excerpt ?: 'Prévisualisation de votre article Vivat.',
             'canonical_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
             'og_image' => $submission->cover_image_url
@@ -936,7 +944,7 @@ class ContributorController extends Controller
         if ($submission->status !== 'approved' || ! $submission->published_article_id) {
             return redirect()
                 ->route('contributor.dashboard')
-                ->with('error', 'Seul un article publié peut faire l’objet d’une demande de dépublication.');
+                ->with('error', "Seul un article publié peut faire l'objet d'une demande de dépublication.");
         }
 
         if ($submission->depublication_requested_at) {
@@ -964,7 +972,7 @@ class ContributorController extends Controller
                 if ($user->hasRole('admin')) {
                     return redirect()
                         ->route('contributor.profile')
-                        ->withErrors(['delete_account' => 'La suppression automatique d’un compte administrateur est bloquée pour préserver l’accès au back-office.'])
+                        ->withErrors(['delete_account' => "La suppression automatique d'un compte administrateur est bloquée pour préserver l'accès au back-office."])
                         ->withInput();
                 }
 
@@ -988,7 +996,7 @@ class ContributorController extends Controller
                 if (! hash_equals((string) $user->email, (string) $validated['delete_email'])) {
                     return redirect()
                         ->route('contributor.profile')
-                        ->withErrors(['delete_email' => 'L’adresse email de confirmation ne correspond pas à votre compte.'])
+                        ->withErrors(['delete_email' => "L'adresse email de confirmation ne correspond pas à votre compte."])
                         ->withInput();
                 }
 

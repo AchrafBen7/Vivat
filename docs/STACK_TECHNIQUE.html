@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivat — Stack Technique Backend</title>
+<title>Vivat  Stack Technique Backend</title>
 <style>
   @page {
     size: A4;
@@ -143,7 +143,7 @@
 </style>
 </head>
 <body>
-<h1>Vivat — Stack Technique Backend</h1>
+<h1>Vivat  Stack Technique Backend</h1>
 <blockquote>
 <p><strong>Version</strong> : Fevrier 2026
 <strong>Auteur</strong> : Equipe Backend
@@ -154,8 +154,8 @@
 <ol>
 <li><a href="#1-vue-densemble">Vue d&#39;ensemble</a></li>
 <li><a href="#2-architecture-logicielle">Architecture logicielle</a></li>
-<li><a href="#3-fonctionnalite-1--content-acquisition-engine">Fonctionnalite 1 — Content Acquisition Engine (detail)</a></li>
-<li><a href="#4-fonctionnalites-2-11--site-public-et-contributeurs">Fonctionnalites 2-11 — Site public et contributeurs</a></li>
+<li><a href="#3-fonctionnalite-1--content-acquisition-engine">Fonctionnalite 1  Content Acquisition Engine (detail)</a></li>
+<li><a href="#4-fonctionnalites-2-11--site-public-et-contributeurs">Fonctionnalites 2-11  Site public et contributeurs</a></li>
 <li><a href="#5-base-de-donnees">Base de donnees</a></li>
 <li><a href="#6-authentification-et-securite">Authentification et securite</a></li>
 <li><a href="#7-intelligence-artificielle">Intelligence artificielle</a></li>
@@ -225,7 +225,7 @@
 <tr>
 <td><strong>Queue monitoring</strong></td>
 <td>Laravel Horizon</td>
-<td>—</td>
+<td></td>
 </tr>
 </tbody></table>
 <hr>
@@ -299,7 +299,7 @@
 </tr>
 </tbody></table>
 <hr>
-<h2>3. Fonctionnalite 1 — Content Acquisition Engine</h2>
+<h2>3. Fonctionnalite 1  Content Acquisition Engine</h2>
 <p>C&#39;est la fonctionnalite principale du backend. Un <strong>pipeline automatise en 5 etapes</strong> qui va de la decouverte d&#39;une information dans un flux RSS a la publication d&#39;un article original genere par IA.</p>
 <h3>Schema du pipeline</h3>
 <pre><code>Sources (medias)
@@ -346,7 +346,7 @@
         published_at defini automatiquement
 </code></pre>
 <h3>Detail de chaque etape</h3>
-<h4>Etape 1 — Ingestion RSS</h4>
+<h4>Etape 1  Ingestion RSS</h4>
 <table>
 <thead>
 <tr>
@@ -392,7 +392,7 @@
 <li><strong>Statuts</strong> : chaque item commence a <code>new</code>, passe a <code>enriching</code>, puis <code>enriched</code> ou <code>failed</code>.</li>
 <li><strong>Intervalles</strong> : chaque flux a son propre <code>fetch_interval_minutes</code> (configurable par source).</li>
 </ul>
-<h4>Etape 2 — Enrichissement IA</h4>
+<h4>Etape 2  Enrichissement IA</h4>
 <table>
 <thead>
 <tr>
@@ -428,7 +428,7 @@
 <li><code>seo_score</code> : 0-100 (potentiel SEO)</li>
 </ul>
 <p><strong>Protection :</strong> Rate limiter OpenAI a 50 requetes/min (<code>AppServiceProvider</code>).</p>
-<h4>Etape 3 — Selection intelligente</h4>
+<h4>Etape 3  Selection intelligente</h4>
 <table>
 <thead>
 <tr>
@@ -476,8 +476,8 @@
 </tr>
 </tbody></table>
 <p><strong>Regroupement par sujet :</strong> Similarite de Jaccard sur les mots-cles (&gt;= 20% d&#39;intersection = meme sujet). Un article genere a partir de 3 sources sur le meme sujet est plus riche qu&#39;un article mono-source.</p>
-<p><strong>Reasoning :</strong> Chaque proposition retournee par l&#39;API inclut un texte explicatif : <em>&quot;Pourquoi generer CET article ?&quot;</em> — justifie par les scores, les sources, et le potentiel SEO.</p>
-<h4>Etape 4 — Generation IA</h4>
+<p><strong>Reasoning :</strong> Chaque proposition retournee par l&#39;API inclut un texte explicatif : <em>&quot;Pourquoi generer CET article ?&quot;</em>  justifie par les scores, les sources, et le potentiel SEO.</p>
+<h4>Etape 4  Generation IA</h4>
 <table>
 <thead>
 <tr>
@@ -514,7 +514,7 @@
 <li><strong>Consignes SEO</strong> : densite mots-cles 1-2%, mot-cle principal dans titre + H1 + premier paragraphe + au moins 2 H2</li>
 </ol>
 <p><strong>Tracabilite complete :</strong> La table <code>article_sources</code> lie chaque article genere a ses items RSS d&#39;origine. On peut toujours remonter de l&#39;article publie jusqu&#39;a la source media.</p>
-<h4>Etape 5 — Publication</h4>
+<h4>Etape 5  Publication</h4>
 <ul>
 <li><strong>Cycle de vie</strong> : <code>draft</code> → <code>review</code> → <code>published</code> / <code>rejected</code> / <code>archived</code></li>
 <li><strong>Condition</strong> : <code>quality_score &gt;= 60</code> et status <code>draft</code> ou <code>review</code></li>
@@ -557,7 +557,7 @@
 <li><strong>4 superviseurs Horizon</strong> : un par type de queue avec scaling different</li>
 </ul>
 <hr>
-<h2>4. Fonctionnalites 2-11 — Site public et contributeurs</h2>
+<h2>4. Fonctionnalites 2-11  Site public et contributeurs</h2>
 <h3>Organisation des routes API</h3>
 <p>L&#39;API est organisee en <strong>4 niveaux d&#39;acces</strong> :</p>
 <table>
@@ -830,7 +830,7 @@
 <td>Preferences visiteurs non connectes (session_id, interests, language)</td>
 </tr>
 </tbody></table>
-<h4>Legacy (5 tables — donnees importees du site existant)</h4>
+<h4>Legacy (5 tables  donnees importees du site existant)</h4>
 <table>
 <thead>
 <tr>
@@ -878,7 +878,7 @@
 </ul>
 <hr>
 <h2>6. Authentification et securite</h2>
-<h3>Authentification API — Laravel Sanctum</h3>
+<h3>Authentification API  Laravel Sanctum</h3>
 <table>
 <thead>
 <tr>
@@ -914,7 +914,7 @@
 </tr>
 </tbody></table>
 <p><strong>Strategie single-device</strong> : a chaque login, les tokens precedents sont revoques.</p>
-<h3>Roles et permissions — spatie/laravel-permission</h3>
+<h3>Roles et permissions  spatie/laravel-permission</h3>
 <table>
 <thead>
 <tr>
@@ -935,7 +935,7 @@
 </tr>
 <tr>
 <td><strong>Visiteur</strong> (non connecte)</td>
-<td>—</td>
+<td></td>
 <td>Lecture articles, recherche, preferences (cookie), newsletter</td>
 </tr>
 </tbody></table>
@@ -1072,7 +1072,7 @@
 <p><strong>Acces</strong> : <code>http://localhost:8000/horizon</code></p>
 <hr>
 <h2>9. Paiement</h2>
-<h3>Stripe — Publication ponctuelle (one-time)</h3>
+<h3>Stripe  Publication ponctuelle (one-time)</h3>
 <p><strong>Flux de paiement :</strong></p>
 <pre><code>1. Contributeur soumet un article
 2. POST /api/contributor/payments/create-intent
@@ -1089,7 +1089,7 @@
    → Marque le paiement comme &quot;refunded&quot;
 </code></pre>
 <p><strong>Statuts</strong> : <code>pending</code> → <code>paid</code> → <code>refunded</code> (si rejete) / <code>failed</code></p>
-<p><strong>Dashboard contributeur</strong> : <code>GET /api/contributor/payments</code> — historique complet (montant, statut, article associe)</p>
+<p><strong>Dashboard contributeur</strong> : <code>GET /api/contributor/payments</code>  historique complet (montant, statut, article associe)</p>
 <hr>
 <h2>10. Infrastructure et deploiement</h2>
 <h3>Docker Compose (developpement)</h3>
@@ -1174,7 +1174,7 @@
 </tr>
 <tr>
 <td><code>laravel/horizon</code></td>
-<td>—</td>
+<td></td>
 <td>Monitoring et gestion des queues Redis</td>
 <td>Installe et configure</td>
 </tr>

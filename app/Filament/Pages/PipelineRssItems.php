@@ -87,7 +87,7 @@ class PipelineRssItems extends Page
         Notification::make()
             ->success()
             ->title('Enrichissement lancé')
-            ->body('L’article a été ajouté à la queue IA.')
+            ->body("L'article a été ajouté à la queue IA.")
             ->send();
     }
 

@@ -1,4 +1,4 @@
-# Guide de Tests Postman — Vivat Content Acquisition Engine
+# Guide de Tests Postman Vivat Content Acquisition Engine
 
 > **Base URL** : `http://localhost:8000/api`
 > **Headers requis** : `Accept: application/json` + `Content-Type: application/json` (pour POST/PUT)
@@ -48,7 +48,7 @@ Pour tester le pipeline complet de zéro, suivre les étapes 2 à 13 dans l'ordr
 GET /api/sources
 ```
 
-**Réponse attendue** : `200` — tableau de sources avec `id`, `name`, `base_url`, `language`, `is_active`.
+**Réponse attendue** : `200` tableau de sources avec `id`, `name`, `base_url`, `language`, `is_active`.
 
 ### 2.2 Créer une source
 
@@ -63,7 +63,7 @@ POST /api/sources
 }
 ```
 
-**Réponse attendue** : `201` — la source créée avec un UUID.
+**Réponse attendue** : `201` la source créée avec un UUID.
 
 ### 2.3 Voir une source
 
@@ -71,7 +71,7 @@ POST /api/sources
 GET /api/sources/{source_id}
 ```
 
-**Réponse attendue** : `200` — détails de la source.
+**Réponse attendue** : `200` détails de la source.
 
 ### 2.4 Modifier une source
 
@@ -79,12 +79,12 @@ GET /api/sources/{source_id}
 PUT /api/sources/{source_id}
 
 {
-  "name": "Le Monde - Planète",
+  "name": "Le Monde Planète",
   "is_active": false
 }
 ```
 
-**Réponse attendue** : `200` — source mise à jour.
+**Réponse attendue** : `200` source mise à jour.
 
 ### 2.5 Supprimer une source
 
@@ -92,7 +92,7 @@ PUT /api/sources/{source_id}
 DELETE /api/sources/{source_id}
 ```
 
-**Réponse attendue** : `204` — pas de contenu.
+**Réponse attendue** : `204` pas de contenu.
 
 ---
 
@@ -104,7 +104,7 @@ DELETE /api/sources/{source_id}
 GET /api/categories
 ```
 
-**Réponse attendue** : `200` — 14 catégories (Environnement, Santé, Économie, Énergie, Alimentation, Technologie, Société, Transport, Habitat, Biodiversité, Politique, Sciences, Mode de vie, International).
+**Réponse attendue** : `200` 14 catégories (Environnement, Santé, Économie, Énergie, Alimentation, Technologie, Société, Transport, Habitat, Biodiversité, Politique, Sciences, Mode de vie, International).
 
 ### 3.2 Voir une catégorie
 
@@ -112,7 +112,7 @@ GET /api/categories
 GET /api/categories/{category_id}
 ```
 
-**Réponse attendue** : `200` — détail avec `name`, `slug`, `description`.
+**Réponse attendue** : `200` détail avec `name`, `slug`, `description`.
 
 ---
 
@@ -126,7 +126,7 @@ Les templates définissent le ton, la structure et les règles SEO par catégori
 GET /api/category-templates
 ```
 
-**Réponse attendue** : `200` — 14 templates (un par catégorie), chacun avec `tone`, `structure`, `min_word_count`, `max_word_count`, `style_notes`, `seo_rules`.
+**Réponse attendue** : `200` 14 templates (un par catégorie), chacun avec `tone`, `structure`, `min_word_count`, `max_word_count`, `style_notes`, `seo_rules`.
 
 ### 4.2 Créer un template
 
@@ -177,7 +177,7 @@ DELETE /api/category-templates/{template_id}
 GET /api/rss-feeds
 ```
 
-**Réponse attendue** : `200` — flux avec `source`, `category`, `feed_url`, `is_active`, `last_fetched_at`.
+**Réponse attendue** : `200` flux avec `source`, `category`, `feed_url`, `is_active`, `last_fetched_at`.
 
 ### 5.2 Lister uniquement les flux actifs
 
@@ -199,7 +199,7 @@ POST /api/rss-feeds
 }
 ```
 
-**Réponse attendue** : `201` — feed créé avec les relations `source` et `category`.
+**Réponse attendue** : `201` feed créé avec les relations `source` et `category`.
 
 ### 5.4 Modifier un flux
 
@@ -284,7 +284,7 @@ GET /api/pipeline/status
 GET /api/rss-items?per_page=10
 ```
 
-**Réponse attendue** : `200` — items avec `title`, `url`, `status`, `rss_feed`, `category`, `enriched_item`.
+**Réponse attendue** : `200` items avec `title`, `url`, `status`, `rss_feed`, `category`, `enriched_item`.
 
 ### 7.2 Filtrer par statut
 
@@ -319,7 +319,7 @@ GET /api/rss-items?status=enriched&category_id={uuid}&per_page=5
 GET /api/rss-items/{item_id}
 ```
 
-**Réponse attendue** : `200` — inclut `enriched_item` avec `lead`, `headings`, `key_points`, `seo_keywords`, `quality_score`, `seo_score`.
+**Réponse attendue** : `200` inclut `enriched_item` avec `lead`, `headings`, `key_points`, `seo_keywords`, `quality_score`, `seo_score`.
 
 ---
 
@@ -462,7 +462,7 @@ POST /api/clusters
 }
 ```
 
-**Réponse attendue** : `201` — cluster avec ses `cluster_items`.
+**Réponse attendue** : `201` cluster avec ses `cluster_items`.
 
 ### 10.3 Voir un cluster avec ses items enrichis
 
@@ -470,7 +470,7 @@ POST /api/clusters
 GET /api/clusters/{cluster_id}
 ```
 
-**Réponse attendue** : `200` — inclut `cluster_items` avec les `rss_item.enriched_item`.
+**Réponse attendue** : `200` inclut `cluster_items` avec les `rss_item.enriched_item`.
 
 ### 10.4 Modifier un cluster
 
@@ -489,7 +489,7 @@ PUT /api/clusters/{cluster_id}
 DELETE /api/clusters/{cluster_id}
 ```
 
-**Réponse attendue** : `204` — supprime le cluster ET ses cluster_items.
+**Réponse attendue** : `204` supprime le cluster ET ses cluster_items.
 
 ---
 
@@ -577,7 +577,7 @@ GET /api/articles?per_page=5
 GET /api/articles/{article_id}
 ```
 
-**Réponse attendue** : `200` — inclut `content` HTML complet + `category` + `article_sources`.
+**Réponse attendue** : `200` inclut `content` HTML complet + `category` + `article_sources`.
 
 ### 12.3 Créer un article manuellement
 
@@ -631,7 +631,7 @@ POST /api/articles/{article_id}/publish
 - `quality_score >= 60`
 - `status` = `draft` ou `review`
 
-**Si OK** : `200` — article avec `status: "published"` et `published_at` défini.
+**Si OK** : `200` article avec `status: "published"` et `published_at` défini.
 
 **Si KO** : `422`
 ```json
@@ -728,7 +728,7 @@ POST /api/articles/generate
 }
 ```
 
-**Réponse** : `422` — `The selected item_ids.0 is invalid.`
+**Réponse** : `422` `The selected item_ids.0 is invalid.`
 
 ### 16.3 Item non enrichi
 
@@ -740,7 +740,7 @@ POST /api/articles/generate
 }
 ```
 
-**Réponse** : `422` — `L'item {id} n'est pas enrichi.`
+**Réponse** : `422` `L'item {id} n'est pas enrichi.`
 
 ### 16.4 Publication avec quality_score insuffisant
 
@@ -750,7 +750,7 @@ POST /api/articles/{id}/publish
 
 (article avec quality_score < 60)
 
-**Réponse** : `422` — `Article non publiable (quality_score >= 60 et status draft ou review).`
+**Réponse** : `422` `Article non publiable (quality_score >= 60 et status draft ou review).`
 
 ### 16.5 Clé OpenAI invalide ou quota dépassé
 
@@ -776,7 +776,7 @@ POST /api/articles/generate
 GET /api/sources/00000000-0000-0000-0000-000000000000
 ```
 
-**Réponse** : `404` — `No query results for model [App\Models\Source]`.
+**Réponse** : `404` `No query results for model [App\Models\Source]`.
 
 ### 16.7 Validation : URL invalide
 
@@ -788,7 +788,7 @@ POST /api/rss-feeds
 }
 ```
 
-**Réponse** : `422` — `The feed url field must be a valid URL.`
+**Réponse** : `422` `The feed url field must be a valid URL.`
 
 ### 16.8 Validation : slug unique
 
@@ -802,7 +802,7 @@ POST /api/articles
 }
 ```
 
-**Réponse** : `422` — `The slug has already been taken.`
+**Réponse** : `422` `The slug has already been taken.`
 
 ---
 
@@ -896,14 +896,14 @@ Tout se fait via **Postman** (aucune commande terminal). Idéal pour montrer au 
 |-------|--------|-----|----------------|------------------|
 | **1. Connexion** | POST | `http://localhost:8000/api/auth/login` | `{"email":"admin@vivat.be","password":"password"}` | 200, `token` dans la réponse. Copier le token pour les étapes suivantes. |
 | **2. Fetch RSS** | POST | `http://localhost:8000/api/pipeline/fetch-rss` | `{"all": true}` | 200, `"count": 5` (ou N jobs dispatchés). |
-| **3. Statut (attendre les items)** | GET | `http://localhost:8000/api/pipeline/status` | — | 200, `rss_items_by_status.new` > 0. Répéter jusqu’à avoir des items `new` (Horizon doit tourner). |
+| **3. Statut (attendre les items)** | GET | `http://localhost:8000/api/pipeline/status` | | 200, `rss_items_by_status.new` > 0. Répéter jusqu’à avoir des items `new` (Horizon doit tourner). |
 | **4. Enrichissement** | POST | `http://localhost:8000/api/pipeline/enrich` | `{"limit": 20}` | 200, `"count": 20`. |
-| **5. Statut (attendre enrichis)** | GET | `http://localhost:8000/api/pipeline/status` | — | 200, `rss_items_by_status.enriched` > 0. Attendre 1–2 min que les jobs traitent. |
+| **5. Statut (attendre enrichis)** | GET | `http://localhost:8000/api/pipeline/status` | | 200, `rss_items_by_status.enriched` > 0. Attendre 1–2 min que les jobs traitent. |
 | **6. Télécharger le CSV** | GET | `http://localhost:8000/api/pipeline/export-trends-csv` | Query : `?limit=500` ou `?per_source=200&sources=3` | 200, **fichier CSV** en téléchargement (Save Response → Save to a file dans Postman). Pas de JSON : c’est un fichier. |
 | **7. Analyser les tendances (IA)** | POST | `http://localhost:8000/api/pipeline/analyze-trends` | Option A : body vide `{}` → CSV généré depuis la BDD (limit 500). Option B : Body form-data, key `csv_file`, type File → ton fichier CSV. | 200, `"success": true`, `"analysis": "1) CONNEXIONS..."`. Si CSV trop gros : `truncated: true` + `truncated_at_chars` (l’IA n’a pas tout lu). |
-| **8. Propositions d’articles** | GET | `http://localhost:8000/api/pipeline/select-items?count=3` | — | 200, `proposals[]` avec `topic`, `score`, `reasoning`, `items` (avec `id`). |
+| **8. Propositions d’articles** | GET | `http://localhost:8000/api/pipeline/select-items?count=3` | | 200, `proposals[]` avec `topic`, `score`, `reasoning`, `items` (avec `id`). |
 | **9. Générer un article** | POST | `http://localhost:8000/api/articles/generate` | `{"item_ids":["uuid1","uuid2"],"article_type":"long_form","suggested_min_words":1000,"suggested_max_words":1800,"context_priority":"Sur X articles analysés..."}` (ids depuis l’étape 8) | 201, article créé (`id`, `title`, `content`, `status: draft`). |
-| **10. Publier** | POST | `http://localhost:8000/api/articles/{article_id}/publish` | — | 200, `status: published`. |
+| **10. Publier** | POST | `http://localhost:8000/api/articles/{article_id}/publish` | | 200, `status: published`. |
 
 **Headers communs (étapes 2–10)** :  
 `Accept: application/json`  

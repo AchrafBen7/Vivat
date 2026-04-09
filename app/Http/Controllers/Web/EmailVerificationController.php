@@ -24,7 +24,7 @@ class EmailVerificationController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => content_locale($request),
-            'title' => 'Vérifiez votre email — Vivat',
+            'title' => 'Vérifiez votre email Vivat',
             'meta_description' => 'Confirmez votre adresse email pour activer pleinement votre espace rédacteur Vivat.',
             'hide_cta_section' => true,
             'hide_footer' => true,

@@ -1,17 +1,17 @@
-# Logboek Vivat Backend — Vanaf het begin van het project
+# Logboek Vivat Backend Vanaf het begin van het project
 
-> **Project** : Vivat — Geautomatiseerd mediaplatform  
+> **Project** : Vivat Geautomatiseerd mediaplatform  
 > **Ontwikkelaar** : Achraf Ben Ali  
 > **Periode** : januari – februari 2026 (data bij benadering)  
 > **Status** : Backend operationeel, klaar voor frontend-integratie
 
 ---
 
-## Fase 1 — Voorbereiding en architectuur
+## Fase 1 Voorbereiding en architectuur
 
 ---
 
-### Dag 1 — Contexte en technische documentatie (vóór Laravel)
+### Dag 1 Contexte en technische documentatie (vóór Laravel)
 
 **Wat gedaan** : Geen code geschreven; eerst alle referentiedocumenten opgesteld zodat het team en de IA dezelfde visie en architectuur hebben.
 
@@ -24,7 +24,7 @@
 
 ---
 
-### Dag 2 — Aanmaak project Laravel 12 en Laravel Boost
+### Dag 2 Aanmaak project Laravel 12 en Laravel Boost
 
 **Wat gedaan** : Laravel 12-project aangemaakt; Laravel Boost geïnstalleerd voor Cursor; regels en conventies vastgelegd.
 
@@ -36,7 +36,7 @@
 
 ---
 
-### Dag 3 — Configuratie MySQL
+### Dag 3 Configuratie MySQL
 
 **Wat gedaan** : Database omgezet van SQLite (Laravel-default) naar MySQL 8.
 
@@ -46,7 +46,7 @@
 
 ---
 
-### Dag 4 — Docker (lokale omgeving)
+### Dag 4 Docker (lokale omgeving)
 
 **Wat gedaan** : Volledige Docker-omgeving voor lokaal ontwikkelen: PHP 8.3, MySQL 8, Redis, phpMyAdmin.
 
@@ -59,11 +59,11 @@
 
 ---
 
-## Fase 2 — Content Acquisition Engine (kernfunctionaliteit)
+## Fase 2 Content Acquisition Engine (kernfunctionaliteit)
 
 ---
 
-### Dag 5 — Migraties van het pipeline (12 tabellen)
+### Dag 5 Migraties van het pipeline (12 tabellen)
 
 **Wat gedaan** : Alle 12 migraties voor het pipeline geschreven en uitgevoerd; MySQL geconfigureerd voor triggers.
 
@@ -74,7 +74,7 @@
 
 ---
 
-### Dag 6 — phpMyAdmin
+### Dag 6 phpMyAdmin
 
 **Wat gedaan** : phpMyAdmin toegevoegd aan Docker voor visuele inspectie van de database.
 
@@ -83,7 +83,7 @@
 
 ---
 
-### Dag 7 — Eloquent-models van het pipeline (11 models)
+### Dag 7 Eloquent-models van het pipeline (11 models)
 
 **Wat gedaan** : De 11 models aangemaakt die bij de pipelinetabellen horen.
 
@@ -92,7 +92,7 @@
 
 ---
 
-### Dag 8 — Services, Jobs, Horizon en Scheduler
+### Dag 8 Services, Jobs, Horizon en Scheduler
 
 **Wat gedaan** : De volledige pipelinelogica geïmplementeerd: 3 services, 3 jobs, Horizon, rate limiter OpenAI, geplande taken.
 
@@ -101,13 +101,13 @@
 - **config/horizon.php** : Supervisors voor rss, enrichment, generation, default; waits; omgevingen local/production.
 - AppServiceProvider: RateLimiter voor `openai` (50/min per item).
 - config/services.php: openai (api_key, model, max_tokens).
-- bootstrap/app.php: withSchedule() — fetch RSS elke 30 min, verrijking elk uur (50 items, delay 3s), horizon:snapshot elke 5 min, queue:prune-failed dagelijks.
+- bootstrap/app.php: withSchedule() fetch RSS elke 30 min, verrijking elk uur (50 items, delay 3s), horizon:snapshot elke 5 min, queue:prune-failed dagelijks.
 - .env.example: OPENAI_API_KEY, OPENAI_MODEL, OPENAI_MAX_TOKENS.
 - `composer require laravel/horizon` en `php artisan horizon:install`.
 
 ---
 
-### Dag 9 — REST-API (Postman)
+### Dag 9 REST-API (Postman)
 
 **Wat gedaan** : REST-API voor het pipeline opgezet: routes onder /api, controllers, JSON-resources; alles testbaar in Postman.
 
@@ -119,7 +119,7 @@
 
 ---
 
-### Dag 10 — Form Requests en Policies
+### Dag 10 Form Requests en Policies
 
 **Wat gedaan** : Validatie naar Form Requests verplaatst; autorisatie via Policies (voorbereid voor latere auth).
 
@@ -129,7 +129,7 @@
 
 ---
 
-### Dag 11 — Artisan-commando’s (pipeline)
+### Dag 11 Artisan-commando’s (pipeline)
 
 **Wat gedaan** : Vier CLI-commando’s om het pipeline handmatig te triggeren zonder op de scheduler te wachten.
 
@@ -141,7 +141,7 @@
 
 ---
 
-### Dag 12 — Tests en SQLite-compatibiliteit
+### Dag 12 Tests en SQLite-compatibiliteit
 
 **Wat gedaan** : Unit- en featuretests toegevoegd; migraties compatibel gemaakt met SQLite voor tests in memory.
 
@@ -153,11 +153,11 @@
 
 ---
 
-## Fase 3 — Analyse en integratie oude database
+## Fase 3 Analyse en integratie oude database
 
 ---
 
-### Dag 13 — Analyse bestaande database (ID93677_vivat)
+### Dag 13 Analyse bestaande database (ID93677_vivat)
 
 **Wat gedaan** : Dump van de bestaande database geanalyseerd; legacy-tabellen en mapping gedocumenteerd.
 
@@ -167,7 +167,7 @@
 
 ---
 
-### Dag 14 — Import legacy-data en volledige audit pipeline
+### Dag 14 Import legacy-data en volledige audit pipeline
 
 **Wat gedaan** : Data geïmporteerd van vivat_old naar vivat; bugs uit end-to-end tests opgelost; nieuwe endpoints en seeder toegevoegd.
 
@@ -181,7 +181,7 @@
 
 ---
 
-### Dag 15 — Intelligente selectie artikelen + SEO + testhandleiding
+### Dag 15 Intelligente selectie artikelen + SEO + testhandleiding
 
 **Wat gedaan** : Beslismodel “welk artikel genereren?” geïmplementeerd; SEO in enrichissement en generatie versterkt; Postman-documentatie afgerond.
 
@@ -194,11 +194,11 @@
 
 ---
 
-## Fase 4 — Sitefunctionaliteiten (11 features)
+## Fase 4 Sitefunctionaliteiten (11 features)
 
 ---
 
-### Dag 16 — Stack-audit en ontbrekende packages
+### Dag 16 Stack-audit en ontbrekende packages
 
 **Wat gedaan** : Gecontroleerd of de aangekondigde stack overeenkomt met de code; ontbrekende packages geïnstalleerd en configuratie gecorrigeerd.
 
@@ -210,7 +210,7 @@
 
 ---
 
-### Dag 17 — Authentificatie, rollen en openbare API
+### Dag 17 Authentificatie, rollen en openbare API
 
 **Wat gedaan** : Sanctum-auth, twee rollen met 21 permissies, vier toegangsniveaus, openbare endpoints voor artikelen, zoeken, hubs, aanbevelingen, voorkeuren en leesvoortgang.
 
@@ -222,7 +222,7 @@
 
 ---
 
-### Dag 18 — Bijdragers, nieuwsbrief en betaling
+### Dag 18 Bijdragers, nieuwsbrief en betaling
 
 **Wat gedaan** : Bijdragersportaal (indienen artikelen), moderatie door admin, nieuwsbrief (inschrijving, bevestiging, uitschrijving), Stripe voor eenmalige publicatie en terugbetaling bij weigering.
 
@@ -236,19 +236,19 @@
 
 ---
 
-### Dag 19 — Stacktechniek en rapporten voor projectleider
+### Dag 19 Stacktechniek en rapporten voor projectleider
 
 **Wat gedaan** : Volledige stack gedocumenteerd; rapport voor projectleider uitgebreid met gedetailleerde databasebeschrijving en uitleg triggers.
 
 - docs/STACK_TECHNIQUE.md: architectuur, pipeline in 5 stappen, 36 tabellen, veiligheid, auth, rollen, OpenAI, cache, Redis, Docker, code-inventaris.
-- docs/RAPPORT_COMPLET.md: uitgebreid met alle 11 pipelinetabellen kolom per kolom (types, indexen, foreign keys); Migration 12 — Triggers in detail (wat is een trigger, bestand, SQL, down()); rapport gegenereerd als HTML voor PDF-export.
+- docs/RAPPORT_COMPLET.md: uitgebreid met alle 11 pipelinetabellen kolom per kolom (types, indexen, foreign keys); Migration 12 Triggers in detail (wat is een trigger, bestand, SQL, down()); rapport gegenereerd als HTML voor PDF-export.
 - docs/SCHEMA_COMPLET_TABLES.md: alle modellen/tabellen in detail; logica voor weergave op homepage, “à la une” en aanbevelingen.
 - docs/RESUME_AVANCEMENT.md: compacte samenvatting voor projectleider; Docker, analyse oude DB, stack.
 - Frequentie RSS in documentatie aangepast naar “1 keer per dag”.
 
 ---
 
-### Dag 20 — Performance-audit en optimalisaties
+### Dag 20 Performance-audit en optimalisaties
 
 **Wat gedaan** : Prestatie-audit uitgevoerd; cache en full-text zoeken geïmplementeerd; invalidatie bij publicatie en wijzigingen.
 
@@ -260,7 +260,7 @@
 
 ---
 
-### Dag 21 — Uitleg services, jobs en scheduler
+### Dag 21 Uitleg services, jobs en scheduler
 
 **Wat gedaan** : Gedetailleerde uitleg opgesteld voor overdracht en projectleider: ContentExtractorService, de drie services, de drie jobs, en de scheduler.
 
@@ -272,7 +272,7 @@
 
 ---
 
-### Dag 22 — Logboek en afronding
+### Dag 22 Logboek en afronding
 
 **Wat gedaan** : Volledig logboek vanaf het begin van het project opgesteld in het Nederlands (dit document); logboek 11–17 februari bijgewerkt/geïntegreerd.
 

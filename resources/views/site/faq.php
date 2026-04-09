@@ -35,8 +35,8 @@ $faqGroups = $locale === 'nl'
         [
             'title' => 'Lire sur Vivat',
             'items' => [
-                ['question' => 'Quel type de contenus trouve-t-on sur Vivat ?', 'answer' => 'Vivat propose des articles autour du quotidien, de la santé, de la technologie, de la finance, du voyage, de la maison et d’autres sujets pratiques ou inspirants à lire simplement.'],
-                ['question' => 'Dois-je créer un compte pour consulter les articles ?', 'answer' => 'Non. Les articles publics sont consultables librement. Aucun compte lecteur n’est nécessaire pour parcourir les rubriques, utiliser la recherche ou lire les contenus.'],
+                ['question' => 'Quel type de contenus trouve-t-on sur Vivat ?', 'answer' => 'Vivat propose des articles autour du quotidien, de la santé, de la technologie, de la finance, du voyage, de la maison et d'autres sujets pratiques ou inspirants à lire simplement.'],
+                ['question' => 'Dois-je créer un compte pour consulter les articles ?', 'answer' => 'Non. Les articles publics sont consultables librement. Aucun compte lecteur n'est nécessaire pour parcourir les rubriques, utiliser la recherche ou lire les contenus.'],
                 ['question' => 'Comment retrouver un sujet précis ?', 'answer' => 'Vous pouvez passer par les rubriques du site ou utiliser la recherche pour retrouver un mot-clé, une thématique ou un article plus rapidement.'],
                 ['question' => 'Les articles sont-ils classés par rubrique ?', 'answer' => 'Oui. Les contenus sont organisés par catégories pour rendre la navigation plus claire et vous permettre de retrouver plus facilement les sujets qui vous intéressent.'],
             ],
@@ -44,26 +44,26 @@ $faqGroups = $locale === 'nl'
         [
             'title' => 'Rédaction et contribution',
             'items' => [
-                ['question' => 'Puis-je proposer un article à Vivat ?', 'answer' => 'Oui. Si vous souhaitez contribuer, vous pouvez passer par l’espace rédacteur prévu sur le site et suivre le parcours d’inscription ou de soumission disponible.'],
-                ['question' => 'Tous les contenus proposés sont-ils publiés automatiquement ?', 'answer' => 'Non. Les contenus peuvent faire l’objet d’une vérification ou d’un traitement éditorial avant publication afin de préserver la cohérence et la qualité du site.'],
-                ['question' => 'Comment accéder à mon espace rédacteur ?', 'answer' => 'Si vous disposez d’un compte auteur ou contributeur, vous pouvez vous connecter puis accéder à votre espace dédié pour gérer vos contenus et vos informations.'],
-                ['question' => 'Puis-je modifier un article après l’avoir soumis ?', 'answer' => 'Selon votre statut et l’état du contenu, certaines modifications peuvent être faites depuis l’espace contributeur. Si besoin, vous pouvez aussi contacter l’équipe.'],
+                ['question' => 'Puis-je proposer un article à Vivat ?', 'answer' => 'Oui. Si vous souhaitez contribuer, vous pouvez passer par l'espace rédacteur prévu sur le site et suivre le parcours d'inscription ou de soumission disponible.'],
+                ['question' => 'Tous les contenus proposés sont-ils publiés automatiquement ?', 'answer' => 'Non. Les contenus peuvent faire l'objet d'une vérification ou d'un traitement éditorial avant publication afin de préserver la cohérence et la qualité du site.'],
+                ['question' => 'Comment accéder à mon espace rédacteur ?', 'answer' => 'Si vous disposez d'un compte auteur ou contributeur, vous pouvez vous connecter puis accéder à votre espace dédié pour gérer vos contenus et vos informations.'],
+                ['question' => 'Puis-je modifier un article après l'avoir soumis ?', 'answer' => 'Selon votre statut et l'état du contenu, certaines modifications peuvent être faites depuis l'espace contributeur. Si besoin, vous pouvez aussi contacter l'équipe.'],
             ],
         ],
         [
             'title' => 'Newsletter et contact',
             'items' => [
-                ['question' => 'Que contient la newsletter Vivat ?', 'answer' => 'La newsletter rassemble une sélection d’articles récents, des contenus mis en avant et des idées de lecture envoyées directement par e-mail.'],
+                ['question' => 'Que contient la newsletter Vivat ?', 'answer' => 'La newsletter rassemble une sélection d'articles récents, des contenus mis en avant et des idées de lecture envoyées directement par e-mail.'],
                 ['question' => 'Puis-je me désabonner facilement de la newsletter ?', 'answer' => 'Oui. Chaque envoi doit permettre de gérer votre abonnement ou de vous désinscrire simplement.'],
-                ['question' => 'Comment contacter l’équipe Vivat ?', 'answer' => 'Vous pouvez utiliser la page contact pour poser une question générale, faire un retour sur un article, demander un renseignement ou prendre contact avec l’équipe.'],
-                ['question' => 'Comment signaler un contenu problématique ?', 'answer' => 'Si un contenu vous semble erroné, sensible ou inapproprié, vous pouvez le signaler à l’équipe via la page contact afin qu’il soit examiné rapidement.'],
-                ['question' => 'Que fait Vivat avec mes données ?', 'answer' => 'Les données éventuellement collectées via le site ou ses services sont traitées dans le cadre de l’utilisation du site, de la communication et de l’amélioration des services, conformément à la politique de vie privée.'],
+                ['question' => 'Comment contacter l'équipe Vivat ?', 'answer' => 'Vous pouvez utiliser la page contact pour poser une question générale, faire un retour sur un article, demander un renseignement ou prendre contact avec l'équipe.'],
+                ['question' => 'Comment signaler un contenu problématique ?', 'answer' => 'Si un contenu vous semble erroné, sensible ou inapproprié, vous pouvez le signaler à l'équipe via la page contact afin qu'il soit examiné rapidement.'],
+                ['question' => 'Que fait Vivat avec mes données ?', 'answer' => 'Les données éventuellement collectées via le site ou ses services sont traitées dans le cadre de l'utilisation du site, de la communication et de l'amélioration des services, conformément à la politique de vie privée.'],
             ],
         ],
     ];
 $faqIntro = $locale === 'nl'
     ? ['badge' => 'Wegwijzers', 'title' => 'Nuttige antwoorden, op één plek.', 'text' => 'Deze FAQ bundelt de meest gestelde vragen over het lezen van artikels, bijdragen aan de site, de newsletter en de contactmogelijkheden.', 'contact' => 'Contacteer het team', 'search' => 'Zoek een artikel']
-    : ['badge' => 'Repères', 'title' => 'Les réponses utiles, au même endroit.', 'text' => 'Cette FAQ reprend les questions les plus fréquentes sur la lecture des articles, la contribution au site, la newsletter et les moyens de contact.', 'contact' => 'Contacter l’équipe', 'search' => 'Rechercher un article'];
+    : ['badge' => 'Repères', 'title' => 'Les réponses utiles, au même endroit.', 'text' => 'Cette FAQ reprend les questions les plus fréquentes sur la lecture des articles, la contribution au site, la newsletter et les moyens de contact.', 'contact' => 'Contacter l'équipe', 'search' => 'Rechercher un article'];
 ?>
 <div class="mx-auto flex w-full max-w-[1280px] flex-col" style="gap: 24px;">
     <section class="grid grid-cols-1 gap-6 lg:grid-cols-12">

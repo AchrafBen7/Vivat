@@ -1,4 +1,4 @@
-# Audit performance — Vivat Backend
+# Audit performance Vivat Backend
 
 > **Date** : Février 2026  
 > **Périmètre** : API Laravel (requêtes BDD, cache, recherche, endpoints publics)
@@ -39,7 +39,7 @@ L’application est déjà bien structurée (eager loading, pagination, index BD
 
 ### 2. Page Hub : pas d’eager load de `category` sur les articles
 
-**Problème** : Dans `CategoryController::hub()`, les requêtes `$featured` et `$recent` ne chargent pas la relation `category`. Si le front affiche le nom de la catégorie pour chaque article, `ArticleResource` ne fait pas de N+1 car `whenLoaded('category')` n’ajoute rien si non chargé — mais la réponse JSON n’inclut pas l’objet `category`. Pour être cohérent et éviter tout risque de requête supplémentaire côté front, mieux vaut charger `category` une fois.
+**Problème** : Dans `CategoryController::hub()`, les requêtes `$featured` et `$recent` ne chargent pas la relation `category`. Si le front affiche le nom de la catégorie pour chaque article, `ArticleResource` ne fait pas de N+1 car `whenLoaded('category')` n’ajoute rien si non chargé mais la réponse JSON n’inclut pas l’objet `category`. Pour être cohérent et éviter tout risque de requête supplémentaire côté front, mieux vaut charger `category` une fois.
 
 **Correctif** : Ajouter `->with('category')` sur les deux requêtes (featured et recent).
 

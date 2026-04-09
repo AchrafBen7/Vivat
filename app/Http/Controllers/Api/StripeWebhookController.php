@@ -77,7 +77,7 @@ class StripeWebhookController extends Controller
     }
 
     /* ================================================================== */
-    /*  Nouveau workflow — Checkout Session                               */
+    /*  Nouveau workflow Checkout Session                               */
     /* ================================================================== */
 
     private function handleCheckoutCompleted(object $session): void
@@ -86,7 +86,7 @@ class StripeWebhookController extends Controller
         $quoteId      = $session->metadata['quote_id'] ?? null;
 
         if (! $submissionId) {
-            // Peut appartenir à un autre workflow — ne pas traiter
+            // Peut appartenir à un autre workflow ne pas traiter
             return;
         }
 
@@ -171,7 +171,7 @@ class StripeWebhookController extends Controller
     }
 
     /* ================================================================== */
-    /*  Ancien workflow — PaymentIntent direct (compat legacy)            */
+    /*  Ancien workflow PaymentIntent direct (compat legacy)            */
     /* ================================================================== */
 
     private function handlePaymentIntentSucceeded(object $intent): void

@@ -1,4 +1,4 @@
-# Guide de test complet — Du début à la fin jusqu'à obtenir un article
+# Guide de test complet Du début à la fin jusqu'à obtenir un article
 
 Ce guide te permet de tester le pipeline complet : fetch RSS → enrichissement → sélection → génération → article publié.
 
@@ -442,4 +442,4 @@ curl http://localhost:8000/api/public/articles/{slug} | jq
 
 ---
 
-*Guide de test complet — Février 2026*
+*Guide de test complet Février 2026*

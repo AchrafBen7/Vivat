@@ -52,35 +52,35 @@ class PipelineSeeder extends Seeder
 
         // ── 3. Flux RSS (liés aux sources et catégories) ──
         $feeds = [
-            // Reporterre - Environnement
+            // Reporterre Environnement
             [
                 'source' => 'Reporterre',
                 'category' => 'environnement',
                 'feed_url' => 'https://reporterre.net/spip.php?page=backend-simple',
                 'fetch_interval_minutes' => 60,
             ],
-            // Futura Sciences - Sciences
+            // Futura Sciences Sciences
             [
                 'source' => 'Futura Sciences',
                 'category' => 'sciences',
                 'feed_url' => 'https://www.futura-sciences.com/rss/environnement/actualites.xml',
                 'fetch_interval_minutes' => 60,
             ],
-            // Futura Sciences - Santé
+            // Futura Sciences Santé
             [
                 'source' => 'Futura Sciences',
                 'category' => 'sante',
                 'feed_url' => 'https://www.futura-sciences.com/rss/sante/actualites.xml',
                 'fetch_interval_minutes' => 60,
             ],
-            // Novethic - Économie
+            // Novethic Économie
             [
                 'source' => 'Novethic',
                 'category' => 'economie',
                 'feed_url' => 'https://www.novethic.fr/rss',
                 'fetch_interval_minutes' => 120,
             ],
-            // Natura Sciences - Environnement
+            // Natura Sciences Environnement
             [
                 'source' => 'Natura Sciences',
                 'category' => 'environnement',

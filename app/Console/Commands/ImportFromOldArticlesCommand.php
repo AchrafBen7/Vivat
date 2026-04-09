@@ -125,10 +125,10 @@ class ImportFromOldArticlesCommand extends Command
         if ($dryRun) {
             $this->info('[DRY-RUN] Aucune modification.');
             foreach ($toImport->take(5) as $c) {
-                $this->line('  - '.($c->row->contTitle ?? 'sans titre').' → catégorie id '.$c->category_id);
+                $this->line('  '.($c->row->contTitle ?? 'sans titre').' → catégorie id '.$c->category_id);
             }
             if ($toImport->count() > 5) {
-                $this->line('  … et '.($toImport->count() - 5).' autres.');
+                $this->line('  … et '.($toImport->count() 5).' autres.');
             }
             return self::SUCCESS;
         }

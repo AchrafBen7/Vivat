@@ -23,6 +23,7 @@ class PublicationQuoteService
         User $moderator,
         int $amountCents,
         string $currency = 'eur',
+        string $articleType = 'standard',
         ?string $pricePresetId = null,
         ?string $noteToAuthor = null,
         int $expiryDays = self::DEFAULT_EXPIRY_DAYS,
@@ -31,9 +32,13 @@ class PublicationQuoteService
             throw new \InvalidArgumentException('Le montant doit être supérieur à 0.');
         }
 
+        if (! in_array($articleType, ['standard', 'hot_news', 'long_form'], true)) {
+            throw new \InvalidArgumentException("Le type d'article est invalide.");
+        }
+
         return DB::transaction(function () use (
             $submission, $moderator, $amountCents, $currency,
-            $pricePresetId, $noteToAuthor, $expiryDays,
+            $articleType, $pricePresetId, $noteToAuthor, $expiryDays,
         ): PublicationQuote {
             // Passer la soumission en price_proposed si elle est under_review
             if ($submission->status === 'under_review') {
@@ -50,6 +55,7 @@ class PublicationQuoteService
                 'price_preset_id'=> $pricePresetId,
                 'amount_cents'   => $amountCents,
                 'currency'       => strtolower($currency),
+                'article_type'   => $articleType,
                 'status'         => 'sent',
                 'note_to_author' => $noteToAuthor,
                 'expires_at'     => now()->addDays($expiryDays),
@@ -123,7 +129,7 @@ class PublicationQuoteService
             $stripe = new \Stripe\StripeClient((string) config('services.stripe.secret'));
             $stripe->checkout->sessions->expire($sessionId);
         } catch (\Throwable $e) {
-            // La session peut déjà être expirée — pas critique
+            // La session peut déjà être expirée pas critique
         }
     }
 }

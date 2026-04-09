@@ -26,7 +26,7 @@ class NewsletterWeeklyDigestMail extends Mailable
     {
         $subject = $this->locale === 'nl'
             ? 'Uw wekelijkse selectie van Vivat'
-            : 'Votre sélection de la semaine — Vivat';
+            : 'Votre sélection de la semaine Vivat';
 
         return new Envelope(subject: $subject);
     }
@@ -39,7 +39,7 @@ class NewsletterWeeklyDigestMail extends Mailable
 
         $subject = $this->locale === 'nl'
             ? 'Uw wekelijkse selectie van Vivat'
-            : 'Votre sélection de la semaine — Vivat';
+            : 'Votre sélection de la semaine Vivat';
 
         return new Content(
             view: 'emails.newsletter_digest',

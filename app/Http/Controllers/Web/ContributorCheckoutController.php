@@ -70,40 +70,54 @@ class ContributorCheckoutController extends Controller
 
         $sessionId = $request->query('session_id');
 
-        if ($sessionId && in_array($submission->status, ['payment_pending', 'awaiting_payment'], true)) {
+        // Si déjà publié, rien à faire
+        if ($submission->status === 'published') {
+            return redirect()->route('contributor.dashboard')
+                ->with('success', 'Votre article est déjà publié !');
+        }
+
+        if ($sessionId) {
             try {
                 $stripeKey = config('services.stripe.secret');
                 $stripe    = new StripeClient((string) $stripeKey);
                 $session   = $stripe->checkout->sessions->retrieve((string) $sessionId);
 
                 if ($session->payment_status === 'paid') {
-                    // Le webhook n'est pas encore arrivé — on publie directement
+                    $submission->refresh();
+
+                    // Marquer le paiement comme réussi si pas encore fait
                     $submissionPayment = $submission->submissionPayments()
                         ->where('stripe_checkout_session_id', $sessionId)
-                        ->whereIn('status', ['pending'])
                         ->first();
 
-                    if ($submissionPayment) {
+                    if ($submissionPayment && $submissionPayment->status !== 'succeeded') {
                         $submissionPayment->update(['status' => 'succeeded', 'paid_at' => now()]);
+                    }
 
-                        $submission->transitionTo(
-                            newStatus: 'payment_succeeded',
-                            triggerSource: 'success_url_fallback',
-                            metadata: ['stripe_session_id' => $sessionId],
-                        );
+                    // Accepter la quote si pas encore fait
+                    $submission->quotes()
+                        ->whereIn('status', ['sent', 'pending'])
+                        ->update(['status' => 'accepted', 'accepted_at' => now()]);
 
-                        $submission->quotes()
-                            ->whereIn('status', ['sent', 'pending'])
-                            ->update(['status' => 'accepted', 'accepted_at' => now()]);
+                    // Publier si pas encore publié
+                    if (! in_array($submission->status, ['published'], true)) {
+                        // Amener au bon statut intermédiaire si nécessaire
+                        if (in_array($submission->status, ['payment_pending', 'awaiting_payment'], true)) {
+                            $submission->transitionTo(
+                                newStatus: 'payment_succeeded',
+                                triggerSource: 'stripe_webhook',
+                                metadata: ['stripe_session_id' => $sessionId, 'via' => 'success_url_fallback'],
+                            );
+                        }
 
                         app(\App\Services\SubmissionWorkflowService::class)->publishAfterPayment($submission->fresh());
                     }
                 }
             } catch (\Throwable $e) {
-                // Si la vérification échoue, le webhook prendra le relais
                 \Illuminate\Support\Facades\Log::warning('success_url fallback failed', [
                     'submission_id' => $submission->id,
                     'error'         => $e->getMessage(),
+                    'trace'         => $e->getTraceAsString(),
                 ]);
             }
         }

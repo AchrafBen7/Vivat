@@ -61,7 +61,7 @@ $submission = $submission ?? null;
             </a>
             <?php if (! empty($submission?->slug)) { ?>
             <a href="<?= route('contributor.articles.show', ['submission' => $submission->slug]) ?>" class="inline-flex h-11 items-center justify-center rounded-full border border-[#004241]/15 px-6 text-sm font-semibold text-[#004241] transition hover:bg-[#EBF1EF]">
-                Voir l’aperçu
+                Voir l'aperçu
             </a>
             <?php } ?>
         </div>

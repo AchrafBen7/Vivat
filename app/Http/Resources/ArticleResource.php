@@ -53,7 +53,7 @@ class ArticleResource extends JsonResource
             'cluster_id' => $this->cluster_id,
             'reading_time' => $this->reading_time,
             'status' => $this->status,
-            'article_type' => $this->article_type, // hot_news | long_form | standard — pour affichage home
+            'article_type' => $this->article_type, // hot_news | long_form | standard pour affichage home
             'cover_image_url' => $this->resolveCoverImageUrl(),
             'cover_video_url' => $this->cover_video_url,
             'quality_score' => $this->quality_score,

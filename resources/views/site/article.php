@@ -132,7 +132,7 @@ $content = preg_replace_callback('/(<\/p>\s*)/i', function ($m) use ($adMidConte
     <div class="mb-6 flex items-center justify-center">
         <div class="inline-flex items-center gap-3 rounded-full border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-3 text-sm font-medium text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#004241] text-white">i</span>
-            <span><?= htmlspecialchars($t('site.article_preview_notice', "Ceci est un aperçu de votre article. Il n’est pas encore affiché publiquement comme version finale.")) ?></span>
+            <span><?= htmlspecialchars($t('site.article_preview_notice', "Ceci est un aperçu de votre article. Il n'est pas encore affiché publiquement comme version finale.")) ?></span>
         </div>
     </div>
     <?php } ?>
@@ -310,7 +310,7 @@ $shareLinks = [
                 }
 
                 var visibleCount = getVisibleCount();
-                var width = Math.floor((frame.getBoundingClientRect().width - (getGap() * (visibleCount - 1))) / visibleCount);
+                var width = Math.floor((frame.getBoundingClientRect().width (getGap() * (visibleCount 1))) / visibleCount);
 
                 items.forEach(function(item) {
                     item.style.width = width + 'px';
@@ -319,7 +319,7 @@ $shareLinks = [
             }
 
             function getMaxIndex() {
-                return Math.max(0, getItems().length - getVisibleCount());
+                return Math.max(0, getItems().length getVisibleCount());
             }
 
             function getOffsets() {
@@ -360,7 +360,7 @@ $shareLinks = [
             scrollToIndex(0, 'auto');
 
             prevBtn.addEventListener('click', function() {
-                scrollToIndex(currentIndex - 1);
+                scrollToIndex(currentIndex 1);
             });
             nextBtn.addEventListener('click', function() {
                 scrollToIndex(currentIndex + 1);

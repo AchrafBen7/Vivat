@@ -26,7 +26,7 @@ class CategoryController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => $locale,
-            'title' => ($data['category']['name'] ?? 'Rubrique') . ' — Vivat',
+            'title' => ($data['category']['name'] ?? 'Rubrique') . ' Vivat',
             'meta_description' => $data['description'] ?? 'Articles de la rubrique '.($data['category']['name'] ?? '').' sur Vivat.',
             'canonical_url' => url('/categories/'.$categorySlug),
         ]);

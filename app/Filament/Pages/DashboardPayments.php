@@ -96,7 +96,7 @@ class DashboardPayments extends Page
 
                 $displayAmount = $workflowPayment?->formatted_amount
                     ?? $quote?->formatted_amount
-                    ?? ($legacyPayment ? number_format($legacyPayment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($legacyPayment->currency) : '—');
+                    ?? ($legacyPayment ? number_format($legacyPayment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($legacyPayment->currency) : '');
 
                 return [
                     'id' => $workflowPayment?->id ?? $legacyPayment?->id ?? $submission->id,

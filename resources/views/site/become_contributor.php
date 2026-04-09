@@ -48,7 +48,7 @@ $advantages = [
         <div class="flex-1">
             <h3 class="font-semibold text-[#004241] text-lg mb-2"><?= htmlspecialchars($t('site.full_support', 'Une participation pour un accompagnement complet')) ?></h3>
             <p class="text-[#004241]/80 text-sm leading-relaxed">
-                <?= htmlspecialchars($t('site.full_support_text', ':amount par soumission couvre la relecture éditoriale, la mise en forme et le traitement de votre demande. Remboursement possible si l’article n’est pas retenu.', [':amount' => (int) $publicationPriceEur . '€'])) ?>
+                <?= htmlspecialchars($t('site.full_support_text', ":amount par soumission couvre la relecture éditoriale, la mise en forme et le traitement de votre demande. Remboursement possible si l'article n'est pas retenu.", [':amount' => (int) $publicationPriceEur . '€'])) ?>
             </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 flex-shrink-0">

@@ -337,7 +337,7 @@ class PipelineDailyAutomation extends Page
             ['key' => 'queue',   'label' => "Job en file d'attente",               'detail' => "Le job de generation attend un worker disponible."],
             ['key' => 'select',  'label' => "Selection des sources",               'detail' => "Chargement des articles RSS enrichis a synthetiser."],
             ['key' => 'prompt',  'label' => "Construction du prompt editorial",    'detail' => "Assemblage des sources, mots-cles SEO et instructions redactionnelles."],
-            ['key' => 'openai',  'label' => "Redaction par GPT-4o",                'detail' => "Appel OpenAI en cours — cela prend generalement 30 a 90 secondes."],
+            ['key' => 'openai',  'label' => "Redaction par GPT-4o",                'detail' => "Appel OpenAI en cours cela prend generalement 30 a 90 secondes."],
             ['key' => 'process', 'label' => "Traitement du contenu",               'detail' => "Nettoyage HTML, calcul du temps de lecture, score qualite."],
             ['key' => 'cover',   'label' => "Generation de l'image de couverture", 'detail' => "Creation de l'image via BFL / DALL-E 3 et upload sur Cloudinary."],
             ['key' => 'done',    'label' => "Brouillon cree",                      'detail' => "L'article est pret a etre relu dans l'espace editorial."],
@@ -465,14 +465,14 @@ class PipelineDailyAutomation extends Page
             'label' => ($finished ? 100 : $progress) . '%',
             'headline' => $finished ? 'Les analyses IA sont terminées.' : 'Enrichissement des articles en cours…',
             'current_detail' => $finished
-                ? "{$completed} article(s) analysé(s) — lead, points clés, mots-clés SEO extraits."
+                ? "{$completed} article(s) analysé(s) lead, points clés, mots-clés SEO extraits."
                 : "Appels OpenAI en cours ({$completed} / {$target} articles traités). Chaque appel prend ~10 secondes.",
             'article_preview_url' => null,
             'is_finished' => $finished,
             'is_failed' => false,
             'steps' => [
                 ['key' => 'extract', 'label' => 'Extraction du texte brut', 'detail' => 'Récupération du contenu depuis les URLs RSS.', 'status' => $completed > 0 ? 'done' : 'active'],
-                ['key' => 'openai',  'label' => 'Analyse par OpenAI (GPT-4o)', 'detail' => "{$completed} / {$target} analysés — lead, key_points, seo_keywords.", 'status' => $finished ? 'done' : 'active'],
+                ['key' => 'openai',  'label' => 'Analyse par OpenAI (GPT-4o)', 'detail' => "{$completed} / {$target} analysés lead, key_points, seo_keywords.", 'status' => $finished ? 'done' : 'active'],
                 ['key' => 'store',   'label' => 'Sauvegarde des enrichissements', 'detail' => 'Mise à jour du statut des RssItems → enriched.', 'status' => $finished ? 'done' : 'waiting'],
             ],
         ];
@@ -487,7 +487,7 @@ class PipelineDailyAutomation extends Page
             'eyebrow' => 'Sélection des sujets',
             'progress' => 100,
             'label' => '100%',
-            'headline' => $count > 0 ? "{$count} idée(s) d'article disponible(s)." : 'Aucune idée disponible — enrichissement requis.',
+            'headline' => $count > 0 ? "{$count} idée(s) d'article disponible(s)." : 'Aucune idée disponible enrichissement requis.',
             'current_detail' => $count > 0
                 ? "Les sujets ont été clustérisés par similarité thématique. Le meilleur sera sélectionné pour la génération."
                 : "Pas assez d'articles enrichis pour former un cluster de 2 sources minimum.",

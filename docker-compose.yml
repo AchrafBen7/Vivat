@@ -1,4 +1,4 @@
-# Vivat - Environnement local (PHP 8.3, MySQL 8, Redis)
+# Vivat Environnement local (PHP 8.3, MySQL 8, Redis)
 # Contexte : CONTEXTE_PROJET.md
 
 services:

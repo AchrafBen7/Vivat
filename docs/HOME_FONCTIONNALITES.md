@@ -1,4 +1,4 @@
-# Fonctionnalités Home — Spécification API (backend)
+# Fonctionnalités Home Spécification API (backend)
 
 Ce document décrit les **fonctionnalités de la page d'accueil** et les **endpoints / données** fournis par le backend pour que le frontend puisse les implémenter sans coder le front.
 
@@ -12,12 +12,12 @@ Chaque article exposé contient au minimum : `id`, `title`, `slug`, `excerpt`, `
 
 | display_type | Rôle visuel | Données à afficher |
 |--------------|-------------|---------------------|
-| **top_news** | 1.1 — Article le plus important, carré grand, image en fond | Image bg (`cover_image_url`), label "Top news", **titre**, **sous-titre** (`excerpt`), date, temps de lecture |
-| **featured** | 1.2 — Article important mais pas hot news, carré plus petit | Image en bg, **titre** (pas de sous-titre), **catégorie**, date de publication, temps de lecture |
-| **standard** | 1.3 — Article moyen / régulier | **Petite image** (pas en bg), titre, catégorie, date, temps de lecture |
-| **secondary** | 1.4 — Sujet secondaire, moins important | **Pas d'image** ; titre, catégorie, date, temps de lecture |
+| **top_news** | 1.1 Article le plus important, carré grand, image en fond | Image bg (`cover_image_url`), label "Top news", **titre**, **sous-titre** (`excerpt`), date, temps de lecture |
+| **featured** | 1.2 Article important mais pas hot news, carré plus petit | Image en bg, **titre** (pas de sous-titre), **catégorie**, date de publication, temps de lecture |
+| **standard** | 1.3 Article moyen / régulier | **Petite image** (pas en bg), titre, catégorie, date, temps de lecture |
+| **secondary** | 1.4 Sujet secondaire, moins important | **Pas d'image** ; titre, catégorie, date, temps de lecture |
 
-- **article_type** (côté article) : `hot_news` | `long_form` | `standard` — renseigné à la génération ou en admin.
+- **article_type** (côté article) : `hot_news` | `long_form` | `standard` renseigné à la génération ou en admin.
 - **cover_image_url** et **cover_video_url** : URL de l’image ou de la vidéo de couverture ; si vides, le front peut afficher en `standard` sans média ou en `secondary`.
 
 ---
@@ -63,9 +63,9 @@ Comportement attendu :
 
 - **Endpoint** : **GET /api/public/home** → champ **`writer_cta`**.
 - Contenu :
-  - **`signup_url`** : URL d’inscription (ex. `/register`) — à utiliser si l’utilisateur n’est pas connecté.
-  - **`dashboard_url`** : URL du tableau de bord rédacteur (ex. `/contributor/submissions`) — à utiliser si l’utilisateur est connecté et `is_authenticated_as_contributor` est vrai.
-  - **`is_authenticated_as_contributor`** : `true` si l’utilisateur courant a le rôle contributor ou admin (le front peut alors afficher un lien vers `dashboard_url` au lieu de `signup_url`).
+  **`signup_url`** : URL d’inscription (ex. `/register`) à utiliser si l’utilisateur n’est pas connecté.
+  **`dashboard_url`** : URL du tableau de bord rédacteur (ex. `/contributor/submissions`) à utiliser si l’utilisateur est connecté et `is_authenticated_as_contributor` est vrai.
+  **`is_authenticated_as_contributor`** : `true` si l’utilisateur courant a le rôle contributor ou admin (le front peut alors afficher un lien vers `dashboard_url` au lieu de `signup_url`).
 
 Les URLs sont configurables dans **`config/vivat.php`** (`writer_signup_url`, `writer_dashboard_url`) ou via variables d’environnement `VIVAT_WRITER_SIGNUP_URL`, `VIVAT_WRITER_DASHBOARD_URL`.
 

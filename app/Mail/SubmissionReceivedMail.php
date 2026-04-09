@@ -19,7 +19,7 @@ class SubmissionReceivedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Vivat] Nouvelle soumission reçue — ' . $this->submission->title,
+            subject: '[Vivat] Nouvelle soumission reçue ' . $this->submission->title,
         );
     }
 

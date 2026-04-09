@@ -17,7 +17,7 @@ class ContributorSubmissionController extends Controller
     ) {}
 
     /**
-     * GET /api/contributor/submissions — historique des soumissions du contributeur
+     * GET /api/contributor/submissions historique des soumissions du contributeur
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -44,7 +44,7 @@ class ContributorSubmissionController extends Controller
     }
 
     /**
-     * POST /api/contributor/submissions — soumettre un article
+     * POST /api/contributor/submissions soumettre un article
      */
     public function store(Request $request): JsonResponse
     {
@@ -79,7 +79,7 @@ class ContributorSubmissionController extends Controller
     }
 
     /**
-     * PUT /api/contributor/submissions/{submission} — modifier avant soumission
+     * PUT /api/contributor/submissions/{submission} modifier avant soumission
      */
     public function update(Request $request, Submission $submission): SubmissionResource|JsonResponse
     {
@@ -122,7 +122,7 @@ class ContributorSubmissionController extends Controller
     }
 
     /**
-     * DELETE /api/contributor/submissions/{submission} — supprimer un brouillon
+     * DELETE /api/contributor/submissions/{submission} supprimer un brouillon
      */
     public function destroy(Request $request, Submission $submission): JsonResponse
     {

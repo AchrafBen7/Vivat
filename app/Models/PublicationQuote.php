@@ -17,6 +17,7 @@ class PublicationQuote extends Model
         'price_preset_id',
         'amount_cents',
         'currency',
+        'article_type',
         'status',
         'note_to_author',
         'expires_at',
@@ -67,6 +68,15 @@ class PublicationQuote extends Model
     public function getFormattedAmountAttribute(): string
     {
         return number_format($this->amount_cents / 100, 2, ',', ' ') . ' ' . strtoupper($this->currency);
+    }
+
+    public function getFormattedArticleTypeAttribute(): string
+    {
+        return match ($this->article_type) {
+            'hot_news' => 'Hot news',
+            'long_form' => 'Long format',
+            default => 'Standard',
+        };
     }
 
     public function scopeActive($query)

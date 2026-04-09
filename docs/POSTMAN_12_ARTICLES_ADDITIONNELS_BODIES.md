@@ -1,4 +1,4 @@
-# 12 articles additionnels — Bodies Postman
+# 12 articles additionnels Bodies Postman
 
 Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de remplir la section « Dernières actualités » (12 cartes).
 
@@ -27,7 +27,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 1 — Bruxelles déchets verts
+## Article 1 Bruxelles déchets verts
 
 ```json
 {
@@ -49,7 +49,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 2 — Jack Depp
+## Article 2 Jack Depp
 
 ```json
 {
@@ -71,7 +71,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 3 — Boris Dilliès météo
+## Article 3 Boris Dilliès météo
 
 ```json
 {
@@ -93,7 +93,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 4 — IAD nouveau directeur
+## Article 4 IAD nouveau directeur
 
 ```json
 {
@@ -115,7 +115,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 5 — Epstein Justice
+## Article 5 Epstein Justice
 
 ```json
 {
@@ -137,7 +137,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 6 — Planète déchets Bruxelles
+## Article 6 Planète déchets Bruxelles
 
 ```json
 {
@@ -159,7 +159,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 7 — Autosuffisance alimentaire
+## Article 7 Autosuffisance alimentaire
 
 ```json
 {
@@ -181,7 +181,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 8 — IA générative entreprise
+## Article 8 IA générative entreprise
 
 ```json
 {
@@ -203,7 +203,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 9 — Vélo électrique Belgique
+## Article 9 Vélo électrique Belgique
 
 ```json
 {
@@ -225,7 +225,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 10 — Rénovation énergétique aides
+## Article 10 Rénovation énergétique aides
 
 ```json
 {
@@ -247,7 +247,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 11 — Biodiversité oiseaux migration
+## Article 11 Biodiversité oiseaux migration
 
 ```json
 {
@@ -269,7 +269,7 @@ Bodies complets pour **POST** `http://localhost:8000/api/articles` afin de rempl
 
 ---
 
-## Article 12 — Inflation Belgique
+## Article 12 Inflation Belgique
 
 ```json
 {

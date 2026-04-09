@@ -164,13 +164,13 @@ class PipelineCronJobs extends Page
                     $metadata['category'] ?? null,
                 ])->filter()->implode(' · ')) ?: 'Flux RSS'),
             'enrich' => (($metadata['manual_dispatch'] ?? false) === true)
-                ? 'Relance manuelle de l’analyse IA'
+                ? "Relance manuelle de l'analyse IA"
                 : ($metadata['title'] ?? 'Item RSS'),
             'generate' => (($metadata['manual_dispatch'] ?? false) === true && ($metadata['outcome'] ?? null) === 'queued')
                 ? 'Relance manuelle de la génération'
                 : ($metadata['article_slug'] ?? ($metadata['cluster_id'] ?? 'Brouillon IA')),
             'cleanup' => match ($metadata['manual_action'] ?? null) {
-                'selection' => 'Recalcul manuel des idées d’articles',
+                'selection' => "Recalcul manuel des idées d'articles",
                 'full_flow' => 'Relance manuelle de tout le pipeline',
                 default => $metadata['command'] ?? 'Maintenance',
             },

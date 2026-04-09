@@ -69,7 +69,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         value="<?= htmlspecialchars($name) ?>"
                         class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.public_name_help', 'C’est le nom affiché publiquement avec vos articles.')) ?></p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.public_name_help', "C'est le nom affiché publiquement avec vos articles.")) ?></p>
                     <?php if (!empty($errors['name'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['name']) ? $errors['name'][0] : $errors['name']) ?></p>
                     <?php endif; ?>
@@ -152,7 +152,7 @@ $initials = $initials !== '' ? $initials : 'V';
                     placeholder="https://votresite.be"
                     class="w-full h-10 rounded-xl border border-[#DED8CE99] bg-[#F3EFE7] px-3 text-sm text-[#004241] outline-none focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/10"
                     >
-                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.website_help', 'Utilisez l’adresse complète de votre site ou portfolio.')) ?></p>
+                    <p class="mt-2 text-xs text-[#004241]/60"><?= htmlspecialchars($t('site.website_help', "Utilisez l'adresse complète de votre site ou portfolio.")) ?></p>
                     <?php if (!empty($errors['website_url'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['website_url']) ? $errors['website_url'][0] : $errors['website_url']) ?></p>
                     <?php endif; ?>
@@ -232,7 +232,7 @@ $initials = $initials !== '' ? $initials : 'V';
         <div class="flex flex-col gap-2">
             <h2 class="text-[18px] leading-7 font-medium text-[#8E2E2A]"><?= htmlspecialchars($t('site.delete_my_account', 'Supprimer mon compte')) ?></h2>
             <p class="text-sm leading-6 text-[#8E2E2A]/80">
-                <?= htmlspecialchars($t('site.delete_account_warning', 'Cette action est irréversible. Vos données personnelles seront anonymisées, votre accès sera révoqué, mais les articles, paiements et décisions éditoriales pourront être conservés si une conservation légale ou comptable s’impose.')) ?>
+                <?= htmlspecialchars($t('site.delete_account_warning', "Cette action est irréversible. Vos données personnelles seront anonymisées, votre accès sera révoqué, mais les articles, paiements et décisions éditoriales pourront être conservés si une conservation légale ou comptable s'impose.")) ?>
             </p>
             <?php if (!empty($errors['delete_account'])): ?>
             <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_account']) ? $errors['delete_account'][0] : $errors['delete_account']) ?></p>
@@ -251,7 +251,7 @@ $initials = $initials !== '' ? $initials : 'V';
                         placeholder="<?= htmlspecialchars($email) ?>"
                         class="w-full h-10 rounded-xl border border-[#E8C8C6] bg-white px-3 text-sm text-[#6A2420] outline-none focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
                     >
-                    <p class="mt-2 text-xs text-[#8E2E2A]/60"><?= htmlspecialchars($t('site.delete_email_help', 'Saisissez exactement l’adresse liée à ce compte pour confirmer l’opération.')) ?></p>
+                    <p class="mt-2 text-xs text-[#8E2E2A]/60"><?= htmlspecialchars($t('site.delete_email_help', "Saisissez exactement l'adresse liée à ce compte pour confirmer l'opération.")) ?></p>
                     <?php if (!empty($errors['delete_email'])): ?>
                     <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_email']) ? $errors['delete_email'][0] : $errors['delete_email']) ?></p>
                     <?php endif; ?>
@@ -279,7 +279,7 @@ $initials = $initials !== '' ? $initials : 'V';
 
         <label class="inline-flex items-start gap-3 rounded-xl border border-[#E8C8C6] bg-white px-4 py-3 text-sm leading-6 text-[#6A2420]">
             <input type="checkbox" name="delete_confirmation" value="1" class="mt-1 h-4 w-4 rounded border-[#D65B57] text-[#8E2E2A] focus:ring-[#8E2E2A]/20">
-            <span><?= htmlspecialchars($t('site.delete_account_checkbox', 'Je confirme vouloir supprimer définitivement mon compte et perdre l’accès à l’espace rédacteur.')) ?></span>
+            <span><?= htmlspecialchars($t('site.delete_account_checkbox', "Je confirme vouloir supprimer définitivement mon compte et perdre l'accès à l'espace rédacteur.")) ?></span>
         </label>
         <?php if (!empty($errors['delete_confirmation'])): ?>
         <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_confirmation']) ? $errors['delete_confirmation'][0] : $errors['delete_confirmation']) ?></p>

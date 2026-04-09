@@ -1,4 +1,4 @@
-# API endpoints, site public et cache — récapitulatif
+# API endpoints, site public et cache récapitulatif
 
 Ce document regroupe les réponses aux questions fréquentes sur l’utilisation des endpoints API, le site public HTML, et le comportement du cache lors des modifications.
 
@@ -78,11 +78,11 @@ Les nouvelles données sont chargées **à la demande**, au moment de la **premi
 1. **Tu modifies les données** (article publié/supprimé/modifié, catégorie modifiée, etc.).
 2. Le contrôleur fait **`Cache::forget('vivat.home')`** (et les autres clés concernées) → le cache est vidé immédiatement pour ces clés.
 3. **La requête suivante** qui demande la home (ou le hub, ou la liste des catégories) :
-   - appelle `Cache::remember('vivat.home', 1800, function () { ... })`,
-   - ne trouve **rien** en cache (car on vient de le supprimer),
-   - **exécute la closure** → requêtes en base → **charge les nouvelles données**,
-   - les remet en cache pour 30 min (home) ou 15 min (hub),
-   - renvoie cette réponse (HTML ou JSON).
+   appelle `Cache::remember('vivat.home', 1800, function () { ... })`,
+   ne trouve **rien** en cache (car on vient de le supprimer),
+   **exécute la closure** → requêtes en base → **charge les nouvelles données**,
+   les remet en cache pour 30 min (home) ou 15 min (hub),
+   renvoie cette réponse (HTML ou JSON).
 
 Donc : le chargement des nouvelles données se fait **au moment de cette première requête après l’invalidation**, pas avant et pas en arrière-plan.
 
@@ -102,6 +102,6 @@ Il n’y a pas de rechargement automatique en tâche de fond : les données sont
 ### Page « Toutes les actualités » (`/articles`)
 
 - **Route ajoutée** : `GET /articles` → liste paginée des articles (12 par page).
-- **Service** : `PublicPageDataService::getArticlesIndexData()` — récupère les articles publiés, formatés via `articleToArray()`, sans cache.
-- **Vue** : `resources/views/site/articles_index.php` — grille de cartes (catégorie, titre, date, temps de lecture, image) avec pagination.
+- **Service** : `PublicPageDataService::getArticlesIndexData()` récupère les articles publiés, formatés via `articleToArray()`, sans cache.
+- **Vue** : `resources/views/site/articles_index.php` grille de cartes (catégorie, titre, date, temps de lecture, image) avec pagination.
 - **Lien** : le bouton « Autres actualités » sur l’accueil (section Dernières actualités) pointe vers `/articles`.

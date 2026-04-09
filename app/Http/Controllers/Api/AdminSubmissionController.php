@@ -99,6 +99,7 @@ class AdminSubmissionController extends Controller
         $validated = $request->validate([
             'amount_cents'    => ['required', 'integer', 'min:100'],   // minimum 1,00 €
             'currency'        => ['nullable', 'string', 'size:3'],
+            'article_type'    => ['required', 'in:hot_news,long_form,standard'],
             'price_preset_id' => ['nullable', 'uuid', 'exists:price_presets,id'],
             'note_to_author'  => ['nullable', 'string', 'max:2000'],
             'expiry_days'     => ['nullable', 'integer', 'min:1', 'max:30'],
@@ -109,6 +110,7 @@ class AdminSubmissionController extends Controller
             moderator:     $request->user(),
             amountCents:   $validated['amount_cents'],
             currency:      $validated['currency'] ?? 'eur',
+            articleType:   $validated['article_type'],
             pricePresetId: $validated['price_preset_id'] ?? null,
             noteToAuthor:  $validated['note_to_author'] ?? null,
             expiryDays:    $validated['expiry_days'] ?? 7,
@@ -157,7 +159,7 @@ class AdminSubmissionController extends Controller
 
     /**
      * POST /api/admin/submissions/{submission}/approve  (compat ancien workflow)
-     * Approuve et publie directement (sans paiement) — gardé pour compat.
+     * Approuve et publie directement (sans paiement) gardé pour compat.
      */
     public function approve(Request $request, Submission $submission): JsonResponse
     {

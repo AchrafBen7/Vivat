@@ -121,7 +121,7 @@ class RssItemResource extends Resource
                         fn () => Notification::make()
                             ->success()
                             ->title('Enrichissement lancé')
-                            ->body('L’item a été ajouté à la queue d’enrichissement.')
+                            ->body("L'item a été ajouté à la queue d'enrichissement.")
                     ),
                 TableAction::make('sourceUrl')
                     ->label('Source')

@@ -1,4 +1,4 @@
-# Site public — implémentation et optimisations
+# Site public implémentation et optimisations
 
 Ce document décrit tout ce qui a été mis en place pour le **site public Vivat** (HTML rendu côté serveur, sans Blade) et comment les performances ont été optimisées.
 

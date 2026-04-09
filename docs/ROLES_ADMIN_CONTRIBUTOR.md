@@ -8,10 +8,10 @@ Ce document décrit **étape par étape** comment les 2 rôles sont mis en place
 
 - **Package** : `spatie/laravel-permission`
 - **Tables** (migration `create_permission_tables`) :
-  - `roles` : liste des rôles (ex. `admin`, `contributor`)
-  - `permissions` : liste des permissions (ex. `articles.publish`, `categories.manage`)
-  - `model_has_roles` : lien user ↔ rôle
-  - `role_has_permissions` : lien rôle ↔ permissions
+  `roles` : liste des rôles (ex. `admin`, `contributor`)
+  `permissions` : liste des permissions (ex. `articles.publish`, `categories.manage`)
+  `model_has_roles` : lien user ↔ rôle
+  `role_has_permissions` : lien rôle ↔ permissions
 
 Tu as déjà la migration et le config dans `config/permission.php`.
 
@@ -42,9 +42,9 @@ Fichier : **`database/seeders/RolesAndPermissionsSeeder.php`**
 2. **Création des permissions** : toutes les permissions métier (articles, pipeline, sources, categories, submissions, newsletter, payments, etc.) avec `guard_name = 'web'`.
 3. **Rôle `admin`** : créé avec `guard_name = 'web'`, puis **toutes les permissions** lui sont assignées (`syncPermissions($permissions)`).
 4. **Rôle `contributor`** : créé avec `guard_name = 'web'`, puis **seulement** :
-   - `articles.view`
-   - `submissions.create`
-   - `submissions.view-own`
+   `articles.view`
+   `submissions.create`
+   `submissions.view-own`
 
 Donc : **admin = tout**, **contributor = limité (soumissions + voir articles)**.
 
@@ -69,8 +69,8 @@ Dans **`database/seeders/DatabaseSeeder.php`** :
 
 1. **`RolesAndPermissionsSeeder`** est appelé en premier (crée les rôles et permissions).
 2. Ensuite :
-   - Un user **admin** est créé ou récupéré : `admin@vivat.be` / `password` → `assignRole('admin')`.
-   - Un user **contributor** est créé ou récupéré : `contributeur@vivat.be` / `password` → `assignRole('contributor')`.
+   Un user **admin** est créé ou récupéré : `admin@vivat.be` / `password` → `assignRole('admin')`.
+   Un user **contributor** est créé ou récupéré : `contributeur@vivat.be` / `password` → `assignRole('contributor')`.
 
 Donc après `php artisan db:seed`, tu as 2 comptes de test : un admin, un contributor.
 
@@ -82,8 +82,8 @@ Dans **`app/Models/User.php`** :
 
 - Le trait **`HasRoles`** (Spatie) est utilisé → `$user->hasRole('admin')`, `$user->assignRole('admin')`, etc.
 - Méthodes pratiques :
-  - `$user->isAdmin()` → `hasRole('admin')`
-  - `$user->isContributor()` → `hasRole('contributor')`
+  `$user->isAdmin()` → `hasRole('admin')`
+  `$user->isContributor()` → `hasRole('contributor')`
 
 Les rôles sont exposés dans la réponse auth via `$user->getRoleNames()` (dans `userPayload` du `AuthController`).
 
@@ -143,8 +143,8 @@ En résumé :
    ```
 
 3. **Tester en Postman** :
-   - **Contributor** : `POST /api/auth/login` avec `contributeur@vivat.be` / `password` → utiliser le token sur les routes `/api/contributor/*`.
-   - **Admin** : `POST /api/auth/login` avec `admin@vivat.be` / `password` → utiliser le token sur les routes admin (ex. `GET /api/categories`, `GET /api/articles`, etc.).
+   **Contributor** : `POST /api/auth/login` avec `contributeur@vivat.be` / `password` → utiliser le token sur les routes `/api/contributor/*`.
+   **Admin** : `POST /api/auth/login` avec `admin@vivat.be` / `password` → utiliser le token sur les routes admin (ex. `GET /api/categories`, `GET /api/articles`, etc.).
 
 4. **Donner le rôle admin à un autre user** (par ex. ton compte) :
    ```bash

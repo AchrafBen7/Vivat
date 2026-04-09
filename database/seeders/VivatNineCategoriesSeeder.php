@@ -12,7 +12,7 @@ class VivatNineCategoriesSeeder extends Seeder
      * À utiliser à la place (ou après nettoyage) des 14 catégories du PipelineSeeder
      * si tu veux uniquement ces 9 rubriques.
      *
-     * Connexion phpMyAdmin : http://localhost:8080 — user: vivat, password: vivat_secret
+     * Connexion phpMyAdmin : http://localhost:8080 user: vivat, password: vivat_secret
      */
     public function run(): void
     {

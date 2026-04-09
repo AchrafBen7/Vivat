@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes — Vivat
+| API Routes Vivat
 |--------------------------------------------------------------------------
 | Préfixe automatique : /api
 | Auth : Laravel Sanctum (Bearer token)
@@ -44,7 +44,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║  PUBLIC — Lecture seule, aucun auth requis                          ║
+// ║  PUBLIC Lecture seule, aucun auth requis                          ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 Route::prefix('public')->group(function () {
     // Home (top_news, featured, latest, categories, writer_cta)
@@ -89,7 +89,7 @@ Route::prefix('newsletter')->group(function () {
 Route::post('stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
 
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║  CONTRIBUTOR — auth:sanctum + role:contributor|admin                 ║
+// ║  CONTRIBUTOR auth:sanctum + role:contributor|admin                 ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 Route::middleware(['auth:sanctum', 'role:contributor|admin'])->prefix('contributor')->group(function () {
     // Soumissions
@@ -111,7 +111,7 @@ Route::middleware(['auth:sanctum', 'role:contributor|admin'])->prefix('contribut
 });
 
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║  ADMIN — auth:sanctum + role:admin                                  ║
+// ║  ADMIN auth:sanctum + role:admin                                  ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Sources

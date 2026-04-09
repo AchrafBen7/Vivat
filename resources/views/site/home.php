@@ -19,7 +19,7 @@ $rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dfcy6isdu/video/upload/v177
 $rubriquesHeroPosterUrl = vivat_cloudinary_video_poster_url($rubriquesHeroVideoUrl) ?? '/technologie.jpg';
 
 /**
- * CTA rédacteur — specs Figma : 301×114, gap 18px, typo 16px (text-base).
+ * CTA rédacteur specs Figma : 301×114, gap 18px, typo 16px (text-base).
  * Arrondi rounded-[30px] comme les cartes du hero. Ligne : texte | bouton (centrés verticalement).
  */
 $writerCtaBanner = 'group relative flex min-h-[114px] h-auto w-full flex-row items-start justify-between gap-[18px] overflow-hidden rounded-[30px] bg-[#EBF1EF] p-[18px] transition-colors duration-200 hover:bg-[#DEE7E4]';
@@ -28,13 +28,13 @@ $writerCtaTextWrap = 'min-w-0 flex-1 pr-16 text-left';
 $writerCtaTitle = 'font-semibold leading-snug text-[#004241] text-base';
 $writerCtaSubtitle = 'mt-0.5 text-sm font-normal leading-snug text-[#004241]/80';
 $writerCtaTagPill = 'inline-flex max-w-full shrink-0 items-center rounded-full bg-[#004241]/10 px-2.5 py-0.5 text-[11px] font-medium leading-none text-[#004241]';
-/** Coin bas-droit du bandeau (padding 18px aligné sur le bloc) — z au-dessus du lien plein écran */
+/** Coin bas-droit du bandeau (padding 18px aligné sur le bloc) z au-dessus du lien plein écran */
 $writerCtaIconBtn = 'pointer-events-none absolute bottom-[18px] right-[18px] z-[3] inline-flex h-12 w-12 flex-shrink-0 items-center justify-center text-[#004241]';
 /** CTA pleine largeur (mobile → lg) : sans tags pastilles, typo un peu au-dessus du base */
 $writerCtaTitleLarge = $writerCtaTitle.' text-lg leading-snug sm:text-xl sm:leading-snug';
 $writerCtaSubtitleLarge = $writerCtaSubtitle.' mt-1 text-sm leading-snug sm:text-base';
 
-// —— Design tokens & blocs Tailwind réutilisables (Vivat)
+// -- Design tokens & blocs Tailwind réutilisables (Vivat)
 $cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
 $glassBox = 'rounded-[21px] flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1.5 box-border p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
 $glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
@@ -161,7 +161,7 @@ foreach ($tabletCategoryPairs as $pair) {
     </div>
 </div>
 
-<!-- Grille tablette dédiée (visible md uniquement) — items-stretch + h-full évite le « trou » sous h0 quand la colonne droite est plus haute -->
+<!-- Grille tablette dédiée (visible md uniquement) items-stretch + h-full évite le « trou » sous h0 quand la colonne droite est plus haute -->
 <div class="hidden md:grid lg:hidden grid-cols-8 items-stretch gap-6 [grid-auto-rows:minmax(0,auto)]">
     <?php if ($h0) { ?>
     <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-5 block min-h-[420px] h-full w-full overflow-hidden rounded-[30px]">
@@ -247,7 +247,7 @@ foreach ($tabletCategoryPairs as $pair) {
     <?php } ?>
 
     <div class="col-span-8 <?= $writerCtaBanner ?>">
-        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> — <?= htmlspecialchars($writer_cta_label) ?>"></a>
+        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
         <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
             <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
             <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
@@ -301,7 +301,7 @@ foreach ($tabletCategoryPairs as $pair) {
             <?php } ?>
         </div>
 
-        <!-- Colonne droite: 3 cartes équivalentes (h1, h2, h3) — grille 3 lignes égales, gap 24px -->
+        <!-- Colonne droite: 3 cartes équivalentes (h1, h2, h3) grille 3 lignes égales, gap 24px -->
         <div class="flex flex-col gap-[18px] lg:col-span-7 lg:row-span-2 lg:grid lg:grid-rows-3 lg:min-h-0 lg:self-stretch lg:gap-6 xl:col-span-4 xl:row-auto xl:row-span-1">
             <?php if ($h1) { ?>
             <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[248px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full lg:min-h-0">
@@ -352,9 +352,9 @@ foreach ($tabletCategoryPairs as $pair) {
             <?php } ?>
         </div>
 
-        <!-- CTA rédacteur : pleine largeur sous le bloc hero (lg / 1024px seulement — même variante que mobile / tablette) -->
+        <!-- CTA rédacteur : pleine largeur sous le bloc hero (lg / 1024px seulement même variante que mobile / tablette) -->
         <div class="<?= $writerCtaBanner ?> hidden w-full items-center lg:col-span-12 lg:row-start-3 lg:flex xl:hidden">
-            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> — <?= htmlspecialchars($writer_cta_label) ?>"></a>
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
             <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
                 <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                 <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
@@ -388,7 +388,7 @@ foreach ($tabletCategoryPairs as $pair) {
 
         <!-- CTA rédacteur mobile (même variante typo que tablette / lg) -->
         <div class="<?= $writerCtaBanner ?> relative w-full lg:hidden">
-            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> — <?= htmlspecialchars($writer_cta_label) ?>"></a>
+            <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
             <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
                 <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
                 <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
@@ -489,7 +489,7 @@ foreach ($tabletCategoryPairs as $pair) {
             return in_array($ext, ['mp4', 'webm', 'mov'], true);
         };
         ?>
-    <!-- Section Rubriques - Carrousel -->
+    <!-- Section Rubriques Carrousel -->
     <section id="categories-section" class="relative z-10 mt-[65px] hidden w-full overflow-visible lg:block">
         <div class="relative w-full min-w-0">
         <div id="categories-carousel-viewport" class="w-full min-w-0 overflow-hidden">
@@ -839,8 +839,8 @@ foreach ($tabletCategoryPairs as $pair) {
 
                     return;
                 }
-                var ix = Math.max(0, Math.min(r.right, vr.right) - Math.max(r.left, vr.left));
-                var iy = Math.max(0, Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top));
+                var ix = Math.max(0, Math.min(r.right, vr.right) Math.max(r.left, vr.left));
+                var iy = Math.max(0, Math.min(r.bottom, vr.bottom) Math.max(r.top, vr.top));
                 var interArea = ix * iy;
                 var ratio = interArea / (r.width * r.height);
                 if (ratio >= 0.08) {
@@ -910,8 +910,8 @@ foreach ($tabletCategoryPairs as $pair) {
 
                     return;
                 }
-                var intersectionX = Math.max(0, Math.min(videoRect.right, viewportRect.right) - Math.max(videoRect.left, viewportRect.left));
-                var intersectionY = Math.max(0, Math.min(videoRect.bottom, viewportRect.bottom) - Math.max(videoRect.top, viewportRect.top));
+                var intersectionX = Math.max(0, Math.min(videoRect.right, viewportRect.right) Math.max(videoRect.left, viewportRect.left));
+                var intersectionY = Math.max(0, Math.min(videoRect.bottom, viewportRect.bottom) Math.max(videoRect.top, viewportRect.top));
                 var ratio = (intersectionX * intersectionY) / (videoRect.width * videoRect.height);
 
                 if (ratio >= 0.08) {
@@ -966,7 +966,7 @@ foreach ($tabletCategoryPairs as $pair) {
         var originalPanels = Array.prototype.slice.call(track.querySelectorAll('.categories-carousel-panel'));
         if (originalPanels.length < 2) return;
         var firstClone = originalPanels[0].cloneNode(true);
-        var lastClone = originalPanels[originalPanels.length - 1].cloneNode(true);
+        var lastClone = originalPanels[originalPanels.length 1].cloneNode(true);
         firstClone.classList.add('categories-carousel-panel-clone');
         firstClone.setAttribute('aria-hidden', 'true');
         lastClone.classList.add('categories-carousel-panel-clone');
@@ -1068,7 +1068,7 @@ foreach ($tabletCategoryPairs as $pair) {
         }
 
         var total = slides.length;
-        var realCount = total - (document.querySelector('.categories-carousel-tablet-clone') ? 1 : 0);
+        var realCount = total (document.querySelector('.categories-carousel-tablet-clone') ? 1 : 0);
         var idx = 0;
         var isAnimating = false;
         var mediaApi = window.VivatCategoryCarouselTabletMedia;
@@ -1116,7 +1116,7 @@ foreach ($tabletCategoryPairs as $pair) {
                 return;
             }
 
-            if (idx === total - 1) {
+            if (idx === total 1) {
                 isAnimating = false;
                 idx = 0;
                 goTo(0, true);
@@ -1144,11 +1144,11 @@ foreach ($tabletCategoryPairs as $pair) {
             beforeSlideAnimation();
             isAnimating = true;
             if (idx === 0) {
-                idx = total - 1;
+                idx = total 1;
                 goTo(idx, true);
                 requestAnimationFrame(function() {
                     requestAnimationFrame(function() {
-                        idx = realCount - 1;
+                        idx = realCount 1;
                         goTo(idx, false);
                     });
                 });

@@ -1,6 +1,6 @@
-# Werkplan — 5 dagen implementatie (Nederlands)
+# Werkplan 5 dagen implementatie (Nederlands)
 
-Dit document legt uit wat er over 5 dagen is gebouwd voor het Vivat-site. Het is geschreven voor **iedereen** — of je nu technisch bent of niet.
+Dit document legt uit wat er over 5 dagen is gebouwd voor het Vivat-site. Het is geschreven voor **iedereen** of je nu technisch bent of niet.
 
 ---
 
@@ -9,9 +9,9 @@ Dit document legt uit wat er over 5 dagen is gebouwd voor het Vivat-site. Het is
 | Begrip | Vereenvoudigde uitleg |
 |--------|------------------------|
 | **API** | Een "venster" waarmee apps of andere systemen data kunnen opvragen (bv. mobiele app, partners). |
-| **Site public** | De website die bezoekers zien — de 5 pagina's die we hebben gebouwd. |
+| **Site public** | De website die bezoekers zien de 5 pagina's die we hebben gebouwd. |
 | **Cache** | Een **tijdelijke kopie** van data. In plaats van elke keer opnieuw te zoeken in de database, gebruiken we deze kopie. Snel en minder belasting. |
-| **TTL** | *Time To Live* — hoe lang die kopie geldig blijft (bij ons: 30 min). |
+| **TTL** | *Time To Live* hoe lang die kopie geldig blijft (bij ons: 30 min). |
 | **Database** | De opslag waar alle artikelen, categorieën, etc. staan. |
 
 ---
@@ -22,7 +22,7 @@ Dit document legt uit wat er over 5 dagen is gebouwd voor het Vivat-site. Het is
 
 De website die bezoekers zien bestaat uit **5 pagina's**. Die halen hun inhoud **niet** op via de API, maar rechtstreeks uit dezelfde bron waar de API ook uit put. Ze delen dus dezelfde "kennis" (data en logica), maar op een andere manier.
 
-**Vergelijking** : De API is als een ober die bestellingen doorgeeft aan de keuken. De website gaat zelf naar de keuken — geen ober nodig. Beide krijgen hetzelfde gerecht (de data).
+**Vergelijking** : De API is als een ober die bestellingen doorgeeft aan de keuken. De website gaat zelf naar de keuken geen ober nodig. Beide krijgen hetzelfde gerecht (de data).
 
 ### De 5 pagina's
 
@@ -38,14 +38,14 @@ De website die bezoekers zien bestaat uit **5 pagina's**. Die halen hun inhoud *
 
 De site public roept geen HTTP-endpoints aan. Data komt uit:
 
-- `PublicPageDataService::getHomeData()` — home
-- `PublicPageDataService::getCategoryHubData()` — hub
-- `PublicPageDataService::getArticlesIndexData()` — lijst artikelen
+- `PublicPageDataService::getHomeData()` home
+- `PublicPageDataService::getCategoryHubData()` hub
+- `PublicPageDataService::getArticlesIndexData()` lijst artikelen
 - Controllers voor categorieën en individuele artikelen
 
 ---
 
-## Dag 2: Cache — waarom de home snel laadt
+## Dag 2: Cache waarom de home snel laadt
 
 ### In het kort (voor iedereen)
 
@@ -55,14 +55,14 @@ De homepagina toont veel data (artikelen, categorieën, enz.). Telkens alles opn
 - **Volgende bezoeken (binnen 30 min)** : We tonen de kopie. Snel, geen extra belasting.
 - **Na 30 min** : De kopie is "verlopen". Het volgende bezoek haalt alles opnieuw op en maakt een nieuwe kopie.
 
-**Vergelijking** : Net als een foto van een bord dat 30 min geldig is. Binnen die 30 min toon je de foto. Daarna maak je een nieuwe foto (of je wacht tot iemand het bord wijzigt — zie Dag 3).
+**Vergelijking** : Net als een foto van een bord dat 30 min geldig is. Binnen die 30 min toon je de foto. Daarna maak je een nieuwe foto (of je wacht tot iemand het bord wijzigt zie Dag 3).
 
 ### Waarom 30 minuten?
 
 - Er verschijnen meestal weinig nieuwe artikelen per dag.
 - Artikelen worden zelden aangepast.
 - Minder belasting op de database.
-- Als je **wel** publiceert, wordt de cache direct leeggemaakt (Dag 3) — dan zie je het nieuwe artikel meteen.
+- Als je **wel** publiceert, wordt de cache direct leeggemaakt (Dag 3) dan zie je het nieuwe artikel meteen.
 
 ### Voor developers
 
@@ -73,7 +73,7 @@ De homepagina toont veel data (artikelen, categorieën, enz.). Telkens alles opn
 
 ---
 
-## Dag 3: Direct zichtbaar — wat gebeurt er bij publiceren?
+## Dag 3: Direct zichtbaar wat gebeurt er bij publiceren?
 
 ### In het kort (voor iedereen)
 
@@ -84,7 +84,7 @@ Als je een artikel publiceert, bewerkt of verwijdert, wil je dat bezoekers dat *
 | Actie | Effect voor bezoekers |
 |-------|------------------------|
 | **Artikel publiceren** | Home, categorieën en hub tonen het nieuwe artikel bij het volgende bezoek. |
-| **Artikel bewerken** | Zelfde — wijzigingen zijn direct zichtbaar. |
+| **Artikel bewerken** | Zelfde wijzigingen zijn direct zichtbaar. |
 | **Artikel verwijderen** | Het artikel verdwijnt direct van de site. |
 | **Categorie aanmaken / bewerken / verwijderen** | Overzichten worden direct bijgewerkt. |
 
@@ -116,7 +116,7 @@ Deze pagina verandert vaker (nieuwe artikelen, paginering). Elke keer verse data
 ### Voor developers
 
 - Route: `GET /articles` → `ArticleController@index`
-- Service: `PublicPageDataService::getArticlesIndexData()` — geen cache, 12 per pagina
+- Service: `PublicPageDataService::getArticlesIndexData()` geen cache, 12 per pagina
 - View: `resources/views/site/articles_index.php`
 
 ---
@@ -131,15 +131,15 @@ Alles is geconfigureerd en gedocumenteerd. Het gedrag is nu duidelijk:
 |----------|-----------------|
 | Je publiceert een nieuw artikel | Bij de volgende bezoeker: het artikel staat op de home. |
 | Je bewerkt of verwijdert een artikel | Bij de volgende bezoeker: de wijziging is zichtbaar. |
-| Geen wijzigingen, iemand bezoekt binnen 30 min | De "snelle kopie" wordt getoond — geen nieuwe zoekactie. |
-| Geen wijzigingen, iemand bezoekt na 30 min | De kopie is verlopen — we halen alles opnieuw op. |
+| Geen wijzigingen, iemand bezoekt binnen 30 min | De "snelle kopie" wordt getoond geen nieuwe zoekactie. |
+| Geen wijzigingen, iemand bezoekt na 30 min | De kopie is verlopen we halen alles opnieuw op. |
 | Je wijzigt een categorie | Relevante pagina's tonen de wijziging direct. |
 
 ### Voor developers
 
 - TTL configureerbaar via `VIVAT_HOME_CACHE_TTL`
 - Documentatie: `API_ENDPOINTS_ET_CACHE.md`, dit werkplan
-- Geen background jobs voor refresh — alles on-demand
+- Geen background jobs voor refresh alles on-demand
 
 ---
 
@@ -149,6 +149,6 @@ Alles is geconfigureerd en gedocumenteerd. Het gedrag is nu duidelijk:
 |-----|-----------|------------|
 | **1** | Architectuur | De website haalt data rechtstreeks op, niet via de API. |
 | **2** | Cache | De home slaat een kopie op voor 30 min om snel te laden. |
-| **3** | Invalidatie | Bij publicatie/wijziging wordt de kopie geleegd — wijzigingen zijn direct zichtbaar. |
+| **3** | Invalidatie | Bij publicatie/wijziging wordt de kopie geleegd wijzigingen zijn direct zichtbaar. |
 | **4** | Articles index | Nieuwe pagina met alle artikelen en paginering. |
 | **5** | Afronding | Configuratie en documentatie afgerond. |

@@ -26,7 +26,7 @@ $t = $locale === 'nl'
         'partnership_badge' => 'Partenariats',
         'partnership_title' => 'Marques et collaborations',
         'partnership_text' => 'Pour une campagne, un sponsoring, une collaboration éditoriale ou une demande liée à une marque.',
-        'response_time' => 'En général, l’équipe répond sous 48h ouvrées. Si vous hésitez, commencez par l’adresse de rédaction.',
+        'response_time' => 'En général, l'équipe répond sous 48h ouvrées. Si vous hésitez, commencez par l'adresse de rédaction.',
         'see_faq' => 'Voir la FAQ',
     ];
 

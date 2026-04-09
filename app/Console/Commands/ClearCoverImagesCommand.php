@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
  * Vide toutes les URLs de couverture (cover_image_url) de la table articles.
  * Le site affichera alors automatiquement des photos Unsplash par catégorie.
  *
- * - En local avec Docker : docker compose exec app php artisan vivat:clear-cover-images
- * - Sans Docker (MySQL sur la machine) : php artisan vivat:clear-cover-images
+ * En local avec Docker : docker compose exec app php artisan vivat:clear-cover-images
+ * Sans Docker (MySQL sur la machine) : php artisan vivat:clear-cover-images
  */
 class ClearCoverImagesCommand extends Command
 {

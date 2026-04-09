@@ -74,7 +74,7 @@ class PaymentResource extends Resource
                                 '<div class="mt-1 space-y-1 text-xs text-gray-500">'
                                 . '<div><span class="font-medium text-gray-700">' . $author . '</span> · ' . $email . '</div>'
                                 . '<div>Paiement créé le ' . $date . '</div>'
-                                . '<div class="text-gray-600">Aucune soumission n’est liée à cette transaction. Il s’agit généralement d’une tentative abandonnée ou d’un cas technique.</div>'
+                                . "<div class=\"text-gray-600\">Aucune soumission n'est liée à cette transaction. Il s'agit généralement d'une tentative abandonnée ou d'un cas technique.</div>"
                                 . '</div>'
                             );
                         }

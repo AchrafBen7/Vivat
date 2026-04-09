@@ -12,7 +12,7 @@ Avec confirmation. Pour forcer sans demander : `--force`.
 
 ---
 
-## phpMyAdmin — Connexion
+## phpMyAdmin Connexion
 
 - **URL** : http://localhost:8080
 - **Utilisateur** : `vivat`
@@ -35,7 +35,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 1 — Au quotidien
+### Catégorie 1 Au quotidien
 
 ```json
 {
@@ -49,7 +49,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 2 — Énergie
+### Catégorie 2 Énergie
 
 ```json
 {
@@ -63,7 +63,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 3 — Finance
+### Catégorie 3 Finance
 
 ```json
 {
@@ -77,7 +77,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 4 — Technologie
+### Catégorie 4 Technologie
 
 ```json
 {
@@ -91,7 +91,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 5 — Chez soi
+### Catégorie 5 Chez soi
 
 ```json
 {
@@ -105,7 +105,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 6 — Mode
+### Catégorie 6 Mode
 
 ```json
 {
@@ -119,7 +119,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 7 — Santé
+### Catégorie 7 Santé
 
 ```json
 {
@@ -133,7 +133,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 8 — Voyage
+### Catégorie 8 Voyage
 
 ```json
 {
@@ -147,7 +147,7 @@ Envoie **une requête par body** ci-dessous (chaque body = une catégorie). Réc
 
 ---
 
-### Catégorie 9 — Famille
+### Catégorie 9 Famille
 
 ```json
 {

@@ -101,11 +101,13 @@ class SubmissionWorkflowService
     public function publishAfterPayment(Submission $submission): Article
     {
         $article = DB::transaction(function () use ($submission): Article {
+            $quote = $submission->quote()->latest('created_at')->first();
+
             $article = $this->publishingService->approveAndPublish(
                 submission: $submission,
                 data: [
                     'category_id'  => $submission->category_id,
-                    'article_type' => 'standard',
+                    'article_type' => $quote?->article_type ?: 'standard',
                     'reviewed_by'  => $submission->reviewed_by,
                     'reviewed_at'  => $submission->reviewed_at ?? now(),
                     'notes'        => $submission->reviewer_notes,

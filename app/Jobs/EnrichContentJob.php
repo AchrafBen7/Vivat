@@ -60,7 +60,7 @@ class EnrichContentJob implements ShouldQueue
                 'url' => $this->item->url,
                 'attempt' => $this->attempts(),
             ],
-            'retry_count' => max(0, $this->attempts() - 1),
+            'retry_count' => max(0, $this->attempts() 1),
         ]);
 
         $data = $extractor->extract($this->item->url);

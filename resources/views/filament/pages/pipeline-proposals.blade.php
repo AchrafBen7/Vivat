@@ -61,10 +61,10 @@
             <div class="vp-hero-inner">
                 <div class="vp-hero-box">
                     <div class="vp-hero-box-step">Assistant IA</div>
-                    <div class="vp-hero-box-title">Idées d’articles</div>
+                    <div class="vp-hero-box-title">Idées d'articles</div>
                 </div>
                 <div class="vp-hero-text" style="flex:1">
-                    <p>Les meilleurs sujets détectés sont classés ici pour lancer rapidement la création d’un brouillon.</p>
+                    <p>Les meilleurs sujets détectés sont classés ici pour lancer rapidement la création d'un brouillon.</p>
                 </div>
             </div>
         </div>
@@ -74,14 +74,14 @@
                 <svg style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
             </div>
             <div>
-                <h4>Ce qu’il se passe ici</h4>
-                <p>Chaque carte représente un sujet jugé intéressant par l’IA. Le classement combine la fraîcheur du sujet, la qualité des contenus trouvés, leur potentiel SEO et la diversité des sources.</p>
+                <h4>Ce qu'il se passe ici</h4>
+                <p>Chaque carte représente un sujet jugé intéressant par l'IA. Le classement combine la fraîcheur du sujet, la qualité des contenus trouvés, leur potentiel SEO et la diversité des sources.</p>
             </div>
         </div>
 
         @if ($proposals === [])
             <div class="vp-empty">
-                Aucune idée d’article disponible pour le moment. Lance d’abord le repérage puis l’analyse IA.
+                Aucune idée d'article disponible pour le moment. Lance d'abord le repérage puis l'analyse IA.
             </div>
         @else
             <div class="vp-grid">

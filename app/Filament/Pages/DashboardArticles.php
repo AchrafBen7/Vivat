@@ -103,7 +103,7 @@ class DashboardArticles extends Page
         Notification::make()
             ->success()
             ->title('Article dépublié')
-            ->body('L’article a été retiré du site public.')
+            ->body("L'article a été retiré du site public.")
             ->send();
     }
 

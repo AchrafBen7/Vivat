@@ -6,7 +6,7 @@ Référence pour la base fournie par le chef de projet (`ID93677_vivat.sql`). Ce
 
 ## Tables de la base existante
 
-### tbl_cont_pg — Articles / pages de contenu (site)
+### tbl_cont_pg Articles / pages de contenu (site)
 
 | Colonne           | Type         | Description |
 |-------------------|--------------|-------------|
@@ -32,7 +32,7 @@ Référence pour la base fournie par le chef de projet (`ID93677_vivat.sql`). Ce
 
 ---
 
-### tbl_ref — Catégories / références éditoriales
+### tbl_ref Catégories / références éditoriales
 
 | Colonne   | Type         | Description |
 |-----------|--------------|-------------|
@@ -51,7 +51,7 @@ Structure hiérarchique : `refID = 0` pour les racines, `refID = id` d’un pare
 
 ---
 
-### tbl_usr — Utilisateurs (site)
+### tbl_usr Utilisateurs (site)
 
 | Colonne          | Type         | Description |
 |------------------|--------------|-------------|
@@ -103,8 +103,8 @@ Table technique (IP / bots). Structure alignée pour import complet du dump si b
 
 1. **Créer les tables** : `php artisan migrate` (crée notamment les tables legacy + pipeline).
 2. **Importer les données existantes** :  
-   - Soit importer tout le dump dans une base dédiée puis copier uniquement les INSERT vers `tbl_cont_pg`, `tbl_ref`, `tbl_usr` (et éventuellement `logs`, `cloaked_ip`) dans la base du projet.  
-   - Soit extraire du fichier `ID93677_vivat.sql` les blocs `INSERT INTO tbl_cont_pg ...`, `INSERT INTO tbl_ref ...`, `INSERT INTO tbl_usr ...` (et logs, cloaked_ip si besoin) et les exécuter sur la base du projet **après** avoir lancé les migrations (les tables doivent exister et être vides ou compatibles).
+   Soit importer tout le dump dans une base dédiée puis copier uniquement les INSERT vers `tbl_cont_pg`, `tbl_ref`, `tbl_usr` (et éventuellement `logs`, `cloaked_ip`) dans la base du projet.  
+   Soit extraire du fichier `ID93677_vivat.sql` les blocs `INSERT INTO tbl_cont_pg ...`, `INSERT INTO tbl_ref ...`, `INSERT INTO tbl_usr ...` (et logs, cloaked_ip si besoin) et les exécuter sur la base du projet **après** avoir lancé les migrations (les tables doivent exister et être vides ou compatibles).
 
 Les tables de backup/copie du dump (`tbl_cont_pg_backup`, `tbl_cont_pg_copy`, etc.) ne sont pas reprises dans la migration ; seules les tables principales ci‑dessus le sont.
 

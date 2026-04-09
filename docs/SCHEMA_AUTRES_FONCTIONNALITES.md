@@ -1,4 +1,4 @@
-# Schéma DB — Autres fonctionnalités du site (Vivat)
+# Schéma DB Autres fonctionnalités du site (Vivat)
 
 > **À jour** : schéma pour les fonctionnalités hors pipeline (utilisateurs, rôles, contribution, paiement, personnalisation, newsletter).  
 > **Ce schéma peut encore changer** avant implémentation.

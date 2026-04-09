@@ -150,19 +150,19 @@ return Application::configure(basePath: dirname(__DIR__))
             })->everyFiveMinutes()->name('pipeline:horizon-snapshot');
         }
 
-        // Purge du texte extrait brut des sources (conformité copyright) — hebdomadaire
+        // Purge du texte extrait brut des sources (conformité copyright) hebdomadaire
         $schedule->job(PruneEnrichedItemTextJob::class)
             ->weekly()
             ->name('pipeline:prune-extracted-text')
             ->withoutOverlapping();
 
-        // Expiration des quotes de publication — toutes les heures
+        // Expiration des quotes de publication toutes les heures
         $schedule->job(ExpirePublicationQuotesJob::class)
             ->hourly()
             ->name('submissions:expire-quotes')
             ->withoutOverlapping();
 
-        // Digest newsletter hebdomadaire — chaque lundi à 8h00
+        // Digest newsletter hebdomadaire chaque lundi à 8h00
         $schedule->command('newsletter:send-digest')
             ->weeklyOn(1, '08:00')
             ->name('newsletter:weekly-digest')

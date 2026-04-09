@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmez votre inscription — Vivat</title>
+    <title>Confirmez votre inscription Vivat</title>
 </head>
 <body style="margin:0;padding:0;background:#F8F6F2;font-family:Figtree,Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F6F2;padding:40px 16px;">

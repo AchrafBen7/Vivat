@@ -8,8 +8,8 @@ use Illuminate\Console\Command;
 
 /**
  * Vérifie qu'aucun article (par id) n'apparaît deux fois sur la home ni sur les hubs catégorie.
- * - Home : aucun id ne doit être à la fois dans highlight et dans latest ; aucun doublon dans highlight ; aucun doublon dans latest.
- * - Hub : aucun doublon dans la liste d'articles.
+ * Home : aucun id ne doit être à la fois dans highlight et dans latest ; aucun doublon dans highlight ; aucun doublon dans latest.
+ * Hub : aucun doublon dans la liste d'articles.
  */
 class VerifyNoDuplicateArticlesCommand extends Command
 {

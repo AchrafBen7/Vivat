@@ -84,7 +84,7 @@ class CategoryArticlesSeeder extends Seeder
                 $articleType = self::TYPES_PER_CATEGORY[$i];
                 $title = self::TITLE_TEMPLATES[$i];
                 $excerpt = self::EXCERPT_TEMPLATES[$i];
-                $content = '<p>' . $excerpt . '</p><p>Article de test pour la catégorie ' . htmlspecialchars($category->name) . ' — type ' . $articleType . '.</p>';
+                $content = '<p>' . $excerpt . '</p><p>Article de test pour la catégorie ' . htmlspecialchars($category->name) . ' type ' . $articleType . '.</p>';
 
                 // Environ la moitié des articles avec image pour varier l'affichage
                 $withImage = in_array($i, [0, 1, 3, 5, 7, 9, 11, 13, 15], true);

@@ -19,7 +19,7 @@ class PaymentSucceededMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Vivat] Paiement reçu — votre article sera publié',
+            subject: '[Vivat] Paiement reçu votre article sera publié',
         );
     }
 

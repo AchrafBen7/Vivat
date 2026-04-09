@@ -1,4 +1,4 @@
-# Prompt d'enrichissement — Version lisible
+# Prompt d'enrichissement Version lisible
 
 Ce document montre **à quoi ressemble visuellement** le prompt envoyé à OpenAI dans `EnrichContentJob` (lignes 96-120). Le prompt est composé de deux messages : **system** et **user**.
 
@@ -72,4 +72,4 @@ Le modèle utilisé est `config('services.openai.model', 'gpt-4o')`, avec `respo
 
 ---
 
-*Référence : EnrichContentJob::callOpenAI() — février 2026*
+*Référence : EnrichContentJob::callOpenAI() février 2026*

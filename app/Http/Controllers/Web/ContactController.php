@@ -19,7 +19,7 @@ class ContactController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => $locale,
-            'title' => 'Contact — Vivat',
+            'title' => 'Contact Vivat',
             'meta_description' => 'Contactez la rédaction Vivat, partagez une question, une suggestion ou une demande de partenariat.',
             'canonical_url' => url('/contact'),
             'hide_cta_section' => true,

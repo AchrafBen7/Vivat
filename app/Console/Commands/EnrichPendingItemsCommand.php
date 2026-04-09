@@ -11,9 +11,9 @@ class EnrichPendingItemsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'content:enrich
-                            {--limit=3 : Nombre max d’items à envoyer en queue}
-                            {--delay=10 : Délai en secondes entre chaque dispatch}';
+    protected $signature = "content:enrich
+                            {--limit=3 : Nombre max d'items à envoyer en queue}
+                            {--delay=10 : Délai en secondes entre chaque dispatch}";
 
     protected $description = 'Dispatch EnrichContentJob pour les RssItem en statut "new" (queue: enrichment).';
 

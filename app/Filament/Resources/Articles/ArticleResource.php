@@ -185,7 +185,7 @@ class ArticleResource extends Resource
                     ->visible(fn (Article $record): bool => $record->status === 'published')
                     ->requiresConfirmation()
                     ->modalHeading("Dépublier l'article ?")
-                    ->modalDescription("L’article sera retiré du site public, mais restera disponible dans le dashboard admin.")
+                    ->modalDescription("L'article sera retiré du site public, mais restera disponible dans le dashboard admin.")
                     ->action(function (Article $record): void {
                         $record->update([
                             'status' => 'archived',
@@ -196,7 +196,7 @@ class ArticleResource extends Resource
                         fn () => Notification::make()
                             ->success()
                             ->title('Article dépublié')
-                            ->body('L’article a été retiré du site public et conservé dans l’administration.')
+                            ->body("L'article a été retiré du site public et conservé dans l'administration.")
                     ),
             ])
             ->defaultSort('published_at', 'desc');

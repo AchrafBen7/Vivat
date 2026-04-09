@@ -1,10 +1,10 @@
-# Exemples de code — Référence d’implémentation (Vivat)
+# Exemples de code Référence d’implémentation (Vivat)
 
 Ce fichier contient les exemples de code à suivre pour le pipeline (fetch RSS, enrichissement, génération, Horizon, etc.). À utiliser en complément de `CONTEXTE_PROJET.md`.
 
 ---
 
-## 1. Fetch RSS — Job + Service
+## 1. Fetch RSS Job + Service
 
 ### 1.1 `App\Jobs\FetchRssFeedJob`
 
@@ -90,7 +90,7 @@ class FetchRssFeedJob implements ShouldQueue
 
 ### 1.2 `App\Services\RssParserService`
 
-- **Méthode** : `parse(string $xml): array` — RSS 2.0 puis fallback Atom.
+- **Méthode** : `parse(string $xml): array` RSS 2.0 puis fallback Atom.
 - **Format retour** : liste d’items avec `title`, `link`, `description`, `pubDate`, `guid`.
 - **Helpers** : `extractTag`, `extractAtomLink`, `generateDedupHash(guid|link+title)`.
 
@@ -98,7 +98,7 @@ class FetchRssFeedJob implements ShouldQueue
 
 ---
 
-## 2. Enrichissement — Job + Rate limit
+## 2. Enrichissement Job + Rate limit
 
 ### 2.1 `App\Jobs\EnrichContentJob`
 
@@ -133,7 +133,7 @@ RssItem::where('status', 'new')
 
 ---
 
-## 3. Extraction de contenu web — `App\Services\ContentExtractorService`
+## 3. Extraction de contenu web `App\Services\ContentExtractorService`
 
 - **Méthode** : `extract(string $url): ?array`.
 - **Retour** : `['title', 'headings', 'text', 'html', 'internal_links', 'word_count', 'deep_scraped'?]`.
@@ -144,7 +144,7 @@ RssItem::where('status', 'new')
 
 ---
 
-## 4. Génération d’articles — `App\Services\ArticleGeneratorService`
+## 4. Génération d’articles `App\Services\ArticleGeneratorService`
 
 - **Méthode** : `generate(array $itemIds, ?string $categoryId = null, ?string $customPrompt = null): Article`.
 - **Étapes** : charger RssItems avec enrichedItem + rssFeed.source ; template catégorie optionnel ; build system/user prompts ; call OpenAI ; créer Article (slug avec random 6) ; ArticleSource pour chaque item ; RssItem status `used`.
@@ -155,13 +155,13 @@ RssItem::where('status', 'new')
 
 ---
 
-## 5. Horizon — Configuration
+## 5. Horizon Configuration
 
 - **Queues** : `rss`, `enrichment`, `generation`, `default`, `notifications`.
 - **Supervisors** : supervisor-rss (queue rss), supervisor-enrichment, supervisor-generation (1 process pour rate limit), supervisor-default.
 - **Waits** : redis:rss 120, redis:enrichment 180, redis:generation 300.
 - **Environnements** : `local` (moins de processes), `production` (plus).
-- **Middleware Horizon** : `App\Http\Middleware\AuthorizeHorizon` — en prod, `$request->user()?->is_admin` sinon 403.
+- **Middleware Horizon** : `App\Http\Middleware\AuthorizeHorizon` en prod, `$request->user()?->is_admin` sinon 403.
 
 ### Jobs avec queue
 
@@ -184,7 +184,7 @@ RssItem::where('status', 'new')
 
 ---
 
-## 6. Génération d’articles — Controller + Request + Policy + Routes
+## 6. Génération d’articles Controller + Request + Policy + Routes
 
 ### 6.1 `GenerateArticleRequest`
 

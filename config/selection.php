@@ -18,11 +18,11 @@ return [
     | Poids des critères (total = 100)
     |--------------------------------------------------------------------------
     | Règles prédéfinies : l'IA fait un choix basé sur ces poids.
-    | - freshness : article récent = plus pertinent (connecté à l'actu)
-    | - quality : qualité du contenu extrait
-    | - seo : potentiel SEO (mots-clés longue traîne, concurrence)
-    | - diversity : multi-sources = plus de valeur
-    | - topic_frequency : si beaucoup d'articles sur le même sujet (ex: 10/50),
+    | freshness : article récent = plus pertinent (connecté à l'actu)
+    | quality : qualité du contenu extrait
+    | seo : potentiel SEO (mots-clés longue traîne, concurrence)
+    | diversity : multi-sources = plus de valeur
+    | topic_frequency : si beaucoup d'articles sur le même sujet (ex: 10/50),
     |   ce sujet est plus important → bonus (corrélation, tendance)
     */
     'weights' => [

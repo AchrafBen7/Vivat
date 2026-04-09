@@ -1,4 +1,4 @@
-# Création d’articles via Postman — Body JSON
+# Création d’articles via Postman Body JSON
 
 Tu crées les articles toi-même. Voici la structure et un exemple de body complet (titre, sous-titre, date, temps de lecture, texte).
 
@@ -35,7 +35,7 @@ Pour pouvoir **publier** juste après (étape 2), envoie au minimum : `status: "
 
 ## Exemple de body complet (ton exemple)
 
-**Requête 1 — Créer l’article**
+**Requête 1 Créer l’article**
 
 Corps (raw JSON) :
 
@@ -61,7 +61,7 @@ Remplace `category_id` si tu veux lier à une catégorie : récupère les IDs av
 
 ---
 
-## Requête 2 — Publier l’article
+## Requête 2 Publier l’article
 
 - **Méthode** : `POST`
 - **URL** : `http://localhost:8000/api/articles/{id}/publish`  

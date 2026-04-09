@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
                 ->by($key)
                 ->response(fn (Request $request, array $headers): RedirectResponse => back()
                     ->withErrors([
-                        'email' => 'Trop de tentatives d’inscription. Réessayez un peu plus tard.',
+                        'email' => "Trop de tentatives d'inscription. Réessayez un peu plus tard.",
                     ])
                     ->withInput($request->except('password', 'password_confirmation')));
         });

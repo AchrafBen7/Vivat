@@ -42,7 +42,7 @@ class FakeDutchArticlesSeeder extends Seeder
                     'article_type' => $data['article_type'],
                     'cover_image_url' => $coverImageUrl,
                     'quality_score' => 100,
-                    'published_at' => now()->subDays(20 - $index)->setTime(rand(7, 18), rand(0, 59)),
+                    'published_at' => now()->subDays(20 $index)->setTime(rand(7, 18), rand(0, 59)),
                 ]
             );
 

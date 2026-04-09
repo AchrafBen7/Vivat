@@ -1,4 +1,4 @@
-# 10 articles du HomeArticlesSeeder — Bodies Postman
+# 10 articles du HomeArticlesSeeder Bodies Postman
 
 À utiliser avec **POST** `http://localhost:8000/api/articles` (headers : `Accept: application/json`, `Content-Type: application/json`, `Authorization: Bearer {{token}}`).
 
@@ -29,7 +29,7 @@ Récupère les **id** (UUID) avec **GET** `http://localhost:8000/api/public/cate
 - **Créer les 9 catégories** (Laravel) :  
   `php artisan db:seed --class=VivatNineCategoriesSeeder`  
   (depuis ta machine ou `docker compose exec app php artisan db:seed --class=VivatNineCategoriesSeeder`)
-- **Voir la base** : ouvre **phpMyAdmin** → http://localhost:8080 — connexion : utilisateur `vivat`, mot de passe `vivat_secret` (base `vivat`). Table `categories` pour voir ou supprimer les entrées.
+- **Voir la base** : ouvre **phpMyAdmin** → http://localhost:8080 connexion : utilisateur `vivat`, mot de passe `vivat_secret` (base `vivat`). Table `categories` pour voir ou supprimer les entrées.
 
 Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaque placeholder par l’UUID réel de la catégorie correspondante (même ordre que le tableau).
 
@@ -49,7 +49,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 1 — IA : la révolution médicale avance sans garde-fou (hot_news) — **Catégorie : Santé**
+## Article 1 IA : la révolution médicale avance sans garde-fou (hot_news) **Catégorie : Santé**
 
 ```json
 {
@@ -71,7 +71,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 2 — L'autosuffisance alimentaire (long_form) — **Catégorie : Au quotidien**
+## Article 2 L'autosuffisance alimentaire (long_form) **Catégorie : Au quotidien**
 
 ```json
 {
@@ -93,7 +93,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 3 — Transition énergétique 2030 (long_form) — **Catégorie : Énergie**
+## Article 3 Transition énergétique 2030 (long_form) **Catégorie : Énergie**
 
 ```json
 {
@@ -115,7 +115,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 4 — Domino's bottes (standard) — **Catégorie : Mode**
+## Article 4 Domino's bottes (standard) **Catégorie : Mode**
 
 ```json
 {
@@ -137,7 +137,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 5 — Météo (standard) — **Catégorie : Au quotidien**
+## Article 5 Météo (standard) **Catégorie : Au quotidien**
 
 ```json
 {
@@ -159,7 +159,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 6 — Dossiers Epstein (standard, sans image) — **Catégorie : Famille**
+## Article 6 Dossiers Epstein (standard, sans image) **Catégorie : Famille**
 
 ```json
 {
@@ -181,7 +181,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 7 — Biodiversité marine (standard, sans image) — **Catégorie : Voyage**
+## Article 7 Biodiversité marine (standard, sans image) **Catégorie : Voyage**
 
 ```json
 {
@@ -203,7 +203,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 8 — Ouverture sommet climat COP (hot_news) — **Catégorie : Énergie**
+## Article 8 Ouverture sommet climat COP (hot_news) **Catégorie : Énergie**
 
 ```json
 {
@@ -225,7 +225,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 9 — Labels consommation responsable (long_form) — **Catégorie : Chez soi**
+## Article 9 Labels consommation responsable (long_form) **Catégorie : Chez soi**
 
 ```json
 {
@@ -247,7 +247,7 @@ Dans les bodies, **category_id** contient un **placeholder UUID**. Remplace chaq
 
 ---
 
-## Article 10 — Justice réforme prescription (standard, sans image) — **Catégorie : Famille**
+## Article 10 Justice réforme prescription (standard, sans image) **Catégorie : Famille**
 
 ```json
 {

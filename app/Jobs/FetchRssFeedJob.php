@@ -43,7 +43,7 @@ class FetchRssFeedJob implements ShouldQueue
                 'source' => $this->feed->source?->name,
                 'category' => $this->feed->category?->name,
             ],
-            'retry_count' => max(0, $this->attempts() - 1),
+            'retry_count' => max(0, $this->attempts() 1),
         ]);
 
         try {
@@ -117,7 +117,7 @@ class FetchRssFeedJob implements ShouldQueue
                 'status' => 'failed',
                 'completed_at' => now(),
                 'error_message' => $e->getMessage(),
-                'retry_count' => max(0, $this->attempts() - 1),
+                'retry_count' => max(0, $this->attempts() 1),
             ]);
 
             throw $e;

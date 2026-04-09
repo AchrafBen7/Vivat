@@ -26,7 +26,7 @@ class ArticleGeneratorService
      * @param  array<int, string>  $itemIds  UUID des RssItem (enriched)
      * @param  string|null  $categoryId  UUID catégorie optionnelle
      * @param  string|null  $customPrompt  Instructions supplémentaires
-     * @param  string|null  $articleType  hot_news | long_form | standard — adapte ton et longueur
+     * @param  string|null  $articleType  hot_news | long_form | standard adapte ton et longueur
      * @param  int|null  $minWords  Longueur min cible (sinon depuis config/template)
      * @param  int|null  $maxWords  Longueur max cible
      * @param  string|null  $contextPriority  Contexte pour l'IA (ex: "Sur 50 articles, 10 sur ce sujet → priorité tendance")
@@ -168,7 +168,7 @@ class ArticleGeneratorService
             $sourceName = e($item->rssFeed?->source?->name ?? 'Source externe');
             $title = e($item->title);
             $url = e($item->url);
-            return "<li><a href=\"{$url}\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">{$title}</a> — {$sourceName}</li>";
+            return "<li><a href=\"{$url}\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">{$title}</a> {$sourceName}</li>";
         })->implode("\n");
 
         return <<<HTML

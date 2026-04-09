@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
  * Supprime le texte extrait brut des sources RSS après 60 jours.
  *
  * Raison : extracted_text contient le contenu complet des articles tiers.
- * Le garder indéfiniment crée un risque copyright inutile — les articles
+ * Le garder indéfiniment crée un risque copyright inutile les articles
  * générés ont déjà été produits et sont stockés séparément.
  * On conserve le reste (lead, key_points, seo_keywords) qui sont des
  * dérivés transformés et ne constituent pas une reproduction protégée.

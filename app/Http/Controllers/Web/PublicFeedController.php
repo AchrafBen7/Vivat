@@ -38,8 +38,8 @@ class PublicFeedController extends Controller
         $feedUrl  = $siteUrl . '/feed.xml' . ($locale === 'nl' ? '?lang=nl' : '');
         $siteName = 'Vivat';
         $siteDesc = $locale === 'nl'
-            ? 'Vivat — Actualiteiten en artikelen in het Nederlands.'
-            : 'Vivat — Actualités et articles en français.';
+            ? 'Vivat Actualiteiten en artikelen in het Nederlands.'
+            : 'Vivat Actualités et articles en français.';
         $lastBuild = $articles->first()?->published_at?->toRfc1123String()
             ?? now()->toRfc1123String();
 

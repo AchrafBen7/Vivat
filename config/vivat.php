@@ -12,7 +12,7 @@ return [
      * On stocke des URLs complètes pour garder la main sur les visuels.
      */
     /**
-     * Images Pexels de repli — chaque URL ne doit jamais être réutilisée sur une même page.
+     * Images Pexels de repli chaque URL ne doit jamais être réutilisée sur une même page.
      * Pool élargi pour garantir l'unicité.
      */
     'pexels_fallback_urls' => [

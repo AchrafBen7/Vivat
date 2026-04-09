@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Site public — HTML rendu côté serveur (templates PHP, Tailwind)
+| Site public HTML rendu côté serveur (templates PHP, Tailwind)
 | Pas de Blade. SEO-friendly.
 |--------------------------------------------------------------------------
 */

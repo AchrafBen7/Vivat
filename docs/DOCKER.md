@@ -1,4 +1,4 @@
-# Docker — Vivat (local)
+# Docker Vivat (local)
 
 Environnement local avec **PHP 8.3**, **MySQL 8**, **Redis**, aligné sur le contexte projet.
 

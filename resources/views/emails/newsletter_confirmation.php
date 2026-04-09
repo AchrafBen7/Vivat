@@ -24,7 +24,7 @@ $firstName = $subscriber && ! empty($subscriber->name) ? trim((string) $subscrib
                 <a href="<?= htmlspecialchars($confirmUrl) ?>" style="display:inline-block;background:#004241;color:#fff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:700;">Confirmer mon inscription</a>
             </p>
             <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#5b6665;">
-                Si vous n’êtes pas à l’origine de cette demande, vous pouvez simplement ignorer cet email.
+                Si vous n'êtes pas à l'origine de cette demande, vous pouvez simplement ignorer cet email.
             </p>
             <p style="margin:0;font-size:13px;line-height:1.6;color:#6d7877;">
                 Se désinscrire : <a href="<?= htmlspecialchars($unsubscribeUrl) ?>" style="color:#004241;"><?= htmlspecialchars($unsubscribeUrl) ?></a>

@@ -31,7 +31,7 @@ $statusStyles = [
 
     <?php if (empty($payments)) { ?>
     <div class="rounded-[24px] border border-[#004241]/12 bg-[#EBF1EF]/50 p-8 text-center">
-        <p class="text-[#004241]/75">Aucun paiement n’a encore été enregistré sur votre compte.</p>
+        <p class="text-[#004241]/75">Aucun paiement n'a encore été enregistré sur votre compte.</p>
     </div>
     <?php } else { ?>
     <div class="space-y-4">

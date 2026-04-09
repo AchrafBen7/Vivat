@@ -1,4 +1,4 @@
-# Models Eloquent — Pipeline génération d’articles (Vivat)
+# Models Eloquent Pipeline génération d’articles (Vivat)
 
 Référence des 11 models pour la fonctionnalité de génération d’articles. **HasUuids** sur tous les models. Tables sans `updated_at` : `$timestamps = false` et `const CREATED_AT = 'created_at'` quand la migration a un `created_at`.
 
@@ -114,7 +114,7 @@ class Category extends Model
 
 ## 3. RssFeed
 
-*Stack MySQL 8 : `scopeDueForFetch` utilise `DATE_SUB`. Pour PostgreSQL, utiliser `NOW() - (fetch_interval_minutes || ' minutes')::interval`.*
+*Stack MySQL 8 : `scopeDueForFetch` utilise `DATE_SUB`. Pour PostgreSQL, utiliser `NOW() (fetch_interval_minutes || ' minutes')::interval`.*
 
 ```php
 <?php
@@ -698,7 +698,7 @@ class PipelineJob extends Model
 | CategoryTemplate | belongsTo Category |
 | Article | belongsTo Category, Cluster ; hasMany ArticleSource ; belongsToMany Source (article_sources, withPivot) |
 | ArticleSource | belongsTo Article, RssItem, Source |
-| PipelineJob | — |
+| PipelineJob | |
 
 ---
 

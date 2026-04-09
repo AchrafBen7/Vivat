@@ -12,7 +12,7 @@ $pagination = $pagination ?? null;
 $category_name = $category['name'] ?? 'Rubrique';
 $category_slug = $category['slug'] ?? '';
 $category_image_url = $category['image_url'] ?? null;
-// Tag carte : sous-rubrique (terme), cohérente avec les filtres / le contenu — pas seulement le nom de la rubrique
+// Tag carte : sous-rubrique (terme), cohérente avec les filtres / le contenu pas seulement le nom de la rubrique
 $hubArticleBadgeLabel = static function (array $article) use ($category_name, $sub_categories, $current_sub_category_slugs): string {
     return vivat_hub_article_subcategory_badge_label(
         $article,
@@ -22,7 +22,7 @@ $hubArticleBadgeLabel = static function (array $article) use ($category_name, $s
     );
 };
 
-// Tags — mêmes classes que home pour cohérence visuelle
+// Tags mêmes classes que home pour cohérence visuelle
 $tagBase = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
 $tagGlassTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
 $tagGlassOnImage = $tagBase.' '.$tagGlassTailwind.' text-white';
@@ -106,7 +106,7 @@ $restArticles = array_values($byId);
         transform: translateY(-2px);
         box-shadow: 0 24px 48px rgba(0, 66, 65, 0.08);
     }
-    /* Cartes pleine couleur — même logique que la home (transition de teinte au survol) */
+    /* Cartes pleine couleur même logique que la home (transition de teinte au survol) */
     .vivat-card-jaune {
         background: #FFF0B6 !important;
         transition: transform 220ms ease, box-shadow 220ms ease, background-color 200ms ease;
@@ -138,7 +138,7 @@ $restArticles = array_values($byId);
 <div class="flex flex-col w-full">
     <!-- 1) Marge 24px sous la navbar déjà gérée par le main -->
 
-    <!-- 2) Pub 728x90 - flow vertical, border 1px, padding right/bottom/left 48px, gap 8 -->
+    <!-- 2) Pub 728x90 flow vertical, border 1px, padding right/bottom/left 48px, gap 8 -->
     <div class="mb-6 flex justify-center">
         <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
             Publicité

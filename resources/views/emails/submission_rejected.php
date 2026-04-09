@@ -11,7 +11,7 @@
         <p style="margin:0 0 16px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6d7d76;">Vivat</p>
         <h1 style="margin:0 0 16px;font-size:28px;line-height:1.2;color:#0d4f4b;">Votre article nécessite quelques ajustements</h1>
         <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">
-            Votre soumission <strong><?= e($submission->title) ?></strong> n’a pas encore été retenue en l’état.
+            Votre soumission <strong><?= e($submission->title) ?></strong> n'a pas encore été retenue en l'état.
         </p>
         <?php if ($submission->reviewer_notes): ?>
             <div style="margin:0 0 24px;padding:18px 20px;background:#f5faf8;border-radius:18px;border:1px solid #d7e7df;">

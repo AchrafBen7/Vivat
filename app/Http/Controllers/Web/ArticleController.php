@@ -21,7 +21,7 @@ class ArticleController extends Controller
         $html = render_php_view('site.layout', [
             'content' => $content,
             'content_locale' => $locale,
-            'title' => 'Toutes les actualités — Vivat',
+            'title' => 'Toutes les actualités Vivat',
             'meta_description' => 'Découvrez tous les articles et actualités Vivat. Parcourez nos derniers contenus par rubrique.',
             'canonical_url' => url('/articles'),
             'trim_main_bottom' => true,

@@ -30,7 +30,7 @@ class TopicScorerService
         $publishedAt = $item->published_at ?? $item->fetched_at ?? $item->created_at;
         if ($publishedAt) {
             $daysOld = max(0, $publishedAt->diffInDays(now(), false));
-            $freshnessRatio = max(0, 1 - ($daysOld / $decayDays));
+            $freshnessRatio = max(0, 1 ($daysOld / $decayDays));
             $score += (int) round($freshnessRatio * ($weights['freshness'] ?? 25));
         }
 
@@ -232,7 +232,7 @@ class TopicScorerService
     {
         $word = mb_strtolower(trim($word));
         $word = preg_replace("/^[^\\p{L}\\p{N}]+|[^\\p{L}\\p{N}]+$/u", '', $word) ?? '';
-        $word = preg_replace('/[’\'`]+/u', '', $word) ?? $word;
+        $word = preg_replace("/['`]+/u", '', $word) ?? $word;
         $word = preg_replace('/-{2,}/', '-', $word) ?? $word;
 
         if ($word === '') {

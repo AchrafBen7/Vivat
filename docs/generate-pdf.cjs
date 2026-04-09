@@ -20,7 +20,7 @@ const html = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivat — Stack Technique Backend</title>
+<title>Vivat  Stack Technique Backend</title>
 <style>
   @page {
     size: A4;

@@ -1,4 +1,4 @@
-# Postman — Nouveaux endpoints et route de test complète
+# Postman Nouveaux endpoints et route de test complète
 
 ## ⚠️ Important : pour éviter du HTML ou des 500
 
@@ -29,8 +29,8 @@ Pour tester **GET /api/public/home** et les 4 types d'affichage (top_news, featu
 
 1. **Créer les 9 catégories** : voir `docs/POSTMAN_9_CATEGORIES_BODIES.md` (POST /api/categories pour chaque body).
 2. **Créer les 10 articles** :
-   - **Option A (Postman)** : **POST** `http://localhost:8000/api/seed-home-articles` avec **Headers** : `Accept: application/json`, `Authorization: Bearer {{token}}` (token admin). Body : aucun. Réponse : 200, message de confirmation.
-   - **Option B (CLI)** : `php artisan db:seed --class=HomeArticlesSeeder` (voir `docs/POSTMAN_10_ARTICLES_HOME_BODIES.md`).
+   **Option A (Postman)** : **POST** `http://localhost:8000/api/seed-home-articles` avec **Headers** : `Accept: application/json`, `Authorization: Bearer {{token}}` (token admin). Body : aucun. Réponse : 200, message de confirmation.
+   **Option B (CLI)** : `php artisan db:seed --class=HomeArticlesSeeder` (voir `docs/POSTMAN_10_ARTICLES_HOME_BODIES.md`).
 3. **Tester la home** : **GET** `http://localhost:8000/api/public/home` avec **Accept: application/json** (pas de token). Vérifier `top_news`, `featured`, `latest`, `categories`, `writer_cta`.
 
 **Checklist complète des tests Home** : voir **`docs/POSTMAN_HOME_TESTS.md`** (tous les endpoints, pagination, hub, writer_cta, cache).
@@ -70,7 +70,7 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
   `Content-Type` : `application/json`  
   `Authorization` : `Bearer {{token}}`  
   (Remplace `{{token}}` par le token de l’étape 1, ou crée une variable Postman `token`.)
-- **Body** (raw JSON) — **obligatoire** : sans `"all": true`, tu peux avoir « Aucun flux à traiter » si aucun flux n’est « dû ».
+- **Body** (raw JSON) **obligatoire** : sans `"all": true`, tu peux avoir « Aucun flux à traiter » si aucun flux n’est « dû ».
 ```json
 {
   "all": true
@@ -121,11 +121,11 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
 
 ---
 
-### 6. Export CSV (nouveau) — télécharger le fichier
+### 6. Export CSV (nouveau) télécharger le fichier
 
 - **Method** : `GET`
 - **URL** : `http://localhost:8000/api/pipeline/export-trends-csv?limit=500`
-  - Variante avec 3 sources :  
+  Variante avec 3 sources :  
     `http://localhost:8000/api/pipeline/export-trends-csv?per_source=200&sources=3`
 - **Headers** :  
   `Accept` : `application/json` (ou `*/*`)  
@@ -136,7 +136,7 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
 
 ---
 
-### 7. Analyser les tendances (nouveau) — Option A : CSV depuis la BDD
+### 7. Analyser les tendances (nouveau) Option A : CSV depuis la BDD
 
 - **Method** : `POST`
 - **URL** : `http://localhost:8000/api/pipeline/analyze-trends`
@@ -154,7 +154,7 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
 
 ---
 
-### 7 bis. Analyser les tendances — Option B : envoyer un fichier CSV
+### 7 bis. Analyser les tendances Option B : envoyer un fichier CSV
 
 - **Method** : `POST`
 - **URL** : `http://localhost:8000/api/pipeline/analyze-trends`
@@ -163,7 +163,7 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
   `Authorization` : `Bearer {{token}}`  
   (Ne pas mettre `Content-Type` : Postman le met automatiquement en multipart.)
 - **Body** : onglet **form-data**  
-  - Key : `csv_file` | Type : **File** | Value : sélectionner le fichier téléchargé à l’étape 6 (ou un autre CSV).
+  Key : `csv_file` | Type : **File** | Value : sélectionner le fichier téléchargé à l’étape 6 (ou un autre CSV).
 - **Réponse** : 200, `"success": true`, `"analysis": "..."`.
 
 ---
@@ -187,7 +187,7 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
   `Accept` : `application/json`  
   `Content-Type` : `application/json`  
   `Authorization` : `Bearer {{token}}`
-- **Body** (raw JSON) — **remplacer les UUID par ceux de l’étape 8** :
+- **Body** (raw JSON) **remplacer les UUID par ceux de l’étape 8** :
 ```json
 {
   "item_ids": ["UUID_1", "UUID_2", "UUID_3"],
@@ -219,12 +219,12 @@ Crée une **Collection** "Vivat – Test complet" et ajoute les requêtes dans l
 À ajouter dans ta collection Postman si tu avais déjà les anciens :
 
 1. **GET** `http://localhost:8000/api/pipeline/export-trends-csv`  
-   - Params : `limit` (optionnel), `per_source` (optionnel), `sources` (optionnel), `status` (optionnel).  
-   - Envoi : **Send and Download** pour sauvegarder le CSV.
+   Params : `limit` (optionnel), `per_source` (optionnel), `sources` (optionnel), `status` (optionnel).  
+   Envoi : **Send and Download** pour sauvegarder le CSV.
 
 2. **POST** `http://localhost:8000/api/pipeline/analyze-trends`  
-   - Soit body JSON : `{"limit": 500}` (ou `per_source`, `sources`, `status`).  
-   - Soit body **form-data** : clé `csv_file`, type **File**, valeur = ton fichier CSV.
+   Soit body JSON : `{"limit": 500}` (ou `per_source`, `sources`, `status`).  
+   Soit body **form-data** : clé `csv_file`, type **File**, valeur = ton fichier CSV.
 
 Toutes les requêtes (sauf Login) utilisent :  
 `Authorization: Bearer {{token}}`  
