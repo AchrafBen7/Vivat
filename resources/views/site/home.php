@@ -856,8 +856,8 @@ foreach ($tabletCategoryPairs as $pair) {
 
                     return;
                 }
-                var ix = Math.max(0, Math.min(r.right, vr.right) Math.max(r.left, vr.left));
-                var iy = Math.max(0, Math.min(r.bottom, vr.bottom) Math.max(r.top, vr.top));
+                var ix = Math.max(0, Math.min(r.right, vr.right) - Math.max(r.left, vr.left));
+                var iy = Math.max(0, Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top));
                 var interArea = ix * iy;
                 var ratio = interArea / (r.width * r.height);
                 if (ratio >= 0.08) {
@@ -927,8 +927,8 @@ foreach ($tabletCategoryPairs as $pair) {
 
                     return;
                 }
-                var intersectionX = Math.max(0, Math.min(videoRect.right, viewportRect.right) Math.max(videoRect.left, viewportRect.left));
-                var intersectionY = Math.max(0, Math.min(videoRect.bottom, viewportRect.bottom) Math.max(videoRect.top, viewportRect.top));
+                var intersectionX = Math.max(0, Math.min(videoRect.right, viewportRect.right) - Math.max(videoRect.left, viewportRect.left));
+                var intersectionY = Math.max(0, Math.min(videoRect.bottom, viewportRect.bottom) - Math.max(videoRect.top, viewportRect.top));
                 var ratio = (intersectionX * intersectionY) / (videoRect.width * videoRect.height);
 
                 if (ratio >= 0.08) {
@@ -983,7 +983,7 @@ foreach ($tabletCategoryPairs as $pair) {
         var originalPanels = Array.prototype.slice.call(track.querySelectorAll('.categories-carousel-panel'));
         if (originalPanels.length < 2) return;
         var firstClone = originalPanels[0].cloneNode(true);
-        var lastClone = originalPanels[originalPanels.length 1].cloneNode(true);
+        var lastClone = originalPanels[originalPanels.length - 1].cloneNode(true);
         firstClone.classList.add('categories-carousel-panel-clone');
         firstClone.setAttribute('aria-hidden', 'true');
         lastClone.classList.add('categories-carousel-panel-clone');
@@ -1085,7 +1085,7 @@ foreach ($tabletCategoryPairs as $pair) {
         }
 
         var total = slides.length;
-        var realCount = total (document.querySelector('.categories-carousel-tablet-clone') ? 1 : 0);
+        var realCount = total - (document.querySelector('.categories-carousel-tablet-clone') ? 1 : 0);
         var idx = 0;
         var isAnimating = false;
         var mediaApi = window.VivatCategoryCarouselTabletMedia;
@@ -1506,7 +1506,8 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 </div>
 
 <script>
-window.addEventListener('load', function () {
+(function () {
+    function init() {
     if (typeof gsap === 'undefined') return;
 
     // — Hero : reveal vertical haut → bas, sans voile blanc
@@ -1523,10 +1524,10 @@ window.addEventListener('load', function () {
         gsap.to(cards, {
             autoAlpha: 1,
             y: 0,
-            duration: 2.0,
+            duration: 1.8,
             ease: 'power3.out',
-            stagger: 0.25,
-            delay: 0.2,
+            stagger: 0.2,
+            delay: 0.15,
         });
     });
 
@@ -1549,5 +1550,12 @@ window.addEventListener('load', function () {
             },
         });
     });
-});
+    }
+    // Démarre immédiatement si page déjà chargée (AJAX swap), sinon attend window.load
+    if (document.readyState === 'complete') {
+        init();
+    } else {
+        window.addEventListener('load', init);
+    }
+})();
 </script>

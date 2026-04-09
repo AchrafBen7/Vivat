@@ -103,6 +103,9 @@ $newsletterOldEmail = old('newsletter_email', '');
             -webkit-clip-path: inset(0 0 100% 0 round 34px);
             clip-path: inset(0 0 100% 0 round 34px);
         }
+        main {
+            transition: opacity 0.18s ease;
+        }
 
         /* Tag pill : effet glass sans padding supplémentaire */
         .vivat-glass-tag {
@@ -111,7 +114,7 @@ $newsletterOldEmail = old('newsletter_email', '');
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(230, 230, 230, 0.2);
         }
-        .vivat-lang-switch {
+.vivat-lang-switch {
             --vivat-lang-active-bg: #004241;
             --vivat-lang-active-text: #ffffff;
             --vivat-lang-inactive-text: rgba(0, 66, 65, 0.68);
@@ -328,13 +331,13 @@ $newsletterOldEmail = old('newsletter_email', '');
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
+    <!-- Voile nav : en dehors du header pour éviter l'impact du stacking context isolate/opacity -->
+    <div id="mobile-nav-overlay"
+         data-open="false"
+         class="fixed inset-0 z-[45] bg-black/45 opacity-0 pointer-events-none transition-opacity duration-300 ease-out data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto"
+         aria-hidden="true"></div>
 
     <header id="site-header" class="relative z-50 isolate bg-gradient-to-b from-white from-0% via-white via-[40%] to-[#EBF1EF]/32 to-100% shadow-[0_6px_20px_-4px_rgba(0,66,65,0.075),0_14px_36px_-18px_rgba(0,66,65,0.05)]">
-        <!-- Voile noir uniforme (sous la barre et le panneau, z-40) : pas de dégradé clair→foncé sur la page -->
-        <div id="mobile-nav-overlay"
-             data-open="false"
-             class="fixed inset-0 z-[40] bg-black/45 opacity-0 pointer-events-none transition-opacity duration-300 ease-out data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto"
-             aria-hidden="true"></div>
         <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 relative z-50">
             <div class="flex items-center gap-2 md:gap-3 h-[72px] md:h-[88px] py-[16px] md:py-[24px]">
 
@@ -865,17 +868,84 @@ $newsletterOldEmail = old('newsletter_email', '');
                 }
             }
 
+            function runPageScripts(container) {
+                container.querySelectorAll('script').forEach(function(old) {
+                    var s = document.createElement('script');
+                    Array.from(old.attributes).forEach(function(a) { s.setAttribute(a.name, a.value); });
+                    s.textContent = old.textContent;
+                    old.parentNode.replaceChild(s, old);
+                });
+            }
+
             function navigateToLanguage(lang) {
+                var currentLanguage = switches[0].getAttribute('data-active') || 'fr';
+                if (lang !== 'fr' && lang !== 'nl') return;
+                if (lang === currentLanguage) return;
+
                 applyLanguage(lang);
 
                 try {
                     document.cookie = 'vivat_lang=' + encodeURIComponent(lang) + '; path=/; max-age=' + (60 * 60 * 24 * 30) + '; SameSite=Lax';
-                } catch (error) {
-                }
+                } catch (e) {}
 
                 var url = new URL(window.location.href);
                 url.searchParams.set('lang', lang);
-                window.location.href = url.toString();
+
+                // Reduced motion : fallback hard redirect
+                if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    window.location.href = url.toString();
+                    return;
+                }
+
+                var mainEl = document.querySelector('main');
+                if (!mainEl || !window.fetch) {
+                    window.location.href = url.toString();
+                    return;
+                }
+
+                // 1. Fade out le contenu immédiatement
+                mainEl.style.opacity = '0';
+
+                // 2. Fetch la nouvelle page
+                fetch(url.toString(), { headers: { 'X-Vivat-Ajax': '1' } })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.text();
+                    })
+                    .then(function(html) {
+                        var parser = new DOMParser();
+                        var newDoc = parser.parseFromString(html, 'text/html');
+                        var newMain = newDoc.querySelector('main');
+                        if (!newMain) throw new Error('no main');
+
+                        // 3. Swap le contenu
+                        mainEl.className = newMain.className;
+                        mainEl.innerHTML = newMain.innerHTML;
+
+                        // 4. Ré-exécuter les scripts injectés
+                        runPageScripts(mainEl);
+
+                        // 5. Mettre à jour titre + attribut lang
+                        document.title = newDoc.title;
+                        document.documentElement.lang = lang;
+
+                        // 6. Mettre à jour l'URL sans rechargement
+                        history.pushState({ lang: lang }, '', url.toString());
+
+                        // 7. Attacher les fallbacks images du nouveau contenu
+                        if (typeof attachFallbackToImages === 'function') {
+                            attachFallbackToImages();
+                        }
+
+                        // 8. Fade in
+                        requestAnimationFrame(function() {
+                            mainEl.style.opacity = '1';
+                        });
+                    })
+                    .catch(function() {
+                        // Fallback si fetch échoue
+                        window.location.href = url.toString();
+                    });
             }
 
             var initialLanguage = switches[0].getAttribute('data-active') || 'fr';
@@ -944,32 +1014,24 @@ $newsletterOldEmail = old('newsletter_email', '');
     </script>
 
     <script>
+        // Cacher le header immédiatement (avant les images)
         document.addEventListener('DOMContentLoaded', function () {
-            if (typeof window.Lenis !== 'undefined') {
-                window.lenis = new window.Lenis();
-
-                function raf(time) {
-                    window.lenis.raf(time);
-                    requestAnimationFrame(raf);
-                }
-
-                requestAnimationFrame(raf);
+            if (typeof window.gsap !== 'undefined') {
+                var header = document.getElementById('site-header');
+                if (header) window.gsap.set(header, { autoAlpha: 0, y: -10 });
             }
-
-            if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
-                window.lenis?.on('scroll', window.ScrollTrigger.update);
-            }
-
+        });
+        // Animer sur window.load = même moment que les cartes hero
+        window.addEventListener('load', function () {
             if (typeof window.gsap !== 'undefined') {
                 var header = document.getElementById('site-header');
                 if (header) {
-                    window.gsap.set(header, { autoAlpha: 0, y: -10 });
                     window.gsap.to(header, {
                         autoAlpha: 1,
                         y: 0,
-                        duration: 2.2,
+                        duration: 1.8,
                         ease: 'power3.out',
-                        delay: 0.05,
+                        delay: 0.15,
                     });
                 }
             }
