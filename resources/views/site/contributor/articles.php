@@ -10,14 +10,74 @@ $statusStyles = [
         'text' => 'text-[#7A5A14]',
         'dot' => '#C69214',
     ],
+    'submitted' => [
+        'label' => 'En vérification',
+        'bg' => 'bg-[#E6F3F2]',
+        'text' => 'text-[#006664]',
+        'dot' => '#006664',
+    ],
     'pending' => [
         'label' => $t('site.pending', 'En attente'),
         'bg' => 'bg-[#004241]/10',
         'text' => 'text-[#006664]',
         'dot' => '#006664',
     ],
+    'under_review' => [
+        'label' => 'En relecture',
+        'bg' => 'bg-[#E6F3F2]',
+        'text' => 'text-[#006664]',
+        'dot' => '#006664',
+    ],
+    'changes_requested' => [
+        'label' => 'Corrections demandées',
+        'bg' => 'bg-[#F3E8CC]',
+        'text' => 'text-[#7A5A14]',
+        'dot' => '#C69214',
+    ],
+    'price_proposed' => [
+        'label' => 'Paiement requis',
+        'bg' => 'bg-[#F3E8CC]',
+        'text' => 'text-[#7A5A14]',
+        'dot' => '#C69214',
+    ],
+    'awaiting_payment' => [
+        'label' => 'Paiement requis',
+        'bg' => 'bg-[#F3E8CC]',
+        'text' => 'text-[#7A5A14]',
+        'dot' => '#C69214',
+    ],
+    'payment_pending' => [
+        'label' => 'Paiement en cours',
+        'bg' => 'bg-[#004241]/10',
+        'text' => 'text-[#006664]',
+        'dot' => '#006664',
+    ],
+    'payment_failed' => [
+        'label' => 'Paiement échoué',
+        'bg' => 'bg-[#AE422E]/10',
+        'text' => 'text-[#AE422E]',
+        'dot' => '#AE422E',
+    ],
+    'payment_expired' => [
+        'label' => 'Offre expirée',
+        'bg' => 'bg-[#E9ECEC]',
+        'text' => 'text-[#506263]',
+        'dot' => '#7A8A8B',
+    ],
+    'payment_succeeded' => [
+        'label' => 'Publié',
+        'bg' => 'bg-[#527E7E]/15',
+        'text' => 'text-[#2D5C5C]',
+        'dot' => '#527E7E',
+    ],
     'approved' => [
-        'label' => $t('site.approved', 'Approuvé'),
+        'label' => 'Publié',
+        'bg' => 'bg-[#527E7E]/15',
+        'text' => 'text-[#2D5C5C]',
+        'dot' => '#527E7E',
+    ],
+    'published' => [
+        'label' => 'Publié',
         'bg' => 'bg-[#527E7E]/15',
         'text' => 'text-[#2D5C5C]',
         'dot' => '#527E7E',
@@ -57,9 +117,9 @@ $statusStyles = [
         $status = $sub['status'] ?? 'draft';
         $statusStyle = $statusStyles[$status] ?? $statusStyles['draft'];
         $cover = $sub['cover_image_url'] ?? null;
-        $fallbackImage = $status === 'pending'
+        $fallbackImage = in_array($status, ['pending', 'submitted', 'under_review', 'payment_pending'], true)
             ? '/quotidien.jpg'
-            : ($status === 'approved' ? '/chezsoi.jpg' : ($status === 'rejected' ? '/sante.jpg' : '/finance.jpg'));
+            : (in_array($status, ['approved', 'published', 'payment_succeeded'], true) ? '/chezsoi.jpg' : ($status === 'rejected' ? '/sante.jpg' : '/finance.jpg'));
         $coverSrc = $cover ?: $fallbackImage;
         $deleteUrl = $sub['delete_url'] ?? null;
         $canDelete = (bool) ($sub['can_delete'] ?? false);

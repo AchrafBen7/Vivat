@@ -284,7 +284,14 @@ class ContributorController extends Controller
         return match ($status) {
             'draft' => 'Brouillon',
             'pending' => 'En attente',
-            'approved' => 'Publié',
+            'submitted' => 'En vérification',
+            'under_review' => 'En relecture',
+            'changes_requested' => 'Corrections demandées',
+            'price_proposed', 'awaiting_payment' => 'Paiement requis',
+            'payment_pending' => 'Paiement en cours',
+            'payment_succeeded', 'approved', 'published' => 'Publié',
+            'payment_failed' => 'Paiement échoué',
+            'payment_expired' => 'Offre expirée',
             'rejected' => 'Refusé',
             default => 'Aucune',
         };
@@ -303,7 +310,7 @@ class ContributorController extends Controller
                 'color' => 'emerald',
                 'description' => match ($submissionStatus) {
                     'pending' => 'Paiement confirmé. Votre article est en cours de relecture.',
-                    'approved' => 'Paiement confirmé. Votre article est publié.',
+                    'approved', 'published', 'payment_succeeded' => 'Paiement confirmé. Votre article est publié.',
                     'rejected' => "Paiement confirmé. L'article a été refusé.",
                     default => 'Paiement confirmé.',
                 },
@@ -377,9 +384,9 @@ class ContributorController extends Controller
                     'pending' => 'En attente',
                     'under_review' => 'En relecture',
                     'changes_requested' => 'Corrections demandées',
-                    'price_proposed', 'awaiting_payment' => 'Prix proposé paiement requis',
+                    'price_proposed', 'awaiting_payment' => 'Paiement requis',
                     'payment_pending' => 'Paiement en cours',
-                    'payment_succeeded' => 'Paiement confirmé',
+                    'payment_succeeded', 'published' => 'Publié',
                     'payment_failed' => 'Paiement échoué',
                     'payment_expired' => 'Offre expirée',
                     'approved' => 'Publié',
@@ -413,7 +420,7 @@ class ContributorController extends Controller
                 'delete_url' => ($s->status === 'draft' || $s->status === 'rejected')
                     ? route('contributor.articles.destroy', ['submission' => $s->slug])
                     : null,
-                'request_unpublish_url' => $s->status === 'approved' && $s->published_article_id
+                'request_unpublish_url' => in_array($s->status, ['approved', 'published', 'payment_succeeded'], true) && $s->published_article_id
                     ? route('contributor.articles.request-unpublish', ['submission' => $s->slug])
                     : null,
                 ];
