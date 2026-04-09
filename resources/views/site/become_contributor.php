@@ -35,7 +35,7 @@ $advantages = [
     <!-- Bento : avantages en priorité -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <?php foreach ($advantages as $i => $adv) { ?>
-        <div class="rounded-[30px] border border-[#004241]/10 bg-white p-5 md:p-6 flex flex-col gap-3 shadow-[0_4px_20px_rgba(0,66,65,0.04)] hover:shadow-[0_8px_30px_rgba(0,66,65,0.08)] transition-shadow">
+        <div class="rounded-[30px] bg-white p-5 md:p-6 flex flex-col gap-3 shadow-[0_4px_20px_rgba(0,66,65,0.04)] hover:shadow-[0_8px_30px_rgba(0,66,65,0.08)] transition-shadow">
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#EBF1EF] text-[#004241] text-sm font-semibold"><?= $i + 1 ?></span>
             <h3 class="font-semibold text-[#004241] text-lg"><?= htmlspecialchars($adv['title']) ?></h3>
             <p class="text-[#004241]/75 text-sm leading-relaxed"><?= htmlspecialchars($adv['desc']) ?></p>

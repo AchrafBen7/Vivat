@@ -41,10 +41,7 @@ $resolveImage = static function (array $article, int $width, int $height, string
     <section class="overflow-hidden rounded-[36px] bg-[#EBF1EF] px-6 py-8 md:px-10 md:py-10">
         <div>
             <div class="max-w-4xl">
-                <span class="inline-flex items-center rounded-full border border-[#004241]/10 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#004241]/65">
-                    <?= htmlspecialchars($t['badge']) ?>
-                </span>
-                <h1 class="mt-5 max-w-4xl text-[2.5rem] font-semibold leading-[1.02] text-[#004241] sm:text-[3.15rem]">
+                <h1 class="max-w-4xl text-[2.5rem] font-semibold leading-[1.02] text-[#004241] sm:text-[3.15rem]">
                     <?= htmlspecialchars($t['title']) ?>
                 </h1>
                 <p class="mt-4 max-w-3xl text-base leading-7 text-[#004241]/76 md:text-lg">

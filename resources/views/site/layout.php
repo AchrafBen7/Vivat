@@ -16,7 +16,7 @@ $newsletterEmailError = $sessionErrorMessages['newsletter_email'][0] ?? null;
 $newsletterOldEmail = old('newsletter_email', '');
 ?>
 <!DOCTYPE html>
-<html lang="<?= htmlspecialchars($content_locale) ?>" class="scroll-smooth">
+<html lang="<?= htmlspecialchars($content_locale) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,6 +44,7 @@ $newsletterOldEmail = old('newsletter_email', '');
     <?php if (! empty($og_image)) { ?>
     <meta name="twitter:image" content="<?= htmlspecialchars($og_image) ?>">
     <?php } ?>
+    <?= app(\Illuminate\Foundation\Vite::class)(['resources/js/app.js']) ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -123,16 +124,12 @@ $newsletterOldEmail = old('newsletter_email', '');
             border-radius: 9999px;
             isolation: isolate;
         }
-        .vivat-lang-switch--on-dark {
-            --vivat-lang-active-bg: #0B5A56;
-            --vivat-lang-inactive-text: rgba(255, 255, 255, 0.68);
-        }
         .vivat-lang-switch__indicator {
             position: absolute;
             top: 0.25rem;
             bottom: 0.25rem;
             left: 0.25rem;
-            width: calc(50% 0.375rem);
+            width: calc(50% - 0.375rem);
             border-radius: 9999px;
             background: var(--vivat-lang-active-bg);
             transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.24s ease;
@@ -195,7 +192,7 @@ $newsletterOldEmail = old('newsletter_email', '');
         #header-search-form:hover,
         #header-search-form:focus-within,
         #header-search-form.vivat-header-search--dirty {
-            width: min(calc(100vw 2.5rem), 22rem);
+            width: min(calc(100vw - 2.5rem), 22rem);
             justify-content: flex-start;
             gap: 0.375rem;
             padding-left: 0.375rem;
@@ -284,7 +281,7 @@ $newsletterOldEmail = old('newsletter_email', '');
         }
         #header-search-suggestions {
             position: absolute;
-            top: calc(100% 1px);
+            top: calc(100% - 1px);
             left: 0;
             right: 0;
             display: none;
@@ -321,23 +318,11 @@ $newsletterOldEmail = old('newsletter_email', '');
         .header-search-view-all.is-active {
             background: rgba(255, 255, 255, 0.72);
         }
-        .vivat-lang-toggle {
-            transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease;
-        }
-        .vivat-lang-toggle:hover {
-            transform: translateY(-1px);
-        }
-        .vivat-lang-toggle-pill {
-            transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, color 220ms ease, opacity 220ms ease;
-        }
-        .vivat-lang-toggle:hover .vivat-lang-toggle-pill--active {
-            transform: scale(1.03);
-        }
         @media (min-width: 1024px) {
             #header-search-form:hover,
             #header-search-form:focus-within,
             #header-search-form.vivat-header-search--dirty {
-                width: min(calc(100vw 6rem), 24rem);
+                width: min(calc(100vw - 6rem), 24rem);
             }
         }
     </style>
@@ -523,13 +508,13 @@ $newsletterOldEmail = old('newsletter_email', '');
 
                         if (event.key === 'ArrowDown') {
                             event.preventDefault();
-                            setActiveSuggestion(activeIndex < currentItems.length 1 ? activeIndex + 1 : 0);
+                            setActiveSuggestion(activeIndex < currentItems.length - 1 ? activeIndex + 1 : 0);
                             return;
                         }
 
                         if (event.key === 'ArrowUp') {
                             event.preventDefault();
-                            setActiveSuggestion(activeIndex > 0 ? activeIndex 1 : currentItems.length 1);
+                            setActiveSuggestion(activeIndex > 0 ? activeIndex - 1 : currentItems.length - 1);
                             return;
                         }
 
@@ -597,7 +582,7 @@ $newsletterOldEmail = old('newsletter_email', '');
             <!-- Panneau menu -->
             <div id="mobile-menu-panel"
                  data-open="false"
-                 class="absolute top-full left-0 right-0 z-50 mt-0 origin-top isolate overflow-hidden rounded-[34px] border border-white/10 bg-[#004241] shadow-[0_20px_60px_rgba(0,40,38,0.35)] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 lg:left-auto lg:right-16 lg:mt-0 lg:w-[min(100%,780px)] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100"
+                 class="absolute top-full left-0 right-0 z-50 mt-0 origin-top isolate overflow-hidden rounded-[34px] border border-white/10 bg-[#004241] shadow-[0_20px_60px_rgba(0,40,38,0.35)] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 lg:left-auto lg:right-[63px] lg:mt-0 lg:w-[min(100%,780px)] xl:right-[79px] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100"
                  role="dialog" aria-label="Menu de navigation" aria-modal="true">
                 <div class="p-8 md:p-10 lg:p-12">
 
@@ -956,6 +941,39 @@ $newsletterOldEmail = old('newsletter_email', '');
         window.addEventListener('load', repairBrokenFallbacks);
         document.body.addEventListener('error', onImageError, true);
     })();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof window.Lenis !== 'undefined') {
+                window.lenis = new window.Lenis();
+
+                function raf(time) {
+                    window.lenis.raf(time);
+                    requestAnimationFrame(raf);
+                }
+
+                requestAnimationFrame(raf);
+            }
+
+            if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
+                window.lenis?.on('scroll', window.ScrollTrigger.update);
+            }
+
+            if (typeof window.gsap !== 'undefined') {
+                var header = document.getElementById('site-header');
+                if (header) {
+                    window.gsap.set(header, { autoAlpha: 0, y: -10 });
+                    window.gsap.to(header, {
+                        autoAlpha: 1,
+                        y: 0,
+                        duration: 2.2,
+                        ease: 'power3.out',
+                        delay: 0.05,
+                    });
+                }
+            }
+        });
     </script>
 </body>
 </html>

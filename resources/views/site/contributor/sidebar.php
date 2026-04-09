@@ -3,7 +3,7 @@ $activeTab = $activeTab ?? 'articles';
 $pendingQuotesCount = $pendingQuotesCount ?? 0;
 $t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 ?>
-<aside class="flex w-[260px] shrink-0 flex-col rounded-[24px] border border-[#004241]/10 bg-white shadow-[0_4px_20px_rgba(0,66,65,0.06)]">
+<aside class="flex w-[260px] shrink-0 flex-col self-start sticky top-6 rounded-[24px] border border-[#004241]/10 bg-white shadow-[0_4px_20px_rgba(0,66,65,0.06)]">
     <nav class="flex flex-col p-3 gap-1">
         <a href="<?= url('/contributor/dashboard') ?>" class="flex items-center gap-3 rounded-[16px] h-12 px-4 transition-colors <?= $activeTab === 'articles' ? 'bg-[#004241] text-white' : 'text-[#004241] hover:bg-[#EBF1EF]' ?>">
             <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

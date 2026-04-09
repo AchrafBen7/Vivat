@@ -9,7 +9,7 @@ $isEditing = (bool) ($is_editing ?? false);
 $canBypassPayment = (bool) ($can_bypass_payment ?? false);
 $jsTranslations = [
     'saving_draft' => $t('site.js_saving_draft', 'Sauvegarde du brouillon…'),
-    'draft_saved_at' => $t('site.js_draft_saved_at', 'Brouillon sauvegardé à'),
+    'draft_saved_at' => $t('site.js_draft_saved_at', "Brouillon sauvegardé à"),
     'autosave_failed' => $t('site.js_autosave_failed', 'La sauvegarde automatique a échoué.'),
     'unsaved_changes' => $t('site.js_unsaved_changes', 'Modifications non enregistrées…'),
     'sending_in_progress_title' => $t('site.js_sending_in_progress_title', 'Envoi en vérification...'),
@@ -31,7 +31,7 @@ $jsTranslations = [
     'draft_not_saved' => $t('site.js_draft_not_saved', 'Brouillon non enregistré'),
     'send_impossible' => $t('site.js_send_impossible', 'Envoi impossible'),
     'draft_saved' => $t('site.js_draft_saved', 'Brouillon enregistré'),
-    'draft_saved_text' => $t('site.js_draft_saved_text', 'Votre brouillon a bien été enregistré. Vous pourrez le reprendre plus tard.'),
+    'draft_saved_text' => $t('site.js_draft_saved_text', "Votre brouillon a bien été enregistré. Vous pourrez le reprendre plus tard."),
 ];
 
 $uploadMaxRaw = ini_get('upload_max_filesize') ?: '2M';
@@ -52,30 +52,18 @@ $uploadMaxBytes = (function (string $value): int {
     };
 })($uploadMaxRaw);
 ?>
-<div class="mb-6 rounded-[20px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.04)]">
-    <div class="flex items-start gap-3">
-        <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#004241] text-sm font-semibold text-white">i</span>
-        <div class="min-w-0">
-            <p class="text-sm font-semibold leading-6">
-                <?= htmlspecialchars($t('site.autosave_title', 'Sauvegarde automatique active')) ?>
-            </p>
-            <p class="mt-1 text-sm leading-6 text-[#004241]/78">
-                <?= htmlspecialchars($isEditing
-                    ? $t('site.autosave_edit_explanation', 'Pendant que vous modifiez cet article, votre brouillon est enregistré automatiquement en arrière-plan. Vous pouvez quitter cette page et revenir plus tard sans perdre vos changements récents.')
-                    : $t('site.autosave_create_explanation', 'Pendant que vous écrivez, votre brouillon est enregistré automatiquement en arrière-plan. Vous pouvez reprendre votre article plus tard sans tout recommencer.')) ?>
-            </p>
-            <p id="draft-autosave-status" class="mt-2 text-sm font-medium text-[#004241]/60">
-                <?= htmlspecialchars($t('site.autosave_info', 'Dernière sauvegarde automatique affichée ici pendant votre rédaction.')) ?>
-            </p>
-        </div>
-    </div>
+<div class="mb-5 flex items-center gap-2 rounded-[12px] border border-[#D6E3E1] bg-[#F4F8F7] px-4 py-2.5 text-[#004241]">
+    <svg class="h-4 w-4 shrink-0 text-[#004241]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+    <p id="draft-autosave-status" class="text-sm text-[#004241]/70"><?= htmlspecialchars($t('site.autosave_title', 'Sauvegarde automatique active')) ?></p>
 </div>
-<h1 class="font-medium text-[#004241] text-2xl mb-2"><?= htmlspecialchars($isEditing ? $t('site.edit_article', "Modifier l'article") : $t('site.create_article', 'Nouvel article')) ?></h1>
-<p class="text-[#004241]/80 mb-8">
-    <?= $canBypassPayment
-        ? htmlspecialchars($isEditing ? $t('site.admin_edit_article_text', 'Mettez à jour votre article puis publiez-le directement depuis cet écran.') : $t('site.admin_create_article_text', 'Créez et publiez un article sans étape de paiement.'))
-        : htmlspecialchars($isEditing ? $t('site.edit_submission_text', 'Mettez à jour votre soumission puis renvoyez-la en validation.') : $t('site.create_submission_text', 'Partagez vos idées avec la communauté Vivat')) ?>
-</p>
+<div class="mb-5 flex items-baseline justify-between gap-3">
+    <h1 class="font-semibold text-[#004241] text-xl"><?= htmlspecialchars($isEditing ? $t('site.edit_article', "Modifier l'article") : $t('site.create_article', 'Nouvel article')) ?></h1>
+    <p class="text-sm text-[#004241]/60">
+        <?= $canBypassPayment
+            ? htmlspecialchars($isEditing ? $t('site.admin_edit_article_text', 'Publiez directement depuis cet écran.') : $t('site.admin_create_article_text', 'Sans étape de paiement.'))
+            : htmlspecialchars($isEditing ? $t('site.edit_submission_text', 'Renvoyez en validation.') : $t('site.create_submission_text', 'Partagez vos idées avec Vivat.')) ?>
+    </p>
+</div>
 
 <?php if ($isEditing && !empty($submission['reviewer_notes'])): ?>
 <div class="mb-6 rounded-[24px] border border-[#D6E3E1] bg-[#F4F8F7] px-5 py-4 text-[#004241] shadow-[0_10px_24px_rgba(0,66,65,0.05)]">
@@ -103,8 +91,8 @@ $uploadMaxBytes = (function (string $value): int {
 >
     <?= csrf_field() ?>
 
-    <div class="rounded-[20px] border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center">
-        <label class="cursor-pointer block">
+    <div class="rounded-[16px] border border-dashed border-gray-300 bg-gray-50 px-4 py-3">
+        <label class="cursor-pointer flex items-center gap-4">
             <input
                 type="file"
                 name="cover_image"
@@ -114,104 +102,113 @@ $uploadMaxBytes = (function (string $value): int {
                 data-max-bytes="<?= $uploadMaxBytes ?>"
                 data-max-label="<?= htmlspecialchars($uploadMaxRaw) ?>"
             >
-            <div id="cover-image-empty-state">
-                <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span class="text-[#004241]/70 text-sm"><?= htmlspecialchars($isEditing && !empty($submission['cover_image_url']) ? $t('site.replace_image', "Cliquez pour remplacer l'image") : $t('site.add_image', 'Cliquez pour ajouter une image')) ?></span>
-                <span class="block text-gray-400 text-xs mt-1">JPG, PNG max 5 Mo</span>
-                <span class="block text-gray-400 text-xs mt-1"><?= htmlspecialchars($t('site.current_php_limit', 'Limite PHP locale actuelle')) ?>: <?= htmlspecialchars($uploadMaxRaw) ?></span>
+            <div id="cover-image-empty-state" class="flex items-center gap-3 w-full">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-gray-200">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-sm font-medium text-[#004241]/80"><?= htmlspecialchars($isEditing && !empty($submission['cover_image_url']) ? $t('site.replace_image', "Remplacer l'image de couverture") : $t('site.add_image', "Ajouter une image de couverture")) ?></span>
+                    <span class="block text-xs text-gray-400">JPG, PNG · max <?= htmlspecialchars($uploadMaxRaw) ?></span>
+                    <span class="mt-1 block text-xs text-gray-400"><?= htmlspecialchars($t('site.current_php_limit', 'Limite PHP locale actuelle')) ?>: <?= htmlspecialchars($uploadMaxRaw) ?></span>
+                </div>
             </div>
 
-            <div id="cover-image-preview-wrapper" class="hidden">
-                <img id="cover-image-preview" src="" alt="Aperçu de l'image sélectionnée" class="mx-auto h-40 w-auto max-w-full rounded-2xl object-cover shadow-sm">
-                <p id="cover-image-name" class="mt-4 text-sm font-medium text-[#004241]"></p>
-                <p id="cover-image-size" class="mt-1 text-xs text-[#004241]/70"></p>
+            <div id="cover-image-preview-wrapper" class="hidden items-center gap-4 w-full">
+                <img id="cover-image-preview" src="" alt="Aperçu" class="h-14 w-auto max-w-[80px] rounded-[10px] object-cover shadow-sm shrink-0">
+                <div class="min-w-0">
+                    <p id="cover-image-name" class="text-sm font-medium text-[#004241] truncate"></p>
+                    <p id="cover-image-size" class="text-xs text-[#004241]/60"></p>
+                </div>
             </div>
         </label>
         <?php if (!empty($errors['cover_image'])): ?>
-        <p class="mt-3 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['cover_image']) ? $errors['cover_image'][0] : $errors['cover_image']) ?></p>
+        <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['cover_image']) ? $errors['cover_image'][0] : $errors['cover_image']) ?></p>
         <?php endif; ?>
-        <p id="cover-image-client-error" class="mt-3 hidden text-sm text-red-600"></p>
+        <p id="cover-image-client-error" class="mt-2 hidden text-sm text-red-600"></p>
     </div>
 
+    <!-- Titre -->
     <div>
-        <div class="mb-2 flex items-center justify-between gap-3">
-            <label for="title" class="block font-medium text-[#004241]"><?= htmlspecialchars($t('site.article_title', "Titre de l'article")) ?></label>
-            <span id="title-char-count" class="text-xs font-medium tabular-nums text-[#004241]/50">0/255</span>
+        <div class="mb-1.5 flex items-center justify-between gap-3">
+            <label for="title" class="block text-sm font-medium text-[#004241]"><?= htmlspecialchars($t('site.article_title', "Titre")) ?></label>
+            <span id="title-char-count" class="text-xs tabular-nums text-[#004241]/40">0/255</span>
         </div>
         <input type="text" name="title" id="title" value="<?= htmlspecialchars($old['title'] ?? '') ?>" placeholder="<?= htmlspecialchars($t('site.article_title', "Titre de l'article")) ?>" required maxlength="255"
             data-char-max="255" data-char-target="title-char-count"
-            class="w-full max-w-2xl h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 focus:border-[#004241]">
+            class="w-full h-10 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] text-sm placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 focus:border-[#004241]">
         <?php if (!empty($errors['title'])): ?>
-        <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['title']) ? $errors['title'][0] : $errors['title']) ?></p>
+        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['title']) ? $errors['title'][0] : $errors['title']) ?></p>
         <?php endif; ?>
     </div>
 
-    <div class="flex gap-4 flex-wrap">
+    <!-- Métadonnées groupées -->
+    <div class="rounded-[14px] border border-[#DED8CE99] bg-[#F8F6F2] px-4 py-3 flex flex-wrap gap-x-6 gap-y-3">
         <div>
-            <label for="category_id" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.category', 'Catégorie')) ?></label>
-            <select name="category_id" id="category_id" class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
+            <label for="category_id" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.category', 'Catégorie')) ?></label>
+            <select name="category_id" id="category_id" class="h-8 pl-3 pr-3 rounded-lg border border-[#DED8CE99] bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
                 <option value=""><?= htmlspecialchars($t('site.choose', 'Choisir...')) ?></option>
                 <?php foreach ($categories as $cat): ?>
                 <option value="<?= htmlspecialchars($cat['id']) ?>" <?= ($old['category_id'] ?? '') === $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
                 <?php endforeach; ?>
             </select>
             <?php if (!empty($errors['category_id'])): ?>
-            <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['category_id']) ? $errors['category_id'][0] : $errors['category_id']) ?></p>
+            <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['category_id']) ? $errors['category_id'][0] : $errors['category_id']) ?></p>
             <?php endif; ?>
         </div>
         <div>
-            <label for="language" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.language', 'Langue')) ?></label>
-            <select name="language" id="language" class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
+            <label for="language" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.language', 'Langue')) ?></label>
+            <select name="language" id="language" class="h-8 pl-3 pr-3 rounded-lg border border-[#DED8CE99] bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
                 <?php $selectedLanguage = $old['language'] ?? 'fr'; ?>
                 <option value="fr" <?= $selectedLanguage === 'fr' ? 'selected' : '' ?>>Français</option>
                 <option value="nl" <?= $selectedLanguage === 'nl' ? 'selected' : '' ?>>Néerlandais</option>
             </select>
             <?php if (!empty($errors['language'])): ?>
-            <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['language']) ? $errors['language'][0] : $errors['language']) ?></p>
+            <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['language']) ? $errors['language'][0] : $errors['language']) ?></p>
             <?php endif; ?>
         </div>
         <div>
-            <label for="reading_time" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.reading_time', 'Temps')) ?></label>
-            <input type="number" name="reading_time" id="reading_time" value="<?= htmlspecialchars($old['reading_time'] ?? '5') ?>" placeholder="5 min" min="1" max="120"
-                class="h-12 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-24">
+            <label for="reading_time" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.reading_time', 'Lecture (min)')) ?></label>
+            <input type="number" name="reading_time" id="reading_time" value="<?= htmlspecialchars($old['reading_time'] ?? '5') ?>" placeholder="5" min="1" max="120"
+                class="h-8 pl-3 pr-3 rounded-lg border border-[#DED8CE99] bg-white text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-16">
             <?php if (!empty($errors['reading_time'])): ?>
-            <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['reading_time']) ? $errors['reading_time'][0] : $errors['reading_time']) ?></p>
+            <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['reading_time']) ? $errors['reading_time'][0] : $errors['reading_time']) ?></p>
             <?php endif; ?>
         </div>
     </div>
 
+    <!-- Extrait -->
     <div>
-        <div class="mb-2 flex items-center justify-between gap-3">
-            <label for="excerpt" class="block font-medium text-[#004241]"><?= htmlspecialchars($t('site.excerpt', 'Extrait / Chapô')) ?></label>
-            <span id="excerpt-char-count" class="text-xs font-medium tabular-nums text-[#004241]/50">0/500</span>
+        <div class="mb-1.5 flex items-center justify-between gap-3">
+            <label for="excerpt" class="block text-sm font-medium text-[#004241]"><?= htmlspecialchars($t('site.excerpt', 'Extrait')) ?></label>
+            <span id="excerpt-char-count" class="text-xs tabular-nums text-[#004241]/40">0/500</span>
         </div>
-        <textarea name="excerpt" id="excerpt" rows="3" placeholder="<?= htmlspecialchars($t('site.start_writing', 'Commencez à écrire votre article ici...')) ?>" maxlength="500"
+        <textarea name="excerpt" id="excerpt" rows="2" placeholder="Résumé court affiché dans les cartes d'articles…" maxlength="500"
             data-char-max="500" data-char-target="excerpt-char-count"
-            class="w-full max-w-2xl pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
+            class="w-full pl-4 pr-4 py-2.5 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
         <?php if (!empty($errors['excerpt'])): ?>
-        <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['excerpt']) ? $errors['excerpt'][0] : $errors['excerpt']) ?></p>
+        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['excerpt']) ? $errors['excerpt'][0] : $errors['excerpt']) ?></p>
         <?php endif; ?>
     </div>
 
+    <!-- Contenu -->
     <div>
-        <label for="content" class="block font-medium text-[#004241] mb-2"><?= htmlspecialchars($t('site.content', 'Contenu')) ?></label>
-        <textarea name="content" id="content" rows="12" placeholder="<?= htmlspecialchars($t('site.start_writing', 'Commencez à écrire votre article ici...')) ?>" required
-            class="w-full max-w-2xl pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['content'] ?? '') ?></textarea>
+        <label for="content" class="block text-sm font-medium text-[#004241] mb-1.5"><?= htmlspecialchars($t('site.content', 'Contenu')) ?></label>
+        <textarea name="content" id="content" rows="14" placeholder="<?= htmlspecialchars($t('site.start_writing', 'Commencez à écrire votre article ici...')) ?>" required
+            class="w-full pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['content'] ?? '') ?></textarea>
         <?php if (!empty($errors['content'])): ?>
-        <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['content']) ? $errors['content'][0] : $errors['content']) ?></p>
+        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['content']) ? $errors['content'][0] : $errors['content']) ?></p>
         <?php endif; ?>
     </div>
 
-    <div class="flex items-center justify-end pt-1">
-        <div class="flex gap-3">
-            <button type="submit" name="status" value="draft" class="h-12 px-6 rounded-full border border-gray-300 bg-white text-[#004241] font-medium hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                <?= htmlspecialchars($isEditing ? $t('site.save_draft', 'Enregistrer') : $t('site.draft_button', 'Brouillon')) ?>
-            </button>
-            <button type="submit" name="status" value="submitted" class="h-12 px-6 rounded-full bg-[#004241] text-white font-semibold hover:bg-[#003535] transition inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                <?= htmlspecialchars($canBypassPayment ? $t('site.publish_now', 'Publier maintenant') : ($isEditing ? $t('site.resubmit', 'Renvoyer en validation') : $t('site.publish', 'Publier'))) ?>
-            </button>
-        </div>
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-3 pt-1">
+        <button type="submit" name="status" value="draft" class="h-9 px-5 rounded-full border border-gray-300 bg-white text-sm text-[#004241] font-medium hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <?= htmlspecialchars($isEditing ? $t('site.save_draft', 'Enregistrer') : $t('site.draft_button', 'Brouillon')) ?>
+        </button>
+        <button type="submit" name="status" value="submitted" class="h-9 px-5 rounded-full bg-[#004241] text-sm text-white font-semibold hover:bg-[#003535] transition inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            <?= htmlspecialchars($canBypassPayment ? $t('site.publish_now', 'Publier') : ($isEditing ? $t('site.resubmit', 'Renvoyer') : $t('site.publish', 'Publier'))) ?>
+        </button>
     </div>
 </form>
 
@@ -243,7 +240,6 @@ $uploadMaxBytes = (function (string $value): int {
         </div>
     </div>
 </div>
-
 
 <script>
 (() => {

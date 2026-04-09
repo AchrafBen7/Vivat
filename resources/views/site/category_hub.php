@@ -125,15 +125,6 @@ $restArticles = array_values($byId);
         background: #003130 !important;
     }
 
-    .category-filter-chip--selected {
-        padding-right: 18px !important;
-        transition: padding-right 200ms ease;
-    }
-
-    .category-filter-chip--selected:hover {
-        padding-right: 42px !important;
-    }
-
 </style>
 <div class="flex flex-col w-full">
     <!-- 1) Marge 24px sous la navbar déjà gérée par le main -->
@@ -146,15 +137,15 @@ $restArticles = array_values($byId);
     </div>
 
     <!-- 3) Hero rubrique : même logique que la home (image/vidéo catégorie), sinon Pexels par slug. -->
-    <div class="rounded-[30px] overflow-hidden relative w-full max-w-[1280px] mx-auto h-[443px] mb-6">
+    <div class="rounded-[30px] overflow-hidden relative w-full max-w-[1280px] mx-auto h-[360px] sm:h-[390px] lg:h-[400px] mb-6">
         <?php
-        $heroFallback = vivat_category_fallback_image($category_slug, 1280, 443, $category_slug, 'hub-hero');
-        $heroMedia = $category_image_url ?? null;
-        $heroIsVideo = is_string($heroMedia) && $heroMedia !== '' && preg_match('/\.(mp4|webm|mov)(\?|$)/i', $heroMedia);
-        $heroPoster = ($heroIsVideo && $heroMedia)
-            ? (vivat_cloudinary_video_poster_url($heroMedia) ?? vivat_category_public_poster_url($category_slug))
-            : null;
-        $hasHeroImage = is_string($heroMedia) && $heroMedia !== '' && ! $heroIsVideo;
+        $heroFallback = vivat_category_fallback_image($category_slug, 1280, 400, $category_slug, 'hub-hero');
+$heroMedia = $category_image_url ?? null;
+$heroIsVideo = is_string($heroMedia) && $heroMedia !== '' && preg_match('/\.(mp4|webm|mov)(\?|$)/i', $heroMedia);
+$heroPoster = ($heroIsVideo && $heroMedia)
+    ? (vivat_cloudinary_video_poster_url($heroMedia) ?? vivat_category_public_poster_url($category_slug))
+    : null;
+$hasHeroImage = is_string($heroMedia) && $heroMedia !== '' && ! $heroIsVideo;
 ?>
         <?php if ($heroIsVideo && $heroMedia) { ?>
         <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline autoplay preload="metadata"<?= $heroPoster ? ' poster="'.htmlspecialchars($heroPoster).'"' : '' ?>>
@@ -166,7 +157,7 @@ $restArticles = array_values($byId);
         <img src="<?= htmlspecialchars($heroFallback) ?>" data-fallback-url="<?= htmlspecialchars($heroFallback) ?>" alt="<?= htmlspecialchars($category_name) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
         <?php } ?>
         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-[1]" aria-hidden="true"></div>
-        <a href="/" class="absolute left-8 top-8 z-20 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white" aria-label="Retour">
+        <a href="/#categories-section" class="absolute left-8 top-8 z-20 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white" aria-label="Retour">
             <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             Retour
         </a>
@@ -181,16 +172,16 @@ $restArticles = array_values($byId);
         <!-- Filtres dans le carré: left 32px, bottom, marge 11px entre les filtres -->
         <nav id="category-hub-filters" class="absolute bottom-8 left-8 z-20 flex flex-wrap items-center gap-[11px]" aria-label="Filtrer par sous-rubrique">
             <?php $allSelected = $current_sub_category_slugs === []; ?>
-            <a href="/categories/<?= htmlspecialchars($category_slug) ?>" class="group inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0 <?= $allSelected ? 'relative category-filter-chip--selected' : '' ?>" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $allSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
+            <a href="/categories/<?= htmlspecialchars($category_slug) ?>" class="inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $allSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
                 Tous
-                <?php if ($allSelected) { ?><span class="pointer-events-none absolute right-[18px] top-1/2 inline-flex h-4 w-4 -translate-y-1/2 flex-shrink-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></span><?php } ?>
+                <?php if ($allSelected) { ?><span class="pointer-events-none ml-1 inline-flex h-4 w-4 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></span><?php } ?>
             </a>
             <?php foreach ($sub_categories as $sub) { ?>
             <?php $subSlug = (string) ($sub['slug'] ?? ''); ?>
             <?php $isSelected = in_array($subSlug, $current_sub_category_slugs, true); ?>
-            <a href="<?= htmlspecialchars($buildSubCategoryUrl($subSlug)) ?>" class="group inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0 <?= $isSelected ? 'relative category-filter-chip--selected' : '' ?>" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $isSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
+            <a href="<?= htmlspecialchars($buildSubCategoryUrl($subSlug)) ?>" class="inline-flex items-center justify-center gap-1 rounded-full font-normal transition box-border shrink-0" style="min-width: 66px; height: 42px; padding: 8px 18px; font-family: Figtree, sans-serif; font-size: 16px; line-height: 100%; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); <?= $isSelected ? 'background: #EBF1EF; color: #004241; border: 1px solid rgba(255,255,255,0.30);' : 'background: rgba(255,255,255,0.44); color: #fff; border: 1px solid rgba(255,255,255,0.12);' ?>">
                 <?= htmlspecialchars(vivat_filter_label_case((string) ($sub['name'] ?? ''))) ?>
-                <?php if ($isSelected) { ?><span class="pointer-events-none absolute right-[18px] top-1/2 inline-flex h-4 w-4 -translate-y-1/2 flex-shrink-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></span><?php } ?>
+                <?php if ($isSelected) { ?><span class="pointer-events-none ml-1 inline-flex h-4 w-4 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></span><?php } ?>
             </a>
             <?php } ?>
         </nav>
@@ -423,9 +414,9 @@ $hasSecondBlockCards = (bool) array_filter([
 
             <?php if ($hotNewsArt) { ?>
             <?php $hotCatSlug = $hotNewsArt['category']['slug'] ?? null;
-            $hotArtId = $hotNewsArt['id'] ?? $hotNewsArt['slug'] ?? null;
-            $hotFallback = vivat_category_fallback_image($hotCatSlug, 626, 240, $hotArtId, 'hub-rest-hot');
-            $hotNewsImg = ! empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : $hotFallback; ?>
+                $hotArtId = $hotNewsArt['id'] ?? $hotNewsArt['slug'] ?? null;
+                $hotFallback = vivat_category_fallback_image($hotCatSlug, 626, 240, $hotArtId, 'hub-rest-hot');
+                $hotNewsImg = ! empty($hotNewsArt['cover_image_url']) ? $hotNewsArt['cover_image_url'] : $hotFallback; ?>
             <a href="/articles/<?= htmlspecialchars($hotNewsArt['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
                 <img src="<?= htmlspecialchars($hotNewsImg) ?>" data-fallback-url="<?= htmlspecialchars($hotFallback) ?>" alt="<?= htmlspecialchars($hotNewsArt['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                 <div class="vivat-card-overlay flex justify-end items-end">
@@ -459,9 +450,9 @@ $hasSecondBlockCards = (bool) array_filter([
 
                 <?php if ($artLeft2) { ?>
                 <?php $left2CatSlug = $artLeft2['category']['slug'] ?? null;
-            $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null;
-            $left2Fallback = vivat_category_fallback_image($left2CatSlug, 302, 419, $left2ArtId, 'hub-rest-left2');
-            $artLeft2Img = ! empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
+                    $left2ArtId = $artLeft2['id'] ?? $artLeft2['slug'] ?? null;
+                    $left2Fallback = vivat_category_fallback_image($left2CatSlug, 302, 419, $left2ArtId, 'hub-rest-left2');
+                    $artLeft2Img = ! empty($artLeft2['cover_image_url']) ? $artLeft2['cover_image_url'] : $left2Fallback; ?>
                 <a href="/articles/<?= htmlspecialchars($artLeft2['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                     <img src="<?= htmlspecialchars($artLeft2Img) ?>" data-fallback-url="<?= htmlspecialchars($left2Fallback) ?>" alt="<?= htmlspecialchars($artLeft2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
@@ -499,8 +490,8 @@ $hasSecondBlockCards = (bool) array_filter([
             <div class="grid grid-cols-1 sm:grid-cols-2 min-w-0" style="gap: 24px;">
                 <?php if ($artRight) { ?>
                 <?php $rightCatSlug = $artRight['category']['slug'] ?? null;
-            $rightFallback = vivat_category_fallback_image($rightCatSlug, 302, 419, $artRight['id'] ?? $artRight['slug'] ?? null, 'hub-rest-right');
-            $artRightImg = ! empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
+                    $rightFallback = vivat_category_fallback_image($rightCatSlug, 302, 419, $artRight['id'] ?? $artRight['slug'] ?? null, 'hub-rest-right');
+                    $artRightImg = ! empty($artRight['cover_image_url']) ? $artRight['cover_image_url'] : $rightFallback; ?>
                 <a href="/articles/<?= htmlspecialchars($artRight['slug']) ?>" class="vivat-reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
                     <img src="<?= htmlspecialchars($artRightImg) ?>" data-fallback-url="<?= htmlspecialchars($rightFallback) ?>" alt="<?= htmlspecialchars($artRight['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>

@@ -72,11 +72,11 @@ $faqIntro = $locale === 'nl'
             <h2 class="font-medium text-[#004241]" style="font-size: 32px; line-height: 1.05;"><?= htmlspecialchars($faqIntro['title']) ?></h2>
             <p class="text-[#004241]/75" style="font-size: 17px; line-height: 1.45;"><?= htmlspecialchars($faqIntro['text']) ?></p>
             <div class="grid grid-cols-1 gap-3">
-                <a href="/contact" class="inline-flex items-center justify-between rounded-[24px] bg-[#F6F8F7] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#edf3f0]">
+                <a href="/contact" class="inline-flex items-center justify-between rounded-[24px] bg-[#FFF0B6] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#FBE9A3]">
                     <span class="font-medium"><?= htmlspecialchars($faqIntro['contact']) ?></span>
                     <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
-                <a href="/search" class="inline-flex items-center justify-between rounded-[24px] bg-[#F6F8F7] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#edf3f0]">
+                <a href="/search" class="inline-flex items-center justify-between rounded-[24px] bg-[#FFF0B6] px-5 py-4 text-[#004241] no-underline transition hover:bg-[#FBE9A3]">
                     <span class="font-medium"><?= htmlspecialchars($faqIntro['search']) ?></span>
                     <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
@@ -84,24 +84,106 @@ $faqIntro = $locale === 'nl'
         </div>
 
         <div class="flex flex-col lg:col-span-8" style="gap: 24px;">
-            <?php foreach ($faqGroups as $group): ?>
+            <?php foreach ($faqGroups as $group) { ?>
             <section class="rounded-[30px] bg-[#EEF4F1] p-6 md:p-7" style="gap: 18px;">
                 <div class="mb-5 flex flex-col" style="gap: 10px;">
                     <span class="inline-flex w-fit items-center justify-center rounded-full bg-white px-[16px] py-[8px] text-sm font-medium text-[#004241]"><?= htmlspecialchars($group['title']) ?></span>
                 </div>
                 <div class="grid grid-cols-1 gap-4">
-                    <?php foreach ($group['items'] as $item): ?>
-                    <details class="group rounded-[24px] bg-white px-5 py-4 text-[#004241]" style="box-shadow: 0 10px 28px rgba(0, 66, 65, 0.06);">
-                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium" style="font-size: 20px;">
+                    <?php foreach ($group['items'] as $item) { ?>
+                    <div class="rounded-[24px] bg-white px-5 py-4 text-[#004241]" style="box-shadow: 0 10px 28px rgba(0, 66, 65, 0.06);" data-faq-item>
+                        <button type="button" class="flex w-full cursor-pointer items-center justify-between gap-4 text-left text-[18px] font-medium md:text-[20px]" aria-expanded="false" data-faq-trigger>
                             <span><?= htmlspecialchars($item['question']) ?></span>
-                            <span class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#EBF1EF] text-[#004241] transition group-open:rotate-45">+</span>
-                        </summary>
-                        <p class="pt-4 text-[#004241]/78" style="font-size: 17px; line-height: 1.55;"><?= htmlspecialchars($item['answer']) ?></p>
-                    </details>
-                    <?php endforeach; ?>
+                            <span class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#EBF1EF] text-[#004241] transition duration-300 ease-out data-[state=open]:rotate-45" data-faq-icon data-state="closed">+</span>
+                        </button>
+                        <div class="h-0 overflow-hidden opacity-0 transition-[height,opacity] duration-300 ease-out" data-faq-panel>
+                            <div data-faq-inner>
+                                <p class="pt-4 text-[#004241]/78" style="font-size: 17px; line-height: 1.55;"><?= htmlspecialchars($item['answer']) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
                 </div>
             </section>
-            <?php endforeach; ?>
+            <?php } ?>
         </div>
     </section>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const faqItems = document.querySelectorAll('[data-faq-item]');
+
+        const openPanel = function (item) {
+            const trigger = item.querySelector('[data-faq-trigger]');
+            const panel = item.querySelector('[data-faq-panel]');
+            const icon = item.querySelector('[data-faq-icon]');
+
+            if (!trigger || !panel || !icon) {
+                return;
+            }
+
+            panel.style.height = '0px';
+            panel.classList.remove('opacity-0');
+            panel.classList.add('opacity-100');
+
+            requestAnimationFrame(function () {
+                panel.style.height = panel.scrollHeight + 'px';
+            });
+
+            trigger.setAttribute('aria-expanded', 'true');
+            icon.dataset.state = 'open';
+        };
+
+        const closePanel = function (item) {
+            const trigger = item.querySelector('[data-faq-trigger]');
+            const panel = item.querySelector('[data-faq-panel]');
+            const icon = item.querySelector('[data-faq-icon]');
+
+            if (!trigger || !panel || !icon) {
+                return;
+            }
+
+            panel.style.height = panel.scrollHeight + 'px';
+
+            requestAnimationFrame(function () {
+                panel.style.height = '0px';
+                panel.classList.remove('opacity-100');
+                panel.classList.add('opacity-0');
+            });
+
+            trigger.setAttribute('aria-expanded', 'false');
+            icon.dataset.state = 'closed';
+        };
+
+        faqItems.forEach(function (item) {
+            const trigger = item.querySelector('[data-faq-trigger]');
+            const panel = item.querySelector('[data-faq-panel]');
+
+            if (!trigger || !panel) {
+                return;
+            }
+
+            trigger.addEventListener('click', function () {
+                const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+
+                if (isOpen) {
+                    closePanel(item);
+
+                    return;
+                }
+
+                openPanel(item);
+            });
+
+            panel.addEventListener('transitionend', function (event) {
+                if (event.propertyName !== 'height') {
+                    return;
+                }
+
+                if (trigger.getAttribute('aria-expanded') === 'true') {
+                    panel.style.height = 'auto';
+                }
+            });
+        });
+    });
+</script>

@@ -81,8 +81,8 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
     </div>
 
     <div class="grid grid-cols-1 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-stretch">
-        <!-- Colonne gauche : flou très léger sur l'image + voile sombre -->
-        <section class="relative flex min-h-[420px] flex-col justify-start gap-4 overflow-hidden rounded-[30px] bg-neutral-900 p-8 text-white md:p-10 lg:col-span-5 lg:min-h-[524px]">
+        <!-- Colonne gauche : flou très léger sur l’image + voile sombre -->
+        <section data-about-hero class="relative flex min-h-[420px] flex-col justify-start gap-4 overflow-hidden rounded-[30px] bg-neutral-900 p-8 text-white md:p-10 lg:col-span-5 lg:min-h-[524px]">
             <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[30px]" aria-hidden="true">
                 <img
                     src="<?= htmlspecialchars($aboutHeroImageUrl) ?>"
@@ -112,19 +112,19 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
 
         <!-- Colonne droite : 3 bandes égales comme sur la home (grid-rows-3 + h-full) -->
         <div class="mt-6 flex min-h-0 flex-col gap-6 lg:col-span-7 lg:mt-0 lg:grid lg:min-h-[524px] lg:grid-rows-3 lg:gap-6 lg:self-stretch">
-            <div class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardGreenSurface ?>">
+            <div data-about-card class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardGreenSurface ?>">
                 <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($t['mission']) ?></span>
                 <h2 class="<?= $heroColorCardTitleCompact ?> text-white"><?= htmlspecialchars($t['mission_title']) ?></h2>
                 <p class="<?= $heroColorCardExcerptOnDark ?>"><?= htmlspecialchars($t['mission_text']) ?></p>
             </div>
 
-            <div class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardYellowSurface ?>">
+            <div data-about-card class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardYellowSurface ?>">
                 <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($t['languages']) ?></span>
                 <h2 class="<?= $heroColorCardTitleCompact ?> text-[#004241]"><?= htmlspecialchars($t['languages_title']) ?></h2>
                 <p class="<?= $heroColorCardExcerptOnLight ?>"><?= htmlspecialchars($t['languages_text']) ?></p>
             </div>
 
-            <div class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardWhiteSurface ?>">
+            <div data-about-card class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardWhiteSurface ?>">
                 <span class="<?= $tagClass ?> <?= $tagOnWhiteCard ?>"><?= htmlspecialchars($t['onsite']) ?></span>
                 <h2 class="<?= $heroColorCardTitleCompact ?> text-[#004241]"><?= htmlspecialchars($t['onsite_title']) ?></h2>
                 <p class="<?= $heroColorCardExcerptOnLight ?>"><?= htmlspecialchars($t['onsite_text']) ?></p>
@@ -132,7 +132,7 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
         </div>
 
         <!-- Bandeau pleine largeur : respiration type bandeau CTA home -->
-        <section class="flex flex-col gap-8 overflow-hidden rounded-[30px] bg-white p-8 shadow-[0_18px_48px_rgba(0,66,65,0.08)] md:flex-row md:items-center md:justify-between md:gap-12 md:p-10 lg:col-span-12">
+        <section data-about-cta class="flex flex-col gap-8 overflow-hidden rounded-[30px] bg-white p-8 shadow-[0_18px_48px_rgba(0,66,65,0.08)] md:flex-row md:items-center md:justify-between md:gap-12 md:p-10 lg:col-span-12">
             <div class="min-w-0 flex-1">
                 <h2 class="m-0 font-semibold leading-tight text-[#004241] text-2xl md:text-3xl"><?= htmlspecialchars($t['continue']) ?></h2>
                 <p class="mt-3 max-w-[48ch] text-base leading-relaxed text-[#004241]/85 md:text-[17px]"><?= htmlspecialchars($t['continue_text']) ?></p>
@@ -157,3 +157,51 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
         </div>
     </div>
 </div>
+
+<script>
+window.addEventListener('load', function () {
+    if (typeof gsap === 'undefined') return;
+
+    const hero  = document.querySelector('[data-about-hero]');
+    const cards = document.querySelectorAll('[data-about-card]');
+    const cta   = document.querySelector('[data-about-cta]');
+
+    // État initial — tout invisible
+    gsap.set(hero,  { opacity: 0, y: 40 });
+    gsap.set(cards, { opacity: 0, y: 50 });
+    gsap.set(cta,   { opacity: 0, y: 36 });
+
+    // Hero : slide up au chargement
+    gsap.to(hero, {
+        opacity: 1, y: 0,
+        duration: 1.4,
+        ease: 'power3.out',
+        delay: 0.1,
+    });
+
+    // Cards : stagger après le hero
+    gsap.to(cards, {
+        opacity: 1, y: 0,
+        duration: 1.2,
+        ease: 'power3.out',
+        stagger: 0.2,
+        delay: 0.35,
+    });
+
+    // CTA banner : scroll trigger
+    if (typeof ScrollTrigger !== 'undefined') {
+        gsap.to(cta, {
+            opacity: 1, y: 0,
+            duration: 1.2,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: cta,
+                start: 'top 88%',
+                toggleActions: 'play none none none',
+            },
+        });
+    } else {
+        gsap.to(cta, { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out', delay: 0.8 });
+    }
+});
+</script>
