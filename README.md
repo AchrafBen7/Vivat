@@ -58,20 +58,7 @@ Exemples disponibles :
 
 - [`.env.example`](./.env.example)
 
-Points importants en production :
-
-- `APP_ENV=production`
-- `APP_DEBUG=false`
-- `QUEUE_CONNECTION=redis`
-- `SESSION_DRIVER=redis`
-- `CACHE_STORE=redis`
-- `GOOGLE_REDIRECT_URI` doit pointer vers le domaine prod
-- `STRIPE_WEBHOOK_SECRET` doit correspondre au webhook prod
-- le mail actuel est configuré en **Resend via SMTP**
-
 ## Installation locale
-
-### Option 1 : Laravel + services installés en local
 
 ```bash
 composer install
@@ -84,28 +71,6 @@ php artisan serve
 ```
 
 Il faut aussi que MySQL et Redis tournent.
-
-### Option 2 : Docker
-
-Le projet contient aussi un environnement Docker local :
-
-```bash
-docker compose up -d
-docker compose exec app composer install
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate
-npm ci
-npm run build
-```
-
-Commandes utiles avec Docker :
-
-```bash
-docker compose exec app php artisan cache:clear
-docker compose exec app php artisan config:clear
-docker compose exec app php artisan view:clear
-docker compose exec app php artisan migrate
-```
 
 ## Commandes utiles
 
@@ -166,30 +131,21 @@ php artisan horizon:terminate || true
 
 ### Tâches planifiées actuellement
 
-- fetch RSS : toutes les 6 heures
-- enrichissement IA : quotidien
-- génération quotidienne d'article : quotidien
+- fetch RSS
+- enrichissement IA
+- génération d'article
 - `horizon:snapshot` : toutes les 10 minutes
-- expiration des quotes : toutes les heures
-- digest newsletter : hebdomadaire
-- health-check pipeline : toutes les 2 heures
+- expiration des quotes
+- newsletter
+- health-check pipeline
 
 ## Paiements Stripe
-
-Le workflow paiement repose sur :
-
-- Checkout Stripe
-- webhook Stripe
-- remboursement admin
-- dépublication si remboursement d'un article publié
 
 Webhook à configurer :
 
 ```text
 /api/stripe/webhook
 ```
-
-En production, le webhook est obligatoire pour fiabiliser la réconciliation des paiements.
 
 ## Déploiement Ploi
 
@@ -225,24 +181,6 @@ php artisan horizon:terminate || true
 - processus Horizon
 - webhook Stripe
 
-## Données et base locale
-
-Après un `git pull`, pense à lancer :
-
-```bash
-php artisan migrate
-```
-
-Si la base locale ne contient pas assez de données, le rendu peut être différent d'une autre machine.
-
-Pour reconstruire un jeu de données local :
-
-```bash
-php artisan db:seed
-```
-
-Pour cloner exactement une base d'un collègue, il faut partager un dump SQL.
-
 ## Santé applicative
 
 Route health Laravel :
@@ -261,10 +199,3 @@ Route health Laravel :
 - [`config/services.php`](./config/services.php)
 - [`routes/web.php`](./routes/web.php)
 - [`routes/api.php`](./routes/api.php)
-
-## Notes
-
-- `QUEUE_CONNECTION=redis` est requis pour Horizon.
-- Le projet utilise actuellement **Resend via SMTP**, pas uniquement un mailer SMTP générique.
-- Le provider d'image actuellement choisi est `pexels`.
-- Les migrations sont nécessaires au déploiement : ne pas supprimer `database/migrations`.
