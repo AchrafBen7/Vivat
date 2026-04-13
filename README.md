@@ -1,13 +1,5 @@
 # Vivat
 
-Vivat est une plateforme éditoriale Laravel avec :
-
-- site public orienté contenu
-- espace admin Filament
-- espace rédacteur / soumissions
-- workflow de review, proposition de prix, paiement Stripe, publication
-- pipeline de génération et d'enrichissement IA
-
 ## Repo
 
 - HTTPS : `https://github.com/AchrafBen7/Vivat.git`
