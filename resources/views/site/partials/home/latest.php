@@ -92,19 +92,19 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
     <section class="mt-16 hidden w-full min-w-0 grid-cols-8 gap-6 md:grid lg:hidden">
         <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]">Dernières actualités</h2>
         <?php if ($topFeatureEditorialArt) { ?>
-        <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative col-span-8 flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 <?= $cardYellowSurface ?>">
-            <span class="<?= $cardArrowOnYellow ?>">
+        <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative col-span-8 flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 <?= $cardGreenSurface ?>">
+            <span class="<?= $cardArrowOnGreen ?>">
                 <svg class="h-[26px] w-[26px] flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </span>
             <div class="<?= $latestCardContentMotion ?> max-w-[760px]">
                 <?php if (! empty($topFeatureEditorialArt['category'])) { ?>
-                <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($topFeatureEditorialArt['category']['name']) ?></span>
+                <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($topFeatureEditorialArt['category']['name']) ?></span>
                 <?php } ?>
-                <h3 class="<?= $latestColorCardTitleLarge ?> text-[#004241]"><?= htmlspecialchars($topFeatureEditorialArt['title'] ?? '') ?></h3>
+                <h3 class="<?= $latestColorCardTitleLarge ?> text-white"><?= htmlspecialchars($topFeatureEditorialArt['title'] ?? '') ?></h3>
                 <?php if (! empty($topFeatureEditorialArt['excerpt'])) { ?>
-                <p class="<?= $latestCardExcerptRevealOnLight ?> text-[#004241]/75"><?= htmlspecialchars($topFeatureEditorialArt['excerpt']) ?></p>
+                <p class="<?= $latestCardExcerptRevealOnDark ?> text-white/75"><?= htmlspecialchars($topFeatureEditorialArt['excerpt']) ?></p>
                 <?php } ?>
-                <p class="<?= $latestColorCardMeta ?> text-[#004241]/70"><?= htmlspecialchars($topFeatureEditorialArt['published_at'] ?? '') ?> • <?= (int) ($topFeatureEditorialArt['reading_time'] ?? 0) ?> min</p>
+                <p class="<?= $latestColorCardMeta ?> text-white/70"><?= htmlspecialchars($topFeatureEditorialArt['published_at'] ?? '') ?> • <?= (int) ($topFeatureEditorialArt['reading_time'] ?? 0) ?> min</p>
                         </div>
         </a>
         <?php } ?>
@@ -172,19 +172,19 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
         <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
         <div class="grid min-w-0 w-full grid-cols-1 gap-[18px] lg:col-span-12 lg:grid-cols-12 lg:gap-6">
             <?php if ($topFeatureEditorialArt) { ?>
-            <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardYellowSurface ?>">
-                <span class="<?= $cardArrowOnYellow ?>">
+            <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardGreenSurface ?>">
+                <span class="<?= $cardArrowOnGreen ?>">
                     <svg class="h-[26px] w-[26px] flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </span>
                 <div class="<?= $latestCardContentMotion ?> max-w-[760px]">
                     <?php if (! empty($topFeatureEditorialArt['category'])) { ?>
-                    <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($topFeatureEditorialArt['category']['name']) ?></span>
+                    <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($topFeatureEditorialArt['category']['name']) ?></span>
                     <?php } ?>
-                    <h3 class="<?= $latestColorCardTitleLarge ?> text-[#004241]"><?= htmlspecialchars($topFeatureEditorialArt['title'] ?? '') ?></h3>
+                    <h3 class="<?= $latestColorCardTitleLarge ?> text-white"><?= htmlspecialchars($topFeatureEditorialArt['title'] ?? '') ?></h3>
                     <?php if (! empty($topFeatureEditorialArt['excerpt'])) { ?>
-                    <p class="<?= $latestCardExcerptRevealOnLight ?> text-[#004241]/75"><?= htmlspecialchars($topFeatureEditorialArt['excerpt']) ?></p>
+                    <p class="<?= $latestCardExcerptRevealOnDark ?> text-white/75"><?= htmlspecialchars($topFeatureEditorialArt['excerpt']) ?></p>
                     <?php } ?>
-                    <p class="<?= $latestColorCardMeta ?> text-[#004241]/70"><?= htmlspecialchars($topFeatureEditorialArt['published_at'] ?? '') ?> • <?= (int) ($topFeatureEditorialArt['reading_time'] ?? 0) ?> min</p>
+                    <p class="<?= $latestColorCardMeta ?> text-white/70"><?= htmlspecialchars($topFeatureEditorialArt['published_at'] ?? '') ?> • <?= (int) ($topFeatureEditorialArt['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </a>
             <?php } ?>

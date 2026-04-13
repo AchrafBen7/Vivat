@@ -30,6 +30,9 @@
                 var input = form && form.querySelector('input[name="q"]');
                 var clearBtn = document.getElementById('header-search-clear');
                 var suggestionBox = document.getElementById('header-search-suggestions');
+                var emptySuggestionsLabel = <?= json_encode(__('site.search_no_suggestion')) ?>;
+                var viewMoreArticlesLabel = <?= json_encode(__('site.search_view_more_articles')) ?>;
+                var viewOtherArticlesLabel = <?= json_encode(__('site.search_view_other_articles')) ?>;
                 var debounceTimer = null;
                 var activeIndex = -1;
                 var abortController = null;
@@ -52,15 +55,20 @@
                     currentItems = [];
                 }
 
+                function searchFooterLabel(itemCount) {
+                    return itemCount >= 4 ? viewMoreArticlesLabel : viewOtherArticlesLabel;
+                }
+
                 function renderSuggestions(items, query) {
                     activeIndex = -1;
                     var searchUrl = '/search?q=' + encodeURIComponent(query);
+                    var footerLabel = searchFooterLabel(items.length);
                     currentItems = items.slice();
 
                     if (!items.length) {
                         suggestionBox.innerHTML = ''
-                            + '<div class="rounded-[1.25rem] px-4 py-4 text-[0.95rem] leading-[1.4rem] text-[#004241]/65">Aucune suggestion pour "' + query.replace(/"/g, '&quot;') + '"</div>'
-                            + '<a href="' + searchUrl + '" class="header-search-view-all mt-1.5 flex items-center justify-center rounded-[1.25rem] bg-white/50 px-5 py-[1.1rem] text-center text-[0.95rem] font-semibold text-[#004241] no-underline transition-colors duration-200 hover:bg-white/75" data-suggestion-index="0">Voir tous les articles</a>';
+                            + '<div class="rounded-[1.25rem] px-4 py-4 text-[0.95rem] leading-[1.4rem] text-[#004241]/65">' + emptySuggestionsLabel.replace(':query', '"' + query.replace(/"/g, '&quot;') + '"') + '</div>'
+                            + '<a href="' + searchUrl + '" class="header-search-view-all mt-1.5 flex items-center justify-center rounded-[1.25rem] bg-white/50 px-5 py-[1.1rem] text-center text-[0.95rem] font-semibold text-[#004241] no-underline transition-colors duration-200 hover:bg-white/75" data-suggestion-index="0">' + footerLabel + '</a>';
                         currentItems = [{ url: searchUrl }];
                         suggestionBox.classList.add('vivat-search-suggestions--open');
                         form.classList.add('vivat-search-suggestions-host');
@@ -80,7 +88,7 @@
                             + '<span class="text-[0.95rem] leading-[1.2rem] text-[#004241]/65">' + item.meta + '</span>'
                             + '</span>'
                             + '</a>';
-                    }).join('') + '<a href="' + searchUrl + '" class="header-search-view-all mt-1.5 flex items-center justify-center rounded-[1.25rem] bg-white/50 px-5 py-[1.1rem] text-center text-[0.95rem] font-semibold text-[#004241] no-underline transition-colors duration-200 hover:bg-white/75" data-suggestion-index="' + items.length + '">Voir tous les articles</a>';
+                    }).join('') + '<a href="' + searchUrl + '" class="header-search-view-all mt-1.5 flex items-center justify-center rounded-[1.25rem] bg-white/50 px-5 py-[1.1rem] text-center text-[0.95rem] font-semibold text-[#004241] no-underline transition-colors duration-200 hover:bg-white/75" data-suggestion-index="' + items.length + '">' + footerLabel + '</a>';
                     currentItems.push({ url: searchUrl });
                     suggestionBox.classList.add('vivat-search-suggestions--open');
                     form.classList.add('vivat-search-suggestions-host');

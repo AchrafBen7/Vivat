@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
-use App\Models\Category;
 use App\Services\PublicPageDataService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,7 +31,7 @@ class SearchController extends Controller
             'content_locale' => $locale,
             'title' => $title,
             'meta_description' => $metaDescription,
-            'canonical_url' => url('/search' . ($q !== '' ? '?q=' . rawurlencode($q) : '')),
+            'canonical_url' => url('/search'.($q !== '' ? '?q='.rawurlencode($q) : '')),
         ]);
 
         return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -56,7 +55,7 @@ class SearchController extends Controller
         $articleSuggestions = Article::published()
             ->forLocale($locale)
             ->with('category')
-            ->where('title', 'LIKE', '%' . $escaped . '%')
+            ->where('title', 'LIKE', '%'.$escaped.'%')
             ->orderByRaw(
                 'CASE
                     WHEN LOWER(title) = ? THEN 0
@@ -64,50 +63,26 @@ class SearchController extends Controller
                     WHEN LOWER(title) LIKE ? THEN 2
                     ELSE 3
                 END',
-                [$normalized, $normalized . '%', '% ' . $normalized . '%']
+                [$normalized, $normalized.'%', '% '.$normalized.'%']
             )
             ->orderByDesc('published_at')
-            ->limit(6)
+            ->limit(8)
             ->get()
             ->map(fn (Article $article) => [
                 'type' => 'article',
                 'label' => $article->title,
-                'url' => url('/articles/' . $article->slug),
+                'url' => url('/articles/'.$article->slug),
                 'meta' => $article->category?->name ?: 'Article',
                 'thumbnail_url' => $this->articleSuggestionThumbnail($article),
             ]);
-
-        $categorySuggestions = Category::query()
-            ->where('name', 'LIKE', '%' . $escaped . '%')
-            ->orderByRaw(
-                'CASE
-                    WHEN LOWER(name) = ? THEN 0
-                    WHEN LOWER(name) LIKE ? THEN 1
-                    WHEN LOWER(name) LIKE ? THEN 2
-                    ELSE 3
-                END',
-                [$normalized, $normalized . '%', '% ' . $normalized . '%']
-            )
-            ->orderBy('name')
-            ->limit(4)
-            ->get()
-            ->map(fn (Category $category) => [
-                'type' => 'category',
-                'label' => $category->name,
-                'url' => url('/categories/' . $category->slug),
-                'meta' => 'Rubrique',
-                'thumbnail_url' => null,
-            ]);
-
-        $suggestions = $categorySuggestions
-            ->concat($articleSuggestions)
+        $suggestions = $articleSuggestions
             ->map(function (array $item) use ($normalized) {
                 $label = mb_strtolower($item['label']);
                 $priority = $label === $normalized
                     ? 0
                     : (str_starts_with($label, $normalized)
                         ? 1
-                        : (str_contains($label, ' ' . $normalized) ? 2 : 3));
+                        : (str_contains($label, ' '.$normalized) ? 2 : 3));
 
                 return $item + ['priority' => $priority];
             })
@@ -116,8 +91,8 @@ class SearchController extends Controller
                 ['type', 'asc'],
                 ['label', 'asc'],
             ])
-            ->unique(fn (array $item) => $item['type'] . '|' . mb_strtolower($item['label']))
-            ->take(8)
+            ->unique(fn (array $item) => $item['type'].'|'.mb_strtolower($item['label']))
+            ->take(4)
             ->map(fn (array $item) => [
                 'type' => $item['type'],
                 'label' => $item['label'],

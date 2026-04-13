@@ -1,6 +1,6 @@
 <div id="mobile-menu-panel"
      data-open="false"
-     class="absolute top-full left-0 right-0 z-50 mt-0 origin-top isolate overflow-hidden rounded-[34px] border border-white/10 bg-[#004241] shadow-[0_20px_60px_rgba(0,40,38,0.35)] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-4 md:right-4 lg:left-auto lg:right-[63px] lg:mt-0 lg:w-[min(calc(100vw-7rem),940px)] xl:right-[79px] xl:w-[min(calc(100vw-9rem),1080px)] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100"
+     class="absolute top-full left-[18px] right-[18px] z-50 mt-0 origin-top isolate overflow-hidden rounded-[34px] border border-white/10 bg-[#004241] shadow-[0_20px_60px_rgba(0,40,38,0.35)] transition-[clip-path,opacity,max-height,visibility] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:left-8 md:right-4 lg:left-10 lg:right-[63px] lg:mt-0 xl:left-20 xl:right-[79px] data-[open=false]:pointer-events-none data-[open=false]:invisible data-[open=false]:max-h-0 data-[open=false]:overflow-hidden data-[open=false]:opacity-0 data-[open=true]:pointer-events-auto data-[open=true]:visible data-[open=true]:max-h-[min(88vh,960px)] data-[open=true]:overflow-y-auto data-[open=true]:overflow-x-hidden data-[open=true]:opacity-100"
      role="dialog" aria-label="Menu de navigation" aria-modal="true">
     <div class="p-8 md:p-10 lg:p-12">
 
@@ -28,7 +28,7 @@
 
     <div class="mb-7 h-px bg-white/[0.07]"></div>
 
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
         <nav aria-label="Navigation principale">
             <p class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35"><?= htmlspecialchars(__('site.navigation', [], null, 'Navigation')) ?></p>
             <div class="flex flex-col gap-0.5">
@@ -46,9 +46,9 @@
 
         <div>
             <p class="mb-2 border-t border-white/[0.07] px-1 pt-7 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35 lg:border-t-0 lg:pt-0"><?= htmlspecialchars(__('site.sections')) ?></p>
-            <nav class="grid grid-cols-2 gap-x-1 gap-y-0.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" aria-label="<?= htmlspecialchars(__('site.sections')) ?>">
+            <nav class="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3" aria-label="<?= htmlspecialchars(__('site.sections')) ?>">
                 <?php foreach ($categories as $cat) { ?>
-                <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[12px] px-4 py-3 text-[15px] font-normal text-white/75 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars($cat['name']) ?></a>
+                <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[14px] px-4 py-3.5 text-[17px] font-medium leading-[1.35] text-white/80 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars($cat['name']) ?></a>
                 <?php } ?>
             </nav>
         </div>
