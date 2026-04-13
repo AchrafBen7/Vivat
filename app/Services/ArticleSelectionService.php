@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Article;
-use App\Models\Category;
 use App\Models\RssItem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -160,14 +159,9 @@ class ArticleSelectionService
         $consolidatedKeywords = $this->consolidateKeywords($allKeywords);
         $topicLabel = $this->generateTopicLabel($items, $consolidatedKeywords);
 
-        $categoryId = collect($items->pluck('category_id')->filter())->mode()[0] ?? null;
-        $category = $categoryId ? Category::find($categoryId) : null;
+        $category = $this->topicScorer->resolveCategoryForItems($items, $consolidatedKeywords);
 
-        if (! $category) {
-            $category = $this->topicScorer->inferCategoryFromKeywords($consolidatedKeywords);
-        }
-
-        $categoryAlignment = $category ? $this->estimateCategoryAlignment($items, $category, $consolidatedKeywords) : 0.0;
+        $categoryAlignment = $category ? $this->topicScorer->estimateCategoryAlignment($items, $category, $consolidatedKeywords) : 0.0;
         $editorialConfig = config('selection.editorial', []);
         $alignmentBonus = match (true) {
             $categoryAlignment >= 0.72 => (int) ($editorialConfig['alignment_bonus_strong'] ?? 12),
@@ -380,49 +374,6 @@ class ArticleSelectionService
         return implode('. ', $reasons) . '.';
     }
 
-    private function estimateCategoryAlignment(Collection $items, Category $category, array $keywords): float
-    {
-        $terms = collect([
-            $category->name,
-            $category->slug,
-            ...$category->subCategories->pluck('name')->all(),
-            ...$category->subCategories->pluck('slug')->all(),
-        ])->filter()
-            ->map(fn (string $term): string => Str::of($term)->lower()->ascii()->replace('-', ' ')->value())
-            ->unique()
-            ->values();
-
-        if ($terms->isEmpty()) {
-            return 0.0;
-        }
-
-        $text = Str::of(implode(' ', array_filter([
-            $items->pluck('title')->implode(' '),
-            $items->map(fn (RssItem $item) => $item->enrichedItem?->lead ?? '')->implode(' '),
-            implode(' ', array_column($keywords, 'word')),
-        ])))->lower()->ascii()->replace('-', ' ')->value();
-
-        $matches = 0.0;
-        foreach ($terms as $term) {
-            if ($term === '') {
-                continue;
-            }
-
-            if (str_contains($text, $term)) {
-                $matches += 1;
-                continue;
-            }
-
-            foreach (explode(' ', $term) as $part) {
-                if ($part !== '' && str_contains($text, $part)) {
-                    $matches += 0.35;
-                }
-            }
-        }
-
-        return min(1.0, $matches / max(1, $terms->count() * 0.75));
-    }
-
     private function isWeakEditorialTopic(Collection $items, array $keywords): bool
     {
         $editorialConfig = config('selection.editorial', []);
@@ -474,8 +425,8 @@ class ArticleSelectionService
             return false;
         }
 
-        $category = $item->category ?: $this->topicScorer->inferCategoryFromKeywords($keywords);
-        $alignment = $category ? $this->estimateCategoryAlignment(collect([$item]), $category, $keywords) : 0.0;
+        $category = $this->topicScorer->resolveCategoryForItems(collect([$item]), $keywords);
+        $alignment = $category ? $this->topicScorer->estimateCategoryAlignment(collect([$item]), $category, $keywords) : 0.0;
 
         if ($alignment < $minAlignment) {
             return false;

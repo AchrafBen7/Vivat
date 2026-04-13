@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Article;
 use App\Models\Category;
 use App\Models\EnrichedItem;
 use App\Models\RssItem;
 use Closure;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class TopicScorerService
@@ -187,6 +189,82 @@ class TopicScorerService
         return Category::where('slug', $bestSlug)->first();
     }
 
+    public function resolveCategoryForItems(Collection $items, array $keywords = []): ?Category
+    {
+        $candidates = collect();
+
+        $directCategories = $items->map(fn (RssItem $item) => $item->category)
+            ->filter(fn ($category) => $category instanceof Category);
+        $candidates = $candidates->merge($directCategories);
+
+        $clusterInferred = $this->inferCategoryFromKeywords($keywords);
+        if ($clusterInferred) {
+            $candidates->push($clusterInferred);
+        }
+
+        foreach ($items as $item) {
+            if (! $item instanceof RssItem) {
+                continue;
+            }
+
+            $inferred = $this->inferCategoryFromKeywords($this->extractKeywords($item));
+            if ($inferred) {
+                $candidates->push($inferred);
+            }
+        }
+
+        $candidates = $candidates
+            ->filter(fn ($category) => $category instanceof Category)
+            ->unique(fn (Category $category) => $category->id)
+            ->values();
+
+        if ($candidates->isEmpty()) {
+            $candidates = Schema::hasTable('categories')
+                ? Category::query()->orderedForHome()->get()
+                : collect();
+        }
+
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        $best = $candidates
+            ->map(function (Category $category) use ($items, $keywords, $clusterInferred): array {
+                $directMatches = $items->filter(fn (RssItem $item) => $item->category_id === $category->id)->count();
+                $alignment = $this->estimateCategoryAlignment($items, $category, $keywords);
+                $recentCount = Schema::hasTable('articles')
+                    ? Article::query()
+                        ->where('category_id', $category->id)
+                        ->whereIn('status', ['draft', 'published'])
+                        ->where('created_at', '>=', now()->subHours(72))
+                        ->count()
+                    : 0;
+
+                $score = ($directMatches * 4)
+                    + ($alignment * 10)
+                    + ($clusterInferred?->id === $category->id ? 3 : 0)
+                    - min(4, $recentCount) * 1.5;
+
+                return [
+                    'category' => $category,
+                    'score' => $score,
+                    'direct_matches' => $directMatches,
+                    'alignment' => $alignment,
+                    'recent_count' => $recentCount,
+                ];
+            })
+            ->sort(function (array $left, array $right): int {
+                if ($left['score'] === $right['score']) {
+                    return $left['recent_count'] <=> $right['recent_count'];
+                }
+
+                return $right['score'] <=> $left['score'];
+            })
+            ->first();
+
+        return $best['category'] ?? null;
+    }
+
     /**
      * @param  mixed  $items
      * @return array<int, string>
@@ -279,6 +357,56 @@ class TopicScorerService
         }
 
         return (int) round($avgWeight);
+    }
+
+    public function estimateCategoryAlignment(Collection $items, Category $category, array $keywords): float
+    {
+        if (Schema::hasTable('sub_categories')) {
+            $category->loadMissing('subCategories');
+        } else {
+            $category->setRelation('subCategories', collect());
+        }
+
+        $terms = collect([
+            $category->name,
+            $category->slug,
+            $category->description,
+            ...$category->subCategories->pluck('name')->all(),
+            ...$category->subCategories->pluck('slug')->all(),
+        ])->filter()
+            ->map(fn (string $term): string => Str::of($term)->lower()->ascii()->replace('-', ' ')->value())
+            ->unique()
+            ->values();
+
+        if ($terms->isEmpty()) {
+            return 0.0;
+        }
+
+        $text = Str::of(implode(' ', array_filter([
+            $items->pluck('title')->implode(' '),
+            $items->map(fn (RssItem $item) => $item->enrichedItem?->lead ?? '')->implode(' '),
+            implode(' ', array_column($keywords, 'word')),
+        ])))->lower()->ascii()->replace('-', ' ')->value();
+
+        $matches = 0.0;
+        foreach ($terms as $term) {
+            if ($term === '') {
+                continue;
+            }
+
+            if (str_contains($text, $term)) {
+                $matches += 1;
+                continue;
+            }
+
+            foreach (explode(' ', $term) as $part) {
+                if ($part !== '' && str_contains($text, $part)) {
+                    $matches += 0.35;
+                }
+            }
+        }
+
+        return min(1.0, $matches / max(1, $terms->count() * 0.75));
     }
 
     public function keywordSimilarity(array $a, array $b): float

@@ -145,6 +145,40 @@ class TopicScorerServiceTest extends TestCase
         $this->assertNotContains('lowbjethèque', $keywords);
     }
 
+    #[Test]
+    public function it_resolves_a_non_energy_category_when_signals_fit_better(): void
+    {
+        $categories = collect([
+            new Category(['id' => 'cat-energie', 'name' => 'Énergie', 'slug' => 'energie']),
+            new Category(['id' => 'cat-chez-soi', 'name' => 'Chez soi', 'slug' => 'chez-soi']),
+        ]);
+
+        $service = new TopicScorerService(
+            categoryResolver: fn (string $slug): ?Category => $categories->firstWhere('slug', $slug)
+        );
+
+        $items = collect([
+            $this->makeRssItem(
+                title: 'Isolation des fenêtres : 6 gestes simples pour mieux chauffer son logement',
+                publishedAt: now(),
+                categorySlug: 'chez-soi',
+                headings: ['Isolation', 'Fenêtres', 'Logement'],
+                keyPoints: ['maison', 'fenêtres', 'chauffage', 'logement'],
+            ),
+        ]);
+
+        $category = $service->resolveCategoryForItems($items, [
+            ['word' => 'isolation', 'frequency' => 4, 'seo_weight' => 82],
+            ['word' => 'fenêtres', 'frequency' => 3, 'seo_weight' => 74],
+            ['word' => 'maison', 'frequency' => 3, 'seo_weight' => 70],
+            ['word' => 'logement', 'frequency' => 3, 'seo_weight' => 70],
+            ['word' => 'chauffage', 'frequency' => 2, 'seo_weight' => 68],
+        ]);
+
+        $this->assertNotNull($category);
+        $this->assertSame('chez-soi', $category?->slug);
+    }
+
     private function makeRssItem(
         string $title,
         ?Carbon $publishedAt,

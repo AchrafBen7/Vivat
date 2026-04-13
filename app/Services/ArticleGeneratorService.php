@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\Models\Article;
 use App\Models\ArticleSource;
+use App\Models\Category;
 use App\Models\CategoryTemplate;
 use App\Models\RssItem;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ArticleGeneratorService
 {
@@ -19,6 +20,7 @@ class ArticleGeneratorService
         private readonly ArticleContentProcessor $contentProcessor,
         private readonly CoverImageService $coverImageService,
         private readonly GeneratedArticlePayloadValidator $payloadValidator,
+        private readonly TopicScorerService $topicScorer,
     ) {}
 
     /**
@@ -68,11 +70,12 @@ class ArticleGeneratorService
             return $existingArticle->loadMissing('articleSources');
         }
 
+        $categoryId = $categoryId ?: $this->resolveCategoryId($items);
+
         $template = null;
         if ($categoryId) {
             $template = CategoryTemplate::where('category_id', $categoryId)->first();
         }
-        $categoryId = $categoryId ?? $items->first()->category_id;
 
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($template, $articleType, $minWords, $maxWords);
         $userPrompt = $this->promptBuilder->buildUserPrompt($items, $customPrompt, $contextPriority);
@@ -178,6 +181,26 @@ class ArticleGeneratorService
         return Article::query()
             ->with('articleSources')
             ->find($existingArticleId);
+    }
+
+    /**
+     * @param  EloquentCollection<int, RssItem>  $items
+     */
+    private function resolveCategoryId(EloquentCollection $items): ?string
+    {
+        $keywords = $items
+            ->flatMap(fn (RssItem $item) => $this->topicScorer->extractKeywords($item))
+            ->values()
+            ->all();
+
+        $resolved = $this->topicScorer->resolveCategoryForItems($items, $keywords);
+
+        if ($resolved instanceof Category) {
+            return $resolved->id;
+        }
+
+        return Category::query()->orderedForHome()->value('id')
+            ?? Category::query()->orderBy('name')->value('id');
     }
 
     /**
