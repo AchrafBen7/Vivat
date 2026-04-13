@@ -89,9 +89,9 @@
                                 @if ($payment['can_refund'])
                                     <button
                                         type="button"
-                                        wire:click="refundPayment('{{ $payment['legacy_payment_id'] }}')"
+                                        wire:click="refundPayment('{{ $payment['legacy_payment_id'] ?? '' }}', '{{ $payment['submission_payment_id'] ?? '' }}')"
                                         wire:loading.attr="disabled"
-                                        wire:target="refundPayment('{{ $payment['legacy_payment_id'] }}')"
+                                        wire:target="refundPayment('{{ $payment['legacy_payment_id'] ?? '' }}', '{{ $payment['submission_payment_id'] ?? '' }}')"
                                         class="vp-btn vp-btn-warning"
                                     >
                                         Rembourser

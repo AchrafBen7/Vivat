@@ -21,17 +21,23 @@ class SubmissionPayment extends Model
         'currency',
         'status',
         'stripe_receipt_url',
+        'stripe_refund_id',
         'failure_code',
         'failure_message',
+        'refund_reason',
+        'refunded_by',
         'idempotency_key',
         'paid_at',
         'refunded_at',
+        'disputed_at',
+        'dispute_reason',
     ];
 
     protected $casts = [
         'amount_cents' => 'integer',
         'paid_at'      => 'datetime',
         'refunded_at'  => 'datetime',
+        'disputed_at'  => 'datetime',
     ];
 
     protected $hidden = [
@@ -59,6 +65,11 @@ class SubmissionPayment extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function refundedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'refunded_by');
+    }
+
     /* ------------------------------------------------------------------ */
     /*  Scopes                                                             */
     /* ------------------------------------------------------------------ */
@@ -73,6 +84,11 @@ class SubmissionPayment extends Model
         return $query->where('status', 'pending');
     }
 
+    public function scopeRefundable($query)
+    {
+        return $query->where('status', 'succeeded');
+    }
+
     /* ------------------------------------------------------------------ */
     /*  Helpers                                                            */
     /* ------------------------------------------------------------------ */
@@ -80,6 +96,11 @@ class SubmissionPayment extends Model
     public function isSucceeded(): bool
     {
         return $this->status === 'succeeded';
+    }
+
+    public function isRefundable(): bool
+    {
+        return $this->status === 'succeeded' && ! $this->refunded_at;
     }
 
     public function getFormattedAmountAttribute(): string

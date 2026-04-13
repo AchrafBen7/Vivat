@@ -13,6 +13,30 @@ class EditArticle extends EditRecord
 {
     protected static string $resource = ArticleResource::class;
 
+    protected string $view = 'filament.resources.articles.pages.edit-article';
+
+    public function getArticleData(): array
+    {
+        return [
+            'title' => $this->record->title,
+            'status' => $this->record->status,
+            'category' => $this->record->category?->name ?? 'Sans catégorie',
+            'type' => match ($this->record->article_type) {
+                'hot_news' => 'Hot news',
+                'long_form' => 'Long format',
+                default => 'Standard',
+            },
+            'reading_time' => (int) ($this->record->reading_time ?: 5),
+            'cover' => $this->record->cover_image_url,
+            'published_at' => $this->record->published_at?->format('d/m/Y à H:i') ?? 'Non publié',
+            'updated_at' => $this->record->updated_at?->format('d/m/Y à H:i') ?? 'Date inconnue',
+            'excerpt' => (string) str($this->record->excerpt ?: $this->record->content ?: '')
+                ->stripTags()
+                ->squish()
+                ->limit(200),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

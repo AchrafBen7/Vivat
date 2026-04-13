@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
+use App\Models\SubmissionPayment;
 use App\Services\StripeCheckoutService;
+use App\Services\SubmissionWorkflowService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Stripe\StripeClient;
@@ -59,7 +62,7 @@ class ContributorCheckoutController extends Controller
     /**
      * GET /contributor/submissions/{submission}/payment/success
      * Page de retour après paiement Stripe.
-     * Vérifie la session Stripe et publie immédiatement si le webhook n'est pas encore passé.
+     * Le webhook Stripe reste la source de vérité.
      */
     public function success(Request $request, Submission $submission): RedirectResponse
     {
@@ -70,7 +73,6 @@ class ContributorCheckoutController extends Controller
 
         $sessionId = $request->query('session_id');
 
-        // Si déjà publié, rien à faire
         if ($submission->status === 'published') {
             return redirect()->route('contributor.dashboard')
                 ->with('success', 'Votre article est déjà publié !');
@@ -83,35 +85,11 @@ class ContributorCheckoutController extends Controller
                 $session   = $stripe->checkout->sessions->retrieve((string) $sessionId);
 
                 if ($session->payment_status === 'paid') {
-                    $submission->refresh();
+                    $this->reconcilePaidSession($submission, (string) $session->id, $session->payment_intent ?? null);
 
-                    // Marquer le paiement comme réussi si pas encore fait
-                    $submissionPayment = $submission->submissionPayments()
-                        ->where('stripe_checkout_session_id', $sessionId)
-                        ->first();
-
-                    if ($submissionPayment && $submissionPayment->status !== 'succeeded') {
-                        $submissionPayment->update(['status' => 'succeeded', 'paid_at' => now()]);
-                    }
-
-                    // Accepter la quote si pas encore fait
-                    $submission->quotes()
-                        ->whereIn('status', ['sent', 'pending'])
-                        ->update(['status' => 'accepted', 'accepted_at' => now()]);
-
-                    // Publier si pas encore publié
-                    if (! in_array($submission->status, ['published'], true)) {
-                        // Amener au bon statut intermédiaire si nécessaire
-                        if (in_array($submission->status, ['payment_pending', 'awaiting_payment'], true)) {
-                            $submission->transitionTo(
-                                newStatus: 'payment_succeeded',
-                                triggerSource: 'stripe_webhook',
-                                metadata: ['stripe_session_id' => $sessionId, 'via' => 'success_url_fallback'],
-                            );
-                        }
-
-                        app(\App\Services\SubmissionWorkflowService::class)->publishAfterPayment($submission->fresh());
-                    }
+                    return redirect()
+                        ->route('contributor.dashboard')
+                        ->with('success', 'Paiement reçu. La publication va être finalisée automatiquement dans quelques instants.');
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::warning('success_url fallback failed', [
@@ -124,7 +102,52 @@ class ContributorCheckoutController extends Controller
 
         return redirect()
             ->route('contributor.dashboard')
-            ->with('success', 'Paiement confirmé ! Votre article est maintenant publié.');
+            ->with('info', 'Retour de paiement enregistré. Si le paiement est validé par Stripe, la publication sera finalisée automatiquement.');
+    }
+
+    private function reconcilePaidSession(Submission $submission, string $sessionId, mixed $paymentIntentId): void
+    {
+        $submissionPayment = SubmissionPayment::query()
+            ->where('stripe_checkout_session_id', $sessionId)
+            ->first();
+
+        if (! $submissionPayment || $submissionPayment->isSucceeded() || $submission->status === 'published') {
+            return;
+        }
+
+        DB::transaction(function () use ($submission, $submissionPayment, $paymentIntentId): void {
+            $submissionPayment->update([
+                'status' => 'succeeded',
+                'paid_at' => $submissionPayment->paid_at ?: now(),
+                'stripe_payment_intent_id' => is_string($paymentIntentId) ? $paymentIntentId : $submissionPayment->stripe_payment_intent_id,
+            ]);
+
+            $lockedSubmission = $submission->newQuery()->lockForUpdate()->find($submission->id);
+
+            if (! $lockedSubmission) {
+                return;
+            }
+
+            if (in_array($lockedSubmission->status, ['payment_pending', 'awaiting_payment'], true)) {
+                $lockedSubmission->transitionTo(
+                    newStatus: 'payment_succeeded',
+                    triggerSource: 'system',
+                    reason: 'Paiement confirmé via success_url fallback',
+                    metadata: ['stripe_checkout_session_id' => $submissionPayment->stripe_checkout_session_id],
+                );
+            }
+
+            if ($submissionPayment->quote) {
+                $submissionPayment->quote()->update([
+                    'status' => 'accepted',
+                    'accepted_at' => $submissionPayment->quote->accepted_at ?: now(),
+                ]);
+            }
+
+            if ($lockedSubmission->status === 'payment_succeeded') {
+                app(SubmissionWorkflowService::class)->publishAfterPayment($lockedSubmission);
+            }
+        });
     }
 
     /**

@@ -27,14 +27,15 @@ class Submission extends Model
         'changes_requested'  => ['submitted'],
         'price_proposed'     => ['awaiting_payment', 'rejected'],
         'awaiting_payment'   => ['payment_pending', 'payment_expired', 'payment_canceled'],
-        'payment_pending'    => ['payment_succeeded', 'payment_failed', 'awaiting_payment'],
+        'payment_pending'    => ['payment_succeeded', 'payment_failed', 'payment_expired', 'awaiting_payment'],
         'payment_failed'     => ['awaiting_payment'],
-        'payment_succeeded'  => ['published'],
+        'payment_succeeded'  => ['published', 'payment_refunded'],
         'payment_expired'    => ['awaiting_payment'],
+        'published'          => ['payment_refunded'],
         // Terminaux (aucune transition)
         'rejected'           => [],
-        'published'          => [],
         'payment_canceled'   => [],
+        'payment_refunded'   => [],
         // Legacy
         'approved'           => ['published'],
     ];
@@ -141,6 +142,13 @@ class Submission extends Model
     public function latestSubmissionPayment(): HasOne
     {
         return $this->hasOne(SubmissionPayment::class)->latestOfMany();
+    }
+
+    public function latestRefundedSubmissionPayment(): HasOne
+    {
+        return $this->hasOne(SubmissionPayment::class)
+            ->where('status', 'refunded')
+            ->latestOfMany();
     }
 
     public function statusLogs(): HasMany

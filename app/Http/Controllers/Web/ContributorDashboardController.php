@@ -24,14 +24,14 @@ class ContributorDashboardController extends ContributorBaseController
             ->count();
 
         $submissionsPaginator = Submission::where('user_id', $user->id)
-            ->with(['category', 'reviewer', 'payment', 'publishedArticle'])
+            ->with(['category', 'reviewer', 'payment', 'latestSubmissionPayment', 'publishedArticle'])
             ->orderByDesc('created_at')
             ->paginate(10)
             ->withQueryString();
 
         $submissions = $submissionsPaginator->getCollection()
             ->map(function ($submission) {
-                $payment = $submission->payment;
+                $payment = $submission->latestSubmissionPayment ?? $submission->payment;
 
                 return [
                     'id' => $submission->id,
@@ -49,6 +49,8 @@ class ContributorDashboardController extends ContributorBaseController
                         'payment_succeeded', 'published' => 'Publié',
                         'payment_failed' => 'Paiement échoué',
                         'payment_expired' => 'Offre expirée',
+                        'payment_canceled' => 'Paiement annulé',
+                        'payment_refunded' => 'Paiement remboursé',
                         'approved' => 'Publié',
                         'rejected' => 'Refusé',
                         default => ucfirst((string) $submission->status),
@@ -62,14 +64,15 @@ class ContributorDashboardController extends ContributorBaseController
                     'reviewer_name' => $submission->reviewer?->name,
                     'category' => $submission->category ? ['name' => $submission->category->name] : null,
                     'payment_status' => $payment?->status,
-                    'payment_amount' => $payment?->amount,
-                    'payment_amount_label' => $payment
-                        ? number_format($payment->amount / 100, 2, ',', ' ').' '.strtoupper($payment->currency ?: 'EUR')
-                        : null,
+                    'payment_amount' => $payment?->amount ?? $payment?->amount_cents,
+                    'payment_amount_label' => $payment?->formatted_amount
+                        ?? ($payment
+                            ? number_format($payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($payment->currency ?: 'EUR')
+                            : null),
                     'language' => $submission->language ?? 'fr',
                     'refund_reason' => $payment?->refund_reason,
-                    'refunded_at' => $payment?->status === 'refunded' ? $payment->updated_at?->format('d/m/Y H:i') : null,
-                    'refund_receipt_url' => $payment?->status === 'refunded'
+                    'refunded_at' => $payment?->status === 'refunded' ? ($payment->refunded_at?->format('d/m/Y H:i') ?? $payment->updated_at?->format('d/m/Y H:i')) : null,
+                    'refund_receipt_url' => $payment instanceof Payment && $payment->status === 'refunded'
                         ? route('contributor.payments.refund-receipt', ['payment' => $payment->id])
                         : null,
                     'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),

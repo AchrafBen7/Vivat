@@ -31,7 +31,7 @@ return [
         'enabled' => true,
         'label' => 'Snapshot Horizon',
         'description' => 'Met à jour les métriques Horizon pour le monitoring des queues.',
-        'cadence' => 'Toutes les 5 minutes',
+        'cadence' => 'Toutes les 10 minutes',
     ],
 
     'prune_failed_jobs' => [
@@ -49,6 +49,6 @@ return [
         'cadence' => 'Toutes les 2 heures',
         'enrichment_silence_hours' => 4,
         'alert_cooldown_hours' => 4,
-        'horizon_stale_minutes' => 15,
+        'horizon_stale_minutes' => 25,
     ],
 ];

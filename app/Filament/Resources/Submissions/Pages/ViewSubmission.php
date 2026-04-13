@@ -21,6 +21,71 @@ class ViewSubmission extends ViewRecord
 {
     protected static string $resource = SubmissionResource::class;
 
+    protected string $view = 'filament.resources.submissions.pages.view-submission';
+
+    public function getSubmissionData(): array
+    {
+        $record = $this->record->loadMissing([
+            'user',
+            'category',
+            'reviewer',
+            'quote.preset',
+            'quote.proposedBy',
+            'latestSubmissionPayment',
+            'statusLogs.triggeredBy',
+            'publishedArticle',
+        ]);
+
+        return [
+            'id' => $record->id,
+            'title' => $record->title,
+            'status' => $record->status,
+            'cover' => $record->cover_image_url,
+            'author' => $record->user?->name ?? 'Auteur inconnu',
+            'author_email' => $record->user?->email ?? '',
+            'category' => $record->category?->name ?? 'Sans catégorie',
+            'reading_time' => (int) ($record->reading_time ?: 5),
+            'created_at' => $record->submitted_at?->format('d/m/Y à H:i') ?? $record->created_at?->format('d/m/Y à H:i') ?? 'Date inconnue',
+            'excerpt' => (string) ($record->excerpt ?: ''),
+            'content' => (string) ($record->content ?: ''),
+            'reviewer' => $record->reviewer?->name,
+            'reviewed_at' => $record->reviewed_at?->format('d/m/Y à H:i'),
+            'reviewer_notes' => $record->reviewer_notes,
+            'payment_status' => $record->latestSubmissionPayment?->status,
+            'payment_amount' => $record->latestSubmissionPayment?->formatted_amount,
+            'payment_failure' => $record->latestSubmissionPayment?->failure_message,
+            'refund_reason' => $record->latestSubmissionPayment?->refund_reason,
+            'quote_amount' => $record->quote?->formatted_amount,
+            'quote_status' => $record->quote?->status,
+            'quote_type' => $record->quote?->article_type,
+            'quote_preset' => $record->quote?->preset?->label,
+            'quote_expires_at' => $record->quote?->expires_at?->format('d/m/Y à H:i'),
+            'quote_note' => $record->quote?->note_to_author,
+            'quote_moderator' => $record->quote?->proposedBy?->name,
+            'preview_url' => route('contributor.articles.show', ['submission' => $record->slug]),
+            'published_url' => $record->publishedArticle?->slug ? url('/articles/' . $record->publishedArticle->slug) : null,
+            'is_revision' => filled($record->published_article_id),
+            'depublication_requested' => $record->depublication_requested_at !== null,
+            'status_logs' => $record->statusLogs
+                ->sortByDesc('created_at')
+                ->take(10)
+                ->map(fn ($log): array => [
+                    'from' => $log->from_status,
+                    'to' => $log->to_status,
+                    'reason' => $log->reason,
+                    'by' => $log->triggeredBy?->name ?? match ($log->trigger_source) {
+                        'system' => 'Système',
+                        'stripe_webhook' => 'Stripe',
+                        'author' => 'Rédacteur',
+                        default => 'Admin',
+                    },
+                    'at' => $log->created_at?->format('d/m/Y à H:i') ?? '',
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

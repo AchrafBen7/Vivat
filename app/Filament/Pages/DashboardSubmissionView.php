@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Submission;
 use App\Models\User;
 use App\Services\PaymentRefundService;
+use App\Services\SubmissionPaymentRefundService;
 use App\Services\SubmissionPublishingService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
@@ -34,7 +35,7 @@ class DashboardSubmissionView extends Page
     public function mount(string $record): void
     {
         $this->record = Submission::query()
-            ->with(['user', 'category', 'reviewer', 'payment', 'publishedArticle'])
+            ->with(['user', 'category', 'reviewer', 'payment', 'latestSubmissionPayment', 'publishedArticle'])
             ->findOrFail($record);
     }
 
@@ -55,11 +56,12 @@ class DashboardSubmissionView extends Page
             'reviewer' => $this->record->reviewer?->name,
             'reviewed_at' => $this->record->reviewed_at?->format('d/m/Y à H:i'),
             'reviewer_notes' => $this->record->reviewer_notes,
-            'payment_status' => $this->record->payment?->status,
-            'payment_amount' => $this->record->payment
-                ? number_format($this->record->payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($this->record->payment->currency)
-                : null,
-            'refund_reason' => $this->record->payment?->refund_reason,
+            'payment_status' => $this->record->latestSubmissionPayment?->status ?? $this->record->payment?->status,
+            'payment_amount' => $this->record->latestSubmissionPayment?->formatted_amount
+                ?? ($this->record->payment
+                    ? number_format($this->record->payment->amount / 100, 2, ',', ' ') . ' ' . strtoupper($this->record->payment->currency)
+                    : null),
+            'refund_reason' => $this->record->latestSubmissionPayment?->refund_reason ?? $this->record->payment?->refund_reason,
             'preview_url' => route('contributor.articles.show', ['submission' => $this->record->slug]),
             'is_revision' => filled($this->record->published_article_id),
             'depublication_requested' => $this->record->depublication_requested_at !== null,
@@ -213,7 +215,7 @@ class DashboardSubmissionView extends Page
                 ->label('Rembourser')
                 ->icon(Heroicon::OutlinedArrowUturnLeft)
                 ->color('danger')
-                ->visible(fn (): bool => (bool) $this->record->payment?->isRefundable())
+                ->visible(fn (): bool => (bool) ($this->record->latestSubmissionPayment?->isRefundable() || $this->record->payment?->isRefundable()))
                 ->form([
                     Textarea::make('reason')
                         ->label('Motif du remboursement')
@@ -223,12 +225,20 @@ class DashboardSubmissionView extends Page
                 ])
                 ->requiresConfirmation()
                 ->modalHeading('Rembourser ce paiement ?')
-                ->modalDescription('Le paiement Stripe sera remboursé immédiatement si la transaction est éligible.')
+                ->modalDescription("Le paiement Stripe sera remboursé immédiatement si la transaction est éligible. Si l'article est déjà publié, il sera automatiquement dépublié.")
                 ->action(function (array $data): void {
-                    app(PaymentRefundService::class)->refund(
-                        $this->record->payment,
-                        $data['reason'] ?? 'Article refusé',
-                    );
+                    if ($this->record->latestSubmissionPayment?->isRefundable()) {
+                        app(SubmissionPaymentRefundService::class)->refund(
+                            $this->record->latestSubmissionPayment,
+                            $data['reason'] ?? 'Article refusé',
+                            auth()->user(),
+                        );
+                    } elseif ($this->record->payment?->isRefundable()) {
+                        app(PaymentRefundService::class)->refund(
+                            $this->record->payment,
+                            $data['reason'] ?? 'Article refusé',
+                        );
+                    }
 
                     $this->record->refresh();
                 })
@@ -236,7 +246,7 @@ class DashboardSubmissionView extends Page
                     fn () => Notification::make()
                         ->success()
                         ->title('Paiement remboursé')
-                        ->body('Le remboursement a été traité.')
+                        ->body("Le remboursement a été traité. L'article lié a été dépublié s'il était déjà en ligne.")
                 ),
         ];
     }

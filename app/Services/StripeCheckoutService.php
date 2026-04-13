@@ -31,11 +31,6 @@ class StripeCheckoutService
             throw new \RuntimeException('Cette soumission a déjà été payée.');
         }
 
-        // Guard : soumission dans un état cohérent
-        if (! in_array($submission->status, ['awaiting_payment', 'payment_failed'], true)) {
-            throw new \RuntimeException("Statut [{$submission->status}] invalide pour initier un paiement.");
-        }
-
         // Guard : quote valide
         if ($quote->status !== 'sent' || $quote->expires_at->isPast()) {
             throw new \RuntimeException('La proposition de prix est expirée ou invalide.');
@@ -60,6 +55,13 @@ class StripeCheckoutService
             }
 
             $existingPayment->update(['status' => 'canceled']);
+        }
+
+        // Guard : soumission dans un état cohérent.
+        // payment_pending est valable ici : l'auteur peut revenir de Stripe puis reprendre la même session
+        // ou en recréer une si elle a expiré entre-temps.
+        if (! in_array($submission->status, ['awaiting_payment', 'payment_failed', 'payment_pending', 'payment_canceled', 'payment_expired'], true)) {
+            throw new \RuntimeException("Statut [{$submission->status}] invalide pour initier un paiement.");
         }
 
         return DB::transaction(function () use ($submission, $quote, $author): SubmissionPayment {
@@ -105,16 +107,17 @@ class StripeCheckoutService
                 'idempotency_key'            => $idempotencyKey,
             ]);
 
-            // Passer en payment_pending
-            $submission->transitionTo(
-                newStatus: 'payment_pending',
-                triggeredBy: $author->id,
-                triggerSource: 'author',
-                metadata: [
-                    'submission_payment_id'     => $payment->id,
-                    'stripe_checkout_session_id'=> $session->id,
-                ],
-            );
+            if ($submission->status !== 'payment_pending') {
+                $submission->transitionTo(
+                    newStatus: 'payment_pending',
+                    triggeredBy: $author->id,
+                    triggerSource: 'author',
+                    metadata: [
+                        'submission_payment_id'     => $payment->id,
+                        'stripe_checkout_session_id'=> $session->id,
+                    ],
+                );
+            }
 
             return $payment;
         });

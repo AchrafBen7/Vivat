@@ -147,7 +147,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'command' => 'horizon:snapshot',
                     ];
                 });
-            })->everyFiveMinutes()->name('pipeline:horizon-snapshot');
+            })->everyTenMinutes()->name('pipeline:horizon-snapshot');
         }
 
         // Purge du texte extrait brut des sources (conformité copyright) hebdomadaire

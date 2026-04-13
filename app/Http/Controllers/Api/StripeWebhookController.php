@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\StripeWebhookLog;
 use App\Models\SubmissionPayment;
 use App\Notifications\StripeDisputeAlertNotification;
+use App\Services\SubmissionPaymentRefundService;
 use App\Services\SubmissionWorkflowService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,10 @@ use UnexpectedValueException;
 
 class StripeWebhookController extends Controller
 {
+    public function __construct(
+        private readonly SubmissionPaymentRefundService $submissionPaymentRefundService,
+    ) {}
+
     public function __invoke(Request $request): JsonResponse
     {
         $webhookSecret = (string) config('services.stripe.webhook_secret');
@@ -65,6 +70,7 @@ class StripeWebhookController extends Controller
             // Ancien workflow (PaymentIntent direct) + legacy
             'payment_intent.succeeded'       => $this->handlePaymentIntentSucceeded($event->data->object),
             'payment_intent.payment_failed'  => $this->handlePaymentIntentFailed($event->data->object),
+            'payment_intent.canceled'        => $this->handlePaymentIntentCanceled($event->data->object),
 
             // Remboursements et litiges
             'charge.refunded'        => $this->handleChargeRefunded($event->data->object),
@@ -158,7 +164,7 @@ class StripeWebhookController extends Controller
         }
 
         DB::transaction(function () use ($submissionPayment): void {
-            $submissionPayment->update(['status' => 'canceled']);
+            $submissionPayment->update(['status' => 'expired']);
 
             $submission = $submissionPayment->submission()->lockForUpdate()->first();
             if ($submission && $submission->status === 'payment_pending') {
@@ -243,6 +249,36 @@ class StripeWebhookController extends Controller
         $payment->markFailed();
     }
 
+    private function handlePaymentIntentCanceled(object $intent): void
+    {
+        $submissionPayment = SubmissionPayment::where('stripe_payment_intent_id', $intent->id)->first();
+        if ($submissionPayment) {
+            DB::transaction(function () use ($submissionPayment): void {
+                $submissionPayment->update([
+                    'status' => 'canceled',
+                    'failure_code' => $submissionPayment->failure_code ?: 'payment_intent_canceled',
+                    'failure_message' => $submissionPayment->failure_message ?: 'Paiement annulé côté Stripe.',
+                ]);
+
+                $submission = $submissionPayment->submission()->lockForUpdate()->first();
+                if ($submission && $submission->status === 'payment_pending') {
+                    $submission->transitionTo(
+                        newStatus: 'awaiting_payment',
+                        triggerSource: 'stripe_webhook',
+                        reason: 'Paiement annulé côté Stripe',
+                    );
+                }
+            });
+
+            return;
+        }
+
+        $payment = Payment::query()->where('stripe_payment_intent_id', $intent->id)->first();
+        if ($payment && ! in_array($payment->status, ['paid', 'refunded', 'abandoned'], true)) {
+            $payment->markFailed();
+        }
+    }
+
     /* ================================================================== */
     /*  Remboursements & litiges                                          */
     /* ================================================================== */
@@ -257,7 +293,13 @@ class StripeWebhookController extends Controller
         // Nouveau workflow
         $submissionPayment = SubmissionPayment::where('stripe_payment_intent_id', $paymentIntentId)->first();
         if ($submissionPayment) {
-            $submissionPayment->update(['status' => 'refunded', 'refunded_at' => now()]);
+            $this->submissionPaymentRefundService->markRefunded(
+                payment: $submissionPayment->fresh(['submission.publishedArticle', 'quote']),
+                refundId: (string) ($charge->refunds->data[0]->id ?? 'stripe-refund'),
+                reason: 'Refund confirmed by Stripe webhook',
+                actor: null,
+                source: 'stripe_webhook',
+            );
             return;
         }
 
@@ -274,6 +316,17 @@ class StripeWebhookController extends Controller
 
     private function handleDisputeCreated(object $charge): void
     {
+        $paymentIntentId = $charge->payment_intent ?? null;
+        if (is_string($paymentIntentId) && $paymentIntentId !== '') {
+            $submissionPayment = SubmissionPayment::where('stripe_payment_intent_id', $paymentIntentId)->first();
+            if ($submissionPayment) {
+                $this->submissionPaymentRefundService->markDisputed(
+                    $submissionPayment,
+                    $charge->dispute?->reason ?? 'Litige Stripe'
+                );
+            }
+        }
+
         Log::critical('Stripe dispute créée', [
             'charge_id'  => $charge->id ?? null,
             'amount'     => $charge->amount ?? null,

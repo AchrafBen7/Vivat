@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Payment;
 use App\Models\Submission;
 use App\Services\PaymentRefundService;
+use App\Services\SubmissionPaymentRefundService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -103,19 +104,53 @@ class DashboardPayments extends Page
                     'amount' => $displayAmount,
                     'status' => $paymentStatus,
                     'submission_status' => $submissionStatus,
-                    'refund_reason' => $legacyPayment?->refund_reason,
+                    'refund_reason' => $workflowPayment?->refund_reason ?? $legacyPayment?->refund_reason,
                     'created_at' => ($workflowPayment?->updated_at ?? $workflowPayment?->created_at ?? $quote?->created_at ?? $legacyPayment?->updated_at ?? $legacyPayment?->created_at ?? $submission->updated_at ?? $submission->created_at)?->format('d/m/Y à H:i') ?? 'Date inconnue',
                     'submission_url' => \App\Filament\Resources\Submissions\SubmissionResource::getUrl('view', ['record' => $submission]),
                     'article_url' => $submission->publishedArticle?->slug ? url('/articles/' . $submission->publishedArticle->slug) : null,
-                    'can_refund' => $legacyPayment?->isRefundable() ?? false,
+                    'can_refund' => $workflowPayment?->isRefundable() || ($legacyPayment?->isRefundable() ?? false),
+                    'submission_payment_id' => $workflowPayment?->id,
                     'legacy_payment_id' => $legacyPayment?->id,
                 ];
             })
             ->toArray();
     }
 
-    public function refundPayment(string $paymentId): void
+    public function refundPayment(string $paymentId, ?string $submissionPaymentId = null): void
     {
+        if ($submissionPaymentId) {
+            $submissionPayment = \App\Models\SubmissionPayment::query()->with('submission.user')->find($submissionPaymentId);
+
+            if (! $submissionPayment) {
+                Notification::make()
+                    ->danger()
+                    ->title('Paiement introuvable')
+                    ->send();
+
+                return;
+            }
+
+            if (! $submissionPayment->isRefundable()) {
+                Notification::make()
+                    ->warning()
+                    ->title('Remboursement impossible')
+                    ->body('Ce paiement ne peut pas être remboursé dans son état actuel.')
+                    ->send();
+
+                return;
+            }
+
+            app(SubmissionPaymentRefundService::class)->refund($submissionPayment, 'Article refusé', auth()->user());
+
+            Notification::make()
+                ->success()
+                ->title('Paiement remboursé')
+                ->body("Le remboursement a été traité. L'article lié a été dépublié s'il était déjà publié.")
+                ->send();
+
+            return;
+        }
+
         $payment = Payment::query()->with('submission.user')->find($paymentId);
 
         if (! $payment) {

@@ -40,6 +40,7 @@ class DashboardSubmissions extends Page
             'payment_failed' => ['label' => 'Paiement échoué', 'bg' => '#fef2f2', 'text' => '#991b1b'],
             'payment_expired' => ['label' => 'Offre expirée', 'bg' => '#fef2f2', 'text' => '#991b1b'],
             'payment_canceled' => ['label' => 'Paiement annulé', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'payment_refunded' => ['label' => 'Paiement remboursé', 'bg' => '#f3f4f6', 'text' => '#374151'],
             'published', 'approved' => ['label' => 'Publiée', 'bg' => '#ecfdf5', 'text' => '#065f46'],
             'rejected' => ['label' => 'Rejetée', 'bg' => '#fef2f2', 'text' => '#991b1b'],
             default => ['label' => ucfirst($status), 'bg' => '#EBF1EF', 'text' => '#004241'],
@@ -54,7 +55,9 @@ class DashboardSubmissions extends Page
             'succeeded' => ['label' => 'Paiement réussi', 'bg' => '#ecfdf5', 'text' => '#065f46'],
             'failed' => ['label' => 'Paiement échoué', 'bg' => '#fef2f2', 'text' => '#991b1b'],
             'canceled' => ['label' => 'Paiement annulé', 'bg' => '#fef2f2', 'text' => '#991b1b'],
+            'expired' => ['label' => 'Paiement expiré', 'bg' => '#fef2f2', 'text' => '#991b1b'],
             'refunded' => ['label' => 'Remboursé', 'bg' => '#f3f4f6', 'text' => '#374151'],
+            'disputed' => ['label' => 'Litige', 'bg' => '#fff7ed', 'text' => '#c2410c'],
             default => null,
         };
     }

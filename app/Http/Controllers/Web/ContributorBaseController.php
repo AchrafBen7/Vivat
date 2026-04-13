@@ -269,6 +269,8 @@ abstract class ContributorBaseController extends Controller
             'payment_succeeded', 'approved', 'published' => 'Publié',
             'payment_failed' => 'Paiement échoué',
             'payment_expired' => 'Offre expirée',
+            'payment_canceled' => 'Paiement annulé',
+            'payment_refunded' => 'Paiement remboursé',
             'rejected' => 'Refusé',
             default => 'Aucune',
         };

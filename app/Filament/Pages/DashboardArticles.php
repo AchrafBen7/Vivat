@@ -7,9 +7,13 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Livewire\WithPagination;
 
 class DashboardArticles extends Page
 {
+    use WithPagination;
+
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Editorial';
@@ -26,6 +30,8 @@ class DashboardArticles extends Page
 
     public string $status = 'published';
 
+    public int $perPage = 25;
+
     public function getStats(): array
     {
         return [
@@ -36,7 +42,17 @@ class DashboardArticles extends Page
         ];
     }
 
-    public function getArticles(): array
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function getArticles(): LengthAwarePaginator
     {
         return Article::query()
             ->with('category')
@@ -52,9 +68,8 @@ class DashboardArticles extends Page
             })
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
-            ->limit(24)
-            ->get()
-            ->map(function (Article $article): array {
+            ->paginate($this->perPage)
+            ->through(function (Article $article): array {
                 return [
                     'id' => $article->id,
                     'title' => $article->title,
@@ -78,8 +93,7 @@ class DashboardArticles extends Page
                         : url('/admin-preview/articles/' . $article->slug),
                     'edit_url' => \App\Filament\Resources\Articles\ArticleResource::getUrl('edit', ['record' => $article]),
                 ];
-            })
-            ->toArray();
+            });
     }
 
     public function unpublish(string $articleId): void

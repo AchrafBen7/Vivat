@@ -101,7 +101,7 @@ class PublicationQuoteService
 
                     if ($pendingPayment?->stripe_checkout_session_id) {
                         $this->cancelStripeSession($pendingPayment->stripe_checkout_session_id);
-                        $pendingPayment->update(['status' => 'canceled']);
+                        $pendingPayment->update(['status' => 'expired']);
                     }
 
                     $submission->transitionTo(
