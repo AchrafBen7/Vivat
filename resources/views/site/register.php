@@ -11,7 +11,6 @@ $locale = content_locale();
 $t = $locale === 'nl'
     ? [
         'back' => 'Terug',
-        'badge' => 'Redacteur worden',
         'hero_title' => 'Schrijven op Vivat, eenvoudig.',
         'hero_text' => 'Maak je account aan, bereid je artikel voor en kom terecht in een ruimte die gemaakt is om te publiceren binnen het redactionele universum van Vivat.',
         'hero_meta' => 'Bewaarbare concepten · Redactionele nalezing · Uitgelichte publicatie',
@@ -34,7 +33,6 @@ $t = $locale === 'nl'
     ]
     : [
         'back' => 'Retour',
-        'badge' => 'Devenir rédacteur',
         'hero_title' => 'Écrire sur Vivat, simplement.',
         'hero_text' => "Créez votre compte, préparez votre article et rejoignez un espace pensé pour publier dans l'univers éditorial Vivat.",
         'hero_meta' => 'Brouillons enregistrables · Relecture éditoriale · Publication mise en avant',
@@ -66,7 +64,7 @@ $t = $locale === 'nl'
             aria-hidden="true"
         ></div>
         <div
-            class="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[34%] min-h-[11rem] bg-white/10 backdrop-blur-[18px] [mask-image:linear-gradient(to_top,black_0%,rgba(0,0,0,0.92)_38%,rgba(0,0,0,0.44)_74%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_top,black_0%,rgba(0,0,0,0.92)_38%,rgba(0,0,0,0.44)_74%,transparent_100%)]"
+            class="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[42%] min-h-[14rem] bg-white/10 backdrop-blur-[18px] [mask-image:linear-gradient(to_top,black_0%,rgba(0,0,0,0.95)_42%,rgba(0,0,0,0.58)_76%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_top,black_0%,rgba(0,0,0,0.95)_42%,rgba(0,0,0,0.58)_76%,transparent_100%)]"
             aria-hidden="true"
         ></div>
 
@@ -80,10 +78,7 @@ $t = $locale === 'nl'
         </a>
 
         <div class="relative z-[2] mt-auto px-5 pb-6 pt-16 md:px-7 md:pb-7 md:pt-20">
-            <span class="inline-flex items-center rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#004241] backdrop-blur-sm">
-                <?= htmlspecialchars($t['badge']) ?>
-            </span>
-            <h1 class="mt-4 font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
+            <h1 class="font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
                 <?= htmlspecialchars($t['hero_title']) ?>
             </h1>
             <p class="mt-3 max-w-[27rem] text-[15px] leading-relaxed text-[#004241]/82">

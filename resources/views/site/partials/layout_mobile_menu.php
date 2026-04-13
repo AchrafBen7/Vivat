@@ -45,7 +45,7 @@
         </nav>
 
         <div>
-            <p class="mb-2 border-t border-white/[0.07] px-1 pt-7 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35 lg:border-t-0 lg:pt-0"><?= htmlspecialchars(__('site.sections')) ?></p>
+            <p class="mb-2 px-1 pt-7 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35 lg:pt-0"><?= htmlspecialchars(__('site.sections')) ?></p>
             <nav class="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3" aria-label="<?= htmlspecialchars(__('site.sections')) ?>">
                 <?php foreach ($categories as $cat) { ?>
                 <a href="/categories/<?= htmlspecialchars($cat['slug']) ?>" class="rounded-[14px] px-4 py-3.5 text-[17px] font-medium leading-[1.35] text-white/80 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars($cat['name']) ?></a>

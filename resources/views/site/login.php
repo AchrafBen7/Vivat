@@ -3,12 +3,11 @@ $errors = $errors ?? [];
 $old = $old ?? [];
 $email = $old['email'] ?? '';
 $hero_img = 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=900&h=1100&fit=crop';
-$inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
+$inputClass = 'h-11 w-full rounded-full border border-transparent bg-white px-5 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
 $locale = content_locale();
 $t = $locale === 'nl'
     ? [
         'back' => 'Terug',
-        'badge' => 'Bijdragersruimte',
         'hero_title' => 'Terug naar je Vivat-ruimte.',
         'hero_text' => 'Log in om je concepten terug te vinden, je content te beheren en je inzendingen op te volgen.',
         'hero_meta' => 'Bewaarbare concepten · Redactionele opvolging · Uitgelichte publicatie',
@@ -26,7 +25,6 @@ $t = $locale === 'nl'
     ]
     : [
         'back' => 'Retour',
-        'badge' => 'Espace contributeur',
         'hero_title' => 'Reprendre votre espace Vivat.',
         'hero_text' => 'Connectez-vous pour retrouver vos brouillons, gérer vos contenus et suivre vos soumissions.',
         'hero_meta' => 'Brouillons enregistrables · Suivi éditorial · Publication mise en avant',
@@ -45,29 +43,29 @@ $t = $locale === 'nl'
 ?>
 
 <div class="mx-auto grid w-full max-w-[1280px] items-stretch gap-6 pb-6 lg:min-h-[calc(100svh-136px)] lg:grid-cols-[1.02fr_0.98fr]">
-    <section class="flex min-h-[320px] flex-col overflow-hidden rounded-[40px] border border-[#EBF1EF] bg-[#EBF1EF] shadow-[0_18px_48px_rgba(0,66,65,0.07)] lg:h-full lg:min-h-0">
-        <div class="relative min-h-[min(280px,42svh)] flex-1 basis-[55%] lg:min-h-[min(38vh,400px)]">
-            <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 h-full w-full object-cover object-center" loading="eager">
-            <div
-                class="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[min(34%,9.5rem)] min-h-[6rem] max-h-[11rem] bg-[linear-gradient(to_top,#EBF1EF_0%,rgba(235,241,239,0.97)_3%,rgba(235,241,239,0.88)_10%,rgba(235,241,239,0.72)_20%,rgba(235,241,239,0.52)_34%,rgba(235,241,239,0.32)_50%,rgba(235,241,239,0.16)_66%,rgba(235,241,239,0.06)_82%,transparent_100%)]"
-                aria-hidden="true"
-            ></div>
+    <section class="relative flex min-h-[560px] flex-col overflow-hidden rounded-[40px] border border-[#EBF1EF] shadow-[0_18px_48px_rgba(0,66,65,0.07)] lg:h-full lg:min-h-0">
+        <img src="<?= htmlspecialchars($hero_img) ?>" alt="" class="absolute inset-0 h-full w-full object-cover object-center" loading="eager">
+        <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0)_36%,rgba(255,255,255,0.08)_100%)]" aria-hidden="true"></div>
+        <div
+            class="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[48%] min-h-[16rem] bg-[linear-gradient(to_top,rgba(235,241,239,0.95)_0%,rgba(235,241,239,0.84)_24%,rgba(235,241,239,0.54)_52%,rgba(235,241,239,0.16)_78%,transparent_100%)]"
+            aria-hidden="true"
+        ></div>
+        <div
+            class="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[42%] min-h-[14rem] bg-white/10 backdrop-blur-[18px] [mask-image:linear-gradient(to_top,black_0%,rgba(0,0,0,0.95)_42%,rgba(0,0,0,0.58)_76%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_top,black_0%,rgba(0,0,0,0.95)_42%,rgba(0,0,0,0.58)_76%,transparent_100%)]"
+            aria-hidden="true"
+        ></div>
 
-            <a
-                href="/"
-                class="absolute left-5 top-5 z-10 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white md:left-6 md:top-6"
-                aria-label="<?= htmlspecialchars($t['back']) ?>"
-            >
-                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                <?= htmlspecialchars($t['back']) ?>
-            </a>
-        </div>
+        <a
+            href="/"
+            class="absolute left-5 top-5 z-10 inline-flex items-center justify-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white md:left-6 md:top-6"
+            aria-label="<?= htmlspecialchars($t['back']) ?>"
+        >
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <?= htmlspecialchars($t['back']) ?>
+        </a>
 
-        <div class="relative z-[1] -mt-px flex-shrink-0 bg-[#EBF1EF] px-5 py-6 md:px-7 md:py-7">
-            <span class="inline-flex items-center rounded-full border border-[#004241]/15 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#004241]">
-                <?= htmlspecialchars($t['badge']) ?>
-            </span>
-            <h1 class="mt-4 font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
+        <div class="relative z-[2] mt-auto px-5 pb-6 pt-16 md:px-7 md:pb-7 md:pt-20">
+            <h1 class="font-sans text-[1.75rem] font-semibold leading-[1.08] text-[#004241] sm:text-[2rem] md:text-[2.25rem]">
                 <?= htmlspecialchars($t['hero_title']) ?>
             </h1>
             <p class="mt-3 max-w-[27rem] text-[15px] leading-relaxed text-[#004241]/82">
@@ -108,23 +106,21 @@ $t = $locale === 'nl'
                     <?php } ?>
                 </div>
 
-                <div class="-mt-1 flex justify-end">
-                    <a href="<?= route('password.request') ?>" class="text-sm font-medium text-[#004241] underline underline-offset-4 hover:no-underline">
-                        <?= htmlspecialchars($t['forgot']) ?>
-                    </a>
-                </div>
-
-                <div class="flex items-start gap-3">
-                    <label for="remember" class="flex items-start gap-3 text-sm leading-snug text-[#004241]">
+                <div class="-mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <label for="remember" class="inline-flex items-center gap-3 text-sm leading-none text-[#004241]">
                         <input
                             type="checkbox"
                             name="remember"
                             id="remember"
                             value="1"
-                            class="mt-1 h-4 w-4 rounded-full border-gray-300 text-[#004241] focus:ring-[#004241]/25"
+                            class="h-4 w-4 rounded border-[#004241]/20 text-[#004241] focus:ring-[#004241]/25"
                         >
                         <span><?= htmlspecialchars($t['remember']) ?></span>
                     </label>
+
+                    <a href="<?= route('password.request') ?>" class="text-sm font-medium text-[#004241] underline underline-offset-4 hover:no-underline">
+                        <?= htmlspecialchars($t['forgot']) ?>
+                    </a>
                 </div>
 
                 <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">

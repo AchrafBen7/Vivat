@@ -9,6 +9,17 @@
         -webkit-tap-highlight-color: transparent;
     }
 </style>
+<?php
+$yellowHeroTagLabel = static function (?array $article) use ($t): string {
+    $categoryName = trim((string) ($article['category']['name'] ?? ''));
+
+    if ($categoryName !== '') {
+        return $categoryName;
+    }
+
+    return $t('site.featured', 'À la une');
+};
+?>
 
 <!-- Bandeau pub tablette uniquement (md) -->
 <div class="hidden md:block lg:hidden w-full mb-6">
@@ -80,9 +91,7 @@
             <svg class="h-[26px] w-[26px] flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </span>
         <div class="<?= $heroColorCardContentMotion ?>">
-            <?php if (! empty($h4['category'])) { ?>
-            <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($h4['category']['name']) ?></span>
-            <?php } ?>
+            <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($yellowHeroTagLabel($h4)) ?></span>
             <h3 class="<?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-3"><?= htmlspecialchars($h4['title']) ?></h3>
             <?php if (! empty($h4['excerpt'])) { ?>
             <p class="<?= $heroColorCardExcerptRevealOnLight ?>"><?= htmlspecialchars($h4['excerpt']) ?></p>
@@ -154,9 +163,7 @@
                     <svg class="h-[26px] w-[26px] flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </span>
                 <div class="<?= $heroColorCardContentMotion ?>">
-                    <?php if (! empty($h4['category'])) { ?>
-                    <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($h4['category']['name']) ?></span>
-                    <?php } ?>
+                    <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($yellowHeroTagLabel($h4)) ?></span>
                     <h3 class="<?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-3"><?= htmlspecialchars($h4['title']) ?></h3>
                     <?php if (! empty($h4['excerpt'])) { ?>
                     <p class="<?= $heroColorCardExcerptRevealOnLight ?>"><?= htmlspecialchars($h4['excerpt']) ?></p>

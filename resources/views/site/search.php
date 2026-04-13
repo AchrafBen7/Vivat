@@ -38,8 +38,6 @@ $t = $locale === 'nl'
 
 $heroTitle = $t['title'];
 $heroDescription = $t['desc'];
-$heroBadge = $t['badge'];
-
 if ($search_term !== '') {
     $heroTitle = $matched_category
         ? $t['results_in'].($matched_category['name'] ?? '')
@@ -54,10 +52,7 @@ if ($search_term !== '') {
     <section class="rounded-[36px] bg-[#EBF1EF] px-6 py-8 md:px-10 md:py-10">
         <div>
             <div class="max-w-4xl">
-                <span class="inline-flex items-center rounded-full border border-[#004241]/10 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#004241]/65">
-                    <?= htmlspecialchars($heroBadge) ?>
-                </span>
-                <h1 class="mt-5 max-w-4xl text-[2.5rem] font-semibold leading-[1.02] text-[#004241] sm:text-[3.15rem]">
+                <h1 class="max-w-4xl text-[2.5rem] font-semibold leading-[1.02] text-[#004241] sm:text-[3.15rem]">
                     <?= htmlspecialchars($heroTitle) ?>
                 </h1>
                 <p class="mt-4 max-w-3xl text-base leading-7 text-[#004241]/76 md:text-lg">
@@ -86,18 +81,18 @@ if ($search_term !== '') {
     <?php if ($search_term !== '' && $gridArticles !== []) { ?>
     <?php
     $count = count($gridArticles);
-    $gridClass = $count === 1
-        ? 'grid gap-6 grid-cols-1 max-w-[520px]'
-        : ($count === 2 ? 'grid gap-6 grid-cols-1 md:grid-cols-2' : 'grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3');
-    ?>
+        $gridClass = $count === 1
+            ? 'grid gap-6 grid-cols-1 max-w-[520px]'
+            : ($count === 2 ? 'grid gap-6 grid-cols-1 md:grid-cols-2' : 'grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3');
+        ?>
     <section class="mt-8">
         <div class="<?= $gridClass ?>">
             <?php foreach ($gridArticles as $index => $article) { ?>
             <?php
-            [$imageSrc, $imageFallback] = $resolveImage($article, 640, 420, 'search-grid-'.$index);
-            $variantPattern = [0, 1, 1, 0, 1, 0];
-            $variant = $variantPattern[$index % count($variantPattern)];
-            ?>
+                [$imageSrc, $imageFallback] = $resolveImage($article, 640, 420, 'search-grid-'.$index);
+                $variantPattern = [0, 1, 1, 0, 1, 0];
+                $variant = $variantPattern[$index % count($variantPattern)];
+                ?>
 
             <?php if ($variant === 0) { ?>
             <a

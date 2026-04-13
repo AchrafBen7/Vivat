@@ -74,7 +74,7 @@ $leftEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isL
 $centerVisualArt = $pickLatestArticle($allLatestPool, $isLongFormArticle, $isImageArticle);
 $rightEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isHotNewsArticle, $isLongFormArticle);
 $bottomLeftVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isLongFormArticle);
-$bottomCenterEditorialArt = $pickLatestArticle($allLatestPool, $isEditorialArticle, $isLongFormArticle);
+$bottomCenterEditorialArt = $pickLatestArticle($allLatestPool, static fn (array $article): bool => ! empty($article['category']), $isEditorialArticle, $isLongFormArticle);
 $bottomRightVisualArt = $pickLatestArticle($allLatestPool, $isImageArticle, $isHotNewsArticle);
 $latestTabletCards = array_values(array_filter([
     ['kind' => 'image', 'article' => $topVisualArt, 'slot' => 'latest-tablet-top-visual', 'width' => 520, 'height' => 320],

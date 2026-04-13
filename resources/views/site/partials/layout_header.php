@@ -1,3 +1,7 @@
+<?php
+$logoPath = public_path('logo_vivat.png');
+$logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath) : '');
+?>
 <div id="mobile-nav-overlay"
      data-open="false"
      class="fixed inset-0 z-[45] bg-black/45 opacity-0 pointer-events-none transition-opacity duration-300 ease-out data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto"
@@ -6,8 +10,10 @@
 <header id="site-header" class="relative z-50 isolate bg-gradient-to-b from-white from-0% via-white via-[40%] to-[#EBF1EF]/32 to-100% shadow-[0_6px_20px_-4px_rgba(0,66,65,0.075),0_14px_36px_-18px_rgba(0,66,65,0.05)]">
     <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 relative z-50">
         <div class="flex items-center gap-2 md:gap-3 h-[72px] md:h-[88px] py-[16px] md:py-[24px]">
-            <h1 class="font-righteous text-[32px] font-normal flex-shrink-0 text-[#004241] tracking-[0.03em]">
-                <a href="/" class="text-inherit no-underline">Vivat</a>
+            <h1 class="flex-shrink-0">
+                <a href="/" class="block no-underline">
+                    <img src="<?= htmlspecialchars($logoUrl) ?>" alt="Vivat" class="block w-[64px] md:w-[88px] h-auto" loading="eager">
+                </a>
             </h1>
 
             <div class="flex-1 min-w-[16px]"></div>

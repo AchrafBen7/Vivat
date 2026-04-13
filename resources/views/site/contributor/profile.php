@@ -59,96 +59,10 @@ $errorClass = 'mt-2 text-sm text-red-600';
 ?>
 <div class="flex w-full max-w-[920px] flex-col gap-6">
     <section class="overflow-hidden rounded-[32px] bg-[#EBF1EF] p-6 shadow-[0_14px_40px_rgba(0,66,65,0.08)] md:p-8">
-        <div class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_280px] xl:items-start">
-            <div class="flex flex-col gap-6">
-                <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
-                    <div class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-[4px] border-white/85 bg-[#DCE8E4] text-[28px] font-semibold text-[#004241] shadow-[0_8px_24px_rgba(0,66,65,0.12)]">
-                        <?php if ($avatarUrl): ?>
-                        <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="Photo de profil" class="h-full w-full object-cover">
-                        <?php else: ?>
-                        <span><?= htmlspecialchars($initials) ?></span>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center rounded-full bg-[#004241] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-                                <?= htmlspecialchars($roleLabel) ?>
-                            </span>
-                            <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-[#004241]/78">
-                                <?= htmlspecialchars($t('site.my_profile', 'Mon profil')) ?>
-                            </span>
-                        </div>
-                        <h1 class="mt-4 text-[30px] font-semibold leading-[1.02] text-[#004241] sm:text-[36px]">
-                            <?= htmlspecialchars($name) ?>
-                        </h1>
-                        <p class="mt-2 text-base text-[#004241]/72">
-                            <?= htmlspecialchars($email) ?>
-                        </p>
-
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#004241]">
-                                <?= htmlspecialchars($accountAccessLabel) ?>
-                            </span>
-                            <span class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium <?= $hasVerifiedEmail ? 'bg-[#DCEFE8] text-[#1F6A51]' : 'bg-[#F3E8CC] text-[#7A5A14]' ?>">
-                                <?= htmlspecialchars($hasVerifiedEmail ? $t('site.email_verified', 'Email vérifié') : $t('site.email_not_verified', 'Email non vérifié')) ?>
-                            </span>
-                            <?php if ($memberSinceLabel !== ''): ?>
-                            <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#004241]/78">
-                                <?= htmlspecialchars($t('site.member_since', 'Membre depuis')) ?> <?= htmlspecialchars($memberSinceLabel) ?>
-                            </span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid gap-3 sm:grid-cols-3">
-                    <div class="<?= $softCardClass ?>">
-                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[#004241]/56"><?= htmlspecialchars($t('site.profile_completion', 'Complétion')) ?></p>
-                        <p class="mt-2 text-[28px] font-semibold leading-none text-[#004241]"><?= $profileCompletionPercent ?>%</p>
-                        <p class="mt-2 text-sm leading-6 text-[#004241]/66"><?= $profileCompletedCount ?>/<?= count($profileCriteria) ?> <?= htmlspecialchars($t('site.profile_points_completed', 'éléments remplis')) ?></p>
-                    </div>
-                    <div class="<?= $softCardClass ?>">
-                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[#004241]/56"><?= htmlspecialchars($t('site.public_links', 'Liens publics')) ?></p>
-                        <p class="mt-2 text-[28px] font-semibold leading-none text-[#004241]"><?= $publicLinksCount ?></p>
-                        <p class="mt-2 text-sm leading-6 text-[#004241]/66"><?= htmlspecialchars($t('site.shared_profiles_count', 'profils ou sites partagés')) ?></p>
-                    </div>
-                    <div class="<?= $softCardClass ?>">
-                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[#004241]/56"><?= htmlspecialchars($t('site.author_space', 'Espace auteur')) ?></p>
-                        <p class="mt-2 text-sm font-medium leading-6 text-[#004241]"><?= htmlspecialchars($hasBio ? $t('site.author_profile_ready', 'Présentation prête pour votre espace auteur') : $t('site.author_profile_missing', 'Ajoutez une bio pour mieux présenter votre profil')) ?></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-[28px] border border-white/60 bg-white/72 p-5 backdrop-blur-sm">
-                <h2 class="text-lg font-semibold text-[#004241]"><?= htmlspecialchars($t('site.quick_overview', 'Repères rapides')) ?></h2>
-                <p class="mt-2 text-sm leading-6 text-[#004241]/68">
-                    <?= htmlspecialchars($t('site.profile_overview_help', 'Mettez à jour vos informations publiques, sécurisez votre accès et gardez un profil propre avant vos prochaines soumissions.')) ?>
-                </p>
-
-                <div class="mt-5 h-2 overflow-hidden rounded-full bg-[#D7E5E1]">
-                    <div class="h-full rounded-full bg-[#004241] transition-all duration-500" style="width: <?= max(0, min(100, $profileCompletionPercent)) ?>%"></div>
-                </div>
-
-                <div class="mt-5 space-y-3 text-sm text-[#004241]/74">
-                    <div class="flex items-start justify-between gap-3 rounded-[18px] bg-[#F5FAF8] px-4 py-3">
-                        <span><?= htmlspecialchars($t('site.public_name', 'Nom public')) ?></span>
-                        <span class="font-medium text-[#004241]"><?= htmlspecialchars(trim((string) $name) !== '' ? $t('site.done', 'OK') : $t('site.to_complete', 'À compléter')) ?></span>
-                    </div>
-                    <div class="flex items-start justify-between gap-3 rounded-[18px] bg-[#F5FAF8] px-4 py-3">
-                        <span><?= htmlspecialchars($t('site.biography', 'Biographie')) ?></span>
-                        <span class="font-medium text-[#004241]"><?= htmlspecialchars($hasBio ? $t('site.done', 'OK') : $t('site.to_complete', 'À compléter')) ?></span>
-                    </div>
-                    <div class="flex items-start justify-between gap-3 rounded-[18px] bg-[#F5FAF8] px-4 py-3">
-                        <span><?= htmlspecialchars($t('site.public_links', 'Liens publics')) ?></span>
-                        <span class="font-medium text-[#004241]"><?= $publicLinksCount ?>/3</span>
-                    </div>
-                </div>
-
-                <p class="mt-5 text-xs leading-5 text-[#004241]/56">
-                    <?= htmlspecialchars($t('site.avatar_upload_coming_soon', 'La gestion avancée de la photo de profil arrivera bientôt.')) ?>
-                </p>
-            </div>
+        <div class="py-2 text-center sm:text-left">
+            <h1 class="text-[30px] font-semibold leading-[1.02] text-[#004241] sm:text-[36px]">
+                <?= htmlspecialchars($name) ?>
+            </h1>
         </div>
     </section>
 
@@ -173,9 +87,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                             class="<?= $inputClass ?>"
                         >
                         <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.public_name_help', 'C’est le nom affiché publiquement avec vos articles.')) ?></p>
-                        <?php if (!empty($errors['name'])): ?>
+                        <?php if (! empty($errors['name'])) { ?>
                         <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['name']) ? $errors['name'][0] : $errors['name']) ?></p>
-                        <?php endif; ?>
+                        <?php } ?>
                     </div>
                 </div>
 
@@ -207,9 +121,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                         <p class="text-xs leading-5 text-[#004241]/58"><?= htmlspecialchars($t('site.bio_help', 'Présentez-vous en quelques lignes. Cette bio peut apparaître dans votre espace auteur.')) ?></p>
                         <span class="text-xs font-medium text-[#004241]/46"><?= mb_strlen(trim((string) $bio)) ?>/2000</span>
                     </div>
-                    <?php if (!empty($errors['bio'])): ?>
+                    <?php if (! empty($errors['bio'])) { ?>
                     <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['bio']) ? $errors['bio'][0] : $errors['bio']) ?></p>
-                    <?php endif; ?>
+                    <?php } ?>
                 </div>
             </div>
 
@@ -232,9 +146,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                 class="<?= $inputClass ?>"
                             >
                             <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.add_full_link_help', 'Ajoutez un lien complet si vous souhaitez le partager.')) ?></p>
-                            <?php if (!empty($errors['twitter_url'])): ?>
+                            <?php if (! empty($errors['twitter_url'])) { ?>
                             <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['twitter_url']) ? $errors['twitter_url'][0] : $errors['twitter_url']) ?></p>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
                     </div>
 
@@ -250,9 +164,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                 class="<?= $inputClass ?>"
                             >
                             <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.add_full_link_help', 'Ajoutez un lien complet si vous souhaitez le partager.')) ?></p>
-                            <?php if (!empty($errors['instagram_url'])): ?>
+                            <?php if (! empty($errors['instagram_url'])) { ?>
                             <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['instagram_url']) ? $errors['instagram_url'][0] : $errors['instagram_url']) ?></p>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
                     </div>
 
@@ -268,9 +182,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                 class="<?= $inputClass ?>"
                             >
                             <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.website_help', 'Utilisez l’adresse complète de votre site ou portfolio.')) ?></p>
-                            <?php if (!empty($errors['website_url'])): ?>
+                            <?php if (! empty($errors['website_url'])) { ?>
                             <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['website_url']) ? $errors['website_url'][0] : $errors['website_url']) ?></p>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>
@@ -302,9 +216,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                 name="current_password"
                                 class="<?= $inputClass ?>"
                             >
-                            <?php if (!empty($errors['current_password'])): ?>
+                            <?php if (! empty($errors['current_password'])) { ?>
                             <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['current_password']) ? $errors['current_password'][0] : $errors['current_password']) ?></p>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
                     </div>
 
@@ -319,9 +233,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                     class="<?= $inputClass ?>"
                                 >
                                 <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.password_rules_help', 'Minimum 12 caractères avec majuscule, minuscule, chiffre et symbole.')) ?></p>
-                                <?php if (!empty($errors['password'])): ?>
+                                <?php if (! empty($errors['password'])) { ?>
                                 <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
-                                <?php endif; ?>
+                                <?php } ?>
                             </div>
                         </div>
 
@@ -353,9 +267,9 @@ $errorClass = 'mt-2 text-sm text-red-600';
                     <p class="text-sm leading-6 text-[#8E2E2A]/80">
                         <?= htmlspecialchars($t('site.delete_account_warning', 'Cette action est irréversible. Vos données personnelles seront anonymisées, votre accès sera révoqué, mais les articles, paiements et décisions éditoriales pourront être conservés si une conservation légale ou comptable s’impose.')) ?>
                     </p>
-                    <?php if (!empty($errors['delete_account'])): ?>
+                    <?php if (! empty($errors['delete_account'])) { ?>
                     <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_account']) ? $errors['delete_account'][0] : $errors['delete_account']) ?></p>
-                    <?php endif; ?>
+                    <?php } ?>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4">
@@ -371,13 +285,13 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                 class="w-full h-11 rounded-[16px] border border-[#E8C8C6] bg-white px-4 text-sm text-[#6A2420] outline-none transition focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
                             >
                             <p class="mt-2 text-xs leading-5 text-[#8E2E2A]/60"><?= htmlspecialchars($t('site.delete_email_help', 'Saisissez exactement l’adresse liée à ce compte pour confirmer l’opération.')) ?></p>
-                            <?php if (!empty($errors['delete_email'])): ?>
+                            <?php if (! empty($errors['delete_email'])) { ?>
                             <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_email']) ? $errors['delete_email'][0] : $errors['delete_email']) ?></p>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
                     </div>
 
-                    <?php if ($requiresPasswordForDeletion): ?>
+                    <?php if ($requiresPasswordForDeletion) { ?>
                     <div class="flex flex-col gap-2">
                         <label for="current_password_delete" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8E2E2A]/70"><?= htmlspecialchars($t('site.current_password', 'Mot de passe actuel')) ?></label>
                         <div>
@@ -388,21 +302,21 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                 class="w-full h-11 rounded-[16px] border border-[#E8C8C6] bg-white px-4 text-sm text-[#6A2420] outline-none transition focus:border-[#8E2E2A] focus:ring-2 focus:ring-[#8E2E2A]/10"
                             >
                             <p class="mt-2 text-xs leading-5 text-[#8E2E2A]/60"><?= htmlspecialchars($t('site.delete_password_help', 'Cette vérification protège votre compte contre une suppression lancée depuis une session ouverte.')) ?></p>
-                            <?php if (!empty($errors['current_password_delete'])): ?>
+                            <?php if (! empty($errors['current_password_delete'])) { ?>
                             <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['current_password_delete']) ? $errors['current_password_delete'][0] : $errors['current_password_delete']) ?></p>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
                     </div>
-                    <?php endif; ?>
+                    <?php } ?>
                 </div>
 
                 <label class="inline-flex items-start gap-3 rounded-[18px] border border-[#E8C8C6] bg-white px-4 py-3 text-sm leading-6 text-[#6A2420]">
                     <input type="checkbox" name="delete_confirmation" value="1" class="mt-1 h-4 w-4 rounded border-[#D65B57] text-[#8E2E2A] focus:ring-[#8E2E2A]/20">
                     <span><?= htmlspecialchars($t('site.delete_account_checkbox', 'Je confirme vouloir supprimer définitivement mon compte et perdre l’accès à l’espace rédacteur.')) ?></span>
                 </label>
-                <?php if (!empty($errors['delete_confirmation'])): ?>
+                <?php if (! empty($errors['delete_confirmation'])) { ?>
                 <p class="text-sm text-red-600"><?= htmlspecialchars(is_array($errors['delete_confirmation']) ? $errors['delete_confirmation'][0] : $errors['delete_confirmation']) ?></p>
-                <?php endif; ?>
+                <?php } ?>
 
                 <div class="flex justify-end pt-1">
                     <button
