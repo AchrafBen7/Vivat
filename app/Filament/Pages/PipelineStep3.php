@@ -54,6 +54,8 @@ class PipelineStep3 extends Page
 
     public ?string $publishCategoryId = null;
 
+    public string $publishArticleType = 'standard';
+
     public function getStats(): array
     {
         return [
@@ -92,6 +94,15 @@ class PipelineStep3 extends Page
             ->orderedForHome()
             ->pluck('name', 'id')
             ->all();
+    }
+
+    public function getArticleTypeOptions(): array
+    {
+        return [
+            'standard' => 'Article standard',
+            'hot_news' => 'Hot news',
+            'long_form' => 'Long format',
+        ];
     }
 
     public function deleteDraft(string $articleId): void
@@ -440,6 +451,9 @@ class PipelineStep3 extends Page
 
         $this->publishArticleId = $article->id;
         $this->publishCategoryId = $article->category_id;
+        $this->publishArticleType = in_array($article->article_type, ['standard', 'hot_news', 'long_form'], true)
+            ? $article->article_type
+            : 'standard';
         $this->publishModalOpen = true;
     }
 
@@ -448,6 +462,7 @@ class PipelineStep3 extends Page
         $this->publishModalOpen = false;
         $this->publishArticleId = null;
         $this->publishCategoryId = null;
+        $this->publishArticleType = 'standard';
     }
 
     public function confirmPublishDraft(): void
@@ -470,12 +485,21 @@ class PipelineStep3 extends Page
             return;
         }
 
-        if ($this->publishCategoryId) {
-            $article->update([
-                'category_id' => $this->publishCategoryId,
-            ]);
-            $article->refresh();
+        if (! in_array($this->publishArticleType, ['standard', 'hot_news', 'long_form'], true)) {
+            Notification::make()
+                ->warning()
+                ->title("Type d'article requis")
+                ->body("Choisis un type d'article valide avant de publier ce brouillon.")
+                ->send();
+
+            return;
         }
+
+        $article->update([
+            'category_id' => $this->publishCategoryId ?: $article->category_id,
+            'article_type' => $this->publishArticleType,
+        ]);
+        $article->refresh();
 
         if (! $article->publish()) {
             Notification::make()

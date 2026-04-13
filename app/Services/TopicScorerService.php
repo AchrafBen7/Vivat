@@ -351,11 +351,6 @@ class TopicScorerService
 
         $avgWeight = $count > 0 ? $totalWeight / $count : 0;
 
-        $highDemandCategories = ['environnement', 'energie', 'sante', 'alimentation', 'technologie'];
-        if ($category && in_array($category->slug, $highDemandCategories, true)) {
-            $avgWeight = min(100, $avgWeight + 10);
-        }
-
         return (int) round($avgWeight);
     }
 

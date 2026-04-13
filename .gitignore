@@ -16,9 +16,12 @@
 /public/build
 /public/hot
 /public/storage
+/public/uploads
 /storage/*.key
 /storage/pail
 /vendor
+/docs/LOGBOEK_*.md
+/vivat_dump.sql
 Homestead.json
 Homestead.yaml
 Thumbs.db

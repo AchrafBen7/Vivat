@@ -78,11 +78,7 @@ class PipelineDailyAutomation extends Page
 
         $proposalCount = count(app(ArticleSelectionService::class)->selectBestTopics(3));
 
-        $generatedArticles = Article::query()
-            ->whereDate('created_at', today())
-            ->whereNotNull('cluster_id')
-            ->latest('created_at')
-            ->get();
+        $generatedArticles = $this->resolveGeneratedArticlesToday($todayGenerateJobs);
         $latestGeneratedArticle = $generatedArticles->first();
 
         $latestGenerateJob = $todayGenerateJobs->sortByDesc('created_at')->first();
@@ -218,6 +214,30 @@ class PipelineDailyAutomation extends Page
         return $date
             ->timezone(config('app.timezone', 'Europe/Brussels'))
             ->format('H:i');
+    }
+
+    private function resolveGeneratedArticlesToday($todayGenerateJobs)
+    {
+        $articleIdsFromJobs = $todayGenerateJobs
+            ->pluck('metadata')
+            ->filter(fn ($metadata): bool => is_array($metadata) && ! empty($metadata['article_id']))
+            ->pluck('article_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $query = Article::query()
+            ->whereDate('created_at', today())
+            ->where(function ($query) use ($articleIdsFromJobs): void {
+                $query->whereNotNull('cluster_id');
+
+                if ($articleIdsFromJobs->isNotEmpty()) {
+                    $query->orWhereIn('id', $articleIdsFromJobs->all());
+                }
+            })
+            ->latest('created_at');
+
+        return $query->get();
     }
 
     protected function getHeaderActions(): array

@@ -57,6 +57,10 @@ class ArticleSelectionService
         $topics = $this->topicScorer->clusterByTopic($scoredItems);
         $totalPoolSize = $items->count();
         $minItems = $this->getClusteringConfig()['min_items_per_topic'];
+        $poolCountByCategory = $items->pluck('category_id')
+            ->filter()
+            ->countBy()
+            ->all();
 
         // Compte d'articles récents (48h) par catégorie pour la diversité
         $recentCountByCategory = Article::whereIn('status', ['draft', 'published'])
@@ -77,7 +81,7 @@ class ArticleSelectionService
                 $effectiveMin = ($maxRecentCount > 0 && $categoryRecentCount < ($maxRecentCount / 2)) ? 1 : $minItems;
                 return $group->count() >= $effectiveMin;
             })
-            ->map(fn (Collection $group): array => $this->scoreTopic($group, $totalPoolSize));
+            ->map(fn (Collection $group): array => $this->scoreTopic($group, $totalPoolSize, $poolCountByCategory));
 
         if ($scoredTopics->isEmpty() && $scoredItems->isNotEmpty()) {
             $bestSingleItem = $scoredItems
@@ -86,7 +90,7 @@ class ArticleSelectionService
                 ->first();
 
             if (is_array($bestSingleItem) && $this->canUseSingleSourceFallback($bestSingleItem)) {
-                $fallbackTopic = $this->scoreTopic(collect([$bestSingleItem]), $totalPoolSize);
+                $fallbackTopic = $this->scoreTopic(collect([$bestSingleItem]), $totalPoolSize, $poolCountByCategory);
                 $fallbackTopic['reasoning'] .= ' Fallback activé : meilleur sujet disponible retenu malgré une seule source enrichie.';
                 $fallbackTopic['selection_mode'] = 'single_source_fallback';
                 $scoredTopics = collect([$fallbackTopic]);
@@ -123,7 +127,7 @@ class ArticleSelectionService
         ], config('selection.clustering', []));
     }
 
-    private function scoreTopic(Collection $group, int $totalPoolSize): array
+    private function scoreTopic(Collection $group, int $totalPoolSize, array $poolCountByCategory = []): array
     {
         $weights = $this->getWeights();
         $config = $this->getClusteringConfig();
@@ -184,23 +188,19 @@ class ArticleSelectionService
         $articleTypesConfig = config('selection.article_types', []);
         $typeConfig = $articleTypesConfig[$suggestedArticleType] ?? $articleTypesConfig['standard'] ?? [];
 
-        // Pénalité si cette catégorie a déjà un brouillon récent (diversité éditoriale)
-        $recentCategoryPenalty = 0;
-        if ($category) {
-            $recentCount = Article::where('category_id', $category->id)
-                ->whereIn('status', ['draft', 'published'])
-                ->where('created_at', '>=', now()->subHours(48))
-                ->count();
-            if ($recentCount >= 3) {
-                $recentCategoryPenalty = 30;
-            } elseif ($recentCount >= 2) {
-                $recentCategoryPenalty = 20;
-            } elseif ($recentCount >= 1) {
-                $recentCategoryPenalty = 10;
-            }
-        }
+        $recentCategoryPenalty = $this->calculateRecentCategoryPenalty($category?->id);
+        $poolDominancePenalty = $this->calculatePoolDominancePenalty($category?->id, $categoryAlignment, $poolCountByCategory, $totalPoolSize);
 
-        $topicScore = (int) round($avgItemScore + $diversityBonus + $multiSourceBonus + $topicFrequencyBonus + $alignmentBonus - $weakTopicPenalty - $recentCategoryPenalty);
+        $topicScore = (int) round(
+            $avgItemScore
+            + $diversityBonus
+            + $multiSourceBonus
+            + $topicFrequencyBonus
+            + $alignmentBonus
+            - $weakTopicPenalty
+            - $recentCategoryPenalty
+            - $poolDominancePenalty
+        );
         $topicScore = min(100, max(0, $topicScore));
 
         $reasoning = $this->buildReasoning(
@@ -245,10 +245,64 @@ class ArticleSelectionService
             'source_count' => $sourceCount,
             'avg_quality' => round($avgQuality, 1),
             'category_alignment' => round($categoryAlignment, 2),
+            'recent_category_penalty' => $recentCategoryPenalty,
+            'pool_dominance_penalty' => $poolDominancePenalty,
             'suggested_article_type' => $suggestedArticleType,
             'suggested_min_words' => $typeConfig['min_words'] ?? 800,
             'suggested_max_words' => $typeConfig['max_words'] ?? 1200,
         ];
+    }
+
+    private function calculateRecentCategoryPenalty(?string $categoryId): int
+    {
+        if (! $categoryId) {
+            return 0;
+        }
+
+        $recent72h = Article::where('category_id', $categoryId)
+            ->whereIn('status', ['draft', 'review', 'published'])
+            ->where('created_at', '>=', now()->subHours(72))
+            ->count();
+
+        $recent7d = Article::where('category_id', $categoryId)
+            ->whereIn('status', ['draft', 'review', 'published'])
+            ->where('created_at', '>=', now()->subDays(7))
+            ->count();
+
+        $penalty = match (true) {
+            $recent72h >= 3 => 40,
+            $recent72h === 2 => 25,
+            $recent72h === 1 => 12,
+            default => 0,
+        };
+
+        if ($recent7d >= 5) {
+            $penalty += 10;
+        } elseif ($recent7d >= 3) {
+            $penalty += 5;
+        }
+
+        return $penalty;
+    }
+
+    private function calculatePoolDominancePenalty(?string $categoryId, float $categoryAlignment, array $poolCountByCategory, int $totalPoolSize): int
+    {
+        if (! $categoryId || $totalPoolSize <= 0) {
+            return 0;
+        }
+
+        $categoryPoolCount = (int) ($poolCountByCategory[$categoryId] ?? 0);
+        if ($categoryPoolCount <= 0) {
+            return 0;
+        }
+
+        $ratio = $categoryPoolCount / $totalPoolSize;
+
+        return match (true) {
+            $ratio >= 0.55 && $categoryAlignment < 0.85 => 15,
+            $ratio >= 0.40 && $categoryAlignment < 0.78 => 8,
+            default => 0,
+        };
     }
 
     private function consolidateKeywords(Collection $allKeywords): array

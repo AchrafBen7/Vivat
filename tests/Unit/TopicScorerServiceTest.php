@@ -179,6 +179,26 @@ class TopicScorerServiceTest extends TestCase
         $this->assertSame('chez-soi', $category?->slug);
     }
 
+    #[Test]
+    public function it_does_not_boost_seo_score_just_because_a_category_is_energy(): void
+    {
+        $service = new TopicScorerService;
+
+        $keywords = [
+            ['word' => 'isolation', 'frequency' => 4, 'seo_weight' => 80],
+            ['word' => 'chauffage', 'frequency' => 3, 'seo_weight' => 74],
+            ['word' => 'logement', 'frequency' => 3, 'seo_weight' => 70],
+        ];
+
+        $energy = new Category(['id' => 'cat-energie', 'name' => 'Énergie', 'slug' => 'energie']);
+        $home = new Category(['id' => 'cat-home', 'name' => 'Chez soi', 'slug' => 'chez-soi']);
+
+        $this->assertSame(
+            $service->estimateSeoScore($keywords, $home),
+            $service->estimateSeoScore($keywords, $energy)
+        );
+    }
+
     private function makeRssItem(
         string $title,
         ?Carbon $publishedAt,

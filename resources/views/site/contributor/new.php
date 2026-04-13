@@ -51,6 +51,7 @@ $uploadMaxBytes = (function (string $value): int {
         default => (int) round((float) $value),
     };
 })($uploadMaxRaw);
+$hasFormErrors = !empty($errors);
 ?>
 <div class="mb-5 flex items-center gap-2 rounded-[12px] border border-[#D6E3E1] bg-[#F4F8F7] px-4 py-2.5 text-[#004241]">
     <svg class="h-4 w-4 shrink-0 text-[#004241]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
@@ -91,6 +92,27 @@ $uploadMaxBytes = (function (string $value): int {
 >
     <?= csrf_field() ?>
 
+    <div
+        id="form-error-summary"
+        class="<?= $hasFormErrors ? '' : 'hidden ' ?>rounded-[16px] border border-[#F1C8C1] bg-[#FFF5F3] px-4 py-3 text-[#8B2E1F]"
+    >
+        <div class="flex items-start gap-3">
+            <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FBE3DE]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold">Le formulaire contient des erreurs</p>
+                <ul id="form-error-summary-list" class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6">
+                    <?php foreach ($errors as $fieldErrors): ?>
+                        <?php foreach ((array) $fieldErrors as $fieldError): ?>
+                            <li><?= htmlspecialchars($fieldError) ?></li>
+                        <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="rounded-[16px] border border-dashed border-gray-300 bg-gray-50 px-4 py-3">
         <label class="cursor-pointer flex items-center gap-4">
             <input
@@ -122,9 +144,9 @@ $uploadMaxBytes = (function (string $value): int {
             </div>
         </label>
         <?php if (!empty($errors['cover_image'])): ?>
-        <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars(is_array($errors['cover_image']) ? $errors['cover_image'][0] : $errors['cover_image']) ?></p>
+        <p class="mt-2 text-sm text-red-600" data-error-for="cover_image"><?= htmlspecialchars(is_array($errors['cover_image']) ? $errors['cover_image'][0] : $errors['cover_image']) ?></p>
         <?php endif; ?>
-        <p id="cover-image-client-error" class="mt-2 hidden text-sm text-red-600"></p>
+        <p id="cover-image-client-error" class="mt-2 hidden text-sm text-red-600" data-error-for="cover_image"></p>
     </div>
 
     <!-- Titre -->
@@ -135,9 +157,9 @@ $uploadMaxBytes = (function (string $value): int {
         </div>
         <input type="text" name="title" id="title" value="<?= htmlspecialchars($old['title'] ?? '') ?>" placeholder="<?= htmlspecialchars($t('site.article_title', "Titre de l'article")) ?>" required maxlength="255"
             data-char-max="255" data-char-target="title-char-count"
-            class="w-full h-10 pl-4 pr-4 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-[#004241] text-sm placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 focus:border-[#004241]">
+            class="w-full h-10 pl-4 pr-4 rounded-xl border <?= !empty($errors['title']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-[#F8F6F2] text-[#004241] text-sm placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 focus:border-[#004241]">
         <?php if (!empty($errors['title'])): ?>
-        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['title']) ? $errors['title'][0] : $errors['title']) ?></p>
+        <p class="mt-1 text-xs text-red-600" data-error-for="title"><?= htmlspecialchars(is_array($errors['title']) ? $errors['title'][0] : $errors['title']) ?></p>
         <?php endif; ?>
     </div>
 
@@ -145,33 +167,33 @@ $uploadMaxBytes = (function (string $value): int {
     <div class="rounded-[14px] border border-[#DED8CE99] bg-[#F8F6F2] px-4 py-3 flex flex-wrap gap-x-6 gap-y-3">
         <div>
             <label for="category_id" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.category', 'Catégorie')) ?></label>
-            <select name="category_id" id="category_id" class="h-8 pl-3 pr-3 rounded-lg border border-[#DED8CE99] bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
+            <select name="category_id" id="category_id" class="h-8 pl-3 pr-3 rounded-lg border <?= !empty($errors['category_id']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
                 <option value=""><?= htmlspecialchars($t('site.choose', 'Choisir...')) ?></option>
                 <?php foreach ($categories as $cat): ?>
                 <option value="<?= htmlspecialchars($cat['id']) ?>" <?= ($old['category_id'] ?? '') === $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
                 <?php endforeach; ?>
             </select>
             <?php if (!empty($errors['category_id'])): ?>
-            <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['category_id']) ? $errors['category_id'][0] : $errors['category_id']) ?></p>
+            <p class="mt-1 text-xs text-red-600" data-error-for="category_id"><?= htmlspecialchars(is_array($errors['category_id']) ? $errors['category_id'][0] : $errors['category_id']) ?></p>
             <?php endif; ?>
         </div>
         <div>
             <label for="language" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.language', 'Langue')) ?></label>
-            <select name="language" id="language" class="h-8 pl-3 pr-3 rounded-lg border border-[#DED8CE99] bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
+            <select name="language" id="language" class="h-8 pl-3 pr-3 rounded-lg border <?= !empty($errors['language']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
                 <?php $selectedLanguage = $old['language'] ?? 'fr'; ?>
                 <option value="fr" <?= $selectedLanguage === 'fr' ? 'selected' : '' ?>>Français</option>
                 <option value="nl" <?= $selectedLanguage === 'nl' ? 'selected' : '' ?>>Néerlandais</option>
             </select>
             <?php if (!empty($errors['language'])): ?>
-            <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['language']) ? $errors['language'][0] : $errors['language']) ?></p>
+            <p class="mt-1 text-xs text-red-600" data-error-for="language"><?= htmlspecialchars(is_array($errors['language']) ? $errors['language'][0] : $errors['language']) ?></p>
             <?php endif; ?>
         </div>
         <div>
             <label for="reading_time" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.reading_time', 'Lecture (min)')) ?></label>
             <input type="number" name="reading_time" id="reading_time" value="<?= htmlspecialchars($old['reading_time'] ?? '5') ?>" placeholder="5" min="1" max="120"
-                class="h-8 pl-3 pr-3 rounded-lg border border-[#DED8CE99] bg-white text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-16">
+                class="h-8 pl-3 pr-3 rounded-lg border <?= !empty($errors['reading_time']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-white text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25 w-16">
             <?php if (!empty($errors['reading_time'])): ?>
-            <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['reading_time']) ? $errors['reading_time'][0] : $errors['reading_time']) ?></p>
+            <p class="mt-1 text-xs text-red-600" data-error-for="reading_time"><?= htmlspecialchars(is_array($errors['reading_time']) ? $errors['reading_time'][0] : $errors['reading_time']) ?></p>
             <?php endif; ?>
         </div>
     </div>
@@ -184,9 +206,9 @@ $uploadMaxBytes = (function (string $value): int {
         </div>
         <textarea name="excerpt" id="excerpt" rows="2" placeholder="Résumé court affiché dans les cartes d'articles…" maxlength="500"
             data-char-max="500" data-char-target="excerpt-char-count"
-            class="w-full pl-4 pr-4 py-2.5 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
+            class="w-full pl-4 pr-4 py-2.5 rounded-xl border <?= !empty($errors['excerpt']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
         <?php if (!empty($errors['excerpt'])): ?>
-        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['excerpt']) ? $errors['excerpt'][0] : $errors['excerpt']) ?></p>
+        <p class="mt-1 text-xs text-red-600" data-error-for="excerpt"><?= htmlspecialchars(is_array($errors['excerpt']) ? $errors['excerpt'][0] : $errors['excerpt']) ?></p>
         <?php endif; ?>
     </div>
 
@@ -194,9 +216,9 @@ $uploadMaxBytes = (function (string $value): int {
     <div>
         <label for="content" class="block text-sm font-medium text-[#004241] mb-1.5"><?= htmlspecialchars($t('site.content', 'Contenu')) ?></label>
         <textarea name="content" id="content" rows="14" placeholder="<?= htmlspecialchars($t('site.start_writing', 'Commencez à écrire votre article ici...')) ?>" required
-            class="w-full pl-4 pr-4 py-3 rounded-xl border border-[#DED8CE99] bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['content'] ?? '') ?></textarea>
+            class="w-full pl-4 pr-4 py-3 rounded-xl border <?= !empty($errors['content']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['content'] ?? '') ?></textarea>
         <?php if (!empty($errors['content'])): ?>
-        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars(is_array($errors['content']) ? $errors['content'][0] : $errors['content']) ?></p>
+        <p class="mt-1 text-xs text-red-600" data-error-for="content"><?= htmlspecialchars(is_array($errors['content']) ? $errors['content'][0] : $errors['content']) ?></p>
         <?php endif; ?>
     </div>
 
@@ -263,8 +285,10 @@ $uploadMaxBytes = (function (string $value): int {
     const check = document.getElementById('publish-feedback-check');
     const errorIcon = document.getElementById('publish-feedback-error-icon');
     const autosaveStatus = document.getElementById('draft-autosave-status');
+    const errorSummary = document.getElementById('form-error-summary');
+    const errorSummaryList = document.getElementById('form-error-summary-list');
 
-    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !draftButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !autosaveStatus) {
+    if (!form || !input || !previewWrapper || !preview || !emptyState || !nameEl || !sizeEl || !errorEl || !publishButton || !draftButton || !overlay || !overlayTitle || !overlayMessage || !overlayButton || !spinner || !check || !errorIcon || !autosaveStatus || !errorSummary || !errorSummaryList) {
         return;
     }
 
@@ -279,6 +303,82 @@ $uploadMaxBytes = (function (string $value): int {
     let autosaveQueued = false;
     let autosaveLastFingerprint = null;
     let isPublishing = false;
+    const baseFieldClass = 'border-[#DED8CE99]';
+    const errorFieldClasses = ['border-red-400', 'ring-2', 'ring-red-100'];
+
+    function clearFormErrors() {
+        errorSummary.classList.add('hidden');
+        errorSummaryList.innerHTML = '';
+
+        form.querySelectorAll('[data-error-for]').forEach((node) => {
+            if (node.id === 'cover-image-client-error') {
+                return;
+            }
+
+            node.remove();
+        });
+
+        ['title', 'excerpt', 'content', 'category_id', 'language', 'reading_time'].forEach((fieldName) => {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (!field) {
+                return;
+            }
+
+            errorFieldClasses.forEach((className) => field.classList.remove(className));
+            if (!field.classList.contains(baseFieldClass)) {
+                field.classList.add(baseFieldClass);
+            }
+        });
+    }
+
+    function applyFormErrors(errors) {
+        clearFormErrors();
+
+        if (!errors || typeof errors !== 'object') {
+            return;
+        }
+
+        const messages = [];
+        let firstField = null;
+
+        Object.entries(errors).forEach(([fieldName, fieldErrors]) => {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            const values = Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors];
+
+            values.filter(Boolean).forEach((message) => {
+                messages.push(String(message));
+            });
+
+            if (field) {
+                errorFieldClasses.forEach((className) => field.classList.add(className));
+                field.classList.remove(baseFieldClass);
+
+                const inline = document.createElement('p');
+                inline.className = 'mt-1 text-xs text-red-600';
+                inline.dataset.errorFor = fieldName;
+                inline.textContent = values[0] ? String(values[0]) : 'Champ invalide.';
+                field.insertAdjacentElement('afterend', inline);
+
+                if (!firstField) {
+                    firstField = field;
+                }
+            }
+        });
+
+        if (messages.length === 0) {
+            return;
+        }
+
+        errorSummaryList.innerHTML = messages
+            .map((message) => `<li>${String(message).replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]))}</li>`)
+            .join('');
+        errorSummary.classList.remove('hidden');
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (firstField && typeof firstField.focus === 'function') {
+            firstField.focus({ preventScroll: true });
+        }
+    }
 
     function setAutosaveStatus(message, tone = 'neutral') {
         autosaveStatus.textContent = message;
@@ -647,6 +747,7 @@ $uploadMaxBytes = (function (string $value): int {
         }
 
         event.preventDefault();
+        clearFormErrors();
 
         if (submitButtons.some((button) => button.disabled)) {
             return;
@@ -682,6 +783,9 @@ $uploadMaxBytes = (function (string $value): int {
                 const data = await readJsonResponse(response, responseFallback);
 
                 if (!response.ok) {
+                    if (response.status === 422 && data && typeof data === 'object' && data.errors) {
+                        applyFormErrors(data.errors);
+                    }
                     throw new Error(extractErrorMessage(data, responseFallback));
                 }
 
@@ -710,5 +814,9 @@ $uploadMaxBytes = (function (string $value): int {
                 isPublishing = false;
             });
     });
+
+    if (!errorSummary.classList.contains('hidden')) {
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 })();
 </script>

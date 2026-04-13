@@ -8,6 +8,7 @@ use App\Services\PublicPageDataService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class SearchController extends Controller
 {
@@ -41,7 +42,7 @@ class SearchController extends Controller
     {
         $locale = content_locale($request);
         $q = trim((string) $request->query('q', ''));
-        $normalized = mb_strtolower($q);
+        $normalized = $this->normalizeSearchText($q);
 
         if (mb_strlen($q) < 2) {
             return response()->json([
@@ -77,21 +78,25 @@ class SearchController extends Controller
             ]);
         $suggestions = $articleSuggestions
             ->map(function (array $item) use ($normalized) {
-                $label = mb_strtolower($item['label']);
+                $label = $this->normalizeSearchText($item['label']);
                 $priority = $label === $normalized
                     ? 0
                     : (str_starts_with($label, $normalized)
                         ? 1
                         : (str_contains($label, ' '.$normalized) ? 2 : 3));
 
-                return $item + ['priority' => $priority];
+                return $item + [
+                    'priority' => $priority,
+                    'match_score' => $this->calculateSuggestionScore($normalized, $label),
+                ];
             })
             ->sortBy([
                 ['priority', 'asc'],
+                ['match_score', 'desc'],
                 ['type', 'asc'],
                 ['label', 'asc'],
             ])
-            ->unique(fn (array $item) => $item['type'].'|'.mb_strtolower($item['label']))
+            ->unique(fn (array $item) => $item['type'] . '|' . mb_strtolower($item['label']))
             ->take(4)
             ->map(fn (array $item) => [
                 'type' => $item['type'],
@@ -121,5 +126,38 @@ class SearchController extends Controller
         }
 
         return vivat_category_fallback_image($categorySlug, 120, 120, (string) $article->id, 'search');
+    }
+
+    private function normalizeSearchText(string $value): string
+    {
+        return Str::of($value)
+            ->lower()
+            ->ascii()
+            ->replaceMatches('/\s+/', ' ')
+            ->trim()
+            ->value();
+    }
+
+    private function calculateSuggestionScore(string $query, string $label): int
+    {
+        if ($query === '' || $label === '') {
+            return 0;
+        }
+
+        if ($label === $query) {
+            return 1000;
+        }
+
+        if (str_starts_with($label, $query)) {
+            return 900 - max(0, strlen($label) - strlen($query));
+        }
+
+        if (str_contains($label, ' ' . $query)) {
+            return 800 - max(0, strpos($label, ' ' . $query));
+        }
+
+        similar_text($query, $label, $percent);
+
+        return (int) round($percent * 5);
     }
 }

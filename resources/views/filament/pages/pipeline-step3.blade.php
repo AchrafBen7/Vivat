@@ -292,8 +292,17 @@
                         </select>
                     </div>
 
+                    <div>
+                        <label class="vp-field-label" for="publish-article-type">Type d'article</label>
+                        <select id="publish-article-type" class="vp-select" wire:model="publishArticleType">
+                            @foreach ($this->getArticleTypeOptions() as $articleTypeValue => $articleTypeLabel)
+                                <option value="{{ $articleTypeValue }}">{{ $articleTypeLabel }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="vp-note">
-                        Si le brouillon n'a pas encore de catégorie, tu peux l'ajouter ici avant publication. Tu peux aussi en profiter pour corriger la catégorie proposée par l'IA.
+                        Tu peux corriger la catégorie proposée par l'IA et choisir le bon format avant publication. Utilise <strong>Article standard</strong> si tu ne veux pas garder le type automatique <strong>Hot news</strong>.
                     </div>
                 </div>
 
