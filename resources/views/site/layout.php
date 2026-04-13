@@ -381,7 +381,7 @@ $canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath)
                     </p>
                 </div>
                 <div class="flex w-full md:w-auto md:justify-end">
-                    <span class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#004241] px-6 py-4 text-base font-semibold text-white transition-colors duration-200 group-hover:bg-[#003130] md:w-auto md:min-w-[240px]">
+                    <span class="inline-flex w-full items-center justify-between rounded-full bg-[#004241] px-6 py-4 text-base font-semibold text-white transition-colors duration-200 group-hover:bg-[#003130] md:w-auto md:min-w-[208px]">
                         <?= htmlspecialchars(auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? __('site.writer_space') : __('site.write_article')) ?>
                         <svg class="h-5 w-5 flex-shrink-0 translate-x-0 transition-transform duration-300 ease-out group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </span>
@@ -395,4 +395,3 @@ $canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath)
     <?= render_php_view('site.partials.layout_scripts', get_defined_vars()) ?>
 </body>
 </html>
- 

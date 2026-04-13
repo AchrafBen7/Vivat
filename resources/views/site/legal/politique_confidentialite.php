@@ -3,7 +3,7 @@
     <section class="rounded-[32px] bg-[#EBF1EF] px-6 py-7 md:px-8 md:py-8">
         <div class="flex flex-col" style="gap: 14px;">
             <span class="inline-flex w-fit items-center justify-center rounded-full bg-white px-[16px] py-[8px] text-sm font-medium text-[#004241]">Légal</span>
-            <h1 class="font-semibold text-[#004241]" style="font-family: Figtree, sans-serif; font-size: clamp(30px, 5vw, 52px); line-height: 1.05;">Politique de confidentialité</h1>
+            <h1 class="font-semibold text-[#004241]" style="font-family: Manrope, sans-serif; font-size: clamp(30px, 5vw, 52px); line-height: 1.05;">Politique de confidentialité</h1>
         </div>
     </section>
 

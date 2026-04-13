@@ -343,6 +343,7 @@ class ContributorSubmissionController extends ContributorBaseController
                 ? (str_starts_with($submission->cover_image_url, '/') ? url($submission->cover_image_url) : $submission->cover_image_url)
                 : null,
             'og_article' => true,
+            'hide_cta_section' => true,
             'hide_footer' => true,
         ]);
 

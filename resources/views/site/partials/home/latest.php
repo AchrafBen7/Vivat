@@ -242,7 +242,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
             <?php } ?>
 
             <?php if ($rightEditorialArt) { ?>
-            <a href="/articles/<?= htmlspecialchars($rightEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-8 lg:col-span-4 lg:h-[360px] <?= $cardGreenSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($rightEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-8 md:col-span-8 lg:col-span-4 lg:col-start-5 lg:row-start-3 lg:h-[290px] <?= $cardGreenSurface ?>">
                 <span class="<?= $cardArrowOnGreen ?>">
                     <svg class="h-[26px] w-[26px] flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </span>
@@ -277,7 +277,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
             <?php } ?>
 
             <?php if ($bottomCenterEditorialArt) { ?>
-            <a href="/articles/<?= htmlspecialchars($bottomCenterEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-7 md:col-span-4 lg:col-span-4 lg:h-[290px] <?= $cardYellowSurface ?>">
+            <a href="/articles/<?= htmlspecialchars($bottomCenterEditorialArt['slug']) ?>" class="group relative flex h-[280px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-8 py-7 md:col-span-4 lg:col-span-4 lg:col-start-9 lg:row-start-2 lg:h-[360px] <?= $cardYellowSurface ?>">
                 <span class="<?= $cardArrowOnYellow ?>">
                     <svg class="h-[26px] w-[26px] flex-shrink-0 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </span>
@@ -314,9 +314,9 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
         <!-- Bouton Autres actualités -->
         <div class="flex justify-center md:col-span-8 lg:col-span-12">
-            <a href="/articles" class="inline-flex items-center justify-center rounded-full font-medium text-white gap-2.5 h-12 w-[226px] bg-[#004241] px-[18px] transition-colors duration-200 hover:bg-[#003130]">
+            <a href="/articles" class="group inline-flex min-w-[208px] items-center justify-between rounded-full bg-[#004241] px-6 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-[#003130]">
                 Autres actualités
-                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <svg class="h-5 w-5 flex-shrink-0 translate-x-0 transition-transform duration-300 ease-out group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
         </div>
     </section>

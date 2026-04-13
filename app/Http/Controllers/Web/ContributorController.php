@@ -10,4 +10,6 @@ namespace App\Http\Controllers\Web;
  * - ContributorSubmissionController
  * - ContributorProfileController
  */
-class ContributorController extends ContributorSubmissionController {}
+class ContributorController extends ContributorSubmissionController
+{
+}

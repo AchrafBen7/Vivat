@@ -4,7 +4,7 @@ $t = $locale === 'nl'
     ? [
         'about' => 'Over ons',
         'hero_title' => 'Vivat, een magazine gericht op beter leven.',
-        'p1' => 'Vivat is een online magazine rond het dagelijkse leven, duurzaamheid en thema's die met levenskwaliteit te maken hebben.',
+        'p1' => "Vivat is een online magazine rond het dagelijkse leven, duurzaamheid en thema's die met levenskwaliteit te maken hebben.",
         'p2' => 'De site biedt praktische en toegankelijke informatie over wonen, gezondheid, mobiliteit, financiën of technologie, in het Frans én in het Nederlands.',
         'p3' => 'Het idee is om te helpen de tijd beter te begrijpen, nieuwe pistes te ontdekken en nuttige content te lezen zonder ingewikkeld discours.',
         'mission' => 'Missie',
@@ -26,7 +26,7 @@ $t = $locale === 'nl'
         'hero_title' => 'Vivat, un magazine tourné vers le mieux vivre.',
         'p1' => 'Vivat est un magazine en ligne centré sur le quotidien, le développement durable et les sujets qui touchent à la qualité de vie.',
         'p2' => 'Le site propose une information pratique et accessible sur la maison, la santé, la mobilité, les finances ou la technologie, en français comme en néerlandais.',
-        'p3' => 'L'idée est d'aider à mieux comprendre son époque, découvrir de nouvelles pistes et lire des contenus utiles sans passer par un discours compliqué.',
+        'p3' => "L'idée est d'aider à mieux comprendre son époque, découvrir de nouvelles pistes et lire des contenus utiles sans passer par un discours compliqué.",
         'mission' => 'Mission',
         'mission_title' => 'Une information concrète',
         'mission_text' => 'Des contenus utiles, lisibles et pensés pour rester proches de la vie réelle.',

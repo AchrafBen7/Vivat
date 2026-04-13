@@ -110,6 +110,8 @@ class ArticleController extends Controller
             'og_article'       => true,
             'trim_main_bottom' => true,
             'compact_cta_spacing' => true,
+            'hide_cta_section' => $isPreview,
+            'hide_footer'      => $isPreview,
             'json_ld'          => [
                 '@context'         => 'https://schema.org',
                 '@type'            => 'Article',

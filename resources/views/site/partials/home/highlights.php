@@ -109,7 +109,7 @@
     <?php } ?>
 
     <div class="col-span-8 <?= $writerCtaBanner ?>">
-        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px]" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
+        <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="absolute inset-0 z-[1] rounded-[30px] <?= $writerCtaFocusReset ?>" aria-label="<?= htmlspecialchars($writer_cta_title) ?> <?= htmlspecialchars($writer_cta_label) ?>"></a>
         <div class="<?= $writerCtaTextWrap ?> pointer-events-none relative z-[2]">
             <p class="<?= $writerCtaTitleLarge ?>"><?= htmlspecialchars($writer_cta_title) ?></p>
             <?php if (trim((string) $writer_cta_subtitle) !== '') { ?>
