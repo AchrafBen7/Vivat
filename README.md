@@ -1,137 +1,270 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Vivat
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Vivat est une plateforme éditoriale Laravel avec :
 
-## Vivat Développement local
+- site public orienté contenu
+- espace admin Filament
+- espace rédacteur / soumissions
+- workflow de review, proposition de prix, paiement Stripe, publication
+- pipeline de génération et d'enrichissement IA
 
-### Vider le cache (sans PHP installé en local)
+## Repo
 
-Si le projet tourne avec **Docker** (e.g. `docker compose up`), PHP s’exécute dans le conteneur. Pas besoin d’avoir PHP installé sur ta machine.
+- HTTPS : `https://github.com/AchrafBen7/Vivat.git`
+- SSH : `git@github.com:AchrafBen7/Vivat.git`
 
-1. Ouvrir un terminal.
-2. Aller dans le dossier du projet :  
-   `cd "/Users/manalboulahya/Documents/EHB 3/Stage/Vivat-1"`  
-   (ou le chemin correspondant sur ta machine.)
-3. Lancer :  
-   **`docker compose exec app php artisan cache:clear`**
+## Stack
 
-Si tu n’utilises pas Docker (pas de `docker compose up`), soit tu installes PHP (php.net, MAMP, XAMPP, etc.), soit le cache est vidé sur l’environnement partagé (même serveur / même Redis) par quelqu’un qui y a accès.
+### Serveur
 
----
+- PHP `8.2+`  
+  Référence actuelle de déploiement : `PHP 8.4`
+- MySQL `8`
+- Redis `7.0+`
+- Composer `2`
+- Node.js `22`
+- Nginx via Ploi
 
-## About Laravel
+### Backend
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel `12`
+- Filament `5`
+- Horizon `5.43+`
+- Sanctum `4.3+`
+- Socialite `5.26+`
+- Spatie Permission `6.24+`
+- Stripe PHP SDK `19.3+`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Frontend
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Vite `7.0.7+`
+- Tailwind CSS `4.0+`
+- axios `1.11+`
+- GSAP `3.14.2+`
+- Lenis `1.3.21+`
 
-## Learning Laravel
+## Services externes
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- Stripe
+- OpenAI
+- Resend via SMTP
+- Google OAuth
+- Cloudinary
+- Pexels
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Variables d'environnement
 
-## Laravel Sponsors
+Exemples disponibles :
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- [`.env.example`](./.env.example)
 
-### Premium Partners
+Points importants en production :
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `QUEUE_CONNECTION=redis`
+- `SESSION_DRIVER=redis`
+- `CACHE_STORE=redis`
+- `GOOGLE_REDIRECT_URI` doit pointer vers le domaine prod
+- `STRIPE_WEBHOOK_SECRET` doit correspondre au webhook prod
+- le mail actuel est configuré en **Resend via SMTP**
 
-## Contributing
+## Installation locale
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Option 1 : Laravel + services installés en local
 
-## Code of Conduct
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+npm ci
+php artisan migrate
+npm run build
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Il faut aussi que MySQL et Redis tournent.
 
-## Security Vulnerabilities
+### Option 2 : Docker
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Le projet contient aussi un environnement Docker local :
 
-## Développement local (Docker)
+```bash
+docker compose up -d
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate
+npm ci
+npm run build
+```
 
-Si tu n'as pas PHP installé en local, utilise Docker pour les commandes Laravel.
+Commandes utiles avec Docker :
 
-**Vider le cache** (depuis la racine du projet) :
 ```bash
 docker compose exec app php artisan cache:clear
 docker compose exec app php artisan config:clear
 docker compose exec app php artisan view:clear
-```
-
-En une seule ligne :
-```bash
-docker compose exec app php artisan cache:clear && docker compose exec app php artisan config:clear && docker compose exec app php artisan view:clear
-```
-
-Assure-toi que les conteneurs tournent (`docker compose up -d`) avant d’exécuter ces commandes.
-
-### Après un git pull
-
-Après avoir récupéré les dernières modifications, **exécuter les migrations** pour que la base (ex. colonne `language` sur `articles`) soit à jour :
-
-```bash
 docker compose exec app php artisan migrate
 ```
 
-Sans Docker (PHP en local) : `php artisan migrate`
+## Commandes utiles
 
-Si tu vois une erreur *Unknown column 'language' in 'where clause'*, c’est que cette migration n’a pas encore été jouée.
-
-### Pourquoi je vois moins de pages d’articles qu’un collègue ?
-
-La liste d’articles est paginée à **12 par page**. Le nombre de pages dépend donc du nombre d’articles **dans ta base locale** (7 pages ≈ 84 articles, 18 pages ≈ 216 articles). Chaque poste a sa propre base ; ce n’est pas un bug du code.
-
-**Pour avoir (au moins) un jeu de données complet côté seed :**
+### Développement
 
 ```bash
-docker compose exec app php artisan db:seed
+composer dev
 ```
 
-Cela crée les 9 catégories, les sous-catégories et environ **17 articles par catégorie** (~153 articles, une douzaine de pages). Ensuite, optionnel :
+Cette commande lance :
+
+- le serveur Laravel
+- l'écoute des queues
+- les logs Laravel Pail
+- Vite
+
+### Build frontend
 
 ```bash
-docker compose exec app php artisan db:seed --class=AdditionalArticlesSeeder
-docker compose exec app php artisan db:seed --class=HomeArticlesSeeder
+npm ci
+npm run build
 ```
 
-**Pour avoir exactement la même base qu’un collègue** (même nombre d’articles, mêmes données) : il faut **partager la base**. (Utilisateur MySQL : `vivat`, mot de passe : `vivat_secret`.)
-
-- **Sur la machine qui a la base à jour** (celle qui a 18 pages), exporter :
+### Tests
 
 ```bash
-docker compose exec mysql mysqldump -u vivat -pvivat_secret vivat > vivat_dump.sql
+composer test
 ```
 
-- **Sur la machine du collègue** : s’assurer que la base `vivat` existe (sinon la créer via phpMyAdmin ou un utilisateur ayant les droits), puis importer le fichier reçu (`vivat_dump.sql`) :
+## Queue, scheduler et Horizon
+
+Le projet dépend fortement de Redis et Horizon.
+
+### Scheduler Laravel
+
+Le scheduler global doit être exécuté **toutes les minutes** :
 
 ```bash
-docker compose exec -T mysql mysql -u vivat -pvivat_secret vivat < vivat_dump.sql
+* * * * * php /chemin/projet/artisan schedule:run >> /dev/null 2>&1
 ```
 
-## License
+Cette ligne se configure dans le cron du serveur ou dans Ploi.  
+Elle ne lance pas toutes les tâches à chaque minute : elle vérifie simplement ce qui est dû.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Horizon
+
+Horizon doit tourner en **processus permanent** :
+
+```bash
+php artisan horizon
+```
+
+Après un déploiement :
+
+```bash
+php artisan horizon:terminate || true
+```
+
+### Tâches planifiées actuellement
+
+- fetch RSS : toutes les 6 heures
+- enrichissement IA : quotidien
+- génération quotidienne d'article : quotidien
+- `horizon:snapshot` : toutes les 10 minutes
+- expiration des quotes : toutes les heures
+- digest newsletter : hebdomadaire
+- health-check pipeline : toutes les 2 heures
+
+## Paiements Stripe
+
+Le workflow paiement repose sur :
+
+- Checkout Stripe
+- webhook Stripe
+- remboursement admin
+- dépublication si remboursement d'un article publié
+
+Webhook à configurer :
+
+```text
+/api/stripe/webhook
+```
+
+En production, le webhook est obligatoire pour fiabiliser la réconciliation des paiements.
+
+## Déploiement Ploi
+
+### Pré-requis
+
+- Nginx via Ploi
+- PHP `8.4`
+- MySQL `8`
+- Redis `7.0+`
+- Composer `2`
+- Node.js `22`
+- fichier `.env` de production
+
+### Commandes de déploiement
+
+```bash
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+npm ci
+npm run build
+php artisan migrate --force
+php artisan storage:link
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan horizon:terminate || true
+```
+
+### À configurer dans Ploi
+
+- domaine et SSL
+- variables d'environnement de production
+- cron Laravel
+- processus Horizon
+- webhook Stripe
+
+## Données et base locale
+
+Après un `git pull`, pense à lancer :
+
+```bash
+php artisan migrate
+```
+
+Si la base locale ne contient pas assez de données, le rendu peut être différent d'une autre machine.
+
+Pour reconstruire un jeu de données local :
+
+```bash
+php artisan db:seed
+```
+
+Pour cloner exactement une base d'un collègue, il faut partager un dump SQL.
+
+## Santé applicative
+
+Route health Laravel :
+
+```text
+/up
+```
+
+## Fichiers importants
+
+- [`composer.json`](./composer.json)
+- [`package.json`](./package.json)
+- [`bootstrap/app.php`](./bootstrap/app.php)
+- [`config/horizon.php`](./config/horizon.php)
+- [`config/pipeline_schedule.php`](./config/pipeline_schedule.php)
+- [`config/services.php`](./config/services.php)
+- [`routes/web.php`](./routes/web.php)
+- [`routes/api.php`](./routes/api.php)
+
+## Notes
+
+- `QUEUE_CONNECTION=redis` est requis pour Horizon.
+- Le projet utilise actuellement **Resend via SMTP**, pas uniquement un mailer SMTP générique.
+- Le provider d'image actuellement choisi est `pexels`.
+- Les migrations sont nécessaires au déploiement : ne pas supprimer `database/migrations`.
