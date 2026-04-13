@@ -8,7 +8,9 @@ use App\Http\Controllers\Web\ArticleController as WebArticleController;
 use App\Http\Controllers\Web\AuthController as WebAuthController;
 use App\Http\Controllers\Web\CategoryController as WebCategoryController;
 use App\Http\Controllers\Web\ContactController as WebContactController;
-use App\Http\Controllers\Web\ContributorController as WebContributorController;
+use App\Http\Controllers\Web\ContributorDashboardController as WebContributorDashboardController;
+use App\Http\Controllers\Web\ContributorProfileController as WebContributorProfileController;
+use App\Http\Controllers\Web\ContributorSubmissionController as WebContributorSubmissionController;
 use App\Http\Controllers\Web\ContributorCheckoutController as WebContributorCheckoutController;
 use App\Http\Controllers\Web\FaqController as WebFaqController;
 use App\Http\Controllers\Web\HomeController as WebHomeController;
@@ -53,17 +55,17 @@ Route::get('/newsletter/confirm', [WebNewsletterController::class, 'confirm'])->
 Route::get('/newsletter/unsubscribe', [WebNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 Route::middleware(['auth', 'role:contributor|admin'])->prefix('contributor')->group(function () {
-    Route::get('/dashboard', [WebContributorController::class, 'dashboard'])->name('contributor.dashboard');
-    Route::match(['get', 'post'], '/new', [WebContributorController::class, 'newArticle'])->name('contributor.new');
-    Route::get('/payments', [WebContributorController::class, 'paymentsHistory'])->name('contributor.payments.history');
+    Route::get('/dashboard', [WebContributorDashboardController::class, 'dashboard'])->name('contributor.dashboard');
+    Route::match(['get', 'post'], '/new', [WebContributorSubmissionController::class, 'newArticle'])->name('contributor.new');
+    Route::get('/payments', [WebContributorDashboardController::class, 'paymentsHistory'])->name('contributor.payments.history');
     Route::post('/payments/create-intent', [ApiPaymentController::class, 'createIntent'])->middleware('throttle:payment-actions')->name('contributor.web-payments.create-intent');
     Route::post('/payments/confirm', [ApiPaymentController::class, 'confirm'])->middleware('throttle:payment-actions')->name('contributor.web-payments.confirm');
-    Route::get('/payments/{payment}/refund-receipt', [WebContributorController::class, 'refundReceipt'])->name('contributor.payments.refund-receipt');
-    Route::get('/articles/{submission:slug}', [WebContributorController::class, 'showSubmission'])->name('contributor.articles.show');
-    Route::match(['get', 'post'], '/articles/{submission:slug}/edit', [WebContributorController::class, 'editSubmission'])->name('contributor.articles.edit');
-    Route::post('/articles/{submission:slug}/request-unpublish', [WebContributorController::class, 'requestUnpublish'])->name('contributor.articles.request-unpublish');
-    Route::delete('/articles/{submission:slug}', [WebContributorController::class, 'destroySubmission'])->name('contributor.articles.destroy');
-    Route::match(['get', 'post'], '/profile', [WebContributorController::class, 'profile'])->name('contributor.profile');
+    Route::get('/payments/{payment}/refund-receipt', [WebContributorDashboardController::class, 'refundReceipt'])->name('contributor.payments.refund-receipt');
+    Route::get('/articles/{submission:slug}', [WebContributorSubmissionController::class, 'showSubmission'])->name('contributor.articles.show');
+    Route::match(['get', 'post'], '/articles/{submission:slug}/edit', [WebContributorSubmissionController::class, 'editSubmission'])->name('contributor.articles.edit');
+    Route::post('/articles/{submission:slug}/request-unpublish', [WebContributorSubmissionController::class, 'requestUnpublish'])->name('contributor.articles.request-unpublish');
+    Route::delete('/articles/{submission:slug}', [WebContributorSubmissionController::class, 'destroySubmission'])->name('contributor.articles.destroy');
+    Route::match(['get', 'post'], '/profile', [WebContributorProfileController::class, 'profile'])->name('contributor.profile');
     Route::post('/submissions/{submission}/checkout', [WebContributorCheckoutController::class, 'redirectToStripe'])->middleware('throttle:6,1')->name('contributor.checkout.create');
     Route::get('/submissions/{submission}/payment/success', [WebContributorCheckoutController::class, 'success'])->name('contributor.checkout.success');
     Route::get('/submissions/{submission}/payment/cancel', [WebContributorCheckoutController::class, 'cancel'])->name('contributor.checkout.cancel');
