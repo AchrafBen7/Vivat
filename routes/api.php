@@ -142,7 +142,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('generate-async', [ArticleController::class, 'generateAsync'])->middleware('throttle:admin-pipeline-actions')->name('articles.generate-async');
         Route::post('{article}/publish', [ArticleController::class, 'publish'])->middleware('throttle:admin-moderation-actions')->name('articles.publish');
     });
-    Route::apiResource('articles', ArticleController::class);
+    Route::apiResource('articles', ArticleController::class)->names('api.articles');
 
     // Pipeline (déclenchement et monitoring)
     Route::prefix('pipeline')->group(function () {
