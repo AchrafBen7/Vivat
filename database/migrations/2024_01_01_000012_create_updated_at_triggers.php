@@ -10,18 +10,23 @@ return new class extends Migration
         if (DB::getDriverName() !== 'mysql') {
             return;
         }
-        DB::unprepared('
-            CREATE TRIGGER sources_updated_at_trigger
-            BEFORE UPDATE ON sources
-            FOR EACH ROW
-            SET NEW.updated_at = NOW()
-        ');
-        DB::unprepared('
-            CREATE TRIGGER articles_updated_at_trigger
-            BEFORE UPDATE ON articles
-            FOR EACH ROW
-            SET NEW.updated_at = NOW()
-        ');
+        try {
+            DB::unprepared('
+                CREATE TRIGGER sources_updated_at_trigger
+                BEFORE UPDATE ON sources
+                FOR EACH ROW
+                SET NEW.updated_at = NOW()
+            ');
+            DB::unprepared('
+                CREATE TRIGGER articles_updated_at_trigger
+                BEFORE UPDATE ON articles
+                FOR EACH ROW
+                SET NEW.updated_at = NOW()
+            ');
+        } catch (\Exception $e) {
+            // Triggers require SUPER privilege when binary logging is enabled.
+            // Eloquent handles updated_at automatically, so this is non-critical.
+        }
     }
 
     public function down(): void
