@@ -232,7 +232,7 @@ $errorClass = 'mt-2 text-sm text-red-600';
                                     name="password"
                                     class="<?= $inputClass ?>"
                                 >
-                                <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.password_rules_help', 'Minimum 12 caractères avec majuscule, minuscule, chiffre et symbole.')) ?></p>
+                                <p class="<?= $helpClass ?>"><?= htmlspecialchars($t('site.password_rules_help', 'Minimum 8 caractères avec majuscule, minuscule, chiffre et symbole.')) ?></p>
                                 <?php if (! empty($errors['password'])) { ?>
                                 <p class="<?= $errorClass ?>"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
                                 <?php } ?>
@@ -322,7 +322,6 @@ $errorClass = 'mt-2 text-sm text-red-600';
                     <button
                         type="submit"
                         class="inline-flex h-11 items-center justify-center rounded-full bg-[#8E2E2A] px-6 text-sm font-semibold text-white transition hover:bg-[#73231F]"
-                        onclick="return window.confirm('<?= htmlspecialchars($t('site.delete_account_confirm', 'Confirmez-vous la suppression définitive de votre compte ?')) ?>');"
                     >
                         <?= htmlspecialchars($t('site.delete_my_account', 'Supprimer mon compte')) ?>
                     </button>

@@ -111,7 +111,7 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
         </section>
 
         <!-- Colonne droite : 3 bandes égales comme sur la home (grid-rows-3 + h-full) -->
-        <div class="mt-6 flex min-h-0 flex-col gap-6 lg:col-span-7 lg:mt-0 lg:grid lg:min-h-[524px] lg:grid-rows-3 lg:gap-6 lg:self-stretch">
+        <div data-about-cards class="mt-6 flex min-h-0 flex-col gap-6 lg:col-span-7 lg:mt-0 lg:grid lg:min-h-[524px] lg:grid-rows-3 lg:gap-6 lg:self-stretch">
             <div data-about-card class="relative flex min-h-[220px] w-full flex-col justify-end gap-3 overflow-hidden rounded-[30px] p-8 lg:h-full lg:min-h-0 <?= $cardGreenSurface ?>">
                 <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($t['mission']) ?></span>
                 <h2 class="<?= $heroColorCardTitleCompact ?> text-white"><?= htmlspecialchars($t['mission_title']) ?></h2>
@@ -159,49 +159,64 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
 </div>
 
 <script>
-window.addEventListener('load', function () {
-    if (typeof gsap === 'undefined') return;
+(function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const hero  = document.querySelector('[data-about-hero]');
-    const cards = document.querySelectorAll('[data-about-card]');
-    const cta   = document.querySelector('[data-about-cta]');
+    function initAboutMotion() {
+        if (!window.gsap || !window.ScrollTrigger) return;
 
-    // État initial — tout invisible
-    gsap.set(hero,  { opacity: 0, y: 40 });
-    gsap.set(cards, { opacity: 0, y: 50 });
-    gsap.set(cta,   { opacity: 0, y: 36 });
+        var hero = document.querySelector('[data-about-hero]');
+        if (hero) {
+            window.gsap.from(hero, {
+                opacity: 0,
+                x: -28,
+                duration: 0.85,
+                ease: 'power2.out',
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top 90%',
+                },
+            });
+        }
 
-    // Hero : slide up au chargement
-    gsap.to(hero, {
-        opacity: 1, y: 0,
-        duration: 1.4,
-        ease: 'power3.out',
-        delay: 0.1,
-    });
+        var cardsWrap = document.querySelector('[data-about-cards]');
+        var cards = document.querySelectorAll('[data-about-card]');
+        if (cardsWrap && cards.length) {
+            window.gsap.from(cards, {
+                opacity: 0,
+                y: 18,
+                duration: 0.48,
+                ease: 'power2.out',
+                stagger: 0,
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: cardsWrap,
+                    start: 'top 84%',
+                },
+            });
+        }
 
-    // Cards : stagger après le hero
-    gsap.to(cards, {
-        opacity: 1, y: 0,
-        duration: 1.2,
-        ease: 'power3.out',
-        stagger: 0.2,
-        delay: 0.35,
-    });
-
-    // CTA banner : scroll trigger
-    if (typeof ScrollTrigger !== 'undefined') {
-        gsap.to(cta, {
-            opacity: 1, y: 0,
-            duration: 1.2,
-            ease: 'power3.out',
-            scrollTrigger: {
-                trigger: cta,
-                start: 'top 88%',
-                toggleActions: 'play none none none',
-            },
-        });
-    } else {
-        gsap.to(cta, { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out', delay: 0.8 });
+        var cta = document.querySelector('[data-about-cta]');
+        if (cta) {
+            window.gsap.from(cta, {
+                opacity: 0,
+                y: 18,
+                duration: 0.48,
+                ease: 'power2.out',
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: cta,
+                    start: 'top bottom',
+                },
+            });
+        }
     }
-});
+
+    if (document.readyState === 'complete') {
+        initAboutMotion();
+    } else {
+        window.addEventListener('load', initAboutMotion);
+    }
+})();
 </script>

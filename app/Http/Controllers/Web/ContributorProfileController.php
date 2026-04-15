@@ -18,7 +18,7 @@ class ContributorProfileController extends ContributorBaseController
 
                 if ($user->hasRole('admin')) {
                     return redirect()
-                        ->route('contributor.profile')
+                        ->back()
                         ->withErrors(['delete_account' => "La suppression automatique d'un compte administrateur est bloquée pour préserver l'accès au back-office."])
                         ->withInput();
                 }
@@ -42,7 +42,7 @@ class ContributorProfileController extends ContributorBaseController
 
                 if (! hash_equals((string) $user->email, (string) $validated['delete_email'])) {
                     return redirect()
-                        ->route('contributor.profile')
+                        ->back()
                         ->withErrors(['delete_email' => "L'adresse email de confirmation ne correspond pas à votre compte."])
                         ->withInput();
                 }
@@ -64,14 +64,14 @@ class ContributorProfileController extends ContributorBaseController
                     'password' => [
                         'required',
                         'confirmed',
-                        Password::min(12)->mixedCase()->numbers()->symbols(),
+                        Password::min(8)->mixedCase()->numbers()->symbols(),
                     ],
                 ], [
                     'current_password.required' => 'Votre mot de passe actuel est obligatoire.',
                     'current_password.current_password' => 'Le mot de passe actuel est incorrect.',
                     'password.required' => 'Le nouveau mot de passe est obligatoire.',
                     'password.confirmed' => 'Les nouveaux mots de passe ne correspondent pas.',
-                    'password.min' => 'Le nouveau mot de passe doit contenir au moins 12 caractères.',
+                    'password.min' => 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
                     'password.mixed' => 'Le nouveau mot de passe doit contenir une majuscule et une minuscule.',
                     'password.numbers' => 'Le nouveau mot de passe doit contenir au moins un chiffre.',
                     'password.symbols' => 'Le nouveau mot de passe doit contenir au moins un symbole.',

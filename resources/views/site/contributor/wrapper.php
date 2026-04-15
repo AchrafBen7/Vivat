@@ -2,11 +2,12 @@
 $activeTab = $activeTab ?? 'articles';
 $contributorContent = $contributorContent ?? '';
 $pendingQuotesCount = $pending_quotes_count ?? 0;
+$contributorUser = $contributorUser ?? null;
 $submissionNotice = session('submission_notice');
 $t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 ?>
 <div class="flex gap-8 pt-6 pb-12">
-    <?= render_php_view('site.contributor.sidebar', ['activeTab' => $activeTab, 'pendingQuotesCount' => $pendingQuotesCount]) ?>
+    <?= render_php_view('site.contributor.sidebar', ['activeTab' => $activeTab, 'pendingQuotesCount' => $pendingQuotesCount, 'contributorUser' => $contributorUser]) ?>
     <main class="flex-1 min-w-0">
         <?= $contributorContent ?>
     </main>

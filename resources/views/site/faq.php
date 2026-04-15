@@ -67,7 +67,7 @@ $faqIntro = $locale === 'nl'
 ?>
 <div class="mx-auto flex w-full max-w-[1280px] flex-col" style="gap: 24px;">
     <section class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div class="flex flex-col rounded-[30px] bg-white p-6 lg:col-span-4" style="gap: 16px; box-shadow: 0 18px 48px rgba(0, 66, 65, 0.08);">
+        <div data-faq-intro class="flex flex-col rounded-[30px] bg-white p-6 lg:col-span-4" style="gap: 16px; box-shadow: 0 18px 48px rgba(0, 66, 65, 0.08);">
             <span class="inline-flex w-fit items-center justify-center rounded-full bg-[#EBF1EF] px-[16px] py-[8px] text-sm font-medium text-[#004241]"><?= htmlspecialchars($faqIntro['badge']) ?></span>
             <h2 class="font-medium text-[#004241]" style="font-size: 32px; line-height: 1.05;"><?= htmlspecialchars($faqIntro['title']) ?></h2>
             <p class="text-[#004241]/75" style="font-size: 17px; line-height: 1.45;"><?= htmlspecialchars($faqIntro['text']) ?></p>
@@ -85,7 +85,7 @@ $faqIntro = $locale === 'nl'
 
         <div class="flex flex-col lg:col-span-8" style="gap: 24px;">
             <?php foreach ($faqGroups as $group) { ?>
-            <section class="rounded-[30px] bg-[#EEF4F1] p-6 md:p-7" style="gap: 18px;">
+            <section data-faq-group class="rounded-[30px] bg-[#EEF4F1] p-6 md:p-7" style="gap: 18px;">
                 <div class="mb-5 flex flex-col" style="gap: 10px;">
                     <span class="inline-flex w-fit items-center justify-center rounded-full bg-white px-[16px] py-[8px] text-sm font-medium text-[#004241]"><?= htmlspecialchars($group['title']) ?></span>
                 </div>
@@ -109,6 +109,69 @@ $faqIntro = $locale === 'nl'
         </div>
     </section>
 </div>
+<script>
+(function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    function initFaqMotion() {
+        if (!window.gsap || !window.ScrollTrigger) return;
+
+        var intro = document.querySelector('[data-faq-intro]');
+        if (intro) {
+            window.gsap.from(intro, {
+                opacity: 0,
+                x: -28,
+                duration: 0.85,
+                ease: 'power2.out',
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: intro,
+                    start: 'top 90%',
+                },
+            });
+        }
+
+        window.gsap.utils.toArray('[data-faq-group]').forEach(function (group) {
+            var heading = group.querySelector('.mb-5');
+            var items = group.querySelectorAll('[data-faq-item]');
+
+            if (heading) {
+                window.gsap.from(heading, {
+                    opacity: 0,
+                    y: 12,
+                    duration: 0.5,
+                    ease: 'power2.out',
+                    clearProps: 'opacity,transform',
+                    scrollTrigger: {
+                        trigger: group,
+                        start: 'top 88%',
+                    },
+                });
+            }
+            if (items.length) {
+                window.gsap.from(items, {
+                    opacity: 0,
+                    y: 18,
+                    duration: 0.48,
+                    ease: 'power2.out',
+                    stagger: 0.07,
+                    clearProps: 'opacity,transform',
+                    scrollTrigger: {
+                        trigger: group,
+                        start: 'top 84%',
+                    },
+                });
+            }
+        });
+    }
+
+    if (document.readyState === 'complete') {
+        initFaqMotion();
+    } else {
+        window.addEventListener('load', initFaqMotion);
+    }
+})();
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const faqItems = document.querySelectorAll('[data-faq-item]');

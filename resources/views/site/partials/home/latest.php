@@ -35,12 +35,12 @@ $isEditorialArticle = static fn (array $article): bool => $articleType($article)
 $isHotNewsArticle = static fn (array $article): bool => $articleType($article) === 'hot_news';
 $isLongFormArticle = static fn (array $article): bool => $articleType($article) === 'long_form';
 $latestColorCardContent = 'flex flex-col justify-end gap-3';
-$latestCardContentMotion = 'flex flex-col gap-3 min-h-0 overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:-translate-y-1';
+$latestCardContentMotion = 'flex flex-col gap-3 min-h-0 overflow-hidden transition-transform duration-[400ms] ease-out md:group-hover:-translate-y-1';
 $latestColorCardTitle = 'line-clamp-3 text-xl font-semibold leading-tight';
 $latestColorCardTitleLarge = 'line-clamp-3 text-2xl font-semibold leading-tight max-sm:text-xl';
 $latestColorCardExcerpt = 'line-clamp-2 text-sm';
-$latestCardExcerptRevealOnLight = 'line-clamp-2 text-sm max-md:max-h-[3rem] max-md:opacity-100 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
-$latestCardExcerptRevealOnDark = 'line-clamp-2 text-sm max-md:max-h-[3rem] max-md:opacity-100 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
+$latestCardExcerptRevealOnLight = 'line-clamp-2 text-sm max-md:max-h-[3rem] max-md:opacity-100 md:max-h-0 md:overflow-hidden md:translate-y-1 md:opacity-0 md:transition-[max-height,opacity,transform] md:duration-[400ms] md:ease-out md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
+$latestCardExcerptRevealOnDark = 'line-clamp-2 text-sm max-md:max-h-[3rem] max-md:opacity-100 md:max-h-0 md:overflow-hidden md:translate-y-1 md:opacity-0 md:transition-[max-height,opacity,transform] md:duration-[400ms] md:ease-out md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
 $latestHeroTitleMedium = 'line-clamp-3 text-xl font-semibold leading-tight';
 $latestHeroTitleSmall = 'line-clamp-3 text-lg font-semibold leading-tight';
 $latestColorCardMeta = 'text-xs';
@@ -89,7 +89,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 ?>
 
     <?php if (count($restArticles) > 0) { ?>
-    <section class="mt-16 hidden w-full min-w-0 grid-cols-8 gap-6 md:grid lg:hidden">
+    <section data-latest-tablet class="mt-16 hidden w-full min-w-0 grid-cols-8 gap-6 md:grid lg:hidden">
         <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]">Dernières actualités</h2>
         <?php if ($topFeatureEditorialArt) { ?>
         <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative col-span-8 flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 <?= $cardGreenSurface ?>">
@@ -168,9 +168,9 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
         </div>
     </section>
 
-    <section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-[18px] md:hidden lg:mt-16 lg:grid lg:grid-cols-12 lg:gap-6">
+    <section data-latest-section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-[18px] md:hidden lg:mt-16 lg:grid lg:grid-cols-12 lg:gap-6">
         <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
-        <div class="grid min-w-0 w-full grid-cols-1 gap-[18px] lg:col-span-12 lg:grid-cols-12 lg:gap-6">
+        <div data-latest-grid class="grid min-w-0 w-full grid-cols-1 gap-[18px] lg:col-span-12 lg:grid-cols-12 lg:gap-6">
             <?php if ($topFeatureEditorialArt) { ?>
             <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardGreenSurface ?>">
                 <span class="<?= $cardArrowOnGreen ?>">
@@ -326,55 +326,122 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
 <script>
 (function () {
-    function init() {
-    if (typeof gsap === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // — Hero : reveal vertical haut → bas, sans voile blanc
-    // autoAlpha utilise visibility:hidden (pas opacity:0) = pas de blending blanc
-    var heroGrids = document.querySelectorAll('[data-home-hero]');
-    heroGrids.forEach(function (grid) {
-        if (grid.offsetParent === null) return;
-        var cards = Array.from(grid.querySelectorAll(':scope > a, :scope > div'));
-        if (cards.length === 0) return;
-        cards.sort(function (a, b) {
-            return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
+    // ── 1. Hero cards — état initial posé en CSS, GSAP anime vers l'état final
+    function initHero() {
+        if (!window.gsap) return;
+        // Skip during language switches — js-anim is already off, items are visible
+        if (window._vivatLangSwap) {
+            document.documentElement.classList.remove('js-anim');
+            return;
+        }
+        var allItems = [];
+        document.querySelectorAll('[data-home-hero]').forEach(function (grid) {
+            if (grid.offsetParent === null) return;
+            var items = Array.from(grid.querySelectorAll(':scope > a, :scope > div'));
+            allItems = allItems.concat(items);
         });
-        gsap.set(cards, { autoAlpha: 0, y: 20 });
-        gsap.to(cards, {
-            autoAlpha: 1,
+        if (!allItems.length) {
+            document.documentElement.classList.remove('js-anim');
+            return;
+        }
+        gsap.to(allItems, {
+            opacity: 1,
             y: 0,
-            duration: 1.8,
-            ease: 'power3.out',
-            stagger: 0.2,
-            delay: 0.15,
-        });
-    });
-
-    // — Sections en dessous : uniquement "Dernières actualités"
-    // Les sections rubriques (carousel + vidéo) sont exclues car autoAlpha cause un accroche
-    if (typeof ScrollTrigger === 'undefined') return;
-
-    var sections = document.querySelectorAll('section:not(#categories-section):not(#categories-section-tablet)');
-    sections.forEach(function (el) {
-        gsap.set(el, { autoAlpha: 0, y: 28 });
-        gsap.to(el, {
-            autoAlpha: 1,
-            y: 0,
-            duration: 2.2,
-            ease: 'power3.out',
-            scrollTrigger: {
-                trigger: el,
-                start: 'top 88%',
-                toggleActions: 'play none none none',
+            scale: 1,
+            duration: 1.0,
+            ease: 'power2.out',
+            stagger: 0.12,
+            onComplete: function () {
+                // Retirer la classe CSS pour libérer tous les éléments
+                document.documentElement.classList.remove('js-anim');
+                // Nettoyer les styles inline APRÈS que le CSS ne cache plus rien
+                gsap.set(allItems, { clearProps: 'all' });
             },
         });
-    });
     }
-    // Démarre immédiatement si page déjà chargée (AJAX swap), sinon attend window.load
-    if (document.readyState === 'complete') {
-        init();
+
+    // ── 2. Rubriques (carrousels desktop / tablette) — apparition au scroll
+    function initCategories() {
+        if (!window.gsap || !window.ScrollTrigger) return;
+
+        document.querySelectorAll('[data-categories-section]').forEach(function (section) {
+            if (section.offsetParent === null) return;
+
+            gsap.from(section, {
+                opacity: 0,
+                y: 36,
+                duration: 0.95,
+                ease: 'power2.out',
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: section,
+                    start: 'top 88%',
+                    toggleActions: 'play none none none',
+                },
+            });
+        });
+    }
+
+    // ── 3. "Dernières actualités" — reveal au scroll (desktop + tablette md)
+    function initLatest() {
+        if (!window.gsap || !window.ScrollTrigger) return;
+
+        function revealSection(section, cardRoot) {
+            if (!section || section.offsetParent === null) return;
+
+            var title = section.querySelector('h2');
+            if (title) {
+                gsap.from(title, {
+                    opacity: 0,
+                    y: 14,
+                    duration: 0.9,
+                    ease: 'power2.out',
+                    clearProps: 'opacity,transform',
+                    scrollTrigger: { trigger: title, start: 'top 92%' },
+                });
+            }
+
+            var root = cardRoot || section;
+            var cards = Array.from(root.querySelectorAll(':scope > a'));
+            if (!cards.length) return;
+
+            gsap.from(cards, {
+                opacity: 0,
+                y: 24,
+                scale: 0.98,
+                duration: 1.0,
+                ease: 'power2.out',
+                stagger: 0.1,
+                clearProps: 'opacity,transform',
+                transformOrigin: 'center bottom',
+                scrollTrigger: {
+                    trigger: section,
+                    start: 'top 88%',
+                },
+            });
+        }
+
+        revealSection(document.querySelector('[data-latest-section]'), document.querySelector('[data-latest-grid]'));
+        revealSection(document.querySelector('[data-latest-tablet]'), null);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHero);
     } else {
-        window.addEventListener('load', init);
+        initHero();
+    }
+
+    function initScrollAnimations() {
+        initCategories();
+        initLatest();
+    }
+
+    if (document.readyState === 'complete') {
+        initScrollAnimations();
+    } else {
+        window.addEventListener('load', initScrollAnimations);
     }
 })();
 </script>

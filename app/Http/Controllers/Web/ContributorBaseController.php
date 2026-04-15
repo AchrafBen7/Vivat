@@ -243,6 +243,7 @@ abstract class ContributorBaseController extends Controller
             'activeTab' => $activeTab,
             'contributorContent' => $content,
             'pending_quotes_count' => $data['pending_quotes_count'] ?? 0,
+            'contributorUser' => auth()->user(),
         ]);
         $html = render_php_view('site.layout', [
             'content' => $wrapper,

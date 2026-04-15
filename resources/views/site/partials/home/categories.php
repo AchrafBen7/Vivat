@@ -79,9 +79,19 @@
 
             return in_array($ext, ['mp4', 'webm', 'mov'], true);
         };
+        $mediaAttrs = static function (bool $eager = false): string {
+            if (! $eager) {
+                return 'loading="lazy" decoding="async"';
+            }
+
+            return 'loading="eager" fetchpriority="high" decoding="async"';
+        };
+        $videoPreload = static function (bool $eager = false): string {
+            return $eager ? 'metadata' : 'none';
+        };
         ?>
     <!-- Section Rubriques Carrousel -->
-    <section id="categories-section" class="relative z-10 mt-[65px] hidden w-full overflow-visible lg:block">
+    <section id="categories-section" data-categories-section class="relative z-10 mt-[65px] hidden w-full overflow-visible lg:block">
         <div class="relative w-full min-w-0">
         <div id="categories-carousel-viewport" class="w-full min-w-0 overflow-hidden">
             <div id="categories-carousel-track" class="flex gap-6 transition-transform duration-[1100ms] ease-out will-change-transform">
@@ -104,11 +114,11 @@
                 <a href="/categories/<?= htmlspecialchars($desktopSoloCategory['slug']) ?>" class="categories-carousel-panel group relative block min-h-0 min-w-0 flex-[0_0_calc((100%-1.5rem)/2)] overflow-hidden rounded-[30px] h-[524px] bg-black/20">
                     <?php if (! empty($desktopSoloCategory['image_url'])) { ?>
                     <?php if ($isVideoMedia($desktopSoloCategory['image_url'])) { ?>
-                    <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $desktopSoloPoster ? ' poster="'.htmlspecialchars($desktopSoloPoster).'"' : '' ?>>
+                    <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($panelIdx === 0)) ?>"<?= $desktopSoloPoster ? ' poster="'.htmlspecialchars($desktopSoloPoster).'"' : '' ?>>
                         <source src="<?= htmlspecialchars($desktopSoloCategory['image_url']) ?>" type="video/mp4">
                     </video>
                     <?php } else { ?>
-                    <img src="<?= htmlspecialchars($desktopSoloCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($desktopSoloCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                    <img src="<?= htmlspecialchars($desktopSoloCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($desktopSoloCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" <?= $mediaAttrs($panelIdx === 0) ?>>
                     <?php } ?>
                     <?php } ?>
                     <div class="<?= $rubriqueDim ?>"></div>
@@ -133,11 +143,11 @@
                     <a href="/categories/<?= htmlspecialchars($pairCat['slug']) ?>" class="group relative block h-[250px] w-full min-h-0 shrink-0 overflow-hidden rounded-[30px] bg-black/20">
                         <?php if (! empty($pairCat['image_url'])) { ?>
                         <?php if ($isVideoMedia($pairCat['image_url'])) { ?>
-                        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $pairPoster ? ' poster="'.htmlspecialchars($pairPoster).'"' : '' ?>>
+                        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($panelIdx === 0)) ?>"<?= $pairPoster ? ' poster="'.htmlspecialchars($pairPoster).'"' : '' ?>>
                             <source src="<?= htmlspecialchars($pairCat['image_url']) ?>" type="video/mp4">
                         </video>
                         <?php } else { ?>
-                        <img src="<?= htmlspecialchars($pairCat['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($pairCat['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <img src="<?= htmlspecialchars($pairCat['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($pairCat['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" <?= $mediaAttrs($panelIdx === 0) ?>>
                         <?php } ?>
                         <?php } ?>
                         <div class="<?= $rubriqueDim ?>"></div>
@@ -176,11 +186,11 @@
                     <a href="/categories/<?= htmlspecialchars($stackedCategory['slug']) ?>" class="group relative block h-[250px] w-full min-h-0 overflow-hidden rounded-[30px] bg-black/20">
                         <?php if (! empty($stackedCategory['image_url'])) { ?>
                         <?php if ($isVideoMedia($stackedCategory['image_url'])) { ?>
-                        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $stackedPoster ? ' poster="'.htmlspecialchars($stackedPoster).'"' : '' ?>>
+                        <video class="categories-rubrique-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($panelIdx === 0)) ?>"<?= $stackedPoster ? ' poster="'.htmlspecialchars($stackedPoster).'"' : '' ?>>
                             <source src="<?= htmlspecialchars($stackedCategory['image_url']) ?>" type="video/mp4">
                         </video>
                         <?php } else { ?>
-                        <img src="<?= htmlspecialchars($stackedCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($stackedCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <img src="<?= htmlspecialchars($stackedCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($stackedCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" <?= $mediaAttrs($panelIdx === 0) ?>>
                         <?php } ?>
                         <?php } ?>
                         <div class="<?= $rubriqueDim ?>"></div>
@@ -200,11 +210,11 @@
                     <a href="/categories/<?= htmlspecialchars($tallCategory['slug']) ?>" class="<?= $rubriqueTileTall ?>">
                         <?php if (! empty($tallCategory['image_url'])) { ?>
                         <?php if ($isVideoMedia($tallCategory['image_url'])) { ?>
-                        <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $tallPoster ? ' poster="'.htmlspecialchars($tallPoster).'"' : '' ?>>
+                        <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($panelIdx === 0)) ?>"<?= $tallPoster ? ' poster="'.htmlspecialchars($tallPoster).'"' : '' ?>>
                             <source src="<?= htmlspecialchars($tallCategory['image_url']) ?>" type="video/mp4">
                         </video>
                         <?php } else { ?>
-                        <img src="<?= htmlspecialchars($tallCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tallCategory['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
+                        <img src="<?= htmlspecialchars($tallCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tallCategory['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" <?= $mediaAttrs($panelIdx === 0) ?>>
                         <?php } ?>
                         <?php } ?>
                         <div class="<?= $rubriqueDim ?>"></div>
@@ -221,11 +231,11 @@
                         <a href="/categories/<?= htmlspecialchars($smallCategory['slug']) ?>" class="<?= $rubriqueTileSm ?>">
                             <?php if (! empty($smallCategory['image_url'])) { ?>
                             <?php if ($isVideoMedia($smallCategory['image_url'])) { ?>
-                            <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $smallPoster ? ' poster="'.htmlspecialchars($smallPoster).'"' : '' ?>>
+                            <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($panelIdx === 0)) ?>"<?= $smallPoster ? ' poster="'.htmlspecialchars($smallPoster).'"' : '' ?>>
                                 <source src="<?= htmlspecialchars($smallCategory['image_url']) ?>" type="video/mp4">
                             </video>
                             <?php } else { ?>
-                            <img src="<?= htmlspecialchars($smallCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($smallCategory['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
+                            <img src="<?= htmlspecialchars($smallCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($smallCategory['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" <?= $mediaAttrs($panelIdx === 0) ?>>
                             <?php } ?>
                             <?php } ?>
                             <div class="<?= $rubriqueDim ?>"></div>
@@ -242,11 +252,11 @@
                     <a href="/categories/<?= htmlspecialchars($tallCategory['slug']) ?>" class="<?= $rubriqueTileTall ?>">
                         <?php if (! empty($tallCategory['image_url'])) { ?>
                         <?php if ($isVideoMedia($tallCategory['image_url'])) { ?>
-                        <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="none"<?= $tallPoster ? ' poster="'.htmlspecialchars($tallPoster).'"' : '' ?>>
+                        <video class="categories-rubrique-video absolute inset-0 z-0 w-full h-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($panelIdx === 0)) ?>"<?= $tallPoster ? ' poster="'.htmlspecialchars($tallPoster).'"' : '' ?>>
                             <source src="<?= htmlspecialchars($tallCategory['image_url']) ?>" type="video/mp4">
                         </video>
                         <?php } else { ?>
-                        <img src="<?= htmlspecialchars($tallCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tallCategory['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" loading="lazy" decoding="async">
+                        <img src="<?= htmlspecialchars($tallCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tallCategory['name']) ?>" class="absolute inset-0 z-0 w-full h-full object-cover" <?= $mediaAttrs($panelIdx === 0) ?>>
                         <?php } ?>
                         <?php } ?>
                         <div class="<?= $rubriqueDim ?>"></div>
@@ -271,7 +281,7 @@
         <?php } ?>
             </div>
     </section>
-    <section id="categories-section-tablet" class="relative z-10 mt-[65px] hidden w-full overflow-visible md:block lg:hidden">
+    <section id="categories-section-tablet" data-categories-section class="relative z-10 mt-[65px] hidden w-full overflow-visible md:block lg:hidden">
         <div class="relative w-full min-w-0">
         <div id="categories-carousel-tablet-viewport" class="w-full overflow-hidden">
             <div id="categories-carousel-tablet-track" class="flex transition-transform duration-[1100ms] ease-out will-change-transform">
@@ -294,11 +304,11 @@
                     <a href="/categories/<?= htmlspecialchars($tabletCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-[0_0_32%] overflow-hidden rounded-[30px] bg-black/20">
                         <?php if (! empty($tabletCategory['image_url'])) { ?>
                         <?php if ($isVideoMedia($tabletCategory['image_url'])) { ?>
-                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletPoster ? ' poster="'.htmlspecialchars($tabletPoster).'"' : '' ?>>
+                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="metadata"<?= $tabletPoster ? ' poster="'.htmlspecialchars($tabletPoster).'"' : '' ?>>
                             <source src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" type="video/mp4">
                         </video>
                         <?php } else { ?>
-                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async">
                         <?php } ?>
                         <?php } ?>
                         <div class="<?= $rubriqueDim ?>"></div>
@@ -314,11 +324,11 @@
                     <a href="/categories/<?= htmlspecialchars($tabletCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-1 overflow-hidden rounded-[30px] bg-black/20">
                         <?php if (! empty($tabletCategory['image_url'])) { ?>
                         <?php if ($isVideoMedia($tabletCategory['image_url'])) { ?>
-                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="none"<?= $tabletPoster ? ' poster="'.htmlspecialchars($tabletPoster).'"' : '' ?>>
+                        <video class="categories-rubrique-tablet-video absolute inset-0 z-0 h-full w-full object-cover" muted loop playsinline preload="<?= htmlspecialchars($videoPreload($tabletHasLoop ? false : true)) ?>"<?= $tabletPoster ? ' poster="'.htmlspecialchars($tabletPoster).'"' : '' ?>>
                             <source src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" type="video/mp4">
                         </video>
                         <?php } else { ?>
-                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" loading="lazy" decoding="async">
+                        <img src="<?= htmlspecialchars($tabletCategory['image_url']) ?>" alt="Rubrique <?= htmlspecialchars($tabletCategory['name']) ?>" class="absolute inset-0 z-0 h-full w-full object-cover" <?= $mediaAttrs(false) ?>>
                         <?php } ?>
                         <?php } ?>
                         <div class="<?= $rubriqueDim ?>"></div>
@@ -748,6 +758,54 @@
                 goTo(idx, false);
             }
         });
+    })();
+    </script>
+
+    <script>
+    (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        function initRubriques() {
+            if (!window.gsap || !window.ScrollTrigger) return;
+
+            // Desktop — tout le carousel entre comme un seul bloc
+            var section = document.getElementById('categories-section');
+            if (section) {
+                gsap.from(section, {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1.0,
+                    ease: 'power2.out',
+                    clearProps: 'opacity,transform',
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top 85%',
+                    },
+                });
+            }
+
+            // Tablet — idem
+            var tabletSection = document.getElementById('categories-section-tablet');
+            if (tabletSection) {
+                gsap.from(tabletSection, {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1.0,
+                    ease: 'power2.out',
+                    clearProps: 'opacity,transform',
+                    scrollTrigger: {
+                        trigger: tabletSection,
+                        start: 'top 85%',
+                    },
+                });
+            }
+        }
+
+        if (document.readyState === 'complete') {
+            initRubriques();
+        } else {
+            window.addEventListener('load', initRubriques);
+        }
     })();
     </script>
     <?php } ?>

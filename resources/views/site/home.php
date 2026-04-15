@@ -40,7 +40,7 @@ $cardOverlay = 'absolute inset-0 box-border p-[18px] min-h-0 min-w-0';
 $glassBox = 'rounded-[21px] flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1.5 box-border p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
 $glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
 $articleImageZoom = 'group min-h-[112px] min-w-[128px] overflow-hidden';
-$articleImageZoomImg = 'transition-transform duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.045]';
+$articleImageZoomImg = 'transition-transform duration-[500ms] ease-out will-change-transform group-hover:scale-[1.03]';
 
 $cardGreenSurface = 'bg-[#004241] transition-colors duration-200 hover:bg-[#003130]';
 $cardYellowSurface = 'bg-[#FFF0B6] transition-colors duration-200 hover:bg-[#FBE9A3]';
@@ -50,11 +50,11 @@ $cardGradientSurface = 'bg-[linear-gradient(135deg,#004241_0%,#185B58_58%,#4C807
 $overlayImagePhoto = 'absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.18)_44%,rgba(0,0,0,0.56)_100%)]';
 $overlayImageSoft = 'absolute inset-0 bg-gradient-to-t from-black/30 to-transparent';
 $overlayRubriqueHero = 'pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 to-black/20';
-$topNewsContentMotion = 'w-full min-h-0 overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:-translate-y-1';
-$topNewsExcerptReveal = 'line-clamp-2 text-white/90 text-sm max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
-$heroColorCardContentMotion = 'w-full min-h-0 overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:-translate-y-1';
-$heroColorCardExcerptRevealOnLight = 'line-clamp-2 text-sm text-[#004241]/72 max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
-$heroColorCardExcerptRevealOnDark = 'line-clamp-2 text-sm text-white/75 max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
+$topNewsContentMotion = 'w-full min-h-0 overflow-hidden transition-transform duration-[400ms] ease-out md:group-hover:-translate-y-1';
+$topNewsExcerptReveal = 'line-clamp-2 text-white/90 text-sm max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-1 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[400ms] md:ease-out md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
+$heroColorCardContentMotion = 'w-full min-h-0 overflow-hidden transition-transform duration-[400ms] ease-out md:group-hover:-translate-y-1';
+$heroColorCardExcerptRevealOnLight = 'line-clamp-2 text-sm text-[#004241]/72 max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-1 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[400ms] md:ease-out md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
+$heroColorCardExcerptRevealOnDark = 'line-clamp-2 text-sm text-white/75 max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-1 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[400ms] md:ease-out md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
 
 $cardArrowIcon = 'pointer-events-none absolute right-[18px] top-[18px] inline-flex h-12 w-12 items-center justify-center rounded-[30px] transition-[background-color,color] duration-300 ease-out';
 $cardArrowOnGreen = $cardArrowIcon.' text-white group-hover:bg-[#527E7E]';

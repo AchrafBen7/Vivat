@@ -62,7 +62,7 @@ $tagTopNews = 'bg-[#FFF1B9] text-[#004241]';
         </div>
     </section>
 
-    <section class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <section data-contact-cards class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <a data-contact-card href="mailto:<?= htmlspecialchars($editorialEmail) ?>" class="group flex min-h-[260px] flex-col justify-between rounded-[30px] bg-[#004241] p-6 text-white no-underline transition hover:opacity-95" style="gap: 18px;">
             <div class="flex flex-col" style="gap: 12px;">
                 <span class="inline-flex w-fit items-center justify-center rounded-full bg-white/12 px-[14px] py-[7px] text-sm font-medium text-white"><?= htmlspecialchars($t['editorial_badge']) ?></span>
@@ -91,37 +91,85 @@ $tagTopNews = 'bg-[#FFF1B9] text-[#004241]';
 </div>
 
 <script>
-window.addEventListener('load', function () {
-    if (typeof gsap === 'undefined') return;
+(function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const hero  = document.querySelector('[data-contact-hero]');
-    const cards = document.querySelectorAll('[data-contact-card]');
-    const info  = document.querySelector('[data-contact-info]');
+    function initContactMotion() {
+        if (!window.gsap || !window.ScrollTrigger) return;
 
-    gsap.set(hero,  { opacity: 0, y: 40 });
-    gsap.set(cards, { opacity: 0, y: 50 });
-    gsap.set(info,  { opacity: 0, y: 30 });
+        var hero = document.querySelector('[data-contact-hero]');
+        if (hero) {
+            window.gsap.from(hero, {
+                opacity: 0,
+                x: -28,
+                duration: 0.85,
+                ease: 'power2.out',
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top 90%',
+                },
+            });
+        }
 
-    gsap.to(hero, {
-        opacity: 1, y: 0,
-        duration: 1.4,
-        ease: 'power3.out',
-        delay: 0.1,
-    });
+        var cardsSection = document.querySelector('[data-contact-cards]');
+        var cards = document.querySelectorAll('[data-contact-card]');
+        if (cardsSection && cards.length) {
+            var stCards = {
+                trigger: cardsSection,
+                start: 'top 84%',
+            };
+            // Pas de stagger : les deux cartes arrivent ensemble (évite l’effet partenariat « qui suit » la rédac).
+            // ≥ md : entrée symétrique (gauche / droite) ; mobile en colonne : même montée pour les deux.
+            if (cards.length >= 2 && window.matchMedia('(min-width: 768px)').matches) {
+                window.gsap
+                    .timeline({
+                        scrollTrigger: stCards,
+                    })
+                    .from(
+                        cards[0],
+                        { opacity: 0, x: -16, y: 8, duration: 0.52, ease: 'power2.out', clearProps: 'opacity,transform' },
+                        0
+                    )
+                    .from(
+                        cards[1],
+                        { opacity: 0, x: 16, y: 8, duration: 0.52, ease: 'power2.out', clearProps: 'opacity,transform' },
+                        0
+                    );
+            } else {
+                window.gsap.from(cards, {
+                    opacity: 0,
+                    y: 14,
+                    duration: 0.52,
+                    ease: 'power2.out',
+                    stagger: 0,
+                    clearProps: 'opacity,transform',
+                    scrollTrigger: stCards,
+                });
+            }
+        }
 
-    gsap.to(cards, {
-        opacity: 1, y: 0,
-        duration: 1.2,
-        ease: 'power3.out',
-        stagger: 0.15,
-        delay: 0.3,
-    });
+        var info = document.querySelector('[data-contact-info]');
+        if (info) {
+            window.gsap.from(info, {
+                opacity: 0,
+                y: 18,
+                duration: 0.48,
+                ease: 'power2.out',
+                clearProps: 'opacity,transform',
+                scrollTrigger: {
+                    trigger: info,
+                    // Plus tôt que "top 88%" : dès que le bloc entre dans la zone basse (ligne du bas de l’écran)
+                    start: 'top bottom',
+                },
+            });
+        }
+    }
 
-    gsap.to(info, {
-        opacity: 1, y: 0,
-        duration: 1.0,
-        ease: 'power3.out',
-        delay: 0.65,
-    });
-});
+    if (document.readyState === 'complete') {
+        initContactMotion();
+    } else {
+        window.addEventListener('load', initContactMotion);
+    }
+})();
 </script>

@@ -4,14 +4,16 @@ namespace App\Services;
 
 use App\Mail\NewsletterConfirmationMail;
 use App\Models\NewsletterSubscriber;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 class NewsletterSubscriptionService
 {
     /**
      * @param  array{email:string,name?:string|null,interests?:array<int,string>|null}  $data
-     * @return array{status:string,message:string,subscriber:NewsletterSubscriber}
+     * @return array{status:string,message:string,subscriber:NewsletterSubscriber,mail_delivered:?bool}
      */
     public function subscribe(array $data): array
     {
@@ -32,6 +34,7 @@ class NewsletterSubscriptionService
                     'status' => 'already_active',
                     'message' => 'Cette adresse est déjà inscrite à la newsletter Vivat.',
                     'subscriber' => $existing->fresh(),
+                    'mail_delivered' => null,
                 ];
             }
 
@@ -45,12 +48,15 @@ class NewsletterSubscriptionService
             ]);
 
             $subscriber = $existing->fresh();
-            $this->sendConfirmationEmail($subscriber);
+            $mailOk = $this->sendConfirmationEmail($subscriber);
 
             return [
                 'status' => 'confirmation_resent',
-                'message' => 'Votre demande est enregistrée. Vérifiez votre boîte mail pour confirmer votre inscription.',
+                'message' => $mailOk
+                    ? 'Votre demande est enregistrée. Vérifiez votre boîte mail pour confirmer votre inscription.'
+                    : 'Inscription enregistrée, mais l’envoi de l’e-mail de confirmation a échoué (service indisponible ou configuration d’envoi). Réessayez plus tard ou contactez-nous.',
                 'subscriber' => $subscriber,
+                'mail_delivered' => $mailOk,
             ];
         }
 
@@ -60,12 +66,15 @@ class NewsletterSubscriptionService
             'interests' => $interests,
         ]);
 
-        $this->sendConfirmationEmail($subscriber);
+        $mailOk = $this->sendConfirmationEmail($subscriber);
 
         return [
             'status' => 'created',
-            'message' => 'Inscription enregistrée. Vérifiez votre boîte mail pour confirmer votre abonnement.',
+            'message' => $mailOk
+                ? 'Inscription enregistrée. Vérifiez votre boîte mail pour confirmer votre abonnement.'
+                : 'Inscription enregistrée, mais l’envoi de l’e-mail de confirmation a échoué (service indisponible ou configuration d’envoi). Réessayez plus tard ou contactez-nous.',
             'subscriber' => $subscriber,
+            'mail_delivered' => $mailOk,
         ];
     }
 
@@ -153,8 +162,23 @@ class NewsletterSubscriptionService
         return $normalized !== [] ? $normalized : ['general'];
     }
 
-    private function sendConfirmationEmail(NewsletterSubscriber $subscriber): void
+    /**
+     * @return bool True si l’e-mail a bien été accepté par le transporteur.
+     */
+    private function sendConfirmationEmail(NewsletterSubscriber $subscriber): bool
     {
-        Mail::to($subscriber->email)->send(new NewsletterConfirmationMail($subscriber));
+        try {
+            Mail::to($subscriber->email)->send(new NewsletterConfirmationMail($subscriber));
+
+            return true;
+        } catch (Throwable $e) {
+            Log::warning('newsletter.confirmation_email_failed', [
+                'subscriber_id' => $subscriber->id,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 }

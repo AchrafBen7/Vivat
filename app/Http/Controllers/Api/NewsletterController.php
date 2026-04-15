@@ -30,6 +30,7 @@ class NewsletterController extends Controller
 
         return response()->json([
             'message' => $result['message'],
+            'mail_delivered' => $result['mail_delivered'] ?? null,
         ], $result['status'] === 'created' ? 201 : 200);
     }
 

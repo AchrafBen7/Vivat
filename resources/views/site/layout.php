@@ -17,6 +17,16 @@ $newsletterOldEmail = old('newsletter_email', '');
 $viteManifestPath = public_path('build/manifest.json');
 $viteHotPath = public_path('hot');
 $canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath);
+
+// ── AJAX lang-switch : renvoyer uniquement le <main>, pas la page entière ─────
+if (app('request')->header('X-Vivat-Ajax')) {
+    $mainPb    = empty($trim_main_bottom) ? 'pb-8' : 'pb-0';
+    $mainClass = 'max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 ' . $mainPb . ' overflow-x-hidden';
+    echo '<!DOCTYPE html><html lang="' . htmlspecialchars($content_locale) . '"><head><title>' . $title_safe . '</title></head><body>';
+    echo '<main class="' . htmlspecialchars($mainClass) . '">' . ($content ?? '') . '</main>';
+    echo '</body></html>';
+    return;
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($content_locale) ?>">
@@ -109,7 +119,13 @@ $canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath)
             clip-path: inset(0 0 100% 0 round 34px);
         }
         main {
-            transition: opacity 0.18s ease;
+            transition: none;
+        }
+        /* Pré-cache les cards hero avant le premier paint — évite le flash GSAP */
+        .js-anim [data-home-hero] > * {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            will-change: opacity, transform;
         }
 
         /* Tag pill : effet glass sans padding supplémentaire */
@@ -336,6 +352,7 @@ $canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath)
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
+<script>document.documentElement.classList.add('js-anim')</script>
     <?= render_php_view('site.partials.layout_header', get_defined_vars()) ?>
 
     <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 <?= ! empty($trim_main_bottom) ? 'pb-0' : 'pb-8' ?> overflow-x-hidden">

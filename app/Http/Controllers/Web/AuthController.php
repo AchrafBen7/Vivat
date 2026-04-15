@@ -27,7 +27,7 @@ class AuthController extends Controller
         return [
             'required',
             'confirmed',
-            PasswordRule::min(12)
+            PasswordRule::min(8)
                 ->mixedCase()
                 ->numbers()
                 ->symbols(),
@@ -39,7 +39,7 @@ class AuthController extends Controller
         return [
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
-            'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.mixed' => 'Le mot de passe doit contenir une majuscule et une minuscule.',
             'password.letters' => 'Le mot de passe doit contenir des lettres.',
             'password.numbers' => 'Le mot de passe doit contenir au moins un chiffre.',
