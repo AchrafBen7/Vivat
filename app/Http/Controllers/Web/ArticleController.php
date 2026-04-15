@@ -48,11 +48,19 @@ class ArticleController extends Controller
 
         $locale = content_locale($request);
         $article->loadMissing(['subCategory', 'category']);
+        $previewBackHref = $this->resolvePreviewBackHref($request);
+        $previewBackLabel = $this->resolvePreviewBackLabel($request, $previewBackHref);
 
-        return $this->renderArticlePage($article, $locale, true);
+        return $this->renderArticlePage($article, $locale, true, $previewBackHref, $previewBackLabel);
     }
 
-    private function renderArticlePage(Article $article, string $locale, bool $isPreview = false): Response
+    private function renderArticlePage(
+        Article $article,
+        string $locale,
+        bool $isPreview = false,
+        ?string $previewBackHref = null,
+        ?string $previewBackLabel = null,
+    ): Response
     {
         $article = $article->fresh(['subCategory', 'category']) ?? $article;
 
@@ -86,8 +94,8 @@ class ArticleController extends Controller
                 'cover_video_url' => $article->cover_video_url,
                 'is_preview' => $isPreview,
                 'preview_context' => $isPreview ? 'admin' : null,
-                'preview_back_href' => $isPreview ? \App\Filament\Resources\Articles\ArticleResource::getUrl() : null,
-                'preview_back_label' => $isPreview ? "Retour à l'administration" : null,
+                'preview_back_href' => $isPreview ? ($previewBackHref ?: \App\Filament\Resources\Articles\ArticleResource::getUrl()) : null,
+                'preview_back_label' => $isPreview ? ($previewBackLabel ?: "Retour à l'administration") : null,
                 'category' => $category ? [
                     'name' => $category->name,
                     'slug' => $category->slug,
@@ -147,5 +155,57 @@ class ArticleController extends Controller
         }
 
         return $cover;
+    }
+
+    private function resolvePreviewBackHref(Request $request): ?string
+    {
+        $back = $request->query('back');
+
+        if (! is_string($back) || trim($back) === '') {
+            return null;
+        }
+
+        $back = trim($back);
+
+        if (str_starts_with($back, '/')) {
+            return $back;
+        }
+
+        $parsedBack = parse_url($back);
+        if (! is_array($parsedBack)) {
+            return null;
+        }
+
+        $backHost = $parsedBack['host'] ?? null;
+        $requestHost = $request->getHost();
+
+        if ($backHost !== null && $requestHost !== '' && ! hash_equals((string) $backHost, (string) $requestHost)) {
+            return null;
+        }
+
+        $path = $parsedBack['path'] ?? '';
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $query = isset($parsedBack['query']) && $parsedBack['query'] !== '' ? '?'.$parsedBack['query'] : '';
+        $fragment = isset($parsedBack['fragment']) && $parsedBack['fragment'] !== '' ? '#'.$parsedBack['fragment'] : '';
+
+        return $path.$query.$fragment;
+    }
+
+    private function resolvePreviewBackLabel(Request $request, ?string $previewBackHref): ?string
+    {
+        $label = $request->query('back_label');
+
+        if (is_string($label) && trim($label) !== '') {
+            return $label;
+        }
+
+        if ($previewBackHref === \App\Filament\Pages\PipelineArticles::getUrl()) {
+            return 'Retour à Brouillons AI';
+        }
+
+        return null;
     }
 }

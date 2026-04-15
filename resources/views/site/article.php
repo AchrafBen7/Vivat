@@ -159,7 +159,7 @@ if (! $isPreview) {
 <div class="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
     <?php if ($isPreview) { ?>
     <div class="mb-8 rounded-[30px] border border-[#D6E3E1] bg-white p-5 sm:p-6">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-4">
             <div class="flex min-w-0 items-start gap-4">
                 <span class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#004241] text-lg font-semibold text-white">i</span>
                 <div class="min-w-0">
@@ -168,23 +168,7 @@ if (! $isPreview) {
                     <p class="mt-2 max-w-[60rem] text-[15px] leading-6 text-[#004241]/72"><?= htmlspecialchars($previewNotice) ?></p>
                 </div>
             </div>
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <a href="<?= htmlspecialchars($previewBackHref) ?>" class="inline-flex h-11 items-center justify-center rounded-full border border-[#004241]/14 bg-white px-5 text-sm font-semibold text-[#004241] no-underline transition hover:bg-[#EBF1EF]">
-                    <?= htmlspecialchars($previewBackLabel) ?>
-                </a>
-                <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-semibold text-white">
-                    <?= htmlspecialchars($previewStatusLabel) ?>
-                </span>
-            </div>
         </div>
-        <?php if ($cover_status_label) { ?>
-        <div class="inline-flex items-center gap-3 rounded-full border px-5 py-3 text-sm font-medium shadow-[0_10px_24px_rgba(0,66,65,0.05)] <?= $has_generated_cover ? 'border-[#CFE7DD] bg-[#ECFDF5] text-[#065F46]' : 'border-[#F3D4D4] bg-[#FEF2F2] text-[#991B1B]' ?>">
-            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full <?= $has_generated_cover ? 'bg-[#065F46] text-white' : 'bg-[#991B1B] text-white' ?>">
-                <?= $has_generated_cover ? '✓' : '!' ?>
-            </span>
-            <span><?= htmlspecialchars($cover_status_label) ?></span>
-        </div>
-        <?php } ?>
     </div>
     <?php } ?>
 
@@ -202,16 +186,26 @@ if (! $isPreview) {
         <img src="<?= htmlspecialchars($coverSrc) ?>" data-fallback-url="<?= htmlspecialchars($coverFallback) ?>" alt="<?= htmlspecialchars($title) ?>" class="absolute inset-0 w-full h-full object-cover" loading="eager" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
         <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
         <div class="absolute inset-0 flex flex-col p-8 top-0 left-0">
-            <a href="<?= htmlspecialchars($isPreview ? $previewBackHref : $backHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white mb-[85px]" aria-label="<?= htmlspecialchars($t('site.back', 'Retour')) ?>">
-                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                <?= htmlspecialchars($isPreview ? $previewBackLabel : $t('site.back', 'Retour')) ?>
-            </a>
             <?php if ($isPreview) { ?>
-            <div class="mb-4 flex items-center">
-                <span class="inline-flex items-center justify-center rounded-full border border-white/20 bg-[rgba(190,190,190,0.16)] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-[14px]">
-                    <?= htmlspecialchars($previewContext === 'admin' ? 'Aperçu article admin' : $t('site.preview_article_badge', 'Aperçu article')) ?>
+            <div class="mb-[85px] flex flex-wrap items-center gap-3">
+                <a href="<?= htmlspecialchars($previewBackHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white">
+                    <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <?= htmlspecialchars($previewBackLabel) ?>
+                </a>
+                <?php if ($cover_status_label) { ?>
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-2 text-sm font-medium text-white backdrop-blur-[14px]">
+                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full <?= $has_generated_cover ? 'bg-[#0F766E] text-white' : 'bg-[#B91C1C] text-white' ?>">
+                        <?= $has_generated_cover ? '✓' : '!' ?>
+                    </span>
+                    <span><?= htmlspecialchars($cover_status_label) ?></span>
                 </span>
+                <?php } ?>
             </div>
+            <?php } else { ?>
+            <a href="<?= htmlspecialchars($backHref) ?>" class="mb-[85px] inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white" aria-label="<?= htmlspecialchars($t('site.back', 'Retour')) ?>">
+                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <?= htmlspecialchars($t('site.back', 'Retour')) ?>
+            </a>
             <?php } ?>
             <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
             <?php if ($metaLine) { ?>
@@ -251,9 +245,8 @@ $shareLinks = [
     <div class="flex flex-col items-center">
         <article class="w-full max-w-[680px]">
             <?php if ($isPreview) { ?>
-            <div class="mb-6 flex items-center justify-between gap-3 rounded-[22px] border border-[#D6E3E1] bg-white px-5 py-4 text-sm text-[#004241]/68 shadow-[0_12px_30px_rgba(0,66,65,0.04)]">
+            <div class="mb-6 rounded-[22px] border border-[#D6E3E1] bg-white px-5 py-4 text-sm text-[#004241]/72 shadow-[0_12px_30px_rgba(0,66,65,0.04)]">
                 <span class="font-medium text-[#004241]"><?= htmlspecialchars($previewReaderLabel) ?></span>
-                <span class="rounded-full bg-[#EBF1EF] px-3 py-1 text-[12px] font-medium text-[#004241]"><?= htmlspecialchars($previewReaderPill) ?></span>
             </div>
             <?php } ?>
             <div class="<?= $articleCanvasClass ?>">

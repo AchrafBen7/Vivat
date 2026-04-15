@@ -164,7 +164,7 @@
                 <div>
                     @foreach ($drafts as $draft)
                         <div class="vp-draft-row">
-                            <a href="{{ $draft['preview_url'] }}" target="_blank" class="vp-draft-main">
+                            <a href="{{ $draft['preview_url'] }}" class="vp-draft-main">
                                 @if (!empty($draft['cover']))
                                     <img src="{{ $draft['cover'] }}" alt="" class="vp-thumb">
                                 @else

@@ -82,7 +82,11 @@ class PipelineStep3 extends Page
                 'word_count' => str_word_count(strip_tags($a->content ?? '')),
                 'created_at' => $a->created_at?->diffForHumans(),
                 'edit_url' => ArticleResource::getUrl('edit', ['record' => $a]),
-                'preview_url' => url('/admin-preview/articles/' . $a->slug),
+                'preview_url' => route('articles.preview.admin', [
+                    'article' => $a->slug,
+                    'back' => static::getUrl(),
+                    'back_label' => 'Retour à Brouillons AI',
+                ]),
                 'is_publishable' => $a->isPublishable(),
             ])
             ->toArray();

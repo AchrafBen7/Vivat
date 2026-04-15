@@ -132,7 +132,7 @@
                             </div>
                             <p class="vp-text">{{ $article['excerpt'] }}</p>
                             <div class="vp-actions">
-                                <a href="{{ $article['preview_url'] }}" target="_blank" class="vp-btn vp-btn-primary">Aperçu</a>
+                                <a href="{{ $article['preview_url'] }}" class="vp-btn vp-btn-primary">Aperçu</a>
                                 <a href="{{ $article['edit_url'] }}" class="vp-btn vp-btn-secondary">Modifier</a>
                                 @if ($article['status'] === 'published')
                                     <button
