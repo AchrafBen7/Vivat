@@ -21,7 +21,7 @@ class VivatNineCategoriesSeeder extends Seeder
             ['name' => 'Énergie', 'slug' => 'energie', 'description' => 'Énergies renouvelables, transition énergétique', 'image_url' => 'https://picsum.photos/400/300?random=energie', 'home_order' => 2],
             ['name' => 'Finance', 'slug' => 'finance', 'description' => 'Argent, finance, investissement', 'image_url' => 'https://picsum.photos/400/300?random=finance', 'home_order' => 3],
             ['name' => 'Technologie', 'slug' => 'technologie', 'description' => 'Innovation, tech, numérique', 'image_url' => 'https://picsum.photos/400/300?random=techno', 'home_order' => 4],
-            ['name' => 'Chez soi', 'slug' => 'chez-soi', 'description' => 'Maison, déco, DIY, logement', 'image_url' => 'https://picsum.photos/400/300?random=chezsoi', 'home_order' => 5],
+            ['name' => 'Chez soi', 'slug' => 'chez-soi', 'description' => 'Maison, déco, DIY, logement', 'image_url' => 'https://images.pexels.com/photos/20488453/pexels-photo-20488453.jpeg?auto=compress&cs=tinysrgb&w=1200&v=2', 'home_order' => 5],
             ['name' => 'Mode', 'slug' => 'mode', 'description' => 'Mode, tendances, style', 'image_url' => 'https://picsum.photos/400/300?random=mode', 'home_order' => 6],
             ['name' => 'Santé', 'slug' => 'sante', 'description' => 'Santé publique, médecine, bien-être', 'image_url' => 'https://picsum.photos/400/300?random=sante', 'home_order' => 7],
             ['name' => 'Voyage', 'slug' => 'voyage', 'description' => 'Voyage, découverte, culture', 'image_url' => 'https://picsum.photos/400/300?random=voyage', 'home_order' => 8],

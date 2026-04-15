@@ -46,12 +46,19 @@ class ArticleResource extends Resource
             ->components([
                 Section::make('Visuel de couverture')
                     ->description("Vérifie ici si l'image affichée vient bien de l'IA ou d'une image manuelle.")
-                    ->columns(3)
+                    ->columnSpanFull()
+                    ->columns([
+                        'default' => 1,
+                        'xl' => 3,
+                    ])
                     ->schema([
                         Placeholder::make('cover_preview')
                             ->label('Aperçu')
                             ->content(fn (?Article $record): HtmlString => new HtmlString(self::coverPreviewHtml($record)))
-                            ->columnSpan(2),
+                            ->columnSpan([
+                                'default' => 1,
+                                'xl' => 2,
+                            ]),
                         Placeholder::make('cover_status')
                             ->label('Statut de la cover')
                             ->content(fn (?Article $record): HtmlString => new HtmlString(self::coverStatusHtml($record))),
@@ -63,7 +70,12 @@ class ArticleResource extends Resource
                             ->columnSpanFull(),
                     ]),
                 Section::make('Paramètres éditoriaux')
-                    ->columns(3)
+                    ->columnSpanFull()
+                    ->columns([
+                        'default' => 1,
+                        'md' => 2,
+                        'xl' => 6,
+                    ])
                     ->schema([
                         TextInput::make('title')
                             ->label('Titre')
@@ -78,7 +90,12 @@ class ArticleResource extends Resource
                             ->label('Catégorie')
                             ->relationship('category', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->columnSpan([
+                                'default' => 1,
+                                'md' => 1,
+                                'xl' => 3,
+                            ]),
                         Select::make('language')
                             ->label('Langue')
                             ->options([
@@ -86,7 +103,12 @@ class ArticleResource extends Resource
                                 'nl' => 'Néerlandais',
                             ])
                             ->default('fr')
-                            ->required(),
+                            ->required()
+                            ->columnSpan([
+                                'default' => 1,
+                                'md' => 1,
+                                'xl' => 1,
+                            ]),
                         Select::make('status')
                             ->label('Statut')
                             ->options([
@@ -95,7 +117,12 @@ class ArticleResource extends Resource
                                 'published' => 'Publié',
                                 'archived' => 'Dépublié',
                             ])
-                            ->required(),
+                            ->required()
+                            ->columnSpan([
+                                'default' => 1,
+                                'md' => 1,
+                                'xl' => 2,
+                            ]),
                         Select::make('article_type')
                             ->label("Type d'article")
                             ->options([
@@ -103,9 +130,15 @@ class ArticleResource extends Resource
                                 'standard' => 'Standard',
                                 'long_form' => 'Long format',
                             ])
-                            ->default('standard'),
+                            ->default('standard')
+                            ->columnSpan([
+                                'default' => 1,
+                                'md' => 2,
+                                'xl' => 3,
+                            ]),
                     ]),
                 Section::make('Texte')
+                    ->columnSpanFull()
                     ->columns(1)
                     ->schema([
                         Textarea::make('excerpt')
@@ -273,9 +306,7 @@ class ArticleResource extends Resource
                 TableAction::make('preview')
                     ->label('Aperçu')
                     ->icon(Heroicon::OutlinedEye)
-                    ->url(fn (Article $record): string => $record->status === 'published'
-                        ? url('/articles/' . $record->slug)
-                        : url('/admin-preview/articles/' . $record->slug))
+                    ->url(fn (Article $record): string => url('/admin-preview/articles/' . $record->slug))
                     ->openUrlInNewTab(),
                 TableAction::make('unpublish')
                     ->label('Dépublier')

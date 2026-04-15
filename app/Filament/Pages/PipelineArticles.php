@@ -76,9 +76,7 @@ class PipelineArticles extends Page
                     'cover' => $article->cover_image_url,
                     'created_at' => $article->created_at?->diffForHumans() ?? 'Date inconnue',
                     'published_at' => $article->published_at?->format('d/m/Y à H:i') ?? 'Non publié',
-                    'preview_url' => $article->status === 'published'
-                        ? url('/articles/' . $article->slug)
-                        : url('/admin-preview/articles/' . $article->slug),
+                    'preview_url' => route('articles.preview.admin', ['article' => $article->slug]),
                     'edit_url' => \App\Filament\Resources\Articles\ArticleResource::getUrl('edit', ['record' => $article]),
                 ];
             })

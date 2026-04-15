@@ -6,7 +6,7 @@
 
     <?php if (auth()->check()) { ?>
     <div class="mb-7">
-        <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="flex items-center gap-4 rounded-[20px] border border-white/12 bg-white/8 p-5 no-underline transition-all duration-200 hover:border-white/25 hover:bg-white/15">
+        <a href="<?= auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : url('/') ?>" class="flex items-center gap-4 rounded-[20px] border border-white/[0.08] bg-white/8 p-5 no-underline transition-all duration-200 hover:border-white/15 hover:bg-white/15">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-base font-semibold text-white">
                 <?= strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) ?>
             </div>
@@ -26,21 +26,29 @@
     </div>
     <?php } ?>
 
-    <div class="mb-7 h-px bg-white/[0.07]"></div>
-
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
         <nav aria-label="Navigation principale">
-            <p class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35"><?= htmlspecialchars(__('site.navigation', [], null, 'Navigation')) ?></p>
+            <p class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35">Menu</p>
             <div class="flex flex-col gap-0.5">
                 <a href="/" class="rounded-[14px] px-4 py-3 text-[17px] font-normal text-white/90 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars(__('site.home')) ?></a>
                 <a href="/a-propos" class="rounded-[14px] px-4 py-3 text-[17px] font-normal text-white/90 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars(__('site.about')) ?></a>
                 <a href="/contact" class="rounded-[14px] px-4 py-3 text-[17px] font-normal text-white/90 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars(__('site.contact')) ?></a>
                 <a href="/faq" class="rounded-[14px] px-4 py-3 text-[17px] font-normal text-white/90 no-underline transition-colors duration-200 hover:bg-white/10 hover:text-white"><?= htmlspecialchars(__('site.faq')) ?></a>
-                <a href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
-                   class="mt-3 flex items-center gap-3 rounded-[14px] bg-[#FFF1B9]/12 px-4 py-3 text-[17px] font-medium text-[#FFF1B9] no-underline transition-colors duration-200 hover:bg-[#FFF1B9]/22">
-                    <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    <?= htmlspecialchars(__('site.write_article')) ?>
-                </a>
+                <div class="mt-3 flex flex-col gap-2">
+                    <?php if (! auth()->check()) { ?>
+                    <a href="<?= url('/login') ?>"
+                       class="flex items-center gap-3 rounded-[14px] bg-[#FFF1B9]/12 px-4 py-3 text-[17px] font-medium text-[#FFF1B9] no-underline transition-colors duration-200 hover:bg-[#FFF1B9]/22">
+                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m-6-3h11.25m0 0L18 8.75m3.25 3.25L18 15.25"/></svg>
+                        Se connecter
+                    </a>
+                    <?php } ?>
+
+                    <a href="<?= auth()->check() && auth()->user()->hasRole(['contributor', 'admin']) ? url('/contributor/dashboard') : config('vivat.writer_signup_url', '/register') ?>"
+                       class="flex items-center gap-3 rounded-[14px] bg-[#FFF1B9]/12 px-4 py-3 text-[17px] font-medium text-[#FFF1B9] no-underline transition-colors duration-200 hover:bg-[#FFF1B9]/22">
+                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <?= htmlspecialchars(__('site.write_article')) ?>
+                    </a>
+                </div>
             </div>
         </nav>
 

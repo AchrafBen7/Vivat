@@ -43,9 +43,7 @@ class EditArticle extends EditRecord
             Actions\Action::make('preview')
                 ->label('Aperçu')
                 ->icon(Heroicon::OutlinedEye)
-                ->url(fn (): string => $this->record->status === 'published'
-                    ? url('/articles/' . $this->record->slug)
-                    : url('/admin-preview/articles/' . $this->record->slug))
+                ->url(fn (): string => url('/admin-preview/articles/' . $this->record->slug))
                 ->openUrlInNewTab(),
             Actions\Action::make('regenerateCover')
                 ->label('Générer une autre photo')

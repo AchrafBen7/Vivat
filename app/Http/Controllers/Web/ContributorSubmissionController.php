@@ -325,6 +325,9 @@ class ContributorSubmissionController extends ContributorBaseController
                 'cover_image_url' => $submission->cover_image_url,
                 'cover_video_url' => null,
                 'is_preview' => true,
+                'preview_context' => 'dashboard',
+                'preview_back_href' => route('contributor.dashboard'),
+                'preview_back_label' => 'Retour au tableau de bord',
                 'category' => $category ? [
                     'name' => $category->name,
                     'slug' => $category->slug,

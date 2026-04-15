@@ -11,7 +11,7 @@ $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath
     <div class="max-w-[1400px] mx-auto px-[18px] md:px-8 lg:px-10 xl:px-20 relative z-50">
         <div class="flex items-center gap-2 md:gap-3 h-[72px] md:h-[88px] py-[16px] md:py-[24px]">
             <h1 class="flex-shrink-0">
-                <a href="/" class="block no-underline">
+                <a href="/" data-home-logo class="block no-underline"<?= url()->current() === url('/') ? ' aria-current="page"' : '' ?>>
                     <img src="<?= htmlspecialchars($logoUrl) ?>" alt="Vivat" class="block w-[64px] md:w-[88px] h-auto" loading="eager">
                 </a>
             </h1>
@@ -32,6 +32,13 @@ $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath
             </form>
             <script>
             (function () {
+                var homeLogo = document.querySelector('[data-home-logo]');
+                if (homeLogo && window.location.pathname === '/') {
+                    homeLogo.addEventListener('click', function (event) {
+                        event.preventDefault();
+                    });
+                }
+
                 var form = document.getElementById('header-search-form');
                 var input = form && form.querySelector('input[name="q"]');
                 var clearBtn = document.getElementById('header-search-clear');

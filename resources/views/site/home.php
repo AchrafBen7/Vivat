@@ -15,8 +15,8 @@ $writer_cta_title = $writer_cta_title ?? $t('site.writer_cta_guest_title', (coun
 $writer_cta_subtitle = $writer_cta_subtitle ?? (count($writerCtaLines) === 2 ? $writerCtaLines[1] : '');
 $writer_cta_tag_1 = $writer_cta_tag_1 ?? $t('site.writer_cta_tag_1', 'Rédaction');
 $writer_cta_tag_2 = $writer_cta_tag_2 ?? $t('site.writer_cta_tag_2', 'Actualités');
-$rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dfcy6isdu/video/upload/v1774257142/rubriques_h5dyvo.mp4';
-$rubriquesHeroPosterUrl = vivat_cloudinary_video_poster_url($rubriquesHeroVideoUrl) ?? '/technologie.jpg';
+$rubriquesHeroVideoUrl = '/quotidien2.mp4';
+$rubriquesHeroPosterUrl = '/technologie.jpg';
 
 /**
  * CTA rédacteur specs Figma : 301×114, gap 18px, typo 16px (text-base).
@@ -51,7 +51,7 @@ $overlayImagePhoto = 'absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.0
 $overlayImageSoft = 'absolute inset-0 bg-gradient-to-t from-black/30 to-transparent';
 $overlayRubriqueHero = 'pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 to-black/20';
 $topNewsContentMotion = 'w-full min-h-0 overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:-translate-y-1';
-$topNewsExcerptReveal = 'text-white/90 text-sm max-md:mt-3 max-md:mb-3 max-md:max-h-[8rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[8rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
+$topNewsExcerptReveal = 'line-clamp-2 text-white/90 text-sm max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
 $heroColorCardContentMotion = 'w-full min-h-0 overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:-translate-y-1';
 $heroColorCardExcerptRevealOnLight = 'line-clamp-2 text-sm text-[#004241]/72 max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';
 $heroColorCardExcerptRevealOnDark = 'line-clamp-2 text-sm text-white/75 max-md:mt-3 max-md:mb-3 max-md:max-h-[3rem] max-md:opacity-100 md:mt-1 md:mb-0 md:max-h-0 md:overflow-hidden md:translate-y-2 md:opacity-0 md:transition-[max-height,opacity,transform,margin] md:duration-[900ms] md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:mt-3 md:group-hover:mb-4 md:group-hover:max-h-[3rem] md:group-hover:translate-y-0 md:group-hover:opacity-100';

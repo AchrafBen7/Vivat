@@ -31,10 +31,20 @@ $relatedItems = ! empty($related_articles) ? array_map(fn (array $a) => [
 ], $related_articles) : [];
 $showRelatedSection = count($relatedItems) > 0;
 $useRelatedCarousel = count($relatedItems) > 2;
-// Insérer une pub carrée après le 2e article
-$alsoCarouselItems = array_map(fn(array $item): array => ['type' => 'article'] + $item, $relatedItems);
-if ($useRelatedCarousel && count($alsoCarouselItems) > 2) {
-    array_splice($alsoCarouselItems, 2, 0, [['type' => 'ad', 'label' => $t('site.advertising', 'Publicité')]]);
+$alsoCarouselItems = [];
+foreach ($relatedItems as $index => $item) {
+    $alsoCarouselItems[] = ['type' => 'article'] + $item;
+
+    if (
+        $useRelatedCarousel
+        && ($index + 1) % 3 === 0
+        && $index < count($relatedItems) - 1
+    ) {
+        $alsoCarouselItems[] = [
+            'type' => 'ad',
+            'label' => $t('site.advertising', 'Publicité'),
+        ];
+    }
 }
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
 $glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
@@ -47,7 +57,20 @@ $metaLine = trim(implode(' • ', array_filter([
 $shareUrl = url('/articles/'.$slug);
 $shareTitle = $title;
 $isPreview = (bool) ($article['is_preview'] ?? false);
-$previewBackHref = '/contributor/dashboard';
+$previewContext = (string) ($article['preview_context'] ?? 'dashboard');
+$previewBackHref = $article['preview_back_href'] ?? '/contributor/dashboard';
+$previewBackLabel = $article['preview_back_label']
+    ?? ($previewContext === 'admin' ? "Retour à l'administration" : 'Retour au tableau de bord');
+$previewModeLabel = $previewContext === 'admin' ? 'Aperçu admin' : $t('site.preview_mode', 'Mode aperçu');
+$previewHeading = $previewContext === 'admin'
+    ? "Aperçu admin de l'article"
+    : $t('site.article_preview_heading', 'Aperçu rédacteur de votre article');
+$previewNotice = $previewContext === 'admin'
+    ? "Cet aperçu interne reprend le rendu article avec un encadrement de prévisualisation avant publication ou vérification."
+    : $t('site.article_preview_notice', "Ceci est un aperçu de votre article. Il n'est pas encore affiché publiquement comme version finale.");
+$previewStatusLabel = $previewContext === 'admin' ? 'Prévisualisation interne' : $t('site.preview_not_public', 'Non publié');
+$previewReaderLabel = $previewContext === 'admin' ? 'Aperçu admin avant publication' : $t('site.preview_reader_simulation', 'Simulation de lecture');
+$previewReaderPill = $previewContext === 'admin' ? 'Vue interne rédaction' : $t('site.preview_reader_only', 'Aperçu interne');
 $articleCanvasClass = $isPreview
     ? 'rounded-[32px] border border-dashed border-[#004241]/18 bg-[#F7FAF9] px-5 py-6 shadow-[0_18px_40px_rgba(0,66,65,0.05)] sm:px-7 sm:py-7'
     : '';
@@ -140,17 +163,17 @@ if (! $isPreview) {
             <div class="flex min-w-0 items-start gap-4">
                 <span class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#004241] text-lg font-semibold text-white">i</span>
                 <div class="min-w-0">
-                    <p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#004241]/55"><?= htmlspecialchars($t('site.preview_mode', 'Mode aperçu')) ?></p>
-                    <h2 class="mt-1 text-[26px] font-semibold leading-[1.05] text-[#004241]"><?= htmlspecialchars($t('site.article_preview_heading', 'Aperçu rédacteur de votre article')) ?></h2>
-                    <p class="mt-2 max-w-[60rem] text-[15px] leading-6 text-[#004241]/72"><?= htmlspecialchars($t('site.article_preview_notice', "Ceci est un aperçu de votre article. Il n'est pas encore affiché publiquement comme version finale.")) ?></p>
+                    <p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#004241]/55"><?= htmlspecialchars($previewModeLabel) ?></p>
+                    <h2 class="mt-1 text-[26px] font-semibold leading-[1.05] text-[#004241]"><?= htmlspecialchars($previewHeading) ?></h2>
+                    <p class="mt-2 max-w-[60rem] text-[15px] leading-6 text-[#004241]/72"><?= htmlspecialchars($previewNotice) ?></p>
                 </div>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row">
                 <a href="<?= htmlspecialchars($previewBackHref) ?>" class="inline-flex h-11 items-center justify-center rounded-full border border-[#004241]/14 bg-white px-5 text-sm font-semibold text-[#004241] no-underline transition hover:bg-[#EBF1EF]">
-                    <?= htmlspecialchars($t('site.back_to_dashboard', 'Retour au tableau de bord')) ?>
+                    <?= htmlspecialchars($previewBackLabel) ?>
                 </a>
                 <span class="inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-5 text-sm font-semibold text-white">
-                    <?= htmlspecialchars($t('site.preview_not_public', 'Non publié')) ?>
+                    <?= htmlspecialchars($previewStatusLabel) ?>
                 </span>
             </div>
         </div>
@@ -181,12 +204,12 @@ if (! $isPreview) {
         <div class="absolute inset-0 flex flex-col p-8 top-0 left-0">
             <a href="<?= htmlspecialchars($isPreview ? $previewBackHref : $backHref) ?>" class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white mb-[85px]" aria-label="<?= htmlspecialchars($t('site.back', 'Retour')) ?>">
                 <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                <?= htmlspecialchars($isPreview ? $t('site.back_to_dashboard_short', 'Retour au dashboard') : $t('site.back', 'Retour')) ?>
+                <?= htmlspecialchars($isPreview ? $previewBackLabel : $t('site.back', 'Retour')) ?>
             </a>
             <?php if ($isPreview) { ?>
             <div class="mb-4 flex items-center">
                 <span class="inline-flex items-center justify-center rounded-full border border-white/20 bg-[rgba(190,190,190,0.16)] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-[14px]">
-                    <?= htmlspecialchars($t('site.preview_article_badge', 'Aperçu article')) ?>
+                    <?= htmlspecialchars($previewContext === 'admin' ? 'Aperçu article admin' : $t('site.preview_article_badge', 'Aperçu article')) ?>
                 </span>
             </div>
             <?php } ?>
@@ -229,8 +252,8 @@ $shareLinks = [
         <article class="w-full max-w-[680px]">
             <?php if ($isPreview) { ?>
             <div class="mb-6 flex items-center justify-between gap-3 rounded-[22px] border border-[#D6E3E1] bg-white px-5 py-4 text-sm text-[#004241]/68 shadow-[0_12px_30px_rgba(0,66,65,0.04)]">
-                <span class="font-medium text-[#004241]"><?= htmlspecialchars($t('site.preview_reader_simulation', 'Simulation de lecture')) ?></span>
-                <span class="rounded-full bg-[#EBF1EF] px-3 py-1 text-[12px] font-medium text-[#004241]"><?= htmlspecialchars($t('site.preview_reader_only', 'Aperçu interne')) ?></span>
+                <span class="font-medium text-[#004241]"><?= htmlspecialchars($previewReaderLabel) ?></span>
+                <span class="rounded-full bg-[#EBF1EF] px-3 py-1 text-[12px] font-medium text-[#004241]"><?= htmlspecialchars($previewReaderPill) ?></span>
             </div>
             <?php } ?>
             <div class="<?= $articleCanvasClass ?>">
@@ -259,9 +282,9 @@ $shareLinks = [
 </div>
 
 <?php if ($showRelatedSection && ! $isPreview) { ?>
-<section class="mx-auto mb-0 mt-16 max-w-[1400px]" aria-label="<?= htmlspecialchars($t('site.read_also', 'À lire aussi')) ?>">
+<section class="mx-auto mb-0 mt-16 max-w-[1500px]" aria-label="<?= htmlspecialchars($t('site.read_also', 'À lire aussi')) ?>">
     <!-- Titre + boutons avec padding normal -->
-    <div class="mb-6 flex items-center justify-between px-[18px] md:px-8 lg:px-10 xl:px-20">
+    <div class="mb-6 flex items-center justify-between">
         <h2 class="font-sans text-3xl font-medium text-[#004241]"><?= htmlspecialchars($t('site.read_also', 'À lire aussi')) ?></h2>
         <?php if ($useRelatedCarousel) { ?>
         <div class="flex items-center gap-2">
@@ -280,43 +303,42 @@ $shareLinks = [
     </div>
 
     <!-- Carousel pleine largeur (pas de padding latéral) -->
-    <div id="also-frame" class="overflow-hidden px-[18px] md:px-8 lg:px-10 xl:px-20">
-        <div id="also-rail" class="<?= $useRelatedCarousel ? 'flex gap-4 transition-transform duration-500 ease-out will-change-transform' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' ?>">
-            <?php foreach ($alsoCarouselItems as $item) { ?>
-            <?php $isAd = ($item['type'] ?? 'article') === 'ad'; ?>
-            <?php if ($isAd) { ?>
-            <!-- Pub carrée -->
-            <aside <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
-                   class="<?= $useRelatedCarousel ? 'flex-shrink-0' : 'aspect-square w-full' ?> flex items-center justify-center rounded-[28px] bg-[#EDEDED]">
-                <div class="flex flex-col items-center gap-2 text-[#BBBBBB]">
-                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M8 12h8M12 8v8"/></svg>
-                    <span class="text-sm font-medium text-[#AAAAAA]"><?= htmlspecialchars($item['label'] ?? 'Publicité') ?></span>
-                    <span class="text-xs text-[#BBBBBB]">380×380</span>
-                </div>
-            </aside>
-            <?php } else { ?>
-            <?php $catData = $item['category'] ?? null; $itemCategory = is_array($catData) ? ($catData['name'] ?? $relatedCategoryName) : ($catData ?? $relatedCategoryName); ?>
-            <!-- Carte article carrée -->
-            <a href="<?= !empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
-               <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
-               class="group relative <?= $useRelatedCarousel ? 'flex-shrink-0' : 'aspect-square w-full' ?> block overflow-hidden rounded-[28px]">
-                <img src="<?= htmlspecialchars($item['image']) ?>"
-                     data-fallback-url="<?= htmlspecialchars($item['fallback'] ?? $item['image']) ?>"
-                     alt="<?= htmlspecialchars($item['title']) ?>"
-                     class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-[1.05]"
-                     loading="lazy"
-                     onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
-                <div class="absolute inset-x-0 bottom-0 p-3 lg:p-4">
-                    <div class="flex flex-col gap-1.5 rounded-[18px] border border-white/10 bg-black/25 p-3 backdrop-blur-md lg:gap-2">
-                        <span class="<?= $tagCarousel ?>"><?= htmlspecialchars($itemCategory) ?></span>
-                        <h3 class="line-clamp-2 text-base font-medium leading-snug text-white"><?= htmlspecialchars($item['title']) ?></h3>
-                        <p class="text-xs text-white/70"><?= htmlspecialchars($item['date']) ?> • <?= (int)($item['reading_time'] ?? 0) ?> min</p>
+    <div>
+        <div id="also-frame" class="overflow-hidden">
+            <div id="also-rail" class="<?= $useRelatedCarousel ? 'flex gap-4 transition-transform duration-[900ms] ease-out will-change-transform' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' ?>">
+                <?php foreach ($alsoCarouselItems as $item) { ?>
+                <?php if (($item['type'] ?? 'article') === 'ad') { ?>
+                <aside <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
+                       class="<?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> flex items-center justify-center rounded-[28px] bg-[#EDEDED]">
+                    <div class="flex flex-col items-center gap-2 text-[#BBBBBB]">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M8 12h8M12 8v8"/></svg>
+                        <span class="text-sm font-medium text-[#AAAAAA]"><?= htmlspecialchars($item['label'] ?? 'Publicité') ?></span>
+                        <span class="text-xs text-[#BBBBBB]">380×380</span>
                     </div>
-                </div>
-            </a>
-            <?php } ?>
-            <?php } ?>
+                </aside>
+                <?php } else { ?>
+                <?php $catData = $item['category'] ?? null; $itemCategory = is_array($catData) ? ($catData['name'] ?? $relatedCategoryName) : ($catData ?? $relatedCategoryName); ?>
+                <a href="<?= !empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
+                   <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
+                   class="group relative <?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> block overflow-hidden rounded-[28px]">
+                    <img src="<?= htmlspecialchars($item['image']) ?>"
+                         data-fallback-url="<?= htmlspecialchars($item['fallback'] ?? $item['image']) ?>"
+                         alt="<?= htmlspecialchars($item['title']) ?>"
+                         class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-[1.05]"
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                    <div class="absolute inset-x-0 bottom-0 p-3 lg:p-4">
+                        <div class="flex flex-col gap-1.5 rounded-[18px] border border-white/10 bg-black/25 p-3 backdrop-blur-md lg:gap-2">
+                            <span class="<?= $tagCarousel ?>"><?= htmlspecialchars($itemCategory) ?></span>
+                            <h3 class="line-clamp-2 text-base font-medium leading-snug text-white"><?= htmlspecialchars($item['title']) ?></h3>
+                            <p class="text-xs text-white/70"><?= htmlspecialchars($item['date']) ?> • <?= (int)($item['reading_time'] ?? 0) ?> min</p>
+                        </div>
+                    </div>
+                </a>
+                <?php } ?>
+                <?php } ?>
+            </div>
         </div>
     </div>
 
@@ -331,23 +353,29 @@ $shareLinks = [
 
         var GAP = 16;
         var isAnimating = false;
-
-        // Cloner le premier et le dernier pour la loop infinie
+        var cloneCount = 0;
         var origItems = Array.from(rail.querySelectorAll('[data-also-item]'));
         var realCount = origItems.length;
         if (realCount < 2) return;
+        cloneCount = Math.min(3, realCount);
 
-        var cloneLast  = origItems[realCount - 1].cloneNode(true);
-        var cloneFirst = origItems[0].cloneNode(true);
-        cloneLast.setAttribute('aria-hidden', 'true');
-        cloneFirst.setAttribute('aria-hidden', 'true');
-        rail.insertBefore(cloneLast, rail.firstChild);
-        rail.appendChild(cloneFirst);
+        for (var i = 0; i < cloneCount; i++) {
+            var headClone = origItems[realCount - cloneCount + i].cloneNode(true);
+            headClone.setAttribute('aria-hidden', 'true');
+            rail.insertBefore(headClone, rail.firstChild);
+        }
 
-        // idx=1 = premier item réel (0 = clone du dernier)
-        var idx = 1;
+        for (var j = 0; j < cloneCount; j++) {
+            var tailClone = origItems[j].cloneNode(true);
+            tailClone.setAttribute('aria-hidden', 'true');
+            rail.appendChild(tailClone);
+        }
 
-        function items() { return Array.from(rail.querySelectorAll('[data-also-item]')); }
+        var idx = cloneCount;
+
+        function items() {
+            return Array.from(rail.querySelectorAll('[data-also-item]'));
+        }
 
         function cols() {
             if (window.matchMedia('(min-width: 1024px)').matches) return 3;
@@ -357,45 +385,41 @@ $shareLinks = [
 
         function cardSize() {
             var n = cols();
-            var cs = window.getComputedStyle(frame);
-            var contentW = frame.getBoundingClientRect().width
-                         - parseFloat(cs.paddingLeft)
-                         - parseFloat(cs.paddingRight);
-            return Math.floor((contentW - GAP * (n - 1)) / n);
+            var viewportWidth = frame.getBoundingClientRect().width;
+            return Math.floor((viewportWidth - GAP * (n - 1)) / n);
         }
 
         function syncSizes() {
             var size = cardSize();
             items().forEach(function(el) {
-                el.style.width  = size + 'px';
+                el.style.width = size + 'px';
                 el.style.height = size + 'px';
+                el.style.flexBasis = size + 'px';
             });
         }
 
         function goTo(i, instant) {
-            var list = items();
-            if (!list.length) return;
             idx = i;
-            var offset = list[idx] ? list[idx].offsetLeft : 0;
+            var size = cardSize();
+            var offset = idx * (size + GAP);
             if (instant) rail.style.transition = 'none';
-            rail.style.transform = 'translateX(-' + offset + 'px)';
-            if (instant) requestAnimationFrame(function() { rail.style.transition = ''; });
+            rail.style.transform = 'translate3d(-' + Math.round(offset) + 'px, 0, 0)';
+            if (instant) {
+                rail.offsetHeight;
+                rail.style.transition = '';
+            }
         }
 
-        // Loop infinie : quand on atteint un clone, on saute silencieusement au vrai
         rail.addEventListener('transitionend', function(e) {
             if (e.target !== rail || e.propertyName !== 'transform') return;
-            isAnimating = false;
-            var total = items().length;
-            if (idx === 0) {
-                // clone du dernier → sauter au vrai dernier
-                idx = realCount;
+            if (idx < cloneCount) {
+                idx = realCount + idx;
                 goTo(idx, true);
-            } else if (idx === total - 1) {
-                // clone du premier → sauter au vrai premier
-                idx = 1;
+            } else if (idx >= realCount + cloneCount) {
+                idx = idx - realCount;
                 goTo(idx, true);
             }
+            isAnimating = false;
         });
 
         syncSizes();

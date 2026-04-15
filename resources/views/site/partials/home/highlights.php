@@ -38,7 +38,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
             <div class="<?= $glassBox ?> w-full">
                 <div class="<?= $topNewsContentMotion ?>">
                 <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
-                <h2 class="font-semibold text-white line-clamp-6 text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
+                <h2 class="mt-2 font-semibold text-white line-clamp-2 text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                 <?php if (! empty($h0['excerpt'])) { ?>
                 <p class="<?= $topNewsExcerptReveal ?>"><?= htmlspecialchars($h0['excerpt']) ?></p>
                 <?php } ?>
@@ -59,7 +59,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                 <?php if (! empty($h2['category'])) { ?>
                 <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($h2['category']['name']) ?></span>
                 <?php } ?>
-                <h3 class="<?= $heroColorCardTitleCompact ?> text-white line-clamp-3"><?= htmlspecialchars($h2['title']) ?></h3>
+                <h3 class="mt-2 <?= $heroColorCardTitleCompact ?> text-white line-clamp-2"><?= htmlspecialchars($h2['title']) ?></h3>
                 <?php if (! empty($h2['excerpt'])) { ?>
                 <p class="<?= $heroColorCardExcerptRevealOnDark ?>"><?= htmlspecialchars($h2['excerpt']) ?></p>
                 <?php } ?>
@@ -77,7 +77,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                     <?php if (! empty($h3['category'])) { ?>
                     <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h3['category']['name']) ?></span>
                     <?php } ?>
-                    <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
+                    <h3 class="mt-2 font-semibold text-white line-clamp-2 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
                     <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                 </div>
                 </div>
@@ -92,7 +92,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
         </span>
         <div class="<?= $heroColorCardContentMotion ?>">
             <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($yellowHeroTagLabel($h4)) ?></span>
-            <h3 class="<?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-3"><?= htmlspecialchars($h4['title']) ?></h3>
+            <h3 class="mt-2 <?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-2"><?= htmlspecialchars($h4['title']) ?></h3>
             <?php if (! empty($h4['excerpt'])) { ?>
             <p class="<?= $heroColorCardExcerptRevealOnLight ?>"><?= htmlspecialchars($h4['excerpt']) ?></p>
             <?php } ?>
@@ -110,7 +110,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                 <?php if (! empty($h1['category'])) { ?>
                 <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h1['category']['name']) ?></span>
                 <?php } ?>
-                <h3 class="font-semibold text-white line-clamp-5 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
+                <h3 class="mt-2 font-semibold text-white line-clamp-2 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
                 <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
             </div>
                 </div>
@@ -146,7 +146,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                     <div class="<?= $glassBox ?> w-full">
                         <div class="<?= $topNewsContentMotion ?>">
                         <span class="<?= $tagClass ?> <?= $tagTopNews ?>">Top news</span>
-                        <h2 class="font-semibold text-white line-clamp-4 text-[32px] max-sm:text-2xl sm:line-clamp-6"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
+                        <h2 class="mt-2 font-semibold text-white line-clamp-2 text-[32px] max-sm:text-2xl"><?= htmlspecialchars($h0['title'] ?? '') ?></h2>
                         <?php if (! empty($h0['excerpt'])) { ?>
                         <p class="<?= $topNewsExcerptReveal ?>"><?= htmlspecialchars($h0['excerpt']) ?></p>
                         <?php } ?>
@@ -164,7 +164,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                 </span>
                 <div class="<?= $heroColorCardContentMotion ?>">
                     <span class="<?= $tagClass ?> <?= $tagOnYellowCard ?>"><?= htmlspecialchars($yellowHeroTagLabel($h4)) ?></span>
-                    <h3 class="<?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-3"><?= htmlspecialchars($h4['title']) ?></h3>
+                    <h3 class="mt-2 <?= $heroColorCardTitleWide ?> text-[#004241] line-clamp-2"><?= htmlspecialchars($h4['title']) ?></h3>
                     <?php if (! empty($h4['excerpt'])) { ?>
                     <p class="<?= $heroColorCardExcerptRevealOnLight ?>"><?= htmlspecialchars($h4['excerpt']) ?></p>
                     <?php } ?>
@@ -185,7 +185,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                         <?php if (! empty($h1['category'])) { ?>
                         <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h1['category']['name']) ?></span>
                         <?php } ?>
-                        <h3 class="font-semibold text-white line-clamp-4 text-lg sm:line-clamp-5"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
+                        <h3 class="mt-2 font-semibold text-white line-clamp-2 text-lg"><?= htmlspecialchars($h1['title'] ?? '') ?></h3>
                         <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h1['published_at'] ?? '') ?> • <?= (int) ($h1['reading_time'] ?? 0) ?> min</p>
             </div>
                 </div>
@@ -201,7 +201,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                     <?php if (! empty($h2['category'])) { ?>
                     <span class="<?= $tagClass ?> <?= $tagOnGreenCard ?>"><?= htmlspecialchars($h2['category']['name']) ?></span>
                     <?php } ?>
-                    <h3 class="<?= $heroColorCardTitleCompact ?> text-white line-clamp-3"><?= htmlspecialchars($h2['title']) ?></h3>
+                    <h3 class="mt-2 <?= $heroColorCardTitleCompact ?> text-white line-clamp-2"><?= htmlspecialchars($h2['title']) ?></h3>
                     <?php if (! empty($h2['excerpt'])) { ?>
                     <p class="<?= $heroColorCardExcerptRevealOnDark ?>"><?= htmlspecialchars($h2['excerpt']) ?></p>
                     <?php } ?>
@@ -219,7 +219,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
                         <?php if (! empty($h3['category'])) { ?>
                         <span class="<?= $tagGlassOnImage ?>"><?= htmlspecialchars($h3['category']['name']) ?></span>
                         <?php } ?>
-                        <h3 class="font-semibold text-white line-clamp-4 text-lg sm:line-clamp-5"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
+                        <h3 class="mt-2 font-semibold text-white line-clamp-2 text-lg"><?= htmlspecialchars($h3['title'] ?? '') ?></h3>
                         <p class="<?= $articleMetaOnImage ?>"><?= htmlspecialchars($h3['published_at'] ?? '') ?> • <?= (int) ($h3['reading_time'] ?? 0) ?> min</p>
                     </div>
                 </div>

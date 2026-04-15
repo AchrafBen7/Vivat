@@ -85,7 +85,7 @@
         <div class="relative w-full min-w-0">
         <div id="categories-carousel-viewport" class="w-full min-w-0 overflow-hidden">
             <div id="categories-carousel-track" class="flex gap-6 transition-transform duration-[1100ms] ease-out will-change-transform">
-                <a href="/" class="categories-carousel-panel relative block min-h-0 min-w-0 flex-[0_0_calc((100%-1.5rem)/2)] overflow-hidden rounded-[30px] h-[524px]">
+                <div class="categories-carousel-panel relative block min-h-0 min-w-0 flex-[0_0_calc((100%-1.5rem)/2)] overflow-hidden rounded-[30px] h-[524px]">
                     <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
                         <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                     </video>
@@ -94,7 +94,7 @@
                         <h2 class="max-w-[85%] text-left text-5xl font-semibold text-white">Découvrez vos rubriques préférées</h2>
                         <p class="mt-2 max-w-[85%] text-left text-2xl text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
                     </div>
-                </a>
+                </div>
                 <?php foreach ($desktopCategoryPanels as $panelIdx => $panel) {
                     if (($panel['type'] ?? 'group') === 'single') {
                         $desktopSoloCategory = $panel['category'] ?? null;
@@ -280,7 +280,7 @@
                     <?php if ($tabletSlide['type'] === 'hero') { ?>
                     <?php $tabletCategory = $tabletSlide['categories'][0] ?? null; ?>
                     <?php $tabletPoster = $tabletCategory ? (vivat_cloudinary_video_poster_url($tabletCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCategory['slug'] ?? null)) : null; ?>
-                    <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[420px]">
+                    <div class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[420px]">
                         <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
                             <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                         </video>
@@ -289,7 +289,7 @@
                             <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
                             <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
-                    </a>
+                    </div>
                     <?php if ($tabletCategory) { ?>
                     <a href="/categories/<?= htmlspecialchars($tabletCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-[0_0_32%] overflow-hidden rounded-[30px] bg-black/20">
                         <?php if (! empty($tabletCategory['image_url'])) { ?>
@@ -337,7 +337,7 @@
                     <?php if ($tabletCloneSlide['type'] === 'hero') { ?>
                     <?php $tabletCloneCategory = $tabletCloneSlide['categories'][0] ?? null; ?>
                     <?php $tabletClonePoster = $tabletCloneCategory ? (vivat_cloudinary_video_poster_url($tabletCloneCategory['image_url'] ?? null) ?? vivat_category_public_poster_url($tabletCloneCategory['slug'] ?? null)) : null; ?>
-                    <a href="/" class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[420px]">
+                    <div class="relative block min-h-0 min-w-0 flex-[7] overflow-hidden rounded-[30px] h-[420px]">
                         <video class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline preload="metadata" poster="<?= htmlspecialchars($rubriquesHeroPosterUrl) ?>">
                             <source src="<?= htmlspecialchars($rubriquesHeroVideoUrl) ?>" type="video/mp4">
                         </video>
@@ -346,7 +346,7 @@
                             <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
                             <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
                         </div>
-                    </a>
+                    </div>
                     <?php if ($tabletCloneCategory) { ?>
                     <a href="/categories/<?= htmlspecialchars($tabletCloneCategory['slug']) ?>" class="group relative block h-[420px] min-h-0 min-w-0 flex-[0_0_32%] overflow-hidden rounded-[30px] bg-black/20">
                         <?php if (! empty($tabletCloneCategory['image_url'])) { ?>

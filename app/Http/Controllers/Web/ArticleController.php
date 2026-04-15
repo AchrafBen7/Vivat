@@ -85,6 +85,9 @@ class ArticleController extends Controller
                     : 'Fallback visuel affiché',
                 'cover_video_url' => $article->cover_video_url,
                 'is_preview' => $isPreview,
+                'preview_context' => $isPreview ? 'admin' : null,
+                'preview_back_href' => $isPreview ? \App\Filament\Resources\Articles\ArticleResource::getUrl() : null,
+                'preview_back_label' => $isPreview ? "Retour à l'administration" : null,
                 'category' => $category ? [
                     'name' => $category->name,
                     'slug' => $category->slug,
