@@ -111,85 +111,164 @@
             });
         }
 
+        var prefetchCache = {};
+        var activeCtrl   = null;
+        var lastNavTime  = 0;
+        var NAV_COOLDOWN = 300; // ms minimum entre deux navigations
+
+        function buildLangUrl(lang) {
+            var u = new URL(window.location.href);
+            u.searchParams.set('lang', lang);
+            return u.toString();
+        }
+
+        function prefetchLang(lang) {
+            var cur = switches[0].getAttribute('data-active') || 'fr';
+            if (lang === cur || prefetchCache[lang]) return;
+            prefetchCache[lang] = fetch(buildLangUrl(lang), { headers: { 'X-Vivat-Ajax': '1' } })
+                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
+                .catch(function() { delete prefetchCache[lang]; });
+        }
+
+        function showMain(mainEl) {
+            mainEl.style.transition = 'opacity 0.15s ease';
+            mainEl.style.opacity    = '1';
+            mainEl.style.pointerEvents = '';
+        }
+
         function navigateToLanguage(lang) {
-            var currentLanguage = switches[0].getAttribute('data-active') || 'fr';
+            // ── Rate limit ──────────────────────────────────────────────
+            var now = Date.now();
+            if (now - lastNavTime < NAV_COOLDOWN) return;
+
+            var currentLang = switches[0].getAttribute('data-active') || 'fr';
             if (lang !== 'fr' && lang !== 'nl') return;
-            if (lang === currentLanguage) return;
+            if (lang === currentLang) return;
+
+            lastNavTime = now;
+
+            // Annuler la navigation en cours
+            if (activeCtrl) { activeCtrl.abort(); activeCtrl = null; }
+            var ctrl  = new AbortController();
+            activeCtrl = ctrl;
 
             applyLanguage(lang);
-
             try {
-                document.cookie = 'vivat_lang=' + encodeURIComponent(lang) + '; path=/; max-age=' + (60 * 60 * 24 * 30) + '; SameSite=Lax';
-            } catch (e) {}
+                document.cookie = 'vivat_lang=' + encodeURIComponent(lang) + '; path=/; max-age=2592000; SameSite=Lax';
+            } catch(e) {}
 
-            var url = new URL(window.location.href);
-            url.searchParams.set('lang', lang);
-
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                window.location.href = url.toString();
+            // La home a beaucoup de blocs et de scripts réinjectés.
+            // Un rechargement complet est plus fiable que le swap AJAX partiel.
+            if (window.location.pathname === '/') {
+                location.href = buildLangUrl(lang);
                 return;
+            }
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                location.href = buildLangUrl(lang); return;
             }
 
             var mainEl = document.querySelector('main');
-            if (!mainEl || !window.fetch) {
-                window.location.href = url.toString();
-                return;
+            if (!mainEl || !window.fetch) { location.href = buildLangUrl(lang); return; }
+
+            // ── Nettoyage GSAP complet ───────────────────────────────────
+            document.documentElement.classList.remove('js-anim');
+            if (window.gsap) {
+                // Tuer tous les tweens actifs sur mainEl ET tous ses enfants
+                gsap.killTweensOf(mainEl);
+                var children = mainEl.querySelectorAll('*');
+                for (var i = 0; i < children.length; i++) gsap.killTweensOf(children[i]);
+            }
+            // Tuer les ScrollTriggers pour qu'ils ne s'accumulent pas
+            if (window.ScrollTrigger) {
+                ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
             }
 
-            mainEl.style.opacity = '0';
+            // ── Fetch (prefetch cache ou nouvelle requête) ───────────────
+            var fetchP;
+            if (prefetchCache[lang]) {
+                fetchP = prefetchCache[lang];
+                delete prefetchCache[lang];
+            } else {
+                fetchP = fetch(buildLangUrl(lang), {
+                    headers: { 'X-Vivat-Ajax': '1' },
+                    signal: ctrl.signal,
+                }).then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
+            }
 
-            fetch(url.toString(), { headers: { 'X-Vivat-Ajax': '1' } })
-                .then(function(res) {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.text();
-                })
-                .then(function(html) {
-                    var parser = new DOMParser();
-                    var newDoc = parser.parseFromString(html, 'text/html');
-                    var newMain = newDoc.querySelector('main');
-                    if (!newMain) throw new Error('no main');
+            // ── Garder la page visible pendant le fetch : on évite l'écran blanc
+            // en atténuant légèrement le contenu au lieu de le masquer.
+            mainEl.style.transition = 'opacity 0.12s ease';
+            mainEl.style.opacity    = '0.68';
+            mainEl.style.pointerEvents = 'none';
 
-                    mainEl.className = newMain.className;
-                    mainEl.innerHTML = newMain.innerHTML;
+            // ── Safety : force la visibilité après 1.5 s quoi qu'il arrive ─
+            var safetyTimer = setTimeout(function() { showMain(mainEl); }, 1500);
 
-                    runPageScripts(mainEl);
+            fetchP.then(function(html) {
+                if (ctrl !== activeCtrl || ctrl.signal.aborted) return;
+                activeCtrl = null;
+                clearTimeout(safetyTimer);
 
-                    document.title = newDoc.title;
-                    document.documentElement.lang = lang;
+                if (!html) throw new Error('empty');
+                var parser  = new DOMParser();
+                var newDoc  = parser.parseFromString(html, 'text/html');
+                var newMain = newDoc.querySelector('main');
+                if (!newMain) throw new Error('no main');
 
-                    history.pushState({ lang: lang }, '', url.toString());
+                mainEl.className  = newMain.className;
+                mainEl.innerHTML  = newMain.innerHTML;
+                window._vivatLangSwap = true;
+                runPageScripts(mainEl);
+                window._vivatLangSwap = false;
+                document.title = newDoc.title;
+                document.documentElement.lang = lang;
+                history.pushState({ lang: lang }, '', buildLangUrl(lang));
+                if (typeof attachFallbackToImages === 'function') attachFallbackToImages();
 
-                    if (typeof attachFallbackToImages === 'function') {
-                        attachFallbackToImages();
-                    }
+                // ── Fade in ──────────────────────────────────────────────
+                requestAnimationFrame(function() { showMain(mainEl); });
 
-                    requestAnimationFrame(function() {
-                        mainEl.style.opacity = '1';
-                    });
-                })
-                .catch(function() {
-                    window.location.href = url.toString();
-                });
+            }).catch(function(err) {
+                clearTimeout(safetyTimer);
+                if (ctrl.signal.aborted || (err && err.name === 'AbortError')) return;
+                showMain(mainEl);
+                location.href = buildLangUrl(lang);
+            });
         }
 
+        // Toujours aligner l’UI sur le serveur (cookie / ?lang=), pas sur sessionStorage : sinon le switch
+        // pouvait afficher NL alors que le HTML servi était encore en FR (cookie illisible côté PHP).
         var initialLanguage = switches[0].getAttribute('data-active') || 'fr';
+        applyLanguage(initialLanguage);
         try {
-            var storedLanguage = window.sessionStorage.getItem('vivat-language-visual');
-            if (storedLanguage === 'fr' || storedLanguage === 'nl') {
-                initialLanguage = storedLanguage;
-            }
+            window.sessionStorage.setItem('vivat-language-visual', initialLanguage);
         } catch (error) {
         }
 
-        applyLanguage(initialLanguage);
+        // Warm prefetch : lancer le fetch de l'autre langue en arrière-plan
+        // dès que la page est idle, pour que le clic soit quasi-instantané
+        var _warmLang = initialLanguage === 'fr' ? 'nl' : 'fr';
+        if (window.requestIdleCallback) {
+            requestIdleCallback(function() { prefetchLang(_warmLang); }, { timeout: 2000 });
+        } else {
+            setTimeout(function() { prefetchLang(_warmLang); }, 800);
+        }
 
         switches.forEach(function(switchEl) {
+            // Prefetch au hover — la requête part avant le clic
+            switchEl.addEventListener('mouseover', function(event) {
+                var btn = event.target.closest('[data-lang-option]');
+                if (btn) prefetchLang(btn.getAttribute('data-lang-option'));
+            });
+            switchEl.addEventListener('focusin', function(event) {
+                var btn = event.target.closest('[data-lang-option]');
+                if (btn) prefetchLang(btn.getAttribute('data-lang-option'));
+            });
+
             switchEl.addEventListener('click', function(event) {
                 var button = event.target.closest('[data-lang-option]');
-                if (!button) {
-                    return;
-                }
-
+                if (!button) return;
                 event.preventDefault();
                 navigateToLanguage(button.getAttribute('data-lang-option'));
             });
@@ -234,27 +313,4 @@
     window.addEventListener('load', repairBrokenFallbacks);
     document.body.addEventListener('error', onImageError, true);
 })();
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    if (typeof window.gsap !== 'undefined') {
-        var header = document.getElementById('site-header');
-        if (header) window.gsap.set(header, { autoAlpha: 0, y: -10 });
-    }
-});
-window.addEventListener('load', function () {
-    if (typeof window.gsap !== 'undefined') {
-        var header = document.getElementById('site-header');
-        if (header) {
-            window.gsap.to(header, {
-                autoAlpha: 1,
-                y: 0,
-                duration: 1.8,
-                ease: 'power3.out',
-                delay: 0.15,
-            });
-        }
-    }
-});
 </script>

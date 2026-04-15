@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\ContentLocaleService;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -23,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Cookie défini côté client (layout_scripts) : doit rester en clair pour que la requête le lise.
+        EncryptCookies::except([ContentLocaleService::COOKIE_NAME]);
+
         if ($this->app->environment('local') && function_exists('opcache_reset')) {
             @opcache_reset();
         }
