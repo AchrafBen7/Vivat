@@ -546,9 +546,7 @@ class PublicPageDataService
             'meta_description' => $article->meta_description,
             'reading_time' => $article->reading_time,
             'published_at' => $article->published_at?->format('d/m/Y'),
-            'cover_image_url' => $useFallback
-                ? vivat_category_fallback_image($category['slug'] ?? null, 800, 450, (string) $article->id, 'page')
-                : $cover,
+            'cover_image_url' => $useFallback ? null : $cover,
             'cover_video_url' => $article->cover_video_url,
             'uses_auto_image' => $useFallback,
             'article_type' => $article->article_type,
@@ -564,14 +562,14 @@ class PublicPageDataService
         ];
     }
 
-    private function articleCoverOrFallback(Article $article, ?Category $category): string
+    private function articleCoverOrFallback(Article $article, ?Category $category): ?string
     {
         $cover = $article->cover_image_url;
 
         if (empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
             || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'))) {
-            return vivat_category_fallback_image($category?->slug, 800, 450, (string) $article->id, 'cover');
+            return null;
         }
 
         return $cover;

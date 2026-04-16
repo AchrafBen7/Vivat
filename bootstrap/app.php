@@ -2,6 +2,7 @@
 
 use App\Jobs\EnrichContentJob;
 use App\Jobs\ExpirePublicationQuotesJob;
+use App\Jobs\FetchMissingCoverImagesJob;
 use App\Jobs\FetchRssFeedJob;
 use App\Jobs\GenerateArticleJob;
 use App\Jobs\PruneEnrichedItemTextJob;
@@ -149,6 +150,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 });
             })->everyTenMinutes()->name('pipeline:horizon-snapshot');
         }
+
+        // Récupération des images Pexels pour les articles sans cover (10 articles par heure)
+        $schedule->job(new FetchMissingCoverImagesJob(10))
+            ->hourly()
+            ->name('pipeline:fetch-missing-covers')
+            ->withoutOverlapping();
 
         // Purge du texte extrait brut des sources (conformité copyright) hebdomadaire
         $schedule->job(PruneEnrichedItemTextJob::class)
