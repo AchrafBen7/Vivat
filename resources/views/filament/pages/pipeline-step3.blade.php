@@ -199,7 +199,6 @@
                                     wire:loading.attr="disabled"
                                     wire:target="openPublishModal('{{ $draft['id'] }}')"
                                     class="vp-btn-publish"
-                                    @disabled(! $draft['is_publishable'])
                                 >
                                     Publier
                                 </button>

@@ -18,6 +18,7 @@ use App\Services\ArticleSelectionService;
 use App\Services\PipelineAutomationState;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 use Filament\Support\Icons\Heroicon;
 
 class PipelineStep3 extends Page
@@ -505,11 +506,24 @@ class PipelineStep3 extends Page
         ]);
         $article->refresh();
 
-        if (! $article->publish()) {
+        // L'admin bypass le seuil quality_score — publication directe
+        $published = DB::transaction(function () use ($article): bool {
+            $updated = $article->update([
+                'status'       => 'published',
+                'published_at' => now(),
+            ]);
+            if (! $updated) {
+                return false;
+            }
+            $article->articleSources()->whereNull('used_at')->update(['used_at' => now()]);
+            return true;
+        });
+
+        if (! $published) {
             Notification::make()
                 ->danger()
                 ->title('Publication impossible')
-                ->body("Le brouillon ne remplit pas encore les conditions nécessaires pour être publié.")
+                ->body("Une erreur est survenue lors de la publication.")
                 ->send();
 
             $this->closePublishModal();
