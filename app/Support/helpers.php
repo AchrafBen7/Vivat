@@ -267,12 +267,14 @@ if (! function_exists('get_layout_categories')) {
 
         $locale = app()->getLocale() ?: 'fr';
         $limit = (int) config('vivat.home_categories_count', 9);
+        $hasNameNl = \Illuminate\Support\Facades\Schema::hasColumn('categories', 'name_nl');
+        $columns = $hasNameNl ? ['name', 'name_nl', 'slug'] : ['name', 'slug'];
         $categories = \App\Models\Category::query()
             ->orderedForHome()
             ->limit($limit)
-            ->get(['name', 'name_nl', 'slug']);
+            ->get($columns);
 
-        return $categories->map(fn ($c) => ['name' => $c->localizedName($locale), 'slug' => $c->slug])->all();
+        return $categories->map(fn ($c) => ['name' => $hasNameNl ? $c->localizedName($locale) : $c->name, 'slug' => $c->slug])->all();
     }
 }
 
