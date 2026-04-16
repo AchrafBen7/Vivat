@@ -39,7 +39,7 @@
                     <a href="<?= url('/login') ?>"
                        class="flex items-center gap-3 rounded-[14px] bg-[#FFF1B9]/12 px-4 py-3 text-[17px] font-medium text-[#FFF1B9] no-underline transition-colors duration-200 hover:bg-[#FFF1B9]/22">
                         <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m-6-3h11.25m0 0L18 8.75m3.25 3.25L18 15.25"/></svg>
-                        Se connecter
+                        <?= htmlspecialchars(__('site.login')) ?>
                     </a>
                     <?php } ?>
 

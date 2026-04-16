@@ -761,42 +761,39 @@
     })();
     </script>
 
+    </script>
+    <?php } ?>
     <script>
     (function () {
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
         function initRubriques() {
             if (!window.gsap || !window.ScrollTrigger) return;
+            if (window._vivatLangSwap) return;
 
-            // Desktop — tout le carousel entre comme un seul bloc
             var section = document.getElementById('categories-section');
             if (section) {
-                gsap.from(section, {
-                    opacity: 0,
-                    y: 30,
-                    duration: 1.0,
+                gsap.set(section, { opacity: 0, y: 40 });
+                gsap.to(section, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1.1,
                     ease: 'power2.out',
                     clearProps: 'opacity,transform',
-                    scrollTrigger: {
-                        trigger: section,
-                        start: 'top 85%',
-                    },
+                    scrollTrigger: { trigger: section, start: 'top 88%' },
                 });
             }
 
-            // Tablet — idem
             var tabletSection = document.getElementById('categories-section-tablet');
             if (tabletSection) {
-                gsap.from(tabletSection, {
-                    opacity: 0,
-                    y: 30,
-                    duration: 1.0,
+                gsap.set(tabletSection, { opacity: 0, y: 40 });
+                gsap.to(tabletSection, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1.1,
                     ease: 'power2.out',
                     clearProps: 'opacity,transform',
-                    scrollTrigger: {
-                        trigger: tabletSection,
-                        start: 'top 85%',
-                    },
+                    scrollTrigger: { trigger: tabletSection, start: 'top 88%' },
                 });
             }
         }
@@ -808,5 +805,4 @@
         }
     })();
     </script>
-    <?php } ?>
     <?php } ?>

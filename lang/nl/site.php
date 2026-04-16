@@ -15,6 +15,7 @@ return [
     'my_account' => 'Mijn account',
     'writer_space' => 'Redacteursruimte',
     'my_profile' => 'Mijn profiel',
+    'login' => 'Inloggen',
     'logout' => 'Uitloggen',
     'home' => 'Home',
     'about' => 'Over ons',

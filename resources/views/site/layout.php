@@ -18,11 +18,13 @@ $viteManifestPath = public_path('build/manifest.json');
 $viteHotPath = public_path('hot');
 $canLoadViteAssets = file_exists($viteManifestPath) || file_exists($viteHotPath);
 
-// ── AJAX lang-switch : renvoyer uniquement le <main>, pas la page entière ─────
+// ── AJAX lang-switch : renvoyer header + main uniquement, pas toute la page ────
 if (app('request')->header('X-Vivat-Ajax')) {
     $mainPb    = empty($trim_main_bottom) ? 'pb-8' : 'pb-0';
     $mainClass = 'max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 ' . $mainPb . ' overflow-x-hidden';
+    $ajaxHeaderHtml = render_php_view('site.partials.layout_header', get_defined_vars());
     echo '<!DOCTYPE html><html lang="' . htmlspecialchars($content_locale) . '"><head><title>' . $title_safe . '</title></head><body>';
+    echo '<div id="ajax-header-payload" hidden>' . $ajaxHeaderHtml . '</div>';
     echo '<main class="' . htmlspecialchars($mainClass) . '">' . ($content ?? '') . '</main>';
     echo '</body></html>';
     return;

@@ -72,6 +72,8 @@
         });
     }
 
+    window._vivatInitHamburger = initHamburgerMenu;
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initHamburgerMenu);
     } else {
@@ -79,9 +81,12 @@
     }
 
     function initLanguageSwitches() {
-        var switches = Array.prototype.slice.call(document.querySelectorAll('[data-language-switch]'));
-        if (!switches.length) {
+        if (!document.querySelector('[data-language-switch]')) {
             return;
+        }
+
+        function getSwitches() {
+            return Array.prototype.slice.call(document.querySelectorAll('[data-language-switch]'));
         }
 
         function syncSwitch(switchEl, lang) {
@@ -92,7 +97,7 @@
         }
 
         function applyLanguage(lang) {
-            switches.forEach(function(switchEl) {
+            getSwitches().forEach(function(switchEl) {
                 syncSwitch(switchEl, lang);
             });
 
@@ -123,7 +128,8 @@
         }
 
         function prefetchLang(lang) {
-            var cur = switches[0].getAttribute('data-active') || 'fr';
+            var s0 = document.querySelector('[data-language-switch]');
+            var cur = s0 ? s0.getAttribute('data-active') || 'fr' : 'fr';
             if (lang === cur || prefetchCache[lang]) return;
             prefetchCache[lang] = fetch(buildLangUrl(lang), { headers: { 'X-Vivat-Ajax': '1' } })
                 .then(function(r) { if (!r.ok) throw 0; return r.text(); })
@@ -141,7 +147,8 @@
             var now = Date.now();
             if (now - lastNavTime < NAV_COOLDOWN) return;
 
-            var currentLang = switches[0].getAttribute('data-active') || 'fr';
+            var s0 = document.querySelector('[data-language-switch]');
+            var currentLang = s0 ? s0.getAttribute('data-active') || 'fr' : 'fr';
             if (lang !== 'fr' && lang !== 'nl') return;
             if (lang === currentLang) return;
 
@@ -221,6 +228,24 @@
                 window._vivatLangSwap = true;
                 runPageScripts(mainEl);
                 window._vivatLangSwap = false;
+
+                // ── Swap header (traductions nav) ────────────────────────
+                var newHeaderPayload = newDoc.getElementById('ajax-header-payload');
+                if (newHeaderPayload) {
+                    var currentHeader = document.querySelector('header#site-header');
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newHeaderPayload.innerHTML;
+                    var newHeader = tempDiv.querySelector('header#site-header');
+                    if (currentHeader && newHeader) {
+                        currentHeader.innerHTML = newHeader.innerHTML;
+                        runPageScripts(currentHeader);
+                        // Ré-initialiser le hamburger (ses listeners sont sur les anciens éléments)
+                        if (typeof window._vivatInitHamburger === 'function') {
+                            window._vivatInitHamburger();
+                        }
+                    }
+                }
+
                 document.title = newDoc.title;
                 document.documentElement.lang = lang;
                 history.pushState({ lang: lang }, '', buildLangUrl(lang));
@@ -239,7 +264,7 @@
 
         // Toujours aligner l’UI sur le serveur (cookie / ?lang=), pas sur sessionStorage : sinon le switch
         // pouvait afficher NL alors que le HTML servi était encore en FR (cookie illisible côté PHP).
-        var initialLanguage = switches[0].getAttribute('data-active') || 'fr';
+        var initialLanguage = (document.querySelector('[data-language-switch]') || {getAttribute: function(){return null;}}).getAttribute('data-active') || 'fr';
         applyLanguage(initialLanguage);
         try {
             window.sessionStorage.setItem('vivat-language-visual', initialLanguage);
@@ -255,23 +280,20 @@
             setTimeout(function() { prefetchLang(_warmLang); }, 800);
         }
 
-        switches.forEach(function(switchEl) {
-            // Prefetch au hover — la requête part avant le clic
-            switchEl.addEventListener('mouseover', function(event) {
-                var btn = event.target.closest('[data-lang-option]');
-                if (btn) prefetchLang(btn.getAttribute('data-lang-option'));
-            });
-            switchEl.addEventListener('focusin', function(event) {
-                var btn = event.target.closest('[data-lang-option]');
-                if (btn) prefetchLang(btn.getAttribute('data-lang-option'));
-            });
-
-            switchEl.addEventListener('click', function(event) {
-                var button = event.target.closest('[data-lang-option]');
-                if (!button) return;
-                event.preventDefault();
-                navigateToLanguage(button.getAttribute('data-lang-option'));
-            });
+        // Event delegation au niveau document — survit au swap du header
+        document.addEventListener('mouseover', function(event) {
+            var btn = event.target.closest('[data-lang-option]');
+            if (btn) prefetchLang(btn.getAttribute('data-lang-option'));
+        });
+        document.addEventListener('focusin', function(event) {
+            var btn = event.target.closest('[data-lang-option]');
+            if (btn) prefetchLang(btn.getAttribute('data-lang-option'));
+        });
+        document.addEventListener('click', function(event) {
+            var btn = event.target.closest('[data-lang-option]');
+            if (!btn) return;
+            event.preventDefault();
+            navigateToLanguage(btn.getAttribute('data-lang-option'));
         });
     }
 

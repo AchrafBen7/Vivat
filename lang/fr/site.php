@@ -15,6 +15,7 @@ return [
     'my_account' => 'Mon compte',
     'writer_space' => 'Espace rédacteur',
     'my_profile' => 'Mon profil',
+    'login' => 'Se connecter',
     'logout' => 'Se déconnecter',
     'home' => 'Accueil',
     'about' => 'À propos',
