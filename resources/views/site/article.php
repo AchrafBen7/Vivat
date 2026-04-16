@@ -209,7 +209,7 @@ if (! $isPreview) {
                 <?= htmlspecialchars($t('site.back', 'Retour')) ?>
             </a>
             <?php } ?>
-            <h1 class="text-white font-semibold leading-none max-w-[947px] text-5xl mb-[9px] font-sans"><?= htmlspecialchars($title) ?></h1>
+            <h1 class="mb-[9px] max-w-[947px] font-sans text-[2.35rem] font-semibold leading-[0.96] text-white sm:text-5xl"><?= htmlspecialchars($title) ?></h1>
             <?php if ($metaLine) { ?>
             <p class="text-white font-light leading-none text-xl opacity-95 font-sans">
                 <time datetime="<?= htmlspecialchars($published_at_iso ?? '') ?>"><?= htmlspecialchars($metaLine) ?></time>
