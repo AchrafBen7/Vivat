@@ -60,6 +60,10 @@ if (app('request')->header('X-Vivat-Ajax')) {
     <?php if ($canLoadViteAssets) { ?>
     <?= app(\Illuminate\Foundation\Vite::class)(['resources/js/app.js']) ?>
     <?php } ?>
+    <?php if (config('vivat.adsense.client')) { ?>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= htmlspecialchars((string) config('vivat.adsense.client')) ?>"
+            crossorigin="anonymous"></script>
+    <?php } ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {

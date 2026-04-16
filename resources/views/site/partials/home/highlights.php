@@ -24,7 +24,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
 <!-- Bandeau pub tablette uniquement (md) -->
 <div class="hidden md:block lg:hidden w-full mb-6">
     <div class="rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm flex items-center justify-center mx-auto w-full max-w-[728px] h-[90px]">
-        Publicité 728×90
+        <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'home_tablet_banner_728x90']) ?>
     </div>
 </div>
 
@@ -245,7 +245,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
         <!-- Colonne pub + CTA : visible xl+ seulement -->
         <div class="hidden xl:flex xl:col-span-3 flex-col gap-6">
             <div class="flex flex-col rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm w-full xl:max-w-[300px] h-[600px] items-center justify-center">
-                Espace publicitaire
+                <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'home_sidebar_300x600']) ?>
             </div>
             <a href="<?= htmlspecialchars($writer_cta_url) ?>" class="<?= $writerCtaBannerSidebar ?> relative <?= $writerCtaFocusReset ?>">
                 <div class="<?= $writerCtaTextWrap ?>">
@@ -279,5 +279,5 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
 
     <!-- Bannière pub -->
     <div class="flex rounded-[30px] bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 text-sm overflow-hidden items-center justify-center w-[970px] max-w-full h-[250px] mt-[65px] mx-auto">
-        Espace publicitaire (bannière)
+        <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'home_bottom_banner_970x250']) ?>
                 </div>

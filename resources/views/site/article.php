@@ -144,7 +144,7 @@ if (is_string($content) && trim($content) !== '') {
 }
 
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
-$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400"><span>' . htmlspecialchars($t('site.advertising_space', 'Espace publicitaire')) . ' 970×250</span></div></div>';
+$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">' . render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_mid_banner_970x250']) . '</div></div>';
 if (! $isPreview) {
     $paraCount = preg_match_all('/<\/p>\s*/i', $content);
     $insertAfterPara = $paraCount >= 2 ? (int) floor($paraCount / 2) : 1;
@@ -192,7 +192,7 @@ if (! $isPreview) {
     <!-- Bannière pub 728×90 -->
     <div class="mb-6 flex items-center justify-center">
         <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
-            <span class="text-sm"><?= htmlspecialchars($t('site.advertising_space', 'Espace publicitaire')) ?> 728×90</span>
+            <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_top_banner_728x90']) ?>
         </div>
     </div>
     <?php } ?>
@@ -310,11 +310,7 @@ $shareLinks = [
                 <?php if (($item['type'] ?? 'article') === 'ad') { ?>
                 <aside <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
                        class="<?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> flex items-center justify-center rounded-[28px] bg-[#EDEDED]">
-                    <div class="flex flex-col items-center gap-2 text-[#BBBBBB]">
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M8 12h8M12 8v8"/></svg>
-                        <span class="text-sm font-medium text-[#AAAAAA]"><?= htmlspecialchars($item['label'] ?? 'Publicité') ?></span>
-                        <span class="text-xs text-[#BBBBBB]">380×380</span>
-                    </div>
+                    <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_related_square_336x280']) ?>
                 </aside>
                 <?php } else { ?>
                 <?php $catData = $item['category'] ?? null; $itemCategory = is_array($catData) ? ($catData['name'] ?? $relatedCategoryName) : ($catData ?? $relatedCategoryName); ?>

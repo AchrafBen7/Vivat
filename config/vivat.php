@@ -95,4 +95,58 @@ return [
 
     'writer_signup_url' => env('VIVAT_WRITER_SIGNUP_URL', '/devenir-redacteur'),
     'writer_dashboard_url' => env('VIVAT_WRITER_DASHBOARD_URL', '/contributor/submissions'),
+
+    'adsense' => [
+        'client' => 'ca-pub-4283192845913527',
+        'slots' => [
+            'home_tablet_banner_728x90' => [
+                'slot' => '4377137008',
+                'mode' => 'responsive',
+            ],
+            'home_sidebar_300x600' => [
+                'slot' => '9711343832',
+                'mode' => 'fixed',
+                'width' => 300,
+                'height' => 600,
+            ],
+            'home_bottom_banner_970x250' => [
+                'slot' => '9703604977',
+                'mode' => 'responsive',
+            ],
+            'article_top_banner_728x90' => [
+                'slot' => '5035612553',
+                'mode' => 'responsive',
+            ],
+            'article_mid_banner_970x250' => [
+                'slot' => '6101282216',
+                'mode' => 'responsive',
+            ],
+            'article_related_square_336x280' => [
+                'slot' => '6620156960',
+                'mode' => 'responsive',
+            ],
+            'about_mobile_banner_320x50' => [
+                'slot' => '8535873863',
+                'mode' => 'fixed',
+                'width' => 320,
+                'height' => 50,
+            ],
+            'about_desktop_banner_728x90' => [
+                'slot' => '7222792194',
+                'mode' => 'responsive',
+            ],
+            'about_bottom_banner_970x250' => [
+                'slot' => '3283547186',
+                'mode' => 'responsive',
+            ],
+            'category_top_banner_728x90' => [
+                'slot' => '4213485475',
+                'mode' => 'responsive',
+            ],
+            'category_mid_banner_970x250' => [
+                'slot' => '6456505433',
+                'mode' => 'responsive',
+            ],
+        ],
+    ],
 ];

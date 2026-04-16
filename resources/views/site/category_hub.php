@@ -127,7 +127,7 @@ $restArticles = array_values($byId);
     <!-- 2) Pub 728x90 flow vertical, border 1px, padding right/bottom/left 48px, gap 8 -->
     <div class="mb-6 flex justify-center">
         <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
-            Publicité
+            <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'category_top_banner_728x90']) ?>
         </div>
     </div>
 
@@ -317,7 +317,7 @@ $remainingArticles = array_values($featuredPool);
     <!-- Bloc pub sous les articles : 24px marge, 970×250, padding 48px, fond #686868 -->
     <div class="mt-6 flex justify-center">
         <div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
-            Espace publicitaire
+            <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'category_mid_banner_970x250']) ?>
         </div>
     </div>
 
