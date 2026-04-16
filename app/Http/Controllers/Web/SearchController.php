@@ -75,6 +75,7 @@ class SearchController extends Controller
                 'url' => url('/articles/'.$article->slug),
                 'meta' => $article->category?->name ?: 'Article',
                 'thumbnail_url' => $this->articleSuggestionThumbnail($article),
+                'fallback_url' => $this->articleSuggestionFallback($article),
             ]);
         $suggestions = $articleSuggestions
             ->map(function (array $item) use ($normalized) {
@@ -104,6 +105,7 @@ class SearchController extends Controller
                 'url' => $item['url'],
                 'meta' => $item['meta'],
                 'thumbnail_url' => $item['thumbnail_url'] ?? null,
+                'fallback_url' => $item['fallback_url'] ?? null,
             ])
             ->values();
 
@@ -115,7 +117,6 @@ class SearchController extends Controller
 
     private function articleSuggestionThumbnail(Article $article): string
     {
-        $categorySlug = $article->category?->slug;
         $cover = $article->cover_image_url;
 
         if (is_string($cover)
@@ -125,7 +126,12 @@ class SearchController extends Controller
             return $cover;
         }
 
-        return vivat_category_fallback_image($categorySlug, 120, 120, (string) $article->id, 'search');
+        return $this->articleSuggestionFallback($article);
+    }
+
+    private function articleSuggestionFallback(Article $article): string
+    {
+        return vivat_category_fallback_image($article->category?->slug, 120, 120, (string) $article->id, 'search');
     }
 
     private function normalizeSearchText(string $value): string

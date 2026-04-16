@@ -38,6 +38,16 @@ if (! function_exists('vivat_category_fallback_image')) {
      */
     function vivat_category_fallback_image(?string $categorySlug, int $width = 800, int $height = 600, ?string $articleIdentifier = null, ?string $contextSeed = null): string
     {
+        $localPoster = vivat_category_public_poster_url($categorySlug);
+        if (is_string($localPoster) && $localPoster !== '') {
+            return $localPoster;
+        }
+
+        $localMedia = vivat_category_public_media_url($categorySlug);
+        if (is_string($localMedia) && $localMedia !== '' && ! preg_match('/\.(mp4|webm|mov)(\?|$)/i', $localMedia)) {
+            return $localMedia;
+        }
+
         $map = config('vivat.pexels_fallback_urls', []);
         $categoryKey = strtolower(trim((string) $categorySlug));
         $categoryUrls = $map[$categoryKey] ?? null;

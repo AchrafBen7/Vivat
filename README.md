@@ -15,7 +15,6 @@
 - Redis `7.0+`
 - Composer `2`
 - Node.js `22`
-- Nginx via Ploi
 
 ### Backend
 

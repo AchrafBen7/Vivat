@@ -91,7 +91,9 @@ $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath
 
                     suggestionBox.innerHTML = items.map(function(item, index) {
                         var thumb = item.thumbnail_url
-                            ? '<span class="h-[4.25rem] w-[4.25rem] shrink-0 overflow-hidden rounded-2xl bg-[#E8F0ED]"><img src="' + item.thumbnail_url + '" alt="" loading="lazy" class="block h-full w-full object-cover"></span>'
+                            ? '<span class="h-[4.25rem] w-[4.25rem] shrink-0 overflow-hidden rounded-2xl bg-[#E8F0ED]"><img src="' + item.thumbnail_url + '"'
+                                + (item.fallback_url ? ' data-fallback-url="' + item.fallback_url + '"' : '')
+                                + ' alt="" loading="lazy" class="block h-full w-full object-cover" onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||\'\';"></span>'
                             : '';
                         return ''
                             + '<a href="' + item.url + '" class="header-search-suggestion flex items-start gap-4 rounded-[1.25rem] px-4 py-4 text-[#004241] no-underline transition-colors duration-200 hover:bg-white/60" role="option" data-suggestion-index="' + index + '">'
