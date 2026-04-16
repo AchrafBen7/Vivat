@@ -4,7 +4,8 @@ return [
     // Mettre à true dans .env pour bypass le cache public pendant un debug local.
     'disable_page_cache' => (bool) env('VIVAT_DISABLE_PAGE_CACHE', false),
     'public_cache_prefix' => (string) env('VIVAT_PUBLIC_CACHE_PREFIX', 'vivat.public'),
-    'public_cache_ttl' => (int) env('VIVAT_PUBLIC_CACHE_TTL', 900),
+    // La home SSR passe par ce TTL générique via PublicPageDataService.
+    'public_cache_ttl' => (int) env('VIVAT_PUBLIC_CACHE_TTL', 60),
     'admin_alert_email' => (string) env('VIVAT_ADMIN_ALERT_EMAIL', env('MAIL_FROM_ADDRESS', 'info@mediaa.be')),
 
     /**
@@ -71,7 +72,8 @@ return [
         ],
     ],
 
-    'home_cache_ttl' => (int) env('VIVAT_HOME_CACHE_TTL', 1800), // 30 min par défaut
+    // Utilisé par l'API home. Gardé court pour éviter un staging trop collant.
+    'home_cache_ttl' => (int) env('VIVAT_HOME_CACHE_TTL', 60),
 
     /**
      * Préfixe des clés de cache Laravel pour la home (clé complète : {prefix}.fr / {prefix}.nl).
