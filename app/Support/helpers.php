@@ -265,13 +265,14 @@ if (! function_exists('get_layout_categories')) {
             return [];
         }
 
+        $locale = app()->getLocale() ?: 'fr';
         $limit = (int) config('vivat.home_categories_count', 9);
         $categories = \App\Models\Category::query()
             ->orderedForHome()
             ->limit($limit)
-            ->get(['name', 'slug']);
+            ->get(['name', 'name_nl', 'slug']);
 
-        return $categories->map(fn ($c) => ['name' => $c->name, 'slug' => $c->slug])->all();
+        return $categories->map(fn ($c) => ['name' => $c->localizedName($locale), 'slug' => $c->slug])->all();
     }
 }
 

@@ -67,7 +67,7 @@ class PublicPageDataService
         $signature = 'q:' . md5($normalized) . ':page:' . $page;
 
         $payload = $this->cache->remember('search', $locale, $signature, $ttl, function () use ($locale, $q, $normalized, $page): array {
-            $perPage = 10;
+            $perPage = 9;
             $query = Article::published()
                 ->forLocale($locale)
                 ->with('category');
@@ -103,7 +103,7 @@ class PublicPageDataService
                 ->values()
                 ->all();
 
-            $mosaicTarget = 10;
+            $mosaicTarget = 9;
             $mosaicArticles = $this->padSearchMosaicArticles($locale, $pageHits, $mosaicTarget);
             $mosaicPadded = count($pageHits) > 0 && count($mosaicArticles) > count($pageHits);
 
@@ -125,7 +125,7 @@ class PublicPageDataService
                 'total' => $total,
                 'page' => $page,
                 'per_page' => $perPage,
-                'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory) : null,
+                'matched_category' => $matchedCategory ? $this->categoryToArray($matchedCategory, $locale) : null,
                 'search_mosaic_padded' => $mosaicPadded,
                 'continue_reading_articles' => $continueReadingArticles,
             ];
@@ -220,7 +220,7 @@ class PublicPageDataService
                 ->orderedForHome()
                 ->limit($categoriesLimit)
                 ->get()
-                ->map(fn (Category $category): array => $this->categoryToArray($category))
+                ->map(fn (Category $category): array => $this->categoryToArray($category, $locale))
                 ->all();
         });
 
@@ -334,7 +334,7 @@ class PublicPageDataService
                 ->all();
 
             return [
-                'category' => $this->categoryToArray($category),
+                'category' => $this->categoryToArray($category, $locale),
                 'description' => $category->description,
                 'total_published' => $totalPublished,
                 'active_sub_category_slugs' => $activeSubCategorySlugs,
@@ -575,8 +575,11 @@ class PublicPageDataService
         return $cover;
     }
 
-    private function categoryToArray(Category $category): array
+    private function categoryToArray(Category $category, string $locale = ''): array
     {
+        if ($locale === '') {
+            $locale = app()->getLocale() ?: 'fr';
+        }
         $fromDb = $category->image_url;
         $trimmed = is_string($fromDb) ? trim($fromDb) : '';
         $public = vivat_category_public_media_url($category->slug);
@@ -592,7 +595,7 @@ class PublicPageDataService
 
         return [
             'id' => $category->id,
-            'name' => $category->name,
+            'name' => $category->localizedName($locale),
             'slug' => $category->slug,
             'description' => $category->description,
             'image_url' => $imageUrl,

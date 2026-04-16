@@ -54,12 +54,22 @@ class Category extends Model
 
     protected $fillable = [
         'name',
+        'name_nl',
         'slug',
         'description',
         'home_order',
         'image_url',
         'video_url',
     ];
+
+    public function localizedName(string $locale = 'fr'): string
+    {
+        if ($locale === 'nl' && ! empty($this->name_nl)) {
+            return $this->name_nl;
+        }
+
+        return $this->name ?? '';
+    }
 
     protected $casts = [
         'created_at' => 'datetime',
