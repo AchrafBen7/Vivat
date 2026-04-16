@@ -365,13 +365,15 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
     // ── 2. Rubriques (carrousels desktop / tablette) — apparition au scroll
     function initCategories() {
         if (!window.gsap || !window.ScrollTrigger) return;
+        if (window._vivatLangSwap) return;
 
         document.querySelectorAll('[data-categories-section]').forEach(function (section) {
             if (section.offsetParent === null) return;
 
-            gsap.from(section, {
-                opacity: 0,
-                y: 36,
+            gsap.set(section, { opacity: 0, y: 36 });
+            gsap.to(section, {
+                opacity: 1,
+                y: 0,
                 duration: 0.95,
                 ease: 'power2.out',
                 clearProps: 'opacity,transform',

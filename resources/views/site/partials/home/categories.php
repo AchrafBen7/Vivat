@@ -763,46 +763,4 @@
 
     </script>
     <?php } ?>
-    <script>
-    (function () {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-        function initRubriques() {
-            if (!window.gsap || !window.ScrollTrigger) return;
-            if (window._vivatLangSwap) return;
-
-            var section = document.getElementById('categories-section');
-            if (section) {
-                gsap.set(section, { opacity: 0, y: 40 });
-                gsap.to(section, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1.1,
-                    ease: 'power2.out',
-                    clearProps: 'opacity,transform',
-                    scrollTrigger: { trigger: section, start: 'top 88%' },
-                });
-            }
-
-            var tabletSection = document.getElementById('categories-section-tablet');
-            if (tabletSection) {
-                gsap.set(tabletSection, { opacity: 0, y: 40 });
-                gsap.to(tabletSection, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1.1,
-                    ease: 'power2.out',
-                    clearProps: 'opacity,transform',
-                    scrollTrigger: { trigger: tabletSection, start: 'top 88%' },
-                });
-            }
-        }
-
-        if (document.readyState === 'complete') {
-            initRubriques();
-        } else {
-            window.addEventListener('load', initRubriques);
-        }
-    })();
-    </script>
     <?php } ?>
