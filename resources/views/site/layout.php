@@ -37,6 +37,9 @@ if (app('request')->header('X-Vivat-Ajax')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title_safe ?></title>
     <meta name="description" content="<?= $meta_description_safe ?>">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <?php if (! empty($canonical_url)) { ?>
     <link rel="canonical" href="<?= htmlspecialchars($canonical_url) ?>">
     <?php } ?>
