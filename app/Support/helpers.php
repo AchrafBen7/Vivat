@@ -38,56 +38,9 @@ if (! function_exists('vivat_category_fallback_image')) {
      */
     function vivat_category_fallback_image(?string $categorySlug, int $width = 800, int $height = 600, ?string $articleIdentifier = null, ?string $contextSeed = null): string
     {
-        $localPoster = vivat_category_public_poster_url($categorySlug);
-        if (is_string($localPoster) && $localPoster !== '') {
-            return $localPoster;
-        }
-
-        $localMedia = vivat_category_public_media_url($categorySlug);
-        if (is_string($localMedia) && $localMedia !== '' && ! preg_match('/\.(mp4|webm|mov)(\?|$)/i', $localMedia)) {
-            return $localMedia;
-        }
-
-        $map = config('vivat.pexels_fallback_urls', []);
-        $categoryKey = strtolower(trim((string) $categorySlug));
-        $categoryUrls = $map[$categoryKey] ?? null;
-        $candidateUrls = [];
-
-        if (is_array($categoryUrls)) {
-            foreach ($categoryUrls as $u) {
-                $base = preg_replace('#\?.*$#', '', (string) $u);
-                if ($base !== '' && ! in_array($base, $candidateUrls, true)) {
-                    $candidateUrls[] = $base;
-                }
-            }
-        }
-
-        if (empty($candidateUrls)) {
-            foreach ($map as $fallbackCategoryUrls) {
-                if (! is_array($fallbackCategoryUrls)) {
-                    continue;
-                }
-
-                foreach ($fallbackCategoryUrls as $u) {
-                    $base = preg_replace('#\?.*$#', '', (string) $u);
-                    if ($base !== '' && ! in_array($base, $candidateUrls, true)) {
-                        $candidateUrls[] = $base;
-                    }
-                }
-            }
-        }
-
-        if (empty($candidateUrls)) {
-            $candidateUrls = ['https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'];
-        }
-
-        $seed = (string) ($articleIdentifier ?? '') . ($contextSeed ? '-' . $contextSeed : '');
-        $seed = $seed !== '' ? $seed : ($categoryKey !== '' ? $categoryKey : 'vivat-fallback');
-        $baseUrl = $candidateUrls[abs(crc32($seed)) % count($candidateUrls)];
-        $w = max(1, $width);
-        $h = max(1, $height);
-
-        return $baseUrl.'?auto=compress&cs=tinysrgb&fm=jpg&q=80&dpr=2&w='.$w.'&h='.$h.'&fit=crop';
+        // Images de catégorie désactivées comme fallback pour les articles sans cover.
+        // Le job FetchMissingCoverImagesJob assigne des images Pexels individuelles à chaque article.
+        return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     }
 }
 
