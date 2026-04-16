@@ -72,10 +72,10 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
 ?>
 <div class="flex w-full flex-col">
     <div class="mb-6 flex w-full flex-col items-center justify-center" role="region" aria-label="Publicité">
-        <div class="flex h-[50px] w-[320px] max-w-full shrink-0 items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400 md:hidden">
+        <div class="flex h-[50px] w-[320px] max-w-full shrink-0 items-center justify-center overflow-hidden md:hidden">
             <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'about_mobile_banner_320x50']) ?>
         </div>
-        <div class="hidden h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400 md:flex">
+        <div class="hidden h-[90px] w-full max-w-[728px] items-center justify-center overflow-hidden md:flex">
             <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'about_desktop_banner_728x90']) ?>
         </div>
     </div>
@@ -151,7 +151,7 @@ $aboutProse = 'text-[17px] leading-[1.65] text-[#004241]/90 md:text-[18px]';
 
         <!-- Bannière type home (970×250) -->
         <div class="mt-2 flex w-full justify-center lg:col-span-12" role="region" aria-label="Publicité">
-            <div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
+            <div class="flex h-[250px] w-full max-w-[970px] items-center justify-center overflow-hidden">
                 <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'about_bottom_banner_970x250']) ?>
             </div>
         </div>

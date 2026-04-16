@@ -144,7 +144,7 @@ if (is_string($content) && trim($content) !== '') {
 }
 
 // Insérer la pub au milieu du contenu (après le paragraphe du milieu)
-$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">' . render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_mid_banner_970x250']) . '</div></div>';
+$adMidContent = '<div class="my-6 flex items-center justify-center"><div class="flex h-[250px] w-full max-w-[970px] items-center justify-center overflow-hidden">' . render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_mid_banner_970x250']) . '</div></div>';
 if (! $isPreview) {
     $paraCount = preg_match_all('/<\/p>\s*/i', $content);
     $insertAfterPara = $paraCount >= 2 ? (int) floor($paraCount / 2) : 1;
@@ -191,7 +191,7 @@ if (! $isPreview) {
     <?php if (! $isPreview) { ?>
     <!-- Bannière pub 728×90 -->
     <div class="mb-6 flex items-center justify-center">
-        <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center rounded-[30px] border-2 border-dashed border-gray-300 bg-gray-100 text-sm text-gray-400">
+        <div class="flex h-[90px] w-full max-w-[728px] items-center justify-center overflow-hidden">
             <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_top_banner_728x90']) ?>
         </div>
     </div>
@@ -309,7 +309,7 @@ $shareLinks = [
                 <?php foreach ($alsoCarouselItems as $item) { ?>
                 <?php if (($item['type'] ?? 'article') === 'ad') { ?>
                 <aside <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
-                       class="<?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> flex items-center justify-center rounded-[28px] bg-[#EDEDED]">
+                       class="<?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> flex items-center justify-center overflow-hidden rounded-[28px]">
                     <?= render_php_view('site.partials.adsense_slot', ['slotKey' => 'article_related_square_336x280']) ?>
                 </aside>
                 <?php } else { ?>
