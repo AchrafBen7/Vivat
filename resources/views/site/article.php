@@ -49,7 +49,7 @@ foreach ($relatedItems as $index => $item) {
 $tagClass = 'inline-flex items-center justify-center w-fit max-w-full min-h-[30px] px-3 rounded-full text-[12px] leading-none font-medium tracking-[0.02em] whitespace-nowrap flex-shrink-0';
 $glassTagTailwind = 'bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]';
 $tagGlassOnImage = $tagClass.' '.$glassTagTailwind.' text-white';
-$tagCarousel = $tagClass.' bg-white text-[#004241] shadow-sm';
+$tagCarousel = $tagClass.' bg-white/20 backdrop-blur-[12px] border border-white/25 text-white';
 $metaLine = trim(implode(' • ', array_filter([
     $published_at_display,
     $reading_time ? (int) $reading_time.' min' : null,
@@ -202,7 +202,9 @@ if (! $isPreview) {
                 <?php } ?>
             </div>
             <?php } else { ?>
-            <a href="<?= htmlspecialchars($backHref) ?>" class="mb-[85px] inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white" aria-label="<?= htmlspecialchars($t('site.back', 'Retour')) ?>">
+            <a href="<?= htmlspecialchars($backHref) ?>"
+               onclick="if(history.length>1){event.preventDefault();history.back();}"
+               class="mb-[85px] inline-flex items-center justify-center gap-2 self-start rounded-full bg-white/95 px-4 py-2.5 text-sm font-medium text-[#004241] shadow-md transition hover:bg-white" aria-label="<?= htmlspecialchars($t('site.back', 'Retour')) ?>">
                 <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" transform="matrix(-1 0 0 1 24 0)" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 <?= htmlspecialchars($t('site.back', 'Retour')) ?>
             </a>
@@ -317,8 +319,8 @@ $shareLinks = [
                          loading="lazy"
                          onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
-                    <div class="absolute inset-x-0 bottom-0 p-3 lg:p-4">
-                        <div class="flex flex-col gap-1.5 rounded-[18px] border border-white/10 bg-black/25 p-3 backdrop-blur-md lg:gap-2">
+                    <div class="absolute inset-x-0 bottom-0 p-[18px]">
+                        <div class="rounded-[21px] flex w-full min-w-0 flex-col gap-1.5 p-[18px] bg-[rgba(190,190,190,0.1)] backdrop-blur-[15px] border border-[rgba(230,230,230,0.2)]">
                             <span class="<?= $tagCarousel ?>"><?= htmlspecialchars($itemCategory) ?></span>
                             <h3 class="line-clamp-2 text-base font-medium leading-snug text-white"><?= htmlspecialchars($item['title']) ?></h3>
                             <p class="text-xs text-white/70"><?= htmlspecialchars($item['date']) ?> • <?= (int)($item['reading_time'] ?? 0) ?> min</p>

@@ -405,7 +405,9 @@ class PublicPageDataService
                     'reading_time' => $related->reading_time,
                     'category' => $related->category?->name ?? '',
                     'published_at_display' => $related->published_at?->locale($locale)->isoFormat('D MMMM YYYY'),
-                    'image' => $this->articleCoverOrFallback($related, $related->category),
+                    'image' => ! empty($related->cover_image_url)
+                        ? $related->cover_image_url
+                        : vivat_category_fallback_image($related->category?->slug ?? $category?->slug, 760, 520, (string) $related->id, 'also'),
                     'fallback' => vivat_category_fallback_image(
                         $related->category?->slug ?? $category?->slug,
                         760,
