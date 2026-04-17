@@ -122,7 +122,12 @@ class SearchController extends Controller
         if (is_string($cover)
             && $cover !== ''
             && stripos($cover, 'picsum') === false
-            && (str_starts_with($cover, 'http') || str_starts_with($cover, '/uploads/'))) {
+            && (
+                str_starts_with($cover, 'http')
+                || str_starts_with($cover, '/uploads/')
+                || str_starts_with($cover, '/storage/')
+                || str_starts_with($cover, 'data:image/')
+            )) {
             return $cover;
         }
 

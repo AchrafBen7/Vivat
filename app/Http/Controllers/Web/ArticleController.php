@@ -150,7 +150,11 @@ class ArticleController extends Controller
         $cover = $article->cover_image_url;
         if (empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
-            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'))) {
+            || (is_string($cover)
+                && ! str_starts_with($cover, 'http')
+                && ! str_starts_with($cover, '/uploads/')
+                && ! str_starts_with($cover, '/storage/')
+                && ! str_starts_with($cover, 'data:image/'))) {
             return vivat_category_fallback_image($category?->slug, 800, 450, (string) $article->id, 'cover');
         }
 

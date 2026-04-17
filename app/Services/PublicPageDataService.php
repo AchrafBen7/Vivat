@@ -534,7 +534,11 @@ class PublicPageDataService
         $cover = $article->cover_image_url;
         $useFallback = empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
-            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'));
+            || (is_string($cover)
+                && ! str_starts_with($cover, 'http')
+                && ! str_starts_with($cover, '/uploads/')
+                && ! str_starts_with($cover, '/storage/')
+                && ! str_starts_with($cover, 'data:image/'));
 
         return [
             'id' => $article->id,
@@ -568,7 +572,11 @@ class PublicPageDataService
 
         if (empty($cover)
             || (is_string($cover) && stripos($cover, 'picsum') !== false)
-            || (is_string($cover) && ! str_starts_with($cover, 'http') && ! str_starts_with($cover, '/uploads/'))) {
+            || (is_string($cover)
+                && ! str_starts_with($cover, 'http')
+                && ! str_starts_with($cover, '/uploads/')
+                && ! str_starts_with($cover, '/storage/')
+                && ! str_starts_with($cover, 'data:image/'))) {
             return null;
         }
 
