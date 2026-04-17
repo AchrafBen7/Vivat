@@ -301,7 +301,7 @@ $shareLinks = [
     <div>
         <div id="also-frame" class="overflow-hidden">
             <div id="also-rail" class="<?= $useRelatedCarousel ? 'flex gap-4 transition-transform duration-[900ms] ease-out will-change-transform' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' ?>">
-                <?php foreach ($alsoCarouselItems as $item) { ?>
+                <?php foreach ($alsoCarouselItems as $index => $item) { ?>
                 <?php if (($item['type'] ?? 'article') === 'ad') { ?>
                 <aside <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
                        class="<?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> flex items-center justify-center overflow-hidden rounded-[28px]">
@@ -309,6 +309,7 @@ $shareLinks = [
                 </aside>
                 <?php } else { ?>
                 <?php $catData = $item['category'] ?? null; $itemCategory = is_array($catData) ? ($catData['name'] ?? $relatedCategoryName) : ($catData ?? $relatedCategoryName); ?>
+                <?php $isPriorityAlsoCard = $index < 3; ?>
                 <a href="<?= !empty($item['slug']) ? '/articles/'.htmlspecialchars($item['slug']) : '#' ?>"
                    <?= $useRelatedCarousel ? 'data-also-item' : '' ?>
                    class="group relative <?= $useRelatedCarousel ? 'also-card flex-shrink-0' : 'aspect-square w-full' ?> block overflow-hidden rounded-[28px]">
@@ -316,7 +317,8 @@ $shareLinks = [
                          data-fallback-url="<?= htmlspecialchars($item['fallback'] ?? $item['image']) ?>"
                          alt="<?= htmlspecialchars($item['title']) ?>"
                          class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-[1.05]"
-                         loading="lazy"
+                         loading="<?= $isPriorityAlsoCard ? 'eager' : 'lazy' ?>"
+                         <?= $isPriorityAlsoCard ? 'fetchpriority="high" decoding="sync"' : 'decoding="async"' ?>
                          onerror="this.onerror=null;this.src=this.dataset.fallbackUrl||'';">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
                     <div class="absolute inset-x-0 bottom-0 p-[18px]">
