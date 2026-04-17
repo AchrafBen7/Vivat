@@ -15,8 +15,8 @@ $writer_cta_title = $writer_cta_title ?? $t('site.writer_cta_guest_title', (coun
 $writer_cta_subtitle = $writer_cta_subtitle ?? (count($writerCtaLines) === 2 ? $writerCtaLines[1] : '');
 $writer_cta_tag_1 = $writer_cta_tag_1 ?? $t('site.writer_cta_tag_1', 'Rédaction');
 $writer_cta_tag_2 = $writer_cta_tag_2 ?? $t('site.writer_cta_tag_2', 'Actualités');
-$rubriquesHeroVideoUrl = '/quotidien2.mp4';
-$rubriquesHeroPosterUrl = '/technologie.jpg';
+$rubriquesHeroVideoUrl = 'https://res.cloudinary.com/dyigkyptj/video/upload/v1776415796/quotidien2_krw2fi.mp4';
+$rubriquesHeroPosterUrl = 'https://res.cloudinary.com/dyigkyptj/video/upload/so_0/v1776415796/quotidien2_krw2fi.jpg';
 
 /**
  * CTA rédacteur specs Figma : 301×114, gap 18px, typo 16px (text-base).
