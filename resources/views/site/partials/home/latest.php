@@ -131,7 +131,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
         <?php if ($isImageTabletCard) { ?>
         <?php [$tabletCardImage, $tabletCardFallback] = $latestImageData($tabletArticle, $tabletCard['width'], $tabletCard['height'], $tabletCard['slot']); ?>
         <a href="/articles/<?= htmlspecialchars($tabletArticle['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-4 block h-[320px] w-full overflow-hidden rounded-[32px]">
-            <img src="<?= htmlspecialchars($tabletCardImage) ?>" data-fallback-url="<?= htmlspecialchars($tabletCardFallback) ?>" alt="<?= htmlspecialchars($tabletArticle['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+            <img src="<?= htmlspecialchars($tabletCardImage) ?>" data-fallback-url="<?= htmlspecialchars($tabletCardFallback) ?>" alt="<?= htmlspecialchars($tabletArticle['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
             <div class="<?= $overlayImagePhoto ?>"></div>
             <div class="absolute inset-x-0 bottom-0 z-10 p-6">
                 <div class="<?= $glassBox ?> min-h-[146px] justify-end">
@@ -192,7 +192,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
             <?php if ($topVisualArt) { ?>
             <?php [$topVisualImg, $topVisualFallback] = $latestImageData($topVisualArt, 520, 340, 'latest-top-visual'); ?>
             <a href="/articles/<?= htmlspecialchars($topVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[280px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[340px]">
-                <img src="<?= htmlspecialchars($topVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($topVisualFallback) ?>" alt="<?= htmlspecialchars($topVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <img src="<?= htmlspecialchars($topVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($topVisualFallback) ?>" alt="<?= htmlspecialchars($topVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="<?= $overlayImagePhoto ?>"></div>
                 <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
                     <div class="<?= $glassBox ?> min-h-[146px] justify-end">
@@ -227,7 +227,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
             <?php if ($centerVisualArt) { ?>
             <?php [$centerVisualImg, $centerVisualFallback] = $latestImageData($centerVisualArt, 620, 360, 'latest-center-visual'); ?>
             <a href="/articles/<?= htmlspecialchars($centerVisualArt['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[280px] w-full overflow-hidden rounded-[32px] md:col-span-4 lg:col-span-5 lg:h-[360px]">
-                <img src="<?= htmlspecialchars($centerVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($centerVisualFallback) ?>" alt="<?= htmlspecialchars($centerVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <img src="<?= htmlspecialchars($centerVisualImg) ?>" data-fallback-url="<?= htmlspecialchars($centerVisualFallback) ?>" alt="<?= htmlspecialchars($centerVisualArt['title'] ?? 'Article') ?>" class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
                 <div class="absolute inset-x-0 bottom-0 z-10 p-5 md:p-6">
                     <div class="<?= $glassBox ?> min-h-[146px] justify-end">

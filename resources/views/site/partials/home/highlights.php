@@ -32,7 +32,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
 <div data-home-hero class="hidden md:grid lg:hidden grid-cols-8 items-stretch gap-6 [grid-auto-rows:minmax(0,auto)]">
     <?php if ($h0) { ?>
     <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-5 block min-h-[420px] h-full w-full overflow-hidden rounded-[30px]">
-        <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager">
+        <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
         <div class="absolute inset-0 bg-black/30"></div>
         <div class="<?= $cardOverlay ?> flex items-end">
             <div class="<?= $glassBox ?> w-full">
@@ -70,7 +70,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
 
         <?php if ($h3) { ?>
         <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[200px] max-h-[200px] w-full flex-none overflow-hidden rounded-[30px]">
-            <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+            <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
             <div class="<?= $overlayImageSoft ?>"></div>
             <div class="<?= $cardOverlay ?> flex items-end">
                 <div class="<?= $glassBox ?> w-full">
@@ -103,7 +103,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
 
     <?php if ($h1) { ?>
     <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative col-span-3 block min-h-[280px] h-full w-full overflow-hidden rounded-[30px]">
-        <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+        <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
         <div class="<?= $overlayImageSoft ?>"></div>
         <div class="<?= $cardOverlay ?> flex items-end">
             <div class="<?= $glassBox ?> w-full">
@@ -140,7 +140,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
         <div class="flex flex-col gap-[18px] lg:contents xl:col-span-5 xl:flex xl:flex-col xl:gap-6">
             <?php if ($h0) { ?>
             <a href="/articles/<?= htmlspecialchars($h0['slug']) ?>" class="<?= $articleImageZoom ?> block h-[438px] w-full overflow-hidden rounded-[30px] relative lg:col-span-5 lg:row-start-1 lg:max-w-none">
-                <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager">
+                <img src="<?= htmlspecialchars($h0Img) ?>" data-fallback-url="<?= htmlspecialchars($h0Fallback) ?>" alt="<?= htmlspecialchars($h0['title'] ?? 'Article à la une') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="absolute inset-0 bg-black/30"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
                     <div class="<?= $glassBox ?> w-full">
@@ -178,7 +178,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
         <div class="flex flex-col gap-[18px] lg:col-span-7 lg:row-span-2 lg:grid lg:grid-rows-3 lg:min-h-0 lg:self-stretch lg:h-full lg:gap-6 xl:col-span-4 xl:row-auto xl:row-span-1">
             <?php if ($h1) { ?>
             <a href="/articles/<?= htmlspecialchars($h1['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[248px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full lg:min-h-0">
-                <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <img src="<?= htmlspecialchars($h1Img) ?>" data-fallback-url="<?= htmlspecialchars($h1Fallback) ?>" alt="<?= htmlspecialchars($h1['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
                     <div class="<?= $glassBox ?> w-full">
@@ -212,7 +212,7 @@ $yellowHeroTagLabel = static function (?array $article) use ($t): string {
 
             <?php if ($h3) { ?>
             <a href="/articles/<?= htmlspecialchars($h3['slug']) ?>" class="<?= $articleImageZoom ?> relative block h-[248px] w-full min-h-0 overflow-hidden rounded-[30px] lg:h-full">
-                <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="lazy">
+                <img src="<?= htmlspecialchars($h3Img) ?>" data-fallback-url="<?= htmlspecialchars($h3Fallback) ?>" alt="<?= htmlspecialchars($h3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover <?= $articleImageZoomImg ?>" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
                     <div class="<?= $glassBox ?> w-full">

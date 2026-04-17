@@ -80,7 +80,8 @@ $resolveImage = static function (array $article, int $width, int $height, string
                     data-fallback-url="<?= htmlspecialchars($imageFallback) ?>"
                     alt="<?= htmlspecialchars($article['title'] ?? 'Article') ?>"
                     class="absolute inset-0 h-full w-full object-cover <?= $articleImageZoomImg ?>"
-                    loading="lazy"
+                    loading="<?= $index < 3 ? 'eager' : 'lazy' ?>"
+                    <?= $index < 3 ? 'fetchpriority="high" decoding="sync"' : 'decoding="async"' ?>
                 >
                 <div class="<?= $overlayImageSoft ?>"></div>
                 <div class="<?= $cardOverlay ?> flex items-end">
@@ -125,7 +126,8 @@ $resolveImage = static function (array $article, int $width, int $height, string
                         data-fallback-url="<?= htmlspecialchars($imageFallback) ?>"
                         alt="<?= htmlspecialchars($article['title'] ?? 'Article') ?>"
                         class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                        loading="lazy"
+                        loading="<?= $index < 3 ? 'eager' : 'lazy' ?>"
+                        <?= $index < 3 ? 'fetchpriority="high" decoding="sync"' : 'decoding="async"' ?>
                     >
                 </div>
             </a>

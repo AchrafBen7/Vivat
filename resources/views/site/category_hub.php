@@ -203,7 +203,7 @@ $remainingArticles = array_values($featuredPool);
                     $featured0Fallback = vivat_category_fallback_image($featured0Slug, 302, 419, $featured0['id'] ?? $featured0['slug'] ?? null, 'hub-first-0');
                     $featured0Img = ! empty($featured0['cover_image_url']) ? $featured0['cover_image_url'] : $featured0Fallback; ?>
                 <a href="/articles/<?= htmlspecialchars($featured0['slug']) ?>" class="vivat-card-with-image group block rounded-[30px] overflow-hidden relative min-w-0 w-full" style="height: 419px;">
-                    <img src="<?= htmlspecialchars($featured0Img) ?>" data-fallback-url="<?= htmlspecialchars($featured0Fallback) ?>" alt="<?= htmlspecialchars($featured0['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                    <img src="<?= htmlspecialchars($featured0Img) ?>" data-fallback-url="<?= htmlspecialchars($featured0Fallback) ?>" alt="<?= htmlspecialchars($featured0['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager" fetchpriority="high" decoding="sync">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <div class="vivat-card-overlay flex items-end z-10">
                         <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
@@ -239,7 +239,7 @@ $remainingArticles = array_values($featuredPool);
                 $featured2Fallback = vivat_category_fallback_image($featured2Slug, 626, 240, $featured2['id'] ?? $featured2['slug'] ?? null, 'hub-first-2');
                 $featured2Img = ! empty($featured2['cover_image_url']) ? $featured2['cover_image_url'] : $featured2Fallback; ?>
             <a href="/articles/<?= htmlspecialchars($featured2['slug']) ?>" class="vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
-                <img src="<?= htmlspecialchars($featured2Img) ?>" data-fallback-url="<?= htmlspecialchars($featured2Fallback) ?>" alt="<?= htmlspecialchars($featured2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                <img src="<?= htmlspecialchars($featured2Img) ?>" data-fallback-url="<?= htmlspecialchars($featured2Fallback) ?>" alt="<?= htmlspecialchars($featured2['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="vivat-card-overlay flex justify-end items-end">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                         <?php if (! empty($featured2['category'])) { ?>
@@ -259,7 +259,7 @@ $remainingArticles = array_values($featuredPool);
                 $featured3Fallback = vivat_category_fallback_image($featured3Slug, 626, 240, $featured3['id'] ?? $featured3['slug'] ?? null, 'hub-first-3');
                 $featured3Img = ! empty($featured3['cover_image_url']) ? $featured3['cover_image_url'] : $featured3Fallback; ?>
             <a href="/articles/<?= htmlspecialchars($featured3['slug']) ?>" class="vivat-card-with-image group block rounded-[32px] overflow-hidden relative min-w-0 w-full" style="height: 240px;">
-                <img src="<?= htmlspecialchars($featured3Img) ?>" data-fallback-url="<?= htmlspecialchars($featured3Fallback) ?>" alt="<?= htmlspecialchars($featured3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="lazy">
+                <img src="<?= htmlspecialchars($featured3Img) ?>" data-fallback-url="<?= htmlspecialchars($featured3Fallback) ?>" alt="<?= htmlspecialchars($featured3['title'] ?? 'Article') ?>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[450ms] ease-in-out group-hover:scale-[1.06]" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="vivat-card-overlay flex items-end">
                     <div class="rounded-[21px] flex flex-col vivat-glass w-full" style="gap: 6px;">
                         <?php if (! empty($featured3['category'])) { ?>
