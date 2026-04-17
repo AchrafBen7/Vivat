@@ -22,15 +22,15 @@ class NewsletterController extends Controller
     public function subscribe(Request $request): RedirectResponse
     {
         if ($this->honeypotTriggered($request)) {
-            return back()->with('success', "Merci, votre demande d'inscription a bien été prise en compte.");
+            return back()->with('success', __('site.flash_newsletter_request_taken'));
         }
 
         $validated = $request->validate([
             'newsletter_email' => ['required', 'email', 'max:255'],
         ], [
-            'newsletter_email.required' => "L'adresse email est obligatoire.",
-            'newsletter_email.email' => "Veuillez entrer une adresse email valide.",
-            'newsletter_email.max' => "L'adresse email est trop longue.",
+            'newsletter_email.required' => __('site.validation_newsletter_email_required'),
+            'newsletter_email.email' => __('site.validation_newsletter_email_invalid'),
+            'newsletter_email.max' => __('site.validation_newsletter_email_max'),
         ]);
 
         $result = $this->newsletterSubscriptionService->subscribe([

@@ -37,18 +37,19 @@ class AuthController extends Controller
     private function strongPasswordMessages(): array
     {
         return [
-            'password.required' => 'Le mot de passe est obligatoire.',
-            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
-            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
-            'password.mixed' => 'Le mot de passe doit contenir une majuscule et une minuscule.',
-            'password.letters' => 'Le mot de passe doit contenir des lettres.',
-            'password.numbers' => 'Le mot de passe doit contenir au moins un chiffre.',
-            'password.symbols' => 'Le mot de passe doit contenir au moins un symbole.',
+            'password.required' => __('site.validation_password_required'),
+            'password.confirmed' => __('site.validation_password_confirmed'),
+            'password.min' => __('site.validation_password_min'),
+            'password.mixed' => __('site.validation_password_mixed'),
+            'password.letters' => __('site.validation_password_letters'),
+            'password.numbers' => __('site.validation_password_numbers'),
+            'password.symbols' => __('site.validation_password_symbols'),
         ];
     }
 
     public function showBecomeContributor(Request $request): Response
     {
+        $locale = content_locale($request);
         $priceCents = (int) config('services.stripe.publication_price', 1500);
         $priceEur = (int) round($priceCents / 100);
 
@@ -57,7 +58,7 @@ class AuthController extends Controller
         ]);
         $html = render_php_view('site.layout', [
             'content' => $content,
-            'content_locale' => content_locale($request),
+            'content_locale' => $locale,
             'title' => 'Devenir rédacteur Vivat',
             'meta_description' => 'Rédigez et publiez vos articles sur Vivat. Découvrez la participation à la publication et les avantages de devenir contributeur.',
             'hide_cta_section' => true,
@@ -69,6 +70,7 @@ class AuthController extends Controller
 
     public function showRegisterForm(Request $request): Response
     {
+        $locale = content_locale($request);
         $errors = $request->session()->get('errors');
         $old = $request->old();
         $content = render_php_view('site.register', [
@@ -77,7 +79,7 @@ class AuthController extends Controller
         ]);
         $html = render_php_view('site.layout', [
             'content' => $content,
-            'content_locale' => content_locale($request),
+            'content_locale' => $locale,
             'title' => 'Créer votre compte Vivat',
             'meta_description' => 'Inscrivez-vous sur Vivat pour devenir rédacteur contributeur et publier vos articles.',
             'hide_cta_section' => true,
@@ -92,7 +94,7 @@ class AuthController extends Controller
     {
         if ($this->honeypotTriggered($request)) {
             return back()->withErrors([
-                'email' => 'Impossible de créer le compte pour le moment. Réessayez.',
+                'email' => __('site.validation_auth_retry'),
             ])->withInput($request->except('password', 'password_confirmation', 'company_website'));
         }
 
@@ -103,16 +105,16 @@ class AuthController extends Controller
             'password'        => $this->strongPasswordRules(),
             'terms_accepted'  => ['required', 'accepted'],
         ], array_merge([
-            'first_name.required' => 'Le prénom est obligatoire.',
-            'first_name.max' => 'Le prénom ne peut pas dépasser 255 caractères.',
-            'last_name.required' => 'Le nom est obligatoire.',
-            'last_name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
-            'email.required' => "L'email est obligatoire.",
-            'email.email' => "L'email n'est pas valide.",
-            'email.max' => "L'email ne peut pas dépasser 255 caractères.",
-            'email.unique' => 'Cet email est déjà utilisé.',
-            'terms_accepted.required' => 'Vous devez accepter les conditions d\'utilisation.',
-            'terms_accepted.accepted' => 'Vous devez accepter les conditions d\'utilisation.',
+            'first_name.required' => __('site.validation_first_name_required'),
+            'first_name.max' => __('site.validation_first_name_max'),
+            'last_name.required' => __('site.validation_last_name_required'),
+            'last_name.max' => __('site.validation_last_name_max'),
+            'email.required' => __('site.validation_email_required'),
+            'email.email' => __('site.validation_email_invalid'),
+            'email.max' => __('site.validation_email_max'),
+            'email.unique' => __('site.validation_email_unique'),
+            'terms_accepted.required' => __('site.validation_terms_required'),
+            'terms_accepted.accepted' => __('site.validation_terms_required'),
         ], $this->strongPasswordMessages()));
 
         $name = trim($validated['first_name'] . ' ' . $validated['last_name']);
@@ -129,11 +131,12 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('contributor.dashboard')->with('success', 'Compte créé avec succès ! Vous êtes maintenant rédacteur contributeur sur Vivat.');
+        return redirect()->route('contributor.dashboard')->with('success', __('site.flash_account_create_success'));
     }
 
     public function showLoginForm(Request $request): Response
     {
+        $locale = content_locale($request);
         $errors = $request->session()->get('errors');
         $old = $request->old();
         $content = render_php_view('site.login', [
@@ -142,7 +145,7 @@ class AuthController extends Controller
         ]);
         $html = render_php_view('site.layout', [
             'content' => $content,
-            'content_locale' => content_locale($request),
+            'content_locale' => $locale,
             'title' => 'Connexion Vivat',
             'meta_description' => 'Connectez-vous à votre compte contributeur Vivat.',
             'hide_cta_section' => true,
@@ -159,9 +162,9 @@ class AuthController extends Controller
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ], [
-            'email.required' => "L'email est obligatoire.",
-            'email.email' => "L'email n'est pas valide.",
-            'password.required' => 'Le mot de passe est obligatoire.',
+            'email.required' => __('site.validation_email_required'),
+            'email.email' => __('site.validation_email_invalid'),
+            'password.required' => __('site.validation_password_required'),
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
@@ -170,25 +173,25 @@ class AuthController extends Controller
             $user = $request->user();
 
             if ($user?->hasRole('admin')) {
-                return redirect()->to('/admin')->with('success', 'Connexion réussie.');
+                return redirect()->to('/admin')->with('success', __('site.flash_login_success'));
             }
 
             if ($user?->hasRole('contributor')) {
-                return redirect()->route('contributor.dashboard')->with('success', 'Connexion réussie.');
+                return redirect()->route('contributor.dashboard')->with('success', __('site.flash_login_success'));
             }
 
-            return redirect('/')->with('success', 'Connexion réussie.');
+            return redirect('/')->with('success', __('site.flash_login_success'));
         }
 
         return back()->withErrors([
-            'email' => 'Les identifiants sont incorrects.',
+            'email' => __('site.validation_login_invalid'),
         ])->onlyInput('email');
     }
 
     public function redirectToGoogle(): RedirectResponse
     {
         if (! $this->googleOAuthConfigured()) {
-            return redirect()->route('login')->with('error', "La connexion Google n'est pas encore configurée.");
+            return redirect()->route('login')->with('error', __('site.flash_google_not_configured'));
         }
 
         return Socialite::driver('google')
@@ -199,19 +202,19 @@ class AuthController extends Controller
     public function handleGoogleCallback(Request $request): RedirectResponse
     {
         if (! $this->googleOAuthConfigured()) {
-            return redirect()->route('login')->with('error', "La connexion Google n'est pas encore configurée.");
+            return redirect()->route('login')->with('error', __('site.flash_google_not_configured'));
         }
 
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Throwable $exception) {
-            return redirect()->route('login')->with('error', 'Impossible de finaliser la connexion Google.');
+            return redirect()->route('login')->with('error', __('site.flash_google_login_failed'));
         }
 
         $email = mb_strtolower(trim((string) ($googleUser->getEmail() ?? '')));
 
         if ($email === '') {
-            return redirect()->route('login')->with('error', "Votre compte Google ne fournit pas d'adresse email exploitable.");
+            return redirect()->route('login')->with('error', __('site.flash_google_email_missing'));
         }
 
         $user = User::query()
@@ -232,7 +235,7 @@ class AuthController extends Controller
                     'avatar' => $googleUser->getAvatar(),
                 ]);
             } catch (QueryException $exception) {
-                return redirect()->route('login')->with('error', 'Ce compte Google ne peut pas être relié pour le moment.');
+                return redirect()->route('login')->with('error', __('site.flash_google_link_failed'));
             }
 
             $user->forceFill([
@@ -265,14 +268,15 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         if ($user->hasRole('admin')) {
-            return redirect('/admin')->with('success', 'Connexion Google réussie.');
+            return redirect('/admin')->with('success', __('site.flash_google_login_success'));
         }
 
-        return redirect()->route('contributor.dashboard')->with('success', 'Connexion Google réussie.');
+        return redirect()->route('contributor.dashboard')->with('success', __('site.flash_google_login_success'));
     }
 
     public function showForgotPasswordForm(Request $request): Response
     {
+        $locale = content_locale($request);
         $errors = $request->session()->get('errors');
         $old = $request->old();
         $content = render_php_view('site.forgot_password', [
@@ -282,7 +286,7 @@ class AuthController extends Controller
         ]);
         $html = render_php_view('site.layout', [
             'content' => $content,
-            'content_locale' => content_locale($request),
+            'content_locale' => $locale,
             'title' => 'Mot de passe oublié Vivat',
             'meta_description' => 'Recevez un lien de réinitialisation de mot de passe pour votre compte Vivat.',
             'hide_cta_section' => true,
@@ -296,14 +300,14 @@ class AuthController extends Controller
     public function sendResetLink(Request $request): RedirectResponse
     {
         if ($this->honeypotTriggered($request)) {
-            return back()->with('status', "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé.");
+            return back()->with('status', __('site.flash_reset_link_sent'));
         }
 
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ], [
-            'email.required' => "L'email est obligatoire.",
-            'email.email' => "L'email n'est pas valide.",
+            'email.required' => __('site.validation_email_required'),
+            'email.email' => __('site.validation_email_invalid'),
         ]);
 
         $status = PasswordBroker::sendResetLink([
@@ -311,16 +315,17 @@ class AuthController extends Controller
         ]);
 
         if ($status === PasswordBroker::RESET_LINK_SENT) {
-            return back()->with('status', "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé.");
+            return back()->with('status', __('site.flash_reset_link_sent'));
         }
 
         return back()->withErrors([
-            'email' => "Impossible d'envoyer le lien de réinitialisation pour le moment.",
+            'email' => __('site.validation_reset_link_failed'),
         ])->onlyInput('email');
     }
 
     public function showResetPasswordForm(Request $request, string $token): Response
     {
+        $locale = content_locale($request);
         $errors = $request->session()->get('errors');
         $old = $request->old();
         $content = render_php_view('site.reset_password', [
@@ -331,7 +336,7 @@ class AuthController extends Controller
         ]);
         $html = render_php_view('site.layout', [
             'content' => $content,
-            'content_locale' => content_locale($request),
+            'content_locale' => $locale,
             'title' => 'Réinitialiser le mot de passe Vivat',
             'meta_description' => 'Choisissez un nouveau mot de passe pour votre compte Vivat.',
             'hide_cta_section' => true,
@@ -349,9 +354,9 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => $this->strongPasswordRules(),
         ], array_merge([
-            'token.required' => 'Le lien de réinitialisation est invalide.',
-            'email.required' => "L'email est obligatoire.",
-            'email.email' => "L'email n'est pas valide.",
+            'token.required' => __('site.validation_reset_token_invalid'),
+            'email.required' => __('site.validation_email_required'),
+            'email.email' => __('site.validation_email_invalid'),
         ], $this->strongPasswordMessages()));
 
         $status = PasswordBroker::reset(
@@ -372,11 +377,11 @@ class AuthController extends Controller
         );
 
         if ($status === PasswordBroker::PASSWORD_RESET) {
-            return redirect()->route('login')->with('success', 'Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter.');
+            return redirect()->route('login')->with('success', __('site.flash_password_reset_success'));
         }
 
         return back()->withErrors([
-            'email' => 'Le lien de réinitialisation est invalide ou a expiré.',
+            'email' => __('site.validation_reset_token_expired'),
         ])->withInput($request->except('password', 'password_confirmation'));
     }
 
@@ -386,7 +391,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Déconnexion réussie.');
+        return redirect('/')->with('success', __('site.flash_logout_success'));
     }
 
     private function googleOAuthConfigured(): bool

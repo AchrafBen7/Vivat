@@ -27,9 +27,9 @@ class ContributorSubmissionController extends ContributorBaseController
 
             $revisionDraft = $this->createRevisionDraftFromPublished($submission, $request->user()->id);
 
-            return redirect()
-                ->route('contributor.articles.edit', ['submission' => $revisionDraft->slug])
-                ->with('info', 'Une nouvelle version brouillon a ete creee pour modifier gratuitement cet article publie.');
+                return redirect()
+                    ->route('contributor.articles.edit', ['submission' => $revisionDraft->slug])
+                    ->with('info', __('site.flash_submission_revision_created'));
         }
 
         if ($request->isMethod('post')) {
@@ -123,13 +123,13 @@ class ContributorSubmissionController extends ContributorBaseController
 
                 return redirect()
                     ->to(url('/articles/'.$article->slug))
-                    ->with('success', 'Article publié directement.');
+                    ->with('success', __('site.flash_article_published_directly'));
             }
 
             if ($shouldSubmit) {
                 return redirect()
                     ->route('contributor.dashboard')
-                    ->with('success', 'Votre article a été envoyé en vérification. Vous serez notifié lorsqu\'un prix vous sera proposé.');
+                    ->with('success', __('site.flash_submission_sent_for_review'));
             }
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -142,8 +142,8 @@ class ContributorSubmissionController extends ContributorBaseController
                     'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
                     'redirect_url' => null,
                     'notice' => [
-                        'title' => 'Brouillon enregistré',
-                        'message' => 'Votre brouillon a bien été mis à jour.',
+                        'title' => __('site.notice_draft_saved_title'),
+                        'message' => __('site.notice_draft_saved_message'),
                     ],
                 ]);
             }
@@ -151,8 +151,8 @@ class ContributorSubmissionController extends ContributorBaseController
             return redirect()
                 ->route('contributor.dashboard')
                 ->with('success', $status === 'pending'
-                    ? 'Article mis à jour et renvoyé en validation.'
-                    : 'Brouillon mis à jour.');
+                    ? __('site.flash_submission_updated_and_resubmitted')
+                    : __('site.flash_draft_updated'));
         }
 
         $submission->loadMissing('reviewer');
@@ -239,7 +239,7 @@ class ContributorSubmissionController extends ContributorBaseController
 
                     return redirect()
                         ->to(url('/articles/'.$article->slug))
-                        ->with('success', 'Article publié directement.');
+                        ->with('success', __('site.flash_article_published_directly'));
                 }
 
                 $this->submissionWorkflow->submit($submission->fresh(), $request->user());
@@ -250,7 +250,7 @@ class ContributorSubmissionController extends ContributorBaseController
 
                 return redirect()
                     ->route('contributor.dashboard')
-                    ->with('success', 'Votre article a été envoyé en vérification. Vous serez notifié lorsqu\'un prix vous sera proposé.');
+                    ->with('success', __('site.flash_submission_sent_for_review'));
             }
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -261,23 +261,23 @@ class ContributorSubmissionController extends ContributorBaseController
                     'redirect_url' => route('contributor.dashboard'),
                     'notice' => $status === 'pending'
                         ? [
-                            'title' => 'Article transmis',
-                            'message' => 'Votre article va être vérifié par notre équipe et sera publié automatiquement après acceptation.',
+                            'title' => __('site.notice_submission_sent_title'),
+                            'message' => __('site.notice_submission_sent_message'),
                         ]
                         : [
-                            'title' => 'Brouillon enregistré',
-                            'message' => 'Votre brouillon a été enregistré dans votre espace rédacteur.',
+                            'title' => __('site.notice_draft_saved_title'),
+                            'message' => __('site.js_draft_saved_text'),
                         ],
                 ]);
             }
 
             $redirect = redirect()->route('contributor.dashboard')
-                ->with('success', $status === 'pending' ? 'Article soumis avec succès !' : 'Brouillon enregistré.');
+                ->with('success', $status === 'pending' ? __('site.flash_submission_sent_success') : __('site.flash_draft_saved'));
 
             if ($status === 'pending') {
                 $redirect->with('submission_notice', [
-                    'title' => 'Article transmis',
-                    'message' => 'Votre article va être vérifié par notre équipe et sera publié automatiquement après acceptation.',
+                    'title' => __('site.notice_submission_sent_title'),
+                    'message' => __('site.notice_submission_sent_message'),
                 ]);
             }
 
@@ -364,13 +364,13 @@ class ContributorSubmissionController extends ContributorBaseController
         if ($submission->status === 'pending' || $submission->status === 'approved') {
             return redirect()
                 ->route('contributor.dashboard')
-                ->with('error', 'Cet article ne peut plus être supprimé car il est déjà en relecture ou publié.');
+                ->with('error', __('site.flash_delete_forbidden_review_or_published'));
         }
 
         if ($this->hasPaidPublication($submission)) {
             return redirect()
                 ->route('contributor.dashboard')
-                ->with('error', 'Cet article ne peut pas être supprimé car un paiement y est déjà lié.');
+                ->with('error', __('site.flash_delete_forbidden_paid'));
         }
 
         $this->deleteLocalSubmissionCover($submission->cover_image_url);
@@ -378,7 +378,7 @@ class ContributorSubmissionController extends ContributorBaseController
 
         return redirect()
             ->route('contributor.dashboard')
-            ->with('success', 'Article supprimé.');
+            ->with('success', __('site.flash_article_deleted'));
     }
 
     public function requestUnpublish(Request $request, Submission $submission): RedirectResponse
@@ -392,13 +392,13 @@ class ContributorSubmissionController extends ContributorBaseController
         if ($submission->status !== 'approved' || ! $submission->published_article_id) {
             return redirect()
                 ->route('contributor.dashboard')
-                ->with('error', "Seul un article publié peut faire l'objet d'une demande de dépublication.");
+                ->with('error', __('site.flash_unpublish_only_published'));
         }
 
         if ($submission->depublication_requested_at) {
             return redirect()
                 ->route('contributor.dashboard')
-                ->with('info', 'Une demande de dépublication a déjà été envoyée pour cet article.');
+                ->with('info', __('site.flash_unpublish_already_requested'));
         }
 
         $submission->update([
@@ -408,6 +408,6 @@ class ContributorSubmissionController extends ContributorBaseController
 
         return redirect()
             ->route('contributor.dashboard')
-            ->with('success', 'Votre demande de dépublication a bien été envoyée à la rédaction.');
+            ->with('success', __('site.flash_unpublish_requested_success'));
     }
 }

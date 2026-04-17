@@ -32,7 +32,7 @@ class NewsletterSubscriptionService
 
                 return [
                     'status' => 'already_active',
-                    'message' => 'Cette adresse est déjà inscrite à la newsletter Vivat.',
+                    'message' => __('site.newsletter_already_active'),
                     'subscriber' => $existing->fresh(),
                     'mail_delivered' => null,
                 ];
@@ -53,8 +53,8 @@ class NewsletterSubscriptionService
             return [
                 'status' => 'confirmation_resent',
                 'message' => $mailOk
-                    ? 'Votre demande est enregistrée. Vérifiez votre boîte mail pour confirmer votre inscription.'
-                    : 'Inscription enregistrée, mais l’envoi de l’e-mail de confirmation a échoué (service indisponible ou configuration d’envoi). Réessayez plus tard ou contactez-nous.',
+                    ? __('site.newsletter_confirmation_sent')
+                    : __('site.newsletter_confirmation_send_failed'),
                 'subscriber' => $subscriber,
                 'mail_delivered' => $mailOk,
             ];
@@ -71,8 +71,8 @@ class NewsletterSubscriptionService
         return [
             'status' => 'created',
             'message' => $mailOk
-                ? 'Inscription enregistrée. Vérifiez votre boîte mail pour confirmer votre abonnement.'
-                : 'Inscription enregistrée, mais l’envoi de l’e-mail de confirmation a échoué (service indisponible ou configuration d’envoi). Réessayez plus tard ou contactez-nous.',
+                ? __('site.newsletter_created')
+                : __('site.newsletter_confirmation_send_failed'),
             'subscriber' => $subscriber,
             'mail_delivered' => $mailOk,
         ];
@@ -88,7 +88,7 @@ class NewsletterSubscriptionService
         if ($token === '') {
             return [
                 'status' => 'missing_token',
-                'message' => 'Le lien de confirmation est incomplet.',
+                'message' => __('site.newsletter_confirm_missing_token'),
                 'subscriber' => null,
             ];
         }
@@ -98,7 +98,7 @@ class NewsletterSubscriptionService
         if (! $subscriber) {
             return [
                 'status' => 'invalid_token',
-                'message' => 'Ce lien de confirmation est invalide ou a déjà été utilisé.',
+                'message' => __('site.newsletter_confirm_invalid_token'),
                 'subscriber' => null,
             ];
         }
@@ -107,7 +107,7 @@ class NewsletterSubscriptionService
 
         return [
             'status' => 'confirmed',
-            'message' => 'Votre abonnement à la newsletter Vivat est confirmé.',
+            'message' => __('site.newsletter_confirm_success'),
             'subscriber' => $subscriber->fresh(),
         ];
     }
@@ -122,7 +122,7 @@ class NewsletterSubscriptionService
         if ($token === '') {
             return [
                 'status' => 'missing_token',
-                'message' => 'Le lien de désinscription est incomplet.',
+                'message' => __('site.newsletter_unsubscribe_missing_token'),
                 'subscriber' => null,
             ];
         }
@@ -132,7 +132,7 @@ class NewsletterSubscriptionService
         if (! $subscriber) {
             return [
                 'status' => 'invalid_token',
-                'message' => 'Ce lien de désinscription est invalide.',
+                'message' => __('site.newsletter_unsubscribe_invalid_token'),
                 'subscriber' => null,
             ];
         }
@@ -141,7 +141,7 @@ class NewsletterSubscriptionService
 
         return [
             'status' => 'unsubscribed',
-            'message' => 'Vous êtes bien désinscrit de la newsletter Vivat.',
+            'message' => __('site.newsletter_unsubscribe_success'),
             'subscriber' => $subscriber->fresh(),
         ];
     }

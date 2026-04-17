@@ -40,8 +40,8 @@ abstract class ContributorBaseController extends Controller
             'status' => 'submitted',
             'redirect_url' => $redirectUrl,
             'notice' => [
-                'title' => 'Article envoyé en vérification',
-                'message' => 'Votre article a été transmis à notre équipe éditoriale. Après relecture, un prix vous sera proposé et vous pourrez alors finaliser la publication.',
+                'title' => __('site.notice_submission_sent_title'),
+                'message' => __('site.notice_submission_sent_message'),
             ],
         ];
     }
@@ -53,8 +53,8 @@ abstract class ContributorBaseController extends Controller
             'status' => 'approved',
             'redirect_url' => $redirectUrl,
             'notice' => [
-                'title' => 'Article publié',
-                'message' => 'Votre article a été publié directement sans étape de paiement.',
+                'title' => __('site.notice_admin_published_title'),
+                'message' => __('site.notice_admin_published_message'),
             ],
         ];
     }
@@ -92,8 +92,8 @@ abstract class ContributorBaseController extends Controller
             'edit_url' => route('contributor.articles.edit', ['submission' => $submission->slug]),
             'preview_url' => route('contributor.articles.show', ['submission' => $submission->slug]),
             'notice' => [
-                'title' => 'Brouillon sauvegardé',
-                'message' => 'Votre dernière version a bien été enregistrée.',
+                'title' => __('site.notice_autosave_title'),
+                'message' => __('site.notice_autosave_message'),
             ],
         ];
     }
@@ -238,6 +238,7 @@ abstract class ContributorBaseController extends Controller
 
     protected function renderContributorPage(string $activeTab, string $contentView, array $data = []): Response
     {
+        $locale = content_locale(request());
         $content = render_php_view($contentView, $data);
         $wrapper = render_php_view('site.contributor.wrapper', [
             'activeTab' => $activeTab,
@@ -247,7 +248,7 @@ abstract class ContributorBaseController extends Controller
         ]);
         $html = render_php_view('site.layout', [
             'content' => $wrapper,
-            'content_locale' => content_locale(request()),
+            'content_locale' => $locale,
             'title' => 'Espace rédacteur Vivat',
             'meta_description' => 'Espace rédacteur Vivat. Gérez vos soumissions et rédigez des articles.',
             'hide_cta_section' => true,

@@ -40,7 +40,7 @@ class EmailVerificationController extends Controller
 
         return redirect()
             ->route('contributor.dashboard')
-            ->with('success', 'Votre adresse email a bien été vérifiée.');
+            ->with('success', __('site.flash_email_verified'));
     }
 
     public function resend(Request $request): RedirectResponse

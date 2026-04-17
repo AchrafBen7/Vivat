@@ -19,7 +19,7 @@ class ContributorProfileController extends ContributorBaseController
                 if ($user->hasRole('admin')) {
                     return redirect()
                         ->back()
-                        ->withErrors(['delete_account' => "La suppression automatique d'un compte administrateur est bloquée pour préserver l'accès au back-office."])
+                        ->withErrors(['delete_account' => __('site.validation_delete_admin_blocked')])
                         ->withInput();
                 }
 
@@ -33,17 +33,17 @@ class ContributorProfileController extends ContributorBaseController
                 }
 
                 $validated = $request->validate($rules, [
-                    'delete_email.required' => 'Veuillez confirmer votre adresse email.',
-                    'delete_email.email' => 'Veuillez entrer une adresse email valide.',
-                    'delete_confirmation.accepted' => 'Vous devez confirmer la suppression définitive du compte.',
-                    'current_password_delete.required' => 'Votre mot de passe actuel est obligatoire pour supprimer le compte.',
-                    'current_password_delete.current_password' => 'Le mot de passe actuel est incorrect.',
+                    'delete_email.required' => __('site.validation_delete_email_required'),
+                    'delete_email.email' => __('site.validation_delete_email_invalid'),
+                    'delete_confirmation.accepted' => __('site.validation_delete_confirmation_required'),
+                    'current_password_delete.required' => __('site.validation_current_password_delete_required'),
+                    'current_password_delete.current_password' => __('site.validation_current_password_invalid'),
                 ]);
 
                 if (! hash_equals((string) $user->email, (string) $validated['delete_email'])) {
                     return redirect()
                         ->back()
-                        ->withErrors(['delete_email' => "L'adresse email de confirmation ne correspond pas à votre compte."])
+                        ->withErrors(['delete_email' => __('site.validation_delete_email_mismatch')])
                         ->withInput();
                 }
 
@@ -55,7 +55,7 @@ class ContributorProfileController extends ContributorBaseController
 
                 return redirect()
                     ->route('home')
-                    ->with('success', 'Votre compte a été supprimé et vos données personnelles ont été anonymisées.');
+                    ->with('success', __('site.flash_account_deleted'));
             }
 
             if ($request->input('form_type') === 'password') {
@@ -67,21 +67,21 @@ class ContributorProfileController extends ContributorBaseController
                         Password::min(8)->mixedCase()->numbers()->symbols(),
                     ],
                 ], [
-                    'current_password.required' => 'Votre mot de passe actuel est obligatoire.',
-                    'current_password.current_password' => 'Le mot de passe actuel est incorrect.',
-                    'password.required' => 'Le nouveau mot de passe est obligatoire.',
-                    'password.confirmed' => 'Les nouveaux mots de passe ne correspondent pas.',
-                    'password.min' => 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
-                    'password.mixed' => 'Le nouveau mot de passe doit contenir une majuscule et une minuscule.',
-                    'password.numbers' => 'Le nouveau mot de passe doit contenir au moins un chiffre.',
-                    'password.symbols' => 'Le nouveau mot de passe doit contenir au moins un symbole.',
+                    'current_password.required' => __('site.validation_current_password_delete_required'),
+                    'current_password.current_password' => __('site.validation_current_password_invalid'),
+                    'password.required' => __('site.validation_new_password_required'),
+                    'password.confirmed' => __('site.validation_new_password_confirmed'),
+                    'password.min' => __('site.validation_new_password_min'),
+                    'password.mixed' => __('site.validation_new_password_mixed'),
+                    'password.numbers' => __('site.validation_new_password_numbers'),
+                    'password.symbols' => __('site.validation_new_password_symbols'),
                 ]);
 
                 $request->user()->forceFill([
                     'password' => $validated['password'],
                 ])->save();
 
-                return redirect()->route('contributor.profile')->with('success', 'Mot de passe mis à jour.');
+                return redirect()->route('contributor.profile')->with('success', __('site.flash_password_updated'));
             }
 
             $validated = $request->validate([
@@ -91,15 +91,15 @@ class ContributorProfileController extends ContributorBaseController
                 'twitter_url' => ['nullable', 'url', 'max:255'],
                 'website_url' => ['nullable', 'url', 'max:255'],
             ], [
-                'name.required' => 'Le nom complet est obligatoire.',
-                'name.max' => 'Le nom complet ne peut pas dépasser 255 caractères.',
-                'bio.max' => 'La biographie ne peut pas dépasser 2000 caractères.',
-                'instagram_url.url' => "Le lien Instagram doit etre une URL valide.",
-                'instagram_url.max' => "Le lien Instagram est trop long.",
-                'twitter_url.url' => "Le lien Twitter doit etre une URL valide.",
-                'twitter_url.max' => "Le lien Twitter est trop long.",
-                'website_url.url' => "Le site web doit etre une URL valide.",
-                'website_url.max' => "Le site web est trop long.",
+                'name.required' => __('site.validation_name_required'),
+                'name.max' => __('site.validation_name_max'),
+                'bio.max' => __('site.validation_bio_max'),
+                'instagram_url.url' => __('site.validation_instagram_invalid'),
+                'instagram_url.max' => __('site.validation_instagram_max'),
+                'twitter_url.url' => __('site.validation_twitter_invalid'),
+                'twitter_url.max' => __('site.validation_twitter_max'),
+                'website_url.url' => __('site.validation_website_invalid'),
+                'website_url.max' => __('site.validation_website_max'),
             ]);
 
             $request->user()->update([
@@ -110,7 +110,7 @@ class ContributorProfileController extends ContributorBaseController
                 'website_url' => $validated['website_url'] ?? null,
             ]);
 
-            return redirect()->route('contributor.profile')->with('success', 'Profil mis à jour.');
+            return redirect()->route('contributor.profile')->with('success', __('site.flash_profile_updated'));
         }
 
         $errors = $request->session()->get('errors');

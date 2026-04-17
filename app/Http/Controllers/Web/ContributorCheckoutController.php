@@ -34,7 +34,7 @@ class ContributorCheckoutController extends Controller
         if (! $quote) {
             return redirect()
                 ->route('contributor.payments.history')
-                ->with('error', 'Aucune proposition de prix active pour cet article. Elle a peut-être expiré.');
+                ->with('error', __('site.flash_checkout_quote_missing'));
         }
 
         try {
@@ -50,7 +50,7 @@ class ContributorCheckoutController extends Controller
         if (! $stripeKey) {
             return redirect()
                 ->route('contributor.payments.history')
-                ->with('error', 'Configuration Stripe manquante.');
+                ->with('error', __('site.flash_checkout_stripe_missing'));
         }
 
         $stripe = new StripeClient($stripeKey);
@@ -75,7 +75,7 @@ class ContributorCheckoutController extends Controller
 
         if ($submission->status === 'published') {
             return redirect()->route('contributor.dashboard')
-                ->with('success', 'Votre article est déjà publié !');
+                ->with('success', __('site.flash_article_already_published'));
         }
 
         if ($sessionId) {
@@ -89,7 +89,7 @@ class ContributorCheckoutController extends Controller
 
                     return redirect()
                         ->route('contributor.dashboard')
-                        ->with('success', 'Paiement reçu. La publication va être finalisée automatiquement dans quelques instants.');
+                        ->with('success', __('site.flash_payment_received_finalize_soon'));
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::warning('success_url fallback failed', [
@@ -102,7 +102,7 @@ class ContributorCheckoutController extends Controller
 
         return redirect()
             ->route('contributor.dashboard')
-            ->with('info', 'Retour de paiement enregistré. Si le paiement est validé par Stripe, la publication sera finalisée automatiquement.');
+            ->with('info', __('site.flash_payment_return_recorded'));
     }
 
     private function reconcilePaidSession(Submission $submission, string $sessionId, mixed $paymentIntentId): void
@@ -181,6 +181,6 @@ class ContributorCheckoutController extends Controller
 
         return redirect()
             ->route('contributor.payments.history')
-            ->with('info', 'Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.');
+            ->with('info', __('site.flash_payment_cancelled'));
     }
 }
