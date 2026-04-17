@@ -113,7 +113,9 @@ return [
             ],
             'home_bottom_banner_970x250' => [
                 'slot' => '9703604977',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 970,
+                'height' => 250,
             ],
             'article_top_banner_728x90' => [
                 'slot' => '5035612553',
