@@ -103,7 +103,9 @@ return [
         'slots' => [
             'home_tablet_banner_728x90' => [
                 'slot' => '4377137008',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 728,
+                'height' => 90,
             ],
             'home_sidebar_300x600' => [
                 'slot' => '9711343832',
@@ -119,15 +121,21 @@ return [
             ],
             'article_top_banner_728x90' => [
                 'slot' => '5035612553',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 728,
+                'height' => 90,
             ],
             'article_mid_banner_970x250' => [
                 'slot' => '6101282216',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 970,
+                'height' => 250,
             ],
             'article_related_square_336x280' => [
                 'slot' => '6620156960',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 336,
+                'height' => 280,
             ],
             'about_mobile_banner_320x50' => [
                 'slot' => '8535873863',
@@ -137,19 +145,27 @@ return [
             ],
             'about_desktop_banner_728x90' => [
                 'slot' => '7222792194',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 728,
+                'height' => 90,
             ],
             'about_bottom_banner_970x250' => [
                 'slot' => '3283547186',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 970,
+                'height' => 250,
             ],
             'category_top_banner_728x90' => [
                 'slot' => '4213485475',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 728,
+                'height' => 90,
             ],
             'category_mid_banner_970x250' => [
                 'slot' => '6456505433',
-                'mode' => 'responsive',
+                'mode' => 'fixed',
+                'width' => 970,
+                'height' => 250,
             ],
         ],
     ],
