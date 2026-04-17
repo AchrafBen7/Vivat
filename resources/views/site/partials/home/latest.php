@@ -330,7 +330,10 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
     // ── 1. Hero cards — état initial posé en CSS, GSAP anime vers l'état final
     function initHero() {
-        if (!window.gsap) return;
+        if (!window.gsap) {
+            document.documentElement.classList.remove('js-anim');
+            return;
+        }
         // Skip during language switches — js-anim is already off, items are visible
         if (window._vivatLangSwap) {
             document.documentElement.classList.remove('js-anim');
@@ -364,7 +367,10 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
     // ── 2. Rubriques (carrousels desktop / tablette) — apparition au scroll
     function initCategories() {
-        if (!window.gsap || !window.ScrollTrigger) return;
+        if (!window.gsap || !window.ScrollTrigger) {
+            document.documentElement.classList.remove('js-anim');
+            return;
+        }
         if (window._vivatLangSwap) return;
 
         document.querySelectorAll('[data-categories-section]').forEach(function (section) {
@@ -388,7 +394,10 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
     // ── 3. "Dernières actualités" — reveal au scroll (desktop + tablette md)
     function initLatest() {
-        if (!window.gsap || !window.ScrollTrigger) return;
+        if (!window.gsap || !window.ScrollTrigger) {
+            document.documentElement.classList.remove('js-anim');
+            return;
+        }
 
         function revealSection(section, cardRoot) {
             if (!section || section.offsetParent === null) return;

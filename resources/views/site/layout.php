@@ -65,6 +65,7 @@ if (app('request')->header('X-Vivat-Ajax')) {
     <?php if ($canLoadViteAssets) { ?>
     <?= app(\Illuminate\Foundation\Vite::class)(['resources/js/app.js']) ?>
     <?php } ?>
+    <script>document.documentElement.classList.add('js-anim')</script>
     <?php if (config('vivat.adsense.client')) { ?>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= htmlspecialchars((string) config('vivat.adsense.client')) ?>"
             crossorigin="anonymous"></script>
@@ -134,6 +135,23 @@ if (app('request')->header('X-Vivat-Ajax')) {
         .js-anim [data-home-hero] > * {
             opacity: 0;
             transform: translateY(20px) scale(0.98);
+            will-change: opacity, transform;
+        }
+        .js-anim [data-categories-section] {
+            opacity: 0;
+            transform: translateY(36px);
+            will-change: opacity, transform;
+        }
+        .js-anim [data-latest-section] h2,
+        .js-anim [data-latest-tablet] h2 {
+            opacity: 0;
+            transform: translateY(14px);
+            will-change: opacity, transform;
+        }
+        .js-anim [data-latest-grid] > a,
+        .js-anim [data-latest-tablet] > a {
+            opacity: 0;
+            transform: translateY(24px) scale(0.98);
             will-change: opacity, transform;
         }
 
@@ -361,7 +379,6 @@ if (app('request')->header('X-Vivat-Ajax')) {
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased font-sans">
-<script>document.documentElement.classList.add('js-anim')</script>
     <?= render_php_view('site.partials.layout_header', get_defined_vars()) ?>
 
     <main class="max-w-[1400px] mx-auto mt-6 px-[18px] md:px-8 lg:px-10 xl:px-20 <?= ! empty($trim_main_bottom) ? 'pb-0' : 'pb-8' ?> overflow-x-hidden">
