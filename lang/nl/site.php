@@ -175,6 +175,8 @@ return [
     'public_name_help' => 'Dit is de naam die publiek bij je artikels verschijnt.',
     'biography' => 'Biografie',
     'bio_help' => 'Stel jezelf kort voor. Deze bio kan in je auteursruimte verschijnen.',
+    'public_links' => 'Publieke links',
+    'links_help' => 'Deel je profielen of portfolio als je die zichtbaar wilt maken in je auteursomgeving.',
     'add_full_link_help' => 'Voeg een volledige link toe als je die wilt delen.',
     'website_help' => 'Gebruik het volledige adres van je website of portfolio.',
     'save' => 'Opslaan',

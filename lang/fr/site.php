@@ -175,6 +175,8 @@ return [
     'public_name_help' => 'C’est le nom affiché publiquement avec vos articles.',
     'biography' => 'Biographie',
     'bio_help' => 'Présentez-vous en quelques lignes. Cette bio peut apparaître dans votre espace auteur.',
+    'public_links' => 'Liens publics',
+    'links_help' => 'Partagez vos profils ou votre portfolio si vous souhaitez les rendre visibles dans votre environnement auteur.',
     'add_full_link_help' => 'Ajoutez un lien complet si vous souhaitez le partager.',
     'website_help' => 'Utilisez l’adresse complète de votre site ou portfolio.',
     'save' => 'Sauvegarder',
