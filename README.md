@@ -1,9 +1,5 @@
 # Vivat
 
-## Repo
-
-- HTTPS : `https://github.com/AchrafBen7/Vivat.git`
-- SSH : `git@github.com:AchrafBen7/Vivat.git`
 
 ## Stack
 
