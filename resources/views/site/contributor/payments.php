@@ -3,6 +3,7 @@ $payments = $payments ?? [];
 $pendingQuotesCount = $pending_quotes_count ?? 0;
 $pagination = $pagination ?? null;
 $paginationView = $pagination ? $pagination->withQueryString() : null;
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 $statusStyles = [
     'emerald' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     'sky' => 'bg-sky-50 text-sky-700 border border-sky-200',
@@ -13,8 +14,8 @@ $statusStyles = [
 ?>
 <div class="space-y-6">
     <div>
-        <h1 class="font-semibold text-[#004241] text-2xl">Mes paiements</h1>
-        <p class="text-[#004241]/70 text-sm mt-0.5">Retrouvez ici vos paiements en attente et vos paiements effectués.</p>
+        <h1 class="font-semibold text-[#004241] text-2xl"><?= htmlspecialchars($t('site.my_payments', 'Mes paiements')) ?></h1>
+        <p class="text-[#004241]/70 text-sm mt-0.5"><?= htmlspecialchars($t('site.payments_intro', 'Retrouvez ici vos paiements en attente et vos paiements effectués.')) ?></p>
     </div>
 
     <?php if ($pendingQuotesCount > 0): ?>
@@ -22,8 +23,10 @@ $statusStyles = [
         <div class="flex items-center gap-3">
             <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white"><?= $pendingQuotesCount ?></span>
             <p class="text-sm font-semibold text-amber-900">
-                <?= $pendingQuotesCount === 1 ? 'Un prix a été proposé pour votre article.' : "{$pendingQuotesCount} prix ont été proposés pour vos articles." ?>
-                Finalisez le paiement pour déclencher la publication.
+                <?= htmlspecialchars($pendingQuotesCount === 1
+                    ? $t('site.one_price_proposed', 'Un prix a été proposé pour votre article.')
+                    : __('site.many_prices_proposed', ['count' => $pendingQuotesCount])) ?>
+                <?= htmlspecialchars($t('site.complete_payment_to_publish', 'Finalisez le paiement pour déclencher la publication.')) ?>
             </p>
         </div>
     </div>
@@ -31,7 +34,7 @@ $statusStyles = [
 
     <?php if (empty($payments)) { ?>
     <div class="rounded-[24px] border border-[#004241]/12 bg-[#EBF1EF]/50 p-8 text-center">
-        <p class="text-[#004241]/75">Aucun paiement n'a encore été enregistré sur votre compte.</p>
+        <p class="text-[#004241]/75"><?= htmlspecialchars($t('site.no_payment_yet', "Aucun paiement n'a encore été enregistré sur votre compte.")) ?></p>
     </div>
     <?php } else { ?>
     <div class="space-y-4">
@@ -60,7 +63,7 @@ $statusStyles = [
                         <span>•</span>
                         <span><?= htmlspecialchars($payment['created_at'] ?? '') ?></span>
                         <span>•</span>
-                        <span>Soumission : <?= htmlspecialchars($payment['submission_status_label']) ?></span>
+                        <span><?= htmlspecialchars($t('site.submission_label', 'Soumission')) ?> : <?= htmlspecialchars($payment['submission_status_label']) ?></span>
                     </div>
 
                     <p class="mt-3 text-sm leading-6 text-[#004241]/80">
@@ -69,16 +72,16 @@ $statusStyles = [
 
                     <?php if (! empty($payment['note_to_author'])) { ?>
                     <div class="mt-3 rounded-[18px] bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-900">
-                        <span class="font-semibold">Note de la rédaction :</span>
+                        <span class="font-semibold"><?= htmlspecialchars($t('site.editorial_note', 'Note de la rédaction')) ?> :</span>
                         <?= htmlspecialchars($payment['note_to_author']) ?>
                     </div>
                     <?php } ?>
                     <?php if (! empty($payment['expires_at'])) { ?>
-                    <p class="mt-2 text-xs text-[#004241]/50">Offre valable jusqu'au <?= htmlspecialchars($payment['expires_at']) ?></p>
+                    <p class="mt-2 text-xs text-[#004241]/50"><?= htmlspecialchars($t('site.offer_valid_until', "Offre valable jusqu'au")) ?> <?= htmlspecialchars($payment['expires_at']) ?></p>
                     <?php } ?>
                     <?php if (! empty($payment['refund_reason'])) { ?>
                     <div class="mt-3 rounded-[18px] bg-[#F4F8F7] px-4 py-3 text-sm text-[#004241]/80">
-                        <span class="font-semibold text-[#004241]">Motif du remboursement :</span>
+                        <span class="font-semibold text-[#004241]"><?= htmlspecialchars($t('site.refund_reason', 'Motif du remboursement')) ?> :</span>
                         <?= htmlspecialchars($payment['refund_reason']) ?>
                     </div>
                     <?php } ?>
@@ -89,27 +92,27 @@ $statusStyles = [
                     <form method="POST" action="<?= htmlspecialchars($payment['checkout_url']) ?>">
                         <?= csrf_field() ?>
                         <button type="submit" class="inline-flex h-10 items-center justify-center rounded-full bg-amber-500 px-5 text-sm font-bold text-white transition hover:bg-amber-600">
-                            Payer maintenant
+                            <?= htmlspecialchars($t('site.pay_now', 'Payer maintenant')) ?>
                         </button>
                     </form>
                     <?php endif; ?>
                     <?php if (! empty($payment['refund_receipt_url'])) { ?>
                     <a href="<?= htmlspecialchars($payment['refund_receipt_url']) ?>" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-4 text-sm font-semibold text-white transition hover:bg-[#003130]">
-                        Voir le reçu
+                        <?= htmlspecialchars($t('site.see_receipt', 'Voir le reçu')) ?>
                     </a>
                     <?php } ?>
                     <?php if (! empty($payment['submission_preview_url'])) { ?>
                     <a href="<?= htmlspecialchars($payment['submission_preview_url']) ?>" class="inline-flex h-10 items-center justify-center rounded-full border border-[#004241]/15 px-4 text-sm font-semibold text-[#004241] transition hover:bg-[#EBF1EF]">
-                        Voir la soumission
+                        <?= htmlspecialchars($t('site.view_submission', 'Voir la soumission')) ?>
                     </a>
                     <?php } ?>
                     <?php if (! empty($payment['published_article_url'])) { ?>
                     <a href="<?= htmlspecialchars($payment['published_article_url']) ?>" target="_blank" rel="noopener noreferrer" class="inline-flex h-10 items-center justify-center rounded-full border border-[#004241]/15 px-4 text-sm font-semibold text-[#004241] transition hover:bg-[#EBF1EF]">
-                        Article publié
+                        <?= htmlspecialchars($t('site.published_article', 'Article publié')) ?>
                     </a>
                     <?php } elseif (($payment['status'] ?? null) !== 'paid' && ! empty($payment['submission_edit_url'])) { ?>
                     <a href="<?= htmlspecialchars($payment['submission_edit_url']) ?>" class="inline-flex h-10 items-center justify-center rounded-full border border-[#7A5A14]/20 px-4 text-sm font-semibold text-[#7A5A14] transition hover:bg-[#F3E8CC]">
-                        Reprendre la soumission
+                        <?= htmlspecialchars($t('site.resume_submission', 'Reprendre la soumission')) ?>
                     </a>
                     <?php } ?>
                 </div>
@@ -122,25 +125,25 @@ $statusStyles = [
     <div class="flex items-center justify-between gap-4 pt-2">
         <?php if ($paginationView->onFirstPage()) { ?>
         <span class="inline-flex h-10 items-center justify-center rounded-full border border-[#004241]/12 px-4 text-sm font-medium text-[#004241]/35">
-            Précédent
+            <?= htmlspecialchars($t('site.previous', 'Précédent')) ?>
         </span>
         <?php } else { ?>
         <a href="<?= htmlspecialchars($paginationView->previousPageUrl()) ?>" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-4 text-sm font-medium text-white transition hover:opacity-90">
-            Précédent
+            <?= htmlspecialchars($t('site.previous', 'Précédent')) ?>
         </a>
         <?php } ?>
 
         <span class="text-sm font-medium text-[#004241]/75">
-            Page <?= $paginationView->currentPage() ?> sur <?= $paginationView->lastPage() ?>
+            <?= htmlspecialchars($t('site.page', 'Page')) ?> <?= $paginationView->currentPage() ?> <?= htmlspecialchars($t('site.of', 'sur')) ?> <?= $paginationView->lastPage() ?>
         </span>
 
         <?php if ($paginationView->hasMorePages()) { ?>
         <a href="<?= htmlspecialchars($paginationView->nextPageUrl()) ?>" class="inline-flex h-10 items-center justify-center rounded-full bg-[#004241] px-4 text-sm font-medium text-white transition hover:opacity-90">
-            Suivant
+            <?= htmlspecialchars($t('site.next', 'Suivant')) ?>
         </a>
         <?php } else { ?>
         <span class="inline-flex h-10 items-center justify-center rounded-full border border-[#004241]/12 px-4 text-sm font-medium text-[#004241]/35">
-            Suivant
+            <?= htmlspecialchars($t('site.next', 'Suivant')) ?>
         </span>
         <?php } ?>
     </div>

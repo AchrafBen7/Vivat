@@ -101,7 +101,7 @@ $hasFormErrors = !empty($errors);
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/></svg>
             </div>
             <div class="min-w-0">
-                <p class="text-sm font-semibold">Le formulaire contient des erreurs</p>
+                <p class="text-sm font-semibold"><?= htmlspecialchars($t('site.form_contains_errors', 'Le formulaire contient des erreurs')) ?></p>
                 <ul id="form-error-summary-list" class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6">
                     <?php foreach ($errors as $fieldErrors): ?>
                         <?php foreach ((array) $fieldErrors as $fieldError): ?>
@@ -136,7 +136,7 @@ $hasFormErrors = !empty($errors);
             </div>
 
             <div id="cover-image-preview-wrapper" class="hidden items-center gap-4 w-full">
-                <img id="cover-image-preview" src="" alt="Aperçu" class="h-14 w-auto max-w-[80px] rounded-[10px] object-cover shadow-sm shrink-0">
+                <img id="cover-image-preview" src="" alt="<?= htmlspecialchars($t('site.preview', 'Aperçu')) ?>" class="h-14 w-auto max-w-[80px] rounded-[10px] object-cover shadow-sm shrink-0">
                 <div class="min-w-0">
                     <p id="cover-image-name" class="text-sm font-medium text-[#004241] truncate"></p>
                     <p id="cover-image-size" class="text-xs text-[#004241]/60"></p>
@@ -181,8 +181,8 @@ $hasFormErrors = !empty($errors);
             <label for="language" class="block text-xs font-medium text-[#004241]/60 mb-1"><?= htmlspecialchars($t('site.language', 'Langue')) ?></label>
             <select name="language" id="language" class="h-8 pl-3 pr-3 rounded-lg border <?= !empty($errors['language']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-white text-sm text-[#004241] outline-none focus:ring-2 focus:ring-[#004241]/25">
                 <?php $selectedLanguage = $old['language'] ?? 'fr'; ?>
-                <option value="fr" <?= $selectedLanguage === 'fr' ? 'selected' : '' ?>>Français</option>
-                <option value="nl" <?= $selectedLanguage === 'nl' ? 'selected' : '' ?>>Néerlandais</option>
+                <option value="fr" <?= $selectedLanguage === 'fr' ? 'selected' : '' ?>><?= htmlspecialchars($t('site.language_french', 'Français')) ?></option>
+                <option value="nl" <?= $selectedLanguage === 'nl' ? 'selected' : '' ?>><?= htmlspecialchars($t('site.language_dutch', 'Néerlandais')) ?></option>
             </select>
             <?php if (!empty($errors['language'])): ?>
             <p class="mt-1 text-xs text-red-600" data-error-for="language"><?= htmlspecialchars(is_array($errors['language']) ? $errors['language'][0] : $errors['language']) ?></p>
@@ -204,7 +204,7 @@ $hasFormErrors = !empty($errors);
             <label for="excerpt" class="block text-sm font-medium text-[#004241]"><?= htmlspecialchars($t('site.excerpt', 'Extrait')) ?></label>
             <span id="excerpt-char-count" class="text-xs tabular-nums text-[#004241]/40">0/500</span>
         </div>
-        <textarea name="excerpt" id="excerpt" rows="2" placeholder="Résumé court affiché dans les cartes d'articles…" maxlength="500"
+        <textarea name="excerpt" id="excerpt" rows="2" placeholder="<?= htmlspecialchars($t('site.excerpt_placeholder', "Résumé court affiché dans les cartes d'articles…")) ?>" maxlength="500"
             data-char-max="500" data-char-target="excerpt-char-count"
             class="w-full pl-4 pr-4 py-2.5 rounded-xl border <?= !empty($errors['excerpt']) ? 'border-red-400 ring-2 ring-red-100' : 'border-[#DED8CE99]' ?> bg-[#F8F6F2] text-sm text-[#004241] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#004241]/25"><?= htmlspecialchars($old['excerpt'] ?? '') ?></textarea>
         <?php if (!empty($errors['excerpt'])): ?>
@@ -250,14 +250,14 @@ $hasFormErrors = !empty($errors);
                 </svg>
             </div>
             <div class="min-w-0">
-                <h2 id="publish-feedback-title" class="text-[20px] font-semibold leading-7 text-[#1B4B3B]">Transmission en cours...</h2>
-                <p id="publish-feedback-message" class="mt-2 max-h-[160px] overflow-y-auto text-sm leading-6 text-[#004241]/80">Nous envoyons votre article à l'espace rédacteur. Vous pouvez patienter quelques instants.</p>
+                <h2 id="publish-feedback-title" class="text-[20px] font-semibold leading-7 text-[#1B4B3B]"><?= htmlspecialchars($t('site.js_sending_in_progress_title', 'Transmission en cours...')) ?></h2>
+                <p id="publish-feedback-message" class="mt-2 max-h-[160px] overflow-y-auto text-sm leading-6 text-[#004241]/80"><?= htmlspecialchars($t('site.js_sending_in_progress_text', "Nous envoyons votre article à l'espace rédacteur. Vous pouvez patienter quelques instants.")) ?></p>
             </div>
         </div>
 
         <div class="mt-6 flex justify-end">
             <button type="button" id="publish-feedback-button" class="hidden inline-flex h-11 items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-[#F8F6F2] transition hover:bg-[#003535]">
-                Continuer
+                <?= htmlspecialchars($t('site.got_it', 'Continuer')) ?>
             </button>
         </div>
     </div>

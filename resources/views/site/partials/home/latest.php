@@ -90,7 +90,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
 
     <?php if (count($restArticles) > 0) { ?>
     <section data-latest-tablet class="mt-16 hidden w-full min-w-0 grid-cols-8 gap-6 md:grid lg:hidden">
-        <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]">Dernières actualités</h2>
+        <h2 class="mb-0 col-span-8 text-[32px] font-medium text-[#004241]"><?= htmlspecialchars(__('site.latest_news')) ?></h2>
         <?php if ($topFeatureEditorialArt) { ?>
         <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative col-span-8 flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 <?= $cardGreenSurface ?>">
             <span class="<?= $cardArrowOnGreen ?>">
@@ -169,7 +169,7 @@ $latestTabletCards = array_slice($latestTabletCards, 0, 4);
     </section>
 
     <section data-latest-section class="mt-12 grid w-full min-w-0 grid-cols-1 gap-[18px] md:hidden lg:mt-16 lg:grid lg:grid-cols-12 lg:gap-6">
-        <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12">Dernières actualités</h2>
+        <h2 class="mb-0 text-[32px] font-medium text-[#004241] md:col-span-8 lg:col-span-12"><?= htmlspecialchars(__('site.latest_news')) ?></h2>
         <div data-latest-grid class="grid min-w-0 w-full grid-cols-1 gap-[18px] lg:col-span-12 lg:grid-cols-12 lg:gap-6">
             <?php if ($topFeatureEditorialArt) { ?>
             <a href="/articles/<?= htmlspecialchars($topFeatureEditorialArt['slug']) ?>" class="group relative flex h-[300px] w-full flex-col justify-end overflow-hidden rounded-[32px] px-9 py-8 md:col-span-8 lg:col-span-7 lg:h-[340px] <?= $cardGreenSurface ?>">

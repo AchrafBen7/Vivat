@@ -28,7 +28,7 @@ $t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) 
                     <p class="mt-2 text-sm leading-6 text-[#006664]/80"><?= htmlspecialchars($submissionNotice['message']) ?></p>
                 </div>
             </div>
-            <button type="button" id="submission-notice-close" class="flex h-9 w-9 items-center justify-center rounded-full text-[#006664]/70 transition hover:bg-[#EBF1EF] hover:text-[#006664]" aria-label="Fermer la confirmation">
+            <button type="button" id="submission-notice-close" class="flex h-9 w-9 items-center justify-center rounded-full text-[#006664]/70 transition hover:bg-[#EBF1EF] hover:text-[#006664]" aria-label="<?= htmlspecialchars($t('site.close_confirmation', 'Fermer la confirmation')) ?>">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>

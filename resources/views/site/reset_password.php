@@ -4,14 +4,15 @@ $old = $old ?? [];
 $token = $token ?? '';
 $email = $email ?? ($old['email'] ?? '');
 $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 text-sm text-[#004241] placeholder:text-gray-400 outline-none transition focus:border-[#004241] focus:ring-2 focus:ring-[#004241]/25';
+$t = fn (string $key, ?string $fallback = null) => __($key) !== $key ? __($key) : ($fallback ?? $key);
 ?>
 
 <div class="mx-auto w-full max-w-[720px] pb-8">
     <section class="rounded-[40px] border border-[#EBF1EF] bg-[#EBF1EF] p-6 shadow-[0_18px_48px_rgba(0,66,65,0.07)] md:p-8">
         <div>
-            <h1 class="text-[2rem] font-medium leading-[1.1] text-[#004241]">Réinitialiser le mot de passe</h1>
+            <h1 class="text-[2rem] font-medium leading-[1.1] text-[#004241]"><?= htmlspecialchars($t('site.reset_password_title', 'Réinitialiser le mot de passe')) ?></h1>
             <p class="mt-2 text-sm leading-6 text-[#004241]/80">
-                Choisissez un nouveau mot de passe sécurisé pour votre compte Vivat.
+                <?= htmlspecialchars($t('site.reset_password_intro', 'Choisissez un nouveau mot de passe sécurisé pour votre compte Vivat.')) ?>
             </p>
         </div>
 
@@ -27,19 +28,19 @@ $inputClass = 'h-11 w-full rounded-full border border-gray-300 bg-white px-5 tex
             </div>
 
             <div>
-                <input type="password" name="password" id="password" placeholder="Nouveau mot de passe" required class="<?= $inputClass ?>">
-                <p class="mt-2 text-xs leading-5 text-[#004241]/62">Minimum 8 caractères avec une majuscule, une minuscule, un chiffre et un symbole.</p>
+                <input type="password" name="password" id="password" placeholder="<?= htmlspecialchars($t('site.new_password', 'Nouveau mot de passe')) ?>" required class="<?= $inputClass ?>">
+                <p class="mt-2 text-xs leading-5 text-[#004241]/62"><?= htmlspecialchars($t('site.password_rules_help', 'Minimum 8 caractères avec une majuscule, une minuscule, un chiffre et un symbole.')) ?></p>
                 <?php if (! empty($errors['password'])) { ?>
                 <p class="mt-2 text-sm text-[#AE422E]"><?= htmlspecialchars(is_array($errors['password']) ? $errors['password'][0] : $errors['password']) ?></p>
                 <?php } ?>
             </div>
 
             <div>
-                <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirmer le mot de passe" required class="<?= $inputClass ?>">
+                <input type="password" name="password_confirmation" id="password_confirmation" placeholder="<?= htmlspecialchars($t('site.confirm_password', 'Confirmer le mot de passe')) ?>" required class="<?= $inputClass ?>">
             </div>
 
             <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#004241] px-6 text-sm font-semibold text-white transition hover:bg-[#003535]">
-                Réinitialiser le mot de passe
+                <?= htmlspecialchars($t('site.reset_password_title', 'Réinitialiser le mot de passe')) ?>
             </button>
         </form>
     </section>

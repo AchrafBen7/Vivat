@@ -101,8 +101,8 @@
                     </video>
                     <div class="<?= $overlayRubriqueHero ?>"></div>
                     <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
-                        <h2 class="max-w-[85%] text-left text-5xl font-semibold text-white">Découvrez vos rubriques préférées</h2>
-                        <p class="mt-2 max-w-[85%] text-left text-2xl text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                        <h2 class="max-w-[85%] text-left text-5xl font-semibold text-white"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
+                        <p class="mt-2 max-w-[85%] text-left text-2xl text-white/95"><?= htmlspecialchars(__('site.discover_categories_text')) ?></p>
                     </div>
                 </div>
                 <?php foreach ($desktopCategoryPanels as $panelIdx => $panel) {
@@ -272,7 +272,7 @@
                 </div>
         </div>
         <?php if (count($desktopCategoryPanels) > 1) { ?>
-        <button type="button" id="categories-carousel-prev" class="<?= $carouselNavBtnEdgeLeft ?>" aria-label="Rubriques précédentes">
+        <button type="button" id="categories-carousel-prev" class="<?= $carouselNavBtnEdgeLeft ?>" aria-label="<?= htmlspecialchars(__('site.categories_previous')) ?>">
             <svg class="h-[26px] w-[26px] flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
         <button type="button" id="categories-carousel-next" class="<?= $carouselNavBtnEdgeRight ?>" aria-label="Rubriques suivantes">
@@ -296,8 +296,8 @@
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
-                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
-                            <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
+                            <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95"><?= htmlspecialchars(__('site.discover_categories_text')) ?></p>
                         </div>
                     </div>
                     <?php if ($tabletCategory) { ?>
@@ -353,8 +353,8 @@
                         </video>
                         <div class="<?= $overlayRubriqueHero ?>"></div>
                         <div class="pointer-events-none absolute inset-0 z-[2] flex flex-col items-start justify-center p-8">
-                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white">Découvrez vos rubriques préférées</h2>
-                            <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95">Explorez dès maintenant les contenus qui vous correspondent.</p>
+                            <h2 class="max-w-[92%] text-left text-[2.75rem] font-semibold leading-[1.06] text-white"><?= htmlspecialchars(__('site.discover_categories')) ?></h2>
+                            <p class="mt-3 max-w-[84%] text-left text-[1.05rem] leading-[1.45] text-white/95"><?= htmlspecialchars(__('site.discover_categories_text')) ?></p>
                         </div>
                     </div>
                     <?php if ($tabletCloneCategory) { ?>
@@ -401,7 +401,7 @@
             </div>
         </div>
         <?php if ($tabletNumSlides > 1) { ?>
-        <button type="button" id="categories-carousel-tablet-prev" class="<?= $carouselNavBtnEdgeLeft ?>" aria-label="Rubriques précédentes">
+        <button type="button" id="categories-carousel-tablet-prev" class="<?= $carouselNavBtnEdgeLeft ?>" aria-label="<?= htmlspecialchars(__('site.categories_previous')) ?>">
             <svg class="h-[26px] w-[26px] flex-shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </button>
         <button type="button" id="categories-carousel-tablet-next" class="<?= $carouselNavBtnEdgeRight ?>" aria-label="Rubriques suivantes">

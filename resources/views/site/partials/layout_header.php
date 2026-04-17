@@ -1,6 +1,7 @@
 <?php
 $logoPath = public_path('logo_vivat.png');
 $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath) : '');
+$hideLanguageSwitch = request()->is('articles/*');
 ?>
 <div id="mobile-nav-overlay"
      data-open="false"
@@ -18,17 +19,17 @@ $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath
 
             <div class="flex-1 min-w-[16px]"></div>
 
-            <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="Recherche sur le site">
+            <form action="/search" method="get" id="header-search-form" class="<?= request()->filled('q') ? 'vivat-header-search--dirty' : '' ?>" role="search" aria-label="<?= htmlspecialchars(__('site.search_label')) ?>">
                 <input type="text" name="q" value="<?= htmlspecialchars(request()->get('q', '')) ?>" placeholder="<?= htmlspecialchars(__('site.search_placeholder')) ?>" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="<?= htmlspecialchars(__('site.search_keyword_label')) ?>" aria-expanded="false" aria-controls="header-search-suggestions" aria-autocomplete="list">
-                <button type="submit" aria-label="Lancer la recherche">
+                <button type="submit" aria-label="<?= htmlspecialchars(__('site.search_submit')) ?>">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </button>
-                <button type="button" id="header-search-clear" aria-label="Effacer la recherche">
+                <button type="button" id="header-search-clear" aria-label="<?= htmlspecialchars(__('site.search_clear')) ?>">
                     <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/>
                     </svg>
                 </button>
-                <div id="header-search-suggestions" role="listbox" aria-label="Suggestions de recherche"></div>
+                <div id="header-search-suggestions" role="listbox" aria-label="<?= htmlspecialchars(__('site.search_suggestions')) ?>"></div>
             </form>
             <script>
             (function () {
@@ -237,6 +238,7 @@ $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath
                 <?= htmlspecialchars(__('site.write_article')) ?>
             </a>
 
+            <?php if (! $hideLanguageSwitch) { ?>
             <div
                 class="vivat-lang-switch inline-grid shrink-0 bg-[#EBF1EF]"
                 data-language-switch
@@ -252,6 +254,7 @@ $logoUrl = '/logo_vivat.png'.(file_exists($logoPath) ? '?v='.filemtime($logoPath
                     NL
                 </button>
             </div>
+            <?php } ?>
 
             <button type="button" id="hamburger-menu" class="group relative flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-[30px] border-none bg-transparent" aria-label="<?= htmlspecialchars(__('site.open_menu')) ?>" aria-expanded="false" aria-controls="mobile-menu-panel">
                 <span class="relative block h-[20px] w-7 shrink-0" aria-hidden="true">
